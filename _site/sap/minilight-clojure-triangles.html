@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Minilight in Clojure: Triangles &larr; Structure &amp; Process</title>
+   <meta name="author" content="Mark Reid" />
+
+   <link rel='openid.server' href='http://www.myopenid.com/server' />
+   <link rel='openid.delegate' href='http://mark.reid.name' />
+
+   <link rel="start" href="/" />
+
+	
+	
+	
+  	<link rel="alternate" type="application/atom+xml" href="atom.xml" title="RSS feed" />
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/files/css/screen.css" type="text/css" />
+
+</head>
+<body id="">
+<div id="site">
+
+  
+<div id="header">
+	<h1>
+	<a href="/sap/" title="A programming blog">Structure <i>&amp;</i> Process</a>
+	<span class="byline">&larr; <a href="/">Mark Reid</a></span>
+</h1>
+
+</div>
+
+<div id="page">
+	
+  <h1 class="emphnext">Minilight in Clojure: Triangles</h1>
+
+<p>Previously on &#8220;Porting Minilight to Clojure&#8221;, our intrepid programmer (a.k.a, yours truly) braved lists, cross products and testing suites to bring you a namespace full of <a href='/sap/minilight-clojure-vectors.html'>vector</a> operations. In this, the nail-biting sequel, I use these to build up some simple geometry in the form of triangles.</p>
+
+<h2 id='housekeeping'>House-keeping&#8230;</h2>
+
+<p>Thanks to some <a href='http://groups.google.com/group/clojure/browse_thread/thread/3f8283421219fef5/10de2f48fb48f6b8'>feedback</a> from the Clojure mailing list, I&#8217;ve made a couple of small changes to the way I&#8217;ve set up this project:</p>
+
+<ul>
+<li>
+<p>I now use of fully qualified names. That is, instead of a package called <code>vec</code>, I will use the longer, Java-style <code>mreid.minilight.vec</code> to avoid potential name collisions.</p>
+</li>
+
+<li>
+<p>The code now lives under a <code>src</code> directory in folders corresponding to their fully-qualified package name. This meant adding a <code>.clojure</code> file with the text <code>src</code> in it so that my <code>clj</code> script can find the code.</p>
+</li>
+
+<li>
+<p>The tests now define a class and are executed via a main method. This is so that IDE users won&#8217;t have the tests run every time the <code>test.clj</code> file is compiled.</p>
+</li>
+</ul>
+
+<p>Tests are now run from a simple shell script <code>runtests.sh</code> which has the following contents:</p>
+<div class='highlight'><pre><span class='c'>#!/bin/bash</span>
+<span class='nv'>JARS</span><span class='o'>=</span><span class='nv'>$HOME</span>/Library/Clojure/lib
+<span class='nv'>CP</span><span class='o'>=</span>.:./src:<span class='nv'>$JARS</span>/clojure.jar:<span class='nv'>$JARS</span>/clojure-contrib.jar
+<span class='nv'>TEST</span><span class='o'>=</span><span class='s2'>&quot;src/mreid/minilight/test/all.clj&quot;</span>
+<span class='nv'>MAIN</span><span class='o'>=</span><span class='s2'>&quot;(mreid.minilight.test.all/-main)&quot;</span>
+
+java -cp <span class='nv'>$CP</span> clojure.main -i <span class='nv'>$TEST</span> -e <span class='s2'>&quot;$MAIN&quot;</span>
+</pre>
+</div>
+<h2 id='and_a_bugfix'>&#8230;and a Bug-Fix</h2>
+
+<p>In the process of writing some new code I found a bug in my cross product implementation. After a bit of head-scratching, I realised that the form I use to extract a particular component from a vector assumes that the underlying data structure is a Clojure vector. I was using this <code>(v 0)</code> to get at the x-coordinate of the vector <code>v</code> which works fine for <code>([1 2 3] 1)</code> but fails spectacularly when the vector is computed as a lazy sequence. For example:</p>
+
+<pre><code>Clojure
+user=&gt; ((map - [1 2 3] [1 1 1]) 1)
+java.lang.ClassCastException: clojure.lang.LazySeq cannot be cast to
+clojure.lang.IFn (NO_SOURCE_FILE:0)</code></pre>
+
+<p>I used <code>map</code> in several places to compute addition, subtraction and scaling of vectors so when these were passed into <code>cross</code> they blew up.</p>
+
+<p>I&#8217;ve added some new tests to <code>test/vec.clj</code> that test for this situation explicitly:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/test/vec.clj ---</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>dyn100</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>2</span> <span class='mi'>3</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>2</span> <span class='mi'>3</span><span class='p'>]))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>dyn010</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>2</span> <span class='mi'>3</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>1</span> <span class='mi'>3</span><span class='p'>]))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-dynamic-add</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span>  <span class='p'>(</span><span class='nf'>add</span> <span class='nv'>dyn100</span> <span class='nv'>dyn010</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-dynamic-sub</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>-1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='nv'>dyn100</span> <span class='nv'>dyn010</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-dynamic-scale</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>2</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span>    <span class='p'>(</span><span class='nf'>scale</span> <span class='mi'>2</span> <span class='nv'>dyn100</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-dynamic-cross</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span>   <span class='p'>(</span><span class='nf'>cross</span> <span class='nv'>dyn100</span> <span class='nv'>dyn010</span><span class='p'>))))</span>
+</pre>
+</div>
+<p>and changed the definition of <code>cross</code> to use the sequence friendly <code>nth</code> instead:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/vec.clj ---</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>cross</span> 
+    <span class='s'>&quot;Returns the cross product vector for the 3D vectors v1 and v2.&quot;</span>
+    <span class='p'>[</span><span class='nv'>v1</span> <span class='nv'>v2</span><span class='p'>]</span> 
+    <span class='p'>[</span> <span class='p'>(</span><span class='nb'>- </span><span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>1</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>2</span><span class='p'>))</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>2</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>1</span><span class='p'>)))</span>
+      <span class='p'>(</span><span class='nb'>- </span><span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>2</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>0</span><span class='p'>))</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>2</span><span class='p'>)))</span>
+      <span class='p'>(</span><span class='nb'>- </span><span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>1</span><span class='p'>))</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v1</span> <span class='mi'>1</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>nth </span><span class='nv'>v2</span> <span class='mi'>0</span><span class='p'>)))</span> <span class='p'>])</span>
+</pre>
+</div>
+<p>I guess this is one of those instances where static typing would have helped me realise my mistake earlier.</p>
+
+<h2 id='triangles'>Triangles</h2>
+
+<p>Triangles are the simplest possible polygon. They are defined by three vectors, one for each vertex. As we will be using triangles to model surfaces in a ray-tracer, I will also need two other vectors to define how light is reflected and emitted from a surface. In Clojure, this is neatly captured using a <code>struct</code>:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/triangle.clj ---</span>
+<span class='c1'>;; A structure and functions for defining and querying triangles.</span>
+<span class='p'>(</span><span class='nf'>ns</span> <span class='nv'>mreid</span><span class='o'>.</span><span class='nv'>minilight</span><span class='o'>.</span><span class='nv'>triangle</span>
+  <span class='p'>(</span><span class='nf'>:use</span> <span class='nv'>mreid</span><span class='o'>.</span><span class='nv'>minilight</span><span class='o'>.</span><span class='nv'>vec</span><span class='p'>))</span>
+ 
+<span class='p'>(</span><span class='k'>defstruct </span><span class='nv'>triangle</span>
+  <span class='nv'>:vertices</span> <span class='c1'>; Collection of 3 vectors</span>
+  <span class='nv'>:reflect</span>  <span class='c1'>; Vector with all values in [0,1)</span>
+  <span class='nv'>:emit</span>     <span class='c1'>; Vector with positive values</span>
+<span class='p'>)</span>
+</pre>
+</div>
+<p>To interrogate the structure and calculate related quantities I will also need a number of simple functions:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>vertex</span>
+  <span class='s'>&quot;Returns (the zero-indexed) vertex i in the triangle t&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span> <span class='nv'>i</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>nth </span><span class='p'>(</span><span class='nf'>:vertices</span> <span class='nv'>t</span><span class='p'>)</span> <span class='nv'>i</span><span class='p'>))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>edge</span>
+  <span class='s'>&quot;Returns the edge in the triangle t from vertex i to vertex j&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span> <span class='nv'>i</span> <span class='nv'>j</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>t</span> <span class='nv'>j</span><span class='p'>)</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>t</span> <span class='nv'>i</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>tangent</span>
+  <span class='s'>&quot;Returns a unit vector tangent to the given triangle t&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>normalise</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>normal</span>
+  <span class='s'>&quot;Returns a vector normal to the given triangle t (edge01 x edge12)&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>cross</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>)</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>1</span> <span class='mi'>2</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>unit-normal</span>
+  <span class='s'>&quot;Returns a unit vector normal to the given triangle t&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>normalise</span> <span class='p'>(</span><span class='nf'>normal</span> <span class='nv'>t</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>area</span>
+  <span class='s'>&quot;Returns the are of the given triangle t&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>/ </span><span class='p'>(</span><span class='nf'>norm</span> <span class='p'>(</span><span class='nf'>normal</span> <span class='nv'>t</span><span class='p'>))</span> <span class='mi'>2</span><span class='p'>))</span>
+</pre>
+</div>
+<p>This is all very straight-forward and, once again, Clojure just &#8220;gets out of the way&#8221; and make it very easy to express each of these simple functions on a single line and with a minimum of fuss.</p>
+
+<p>Unit tests for these can be found in the file <code>test/triangle.clj</code>. This consists of a few simple triangle structures and then a number of tests on them:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/test/triangle.clj ---</span>
+<span class='c1'>;; Tests for triangle.clj using the test-is library.</span>
+<span class='p'>(</span><span class='nf'>ns</span> <span class='nv'>mreid</span><span class='o'>.</span><span class='nv'>minilight</span><span class='o'>.</span><span class='nv'>test</span><span class='o'>.</span><span class='nv'>triangle</span>
+  <span class='p'>(</span><span class='nf'>:use</span> <span class='nv'>mreid</span><span class='o'>.</span><span class='nv'>minilight</span><span class='o'>.</span><span class='nv'>triangle</span><span class='p'>)</span>
+  <span class='p'>(</span><span class='nf'>:use</span> <span class='nv'>clojure</span><span class='o'>.</span><span class='nv'>contrib</span><span class='o'>.</span><span class='nv'>test-is</span><span class='p'>))</span>
+
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>xytriangle</span>
+  <span class='p'>(</span><span class='nb'>struct </span><span class='nv'>triangle</span> 
+     <span class='p'>[</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>]</span> <span class='c1'>; Triangle in xy-plane</span>
+     <span class='p'>[</span><span class='mf'>0.5</span> <span class='mf'>0.5</span> <span class='mf'>0.5</span><span class='p'>]</span>               <span class='c1'>; Reflectivity</span>
+     <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>1</span> <span class='mi'>1</span><span class='p'>]</span>                     <span class='c1'>; Emitivity </span>
+  <span class='p'>))</span>
+
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>y2ztriangle</span>
+  <span class='p'>(</span><span class='nb'>struct </span><span class='nv'>triangle</span> 
+     <span class='p'>[</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>2</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>]</span> <span class='c1'>; Triangle in xy-plane</span>
+     <span class='p'>[</span><span class='mf'>0.5</span> <span class='mf'>0.5</span> <span class='mf'>0.5</span><span class='p'>]</span>               <span class='c1'>; Reflectivity</span>
+     <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>1</span> <span class='mi'>1</span><span class='p'>]</span>                     <span class='c1'>; Emitivity </span>
+  <span class='p'>))</span>
+
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>zxtriangle</span>
+  <span class='p'>(</span><span class='nb'>struct </span><span class='nv'>triangle</span> 
+     <span class='p'>[</span> <span class='p'>[</span><span class='mi'>-10</span> <span class='mi'>5</span> <span class='mi'>-10</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>-9</span> <span class='mi'>5</span> <span class='mi'>-10</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>-10</span> <span class='mi'>5</span> <span class='mi'>-9</span><span class='p'>]</span> <span class='p'>]</span> <span class='c1'>; Triangle parallel to zx-plane</span>
+     <span class='p'>[</span><span class='mf'>0.5</span> <span class='mf'>0.5</span> <span class='mf'>0.5</span><span class='p'>]</span>                         <span class='c1'>; Reflectivity</span>
+     <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>1</span> <span class='mi'>1</span><span class='p'>]</span>                               <span class='c1'>; Emitivity </span>
+  <span class='p'>))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-vertex</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>xytriangle</span> <span class='mi'>0</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>xytriangle</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>xytriangle</span> <span class='mi'>2</span><span class='p'>)))</span>
+
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>y2ztriangle</span> <span class='mi'>0</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>2</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>y2ztriangle</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>y2ztriangle</span> <span class='mi'>2</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-edge</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>xytriangle</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>xytriangle</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>-1</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>xytriangle</span> <span class='mi'>1</span> <span class='mi'>2</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>-1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>xytriangle</span> <span class='mi'>2</span> <span class='mi'>1</span><span class='p'>)))</span>
+
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>2</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>y2ztriangle</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>y2ztriangle</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>-2</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>y2ztriangle</span> <span class='mi'>1</span> <span class='mi'>2</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>2</span> <span class='mi'>-1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>y2ztriangle</span> <span class='mi'>2</span> <span class='mi'>1</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-tangent</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>tangent</span> <span class='nv'>xytriangle</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>1</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>tangent</span> <span class='nv'>y2ztriangle</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-normal</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>normal</span> <span class='nv'>xytriangle</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>2</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>normal</span> <span class='nv'>y2ztriangle</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-unit-normal</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>unit-normal</span> <span class='nv'>xytriangle</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>unit-normal</span> <span class='nv'>y2ztriangle</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-area</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mf'>0.5</span> <span class='p'>(</span><span class='nf'>area</span> <span class='nv'>xytriangle</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span>   <span class='p'>(</span><span class='nf'>area</span> <span class='nv'>y2ztriangle</span><span class='p'>))))</span>
+</pre>
+</div>
+<p>There are three main functions left to port: one that computes a bounding-box for a triangle, one that tests whether a vector intersects a triangle, and one that randomly samples a point from a given triangle.</p>
+
+<h2 id='bounding_boxes'>Bounding Boxes</h2>
+
+<p>The following function creates the smallest box containing all the points belonging to a triangle and then slightly expands it. It is pretty straight-forward, the only slightly tricky part is the higher-order function <code>tweak</code>. This takes in either a <code>+</code> or a <code>-</code> and will return a function that expands or shrinks <em>its</em> input by the specified <code>TOLERANCE</code>. This is used by <code>bounding-box</code> to pull the point of a triangle closest to the origin about 0.1% closer and push the furthest point away by 0.1%.</p>
+
+<p>The reason for this function is that without it I would have have two copies of the code inside the function returned by <code>tweak</code> with only a sign change. I figured this was a more <a href='http://en.wikipedia.org/wiki/Don&apos;t_repeat_yourself'>DRY</a> was of writing it.</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>TOLERANCE</span> <span class='p'>(</span><span class='nb'>/ </span><span class='mf'>1.0</span> <span class='mf'>1024.0</span><span class='p'>))</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>tweak</span>
+  <span class='s'>&quot;Returns a function that adds or subtracts a small amount&quot;</span>
+  <span class='p'>[</span><span class='nv'>add-or-sub</span><span class='p'>]</span>
+  <span class='p'>(</span><span class='k'>fn </span><span class='p'>[</span><span class='nv'>x</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>add-or-sub</span> <span class='nv'>x</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>+ </span><span class='p'>(</span><span class='nf'>Math/abs</span> <span class='nv'>x</span><span class='p'>)</span> <span class='mf'>1.0</span><span class='p'>)</span> <span class='nv'>TOLERANCE</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>bounding-box</span>
+  <span class='s'>&quot;Computes the bounding box for a triangle t, returning the result as</span>
+<span class='s'>  a list of two vectors [lower-corner upper-corner].&quot;</span> 
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span>
+  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>vs</span> <span class='p'>(</span><span class='nf'>:vertices</span> <span class='nv'>t</span><span class='p'>)]</span>
+    <span class='p'>[</span> <span class='p'>(</span><span class='nb'>map </span><span class='p'>(</span><span class='nf'>tweak</span> <span class='nv'>-</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>apply </span><span class='nv'>map</span> <span class='nv'>min</span> <span class='nv'>vs</span><span class='p'>))</span>
+      <span class='p'>(</span><span class='nb'>map </span><span class='p'>(</span><span class='nf'>tweak</span> <span class='nv'>+</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>apply </span><span class='nv'>map</span> <span class='nv'>max</span> <span class='nv'>vs</span><span class='p'>))</span> <span class='p'>]))</span>
+</pre>
+</div>
+<p>The above code is definitely not the most efficient way of computing and expanding a bounding-box. Indeed, the Ruby code that I&#8217;m cribbing this from explicitly optimises this using a single loop through each of a triangle&#8217;s vectors. In the interests of simplicity, I&#8217;ve opted for more two sweeps through each vector&#8212;once for the <code>min</code>/<code>max</code> and once for the <code>tweak</code>.</p>
+
+<p>When testing these functions, I&#8217;ve opted for hand-building the correct values as constants defined in terms of the tolerance and then testing the output of <code>tweak</code> and <code>bounding-box</code> against these:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/test/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak+0</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>1</span> <span class='nv'>TOLERANCE</span><span class='p'>))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak-0</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>-1</span> <span class='nv'>TOLERANCE</span><span class='p'>))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak+1</span> <span class='p'>(</span><span class='nb'>+ </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>2</span> <span class='nv'>TOLERANCE</span><span class='p'>)))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak-1</span> <span class='p'>(</span><span class='nb'>- </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>2</span> <span class='nv'>TOLERANCE</span><span class='p'>)))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak+2</span> <span class='p'>(</span><span class='nb'>+ </span><span class='mi'>2</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>3</span> <span class='nv'>TOLERANCE</span><span class='p'>)))</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>tweak-2</span> <span class='p'>(</span><span class='nb'>- </span><span class='mi'>2</span> <span class='p'>(</span><span class='nb'>* </span><span class='mi'>3</span> <span class='nv'>TOLERANCE</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-tweak</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak+0</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>+</span><span class='p'>)</span> <span class='mi'>0</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak-0</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>-</span><span class='p'>)</span> <span class='mi'>0</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak+1</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>+</span><span class='p'>)</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak-1</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>-</span><span class='p'>)</span> <span class='mi'>1</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak+2</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>+</span><span class='p'>)</span> <span class='mi'>2</span><span class='p'>)))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='nv'>tweak-2</span> <span class='p'>((</span><span class='nf'>tweak</span> <span class='nv'>-</span><span class='p'>)</span> <span class='mi'>2</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-bounding-box</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='p'>[[</span><span class='nv'>tweak-0</span> <span class='nv'>tweak-0</span> <span class='nv'>tweak-0</span><span class='p'>]</span> <span class='p'>[</span><span class='nv'>tweak+0</span> <span class='nv'>tweak+2</span> <span class='nv'>tweak+1</span><span class='p'>]]</span> 
+         <span class='p'>(</span><span class='nf'>bounding-box</span> <span class='nv'>y2ztriangle</span><span class='p'>))))</span>
+</pre>
+</div>
+<h2 id='apply_liberally'>Apply Liberally</h2>
+
+<p>One discovery I made while attempting to write this was the <code>apply</code> method. Its (very terse) documentation says</p>
+
+<pre><code>clojure.core/apply
+([f args* argseq])
+  Applies fn f to the argument list formed by prepending args to argseq.</code></pre>
+
+<p>In English, what it really does is treat a sequence of items as though they were passed in as arguments to the given function. In my case, I wanted to compute the point-wise minimum of three vectors. If these were, say, <code>[1 2 3]</code>, <code>[0 5 5]</code> and <code>[1 1 1]</code> I would simply <code>map</code> <code>min</code> onto them as arguments:</p>
+
+<pre><code>Clojure
+user=&gt; (map min [1 2 3] [0 5 5] [1 1 1])
+(0 1 1)</code></pre>
+
+<p>This works because <code>min</code> can take an arbitrary number of arguments (_e.g._, <code>min 1 0 1</code> gives 0) and <code>map</code>, when given several sequences, will pull items from each in parallel and pass them to the function it is mapping.</p>
+
+<p>However, the problem I faced here was that the three vectors were inside a sequence and so naïvely trying the following gives the wrong result:</p>
+
+<pre><code>user=&gt; (map min [ [1 2 3] [0 5 5] [1 1 1] ])
+([1 2 3] [0 5 5] [1 1 1])</code></pre>
+
+<p>This is where <code>apply</code> comes in. It strips away the container and presents its contents to the function being applied as arguments, along with any extra arguments before the sequence:</p>
+
+<pre><code>user=&gt; (apply map min [ [1 2 3] [0 5 5] [1 1 1] ])
+(0 1 1)</code></pre>
+
+<h2 id='intersection'>Intersection</h2>
+
+<p>Much of the main loop of a ray-tracing algorithm involves checking whether a ray will hit a surface. Minilight is no exception, so we have the following method for testing whether a ray, represented as a starting point and a direction vector, will intersect with a given triangle:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>intersect</span>
+  <span class='s'>&quot;Finds the intersection with the triangle t of the ray starting at r0 in </span>
+<span class='s'>  direction rd. The returned value is a positive number a such that r0 + a.rd </span>
+<span class='s'>  is contained within t, or nil if there is no such a.&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span> <span class='nv'>r0</span> <span class='nv'>rd</span><span class='p'>]</span>
+  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='nv'>e01</span>    <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>)</span>
+         <span class='nv'>e02</span>    <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>)</span>
+         <span class='nv'>p</span>      <span class='p'>(</span><span class='nf'>cross</span> <span class='nv'>rd</span> <span class='nv'>e02</span><span class='p'>)</span>
+         <span class='nv'>invdet</span> <span class='p'>(</span><span class='nf'>invdet</span> <span class='nv'>e01</span> <span class='nv'>rd</span> <span class='nv'>e02</span><span class='p'>)</span> <span class='p'>]</span>
+    <span class='p'>(</span><span class='k'>if </span><span class='p'>(</span><span class='nf'>number?</span> <span class='nv'>invdet</span><span class='p'>)</span>
+      <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='nv'>v0</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>t</span> <span class='mi'>0</span><span class='p'>)</span>
+             <span class='nv'>tv</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='nv'>r0</span> <span class='nv'>v0</span><span class='p'>)</span>
+             <span class='nv'>u</span>  <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nf'>dot</span> <span class='nv'>tv</span> <span class='nv'>p</span><span class='p'>)</span> <span class='nv'>invdet</span><span class='p'>)</span> <span class='p'>]</span>
+        <span class='p'>(</span><span class='k'>if </span><span class='p'>(</span><span class='nb'>and </span><span class='p'>(</span><span class='nb'>&gt;= </span><span class='nv'>u</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>&lt;= </span><span class='nv'>u</span> <span class='mi'>1</span><span class='p'>))</span>
+          <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='nv'>q</span> <span class='p'>(</span><span class='nf'>cross</span> <span class='nv'>tv</span> <span class='nv'>e01</span><span class='p'>)</span>
+                 <span class='nv'>v</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nf'>dot</span> <span class='nv'>rd</span> <span class='nv'>q</span><span class='p'>)</span> <span class='nv'>invdet</span><span class='p'>)</span> <span class='p'>]</span>
+            <span class='p'>(</span><span class='k'>if </span><span class='p'>(</span><span class='nb'>and </span><span class='p'>(</span><span class='nb'>&gt;= </span><span class='nv'>v</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>&lt;= </span><span class='p'>(</span><span class='nb'>+ </span><span class='nv'>u</span> <span class='nv'>v</span><span class='p'>)</span> <span class='mi'>1</span><span class='p'>))</span>
+              <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>a</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nf'>dot</span> <span class='nv'>e02</span> <span class='nv'>q</span><span class='p'>)</span> <span class='nv'>invdet</span><span class='p'>)]</span>
+                <span class='p'>(</span><span class='k'>if </span><span class='p'>(</span><span class='nb'>&gt;= </span><span class='nv'>a</span> <span class='mi'>0</span><span class='p'>)</span> <span class='nv'>a</span><span class='p'>)))))))))</span>
+</pre>
+</div>
+<p>I&#8217;m least happy with the style of this code. The repeatedly nested <code>let</code>/<code>if</code> blocks seem ugly but I cannot see a more elegant way to do this sort of thing. Partly, it&#8217;s because the series of conditional tests are essential to what is being computed, but I can&#8217;t help but feel there is a lot of what Brook&#8217;s calls &#8221;<a href='http://en.wikipedia.org/wiki/Accidental_complexity'>accidental complexity</a>&#8221; in there as well.</p>
+
+<p>Suggestions on how to improve this function are very welcome.</p>
+
+<p>We can, at least, test that it is working though. Here I check whether hand-picked rays intersect on of the test triangles or not:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/test/triangle.clj ---</span>
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-intersect</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span> <span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>-1</span><span class='p'>])))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>2</span> <span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>-1</span><span class='p'>])))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span> <span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mf'>0.9</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>-1</span><span class='p'>])))</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span> <span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mf'>0.1</span> <span class='mf'>0.1</span> <span class='mi'>-1</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]))))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-no-intersect</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>nil? </span><span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>])))</span> <span class='c1'>; Dir. is opposite</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>nil? </span><span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>1</span> <span class='mi'>0</span> <span class='mi'>0</span><span class='p'>])))</span> <span class='c1'>; Dir. is parallel</span>
+  <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>nil? </span><span class='p'>(</span><span class='nf'>intersect</span> <span class='nv'>xytriangle</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>]</span> <span class='p'>[</span><span class='mi'>0</span> <span class='mi'>1</span> <span class='mi'>-1</span><span class='p'>]))))</span> <span class='c1'>; Goes wide</span>
+</pre>
+</div>
+<h2 id='sampling'>Sampling</h2>
+
+<p>Finally, the renderer needs a way of choosing a random point uniformly from a given triangle. I&#8217;ve lifted the formula for choosing the point at random directly from the Ruby code and translated as directly as possible into Clojure.</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>def </span><span class='nv'>rnd</span> <span class='p'>(</span><span class='nf'>java</span><span class='o'>.</span><span class='nv'>util</span><span class='o'>.</span><span class='nv'>Random</span><span class='o'>.</span><span class='p'>))</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>sample-point</span>
+  <span class='s'>&quot;Returns a random point as a vector from inside the given triangle t&quot;</span>
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span>
+  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='nv'>sqr1</span> <span class='p'>(</span><span class='nf'>Math/sqrt</span> <span class='p'>(</span><span class='o'>.</span><span class='nv'>nextFloat</span> <span class='nv'>rnd</span><span class='p'>))</span>
+         <span class='nv'>r2</span>   <span class='p'>(</span><span class='o'>.</span><span class='nv'>nextFloat</span> <span class='nv'>rnd</span><span class='p'>)</span>
+         <span class='nv'>a</span>    <span class='p'>(</span><span class='nb'>- </span><span class='mi'>1</span> <span class='nv'>sqr1</span><span class='p'>)</span>
+         <span class='nv'>b</span>    <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nb'>- </span><span class='mi'>1</span> <span class='nv'>r2</span><span class='p'>)</span> <span class='nv'>sqr1</span><span class='p'>)</span> <span class='p'>]</span>
+    <span class='p'>(</span><span class='nf'>add</span> <span class='p'>(</span><span class='nf'>vertex</span> <span class='nv'>t</span> <span class='mi'>0</span><span class='p'>)</span>
+        <span class='p'>(</span><span class='nf'>add</span> <span class='p'>(</span><span class='nf'>scale</span> <span class='nv'>a</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>1</span><span class='p'>))</span> 
+             <span class='p'>(</span><span class='nf'>scale</span> <span class='nv'>b</span> <span class='p'>(</span><span class='nf'>edge</span> <span class='nv'>t</span> <span class='mi'>0</span> <span class='mi'>2</span><span class='p'>))))))</span>
+</pre>
+</div>
+<p>By its very nature, <code>sample-point</code> is non-deterministic. This makes testing a little unusual. Rather than testing whether a specific function call returns a specific value, I&#8217;ve opted for testing an invariant. In particular, if I sample a point from a triangle and translate it one unit along its normal then a ray starting at that point which points back along the normal should intersect the original triangle:</p>
+<div class='highlight'><pre><span class='c1'>;; --- src/mreid/minilight/test/triangle.clj ---</span>
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>random-ray</span>
+  <span class='s'>&quot;Returns [r0 rd] where rd is the unit normal of the triangle t and r0 is a </span>
+<span class='s'>   random point on t translated by -rd&quot;</span> 
+  <span class='p'>[</span><span class='nv'>t</span><span class='p'>]</span>
+  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>ray-direction</span> <span class='p'>(</span><span class='nf'>unit-normal</span> <span class='nv'>t</span><span class='p'>)]</span>
+    <span class='p'>[</span> <span class='p'>(</span><span class='nf'>sub</span> <span class='p'>(</span><span class='nf'>sample-point</span> <span class='nv'>t</span><span class='p'>)</span> <span class='nv'>ray-direction</span><span class='p'>)</span> 
+      <span class='nv'>ray-direction</span> <span class='p'>]))</span>
+
+<span class='p'>(</span><span class='nf'>deftest</span> <span class='nv'>test-sample-point</span>
+  <span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>xy-random-ray</span> <span class='p'>(</span><span class='nf'>random-ray</span> <span class='nv'>xytriangle</span><span class='p'>)</span>
+        <span class='nv'>zx-random-ray</span> <span class='p'>(</span><span class='nf'>random-ray</span> <span class='nv'>zxtriangle</span><span class='p'>)]</span>
+    <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>apply </span><span class='nv'>intersect</span> <span class='nv'>xytriangle</span> <span class='nv'>xy-random-ray</span><span class='p'>)))</span>
+    <span class='p'>(</span><span class='nf'>is</span> <span class='p'>(</span><span class='nb'>= </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>apply </span><span class='nv'>intersect</span> <span class='nv'>zxtriangle</span> <span class='nv'>zx-random-ray</span><span class='p'>)))))</span>
+</pre>
+</div>
+<p>Running this test on different occasions will check whether the invariant holds for different points. A down-side is that this test is not strictly repeatable and may fail very rarely. This may make tracking down a failing test difficult (even though the failure output will offer clues). The upside, however, is that the coverage for the <code>intersect</code> function is increased.</p>
+
+<h2 id='summary'>Summary</h2>
+
+<p>I&#8217;m definitely feeling more confident with Clojure even though I cannot instinctively count parentheses yet. Structures in Clojure feel very natural and are easy to work with and many of the functions I needed can still be expressed concisely. That said, the more mathematically involved functions didn&#8217;t lend themselves to Clojure&#8217;s prefix notation.</p>
+
+<p>I suspect I&#8217;ll find these easier to read as time goes on but it is one case where simplicity of S-expressions falls short. Perhaps there are common ways of breaking up or otherwise formatting formulae that makes them easier to work with but they are far from obvious to me.</p>
+
+<p>As usual, the code is on GitHub, this time tagged with <a href='http://github.com/mreid/minilight-clojure/tree/sap-2.1'>sap-2.1</a>. See you there!</p>
+
+<h2 id='updates'>Updates</h2>
+
+<ul>
+<li><em>15 April 2009</em>: Fixed a bug spotted by HXA7241 in <code>sample-point</code> as well as a related bug in <code>intersect</code>. Updated the relevant tests to reproduce the bug.</li>
+</ul>
+
+  <address class="signature">
+    <a class="author" href="http://mark.reid.name">Mark Reid</a> 
+    <span class="date">11 April 2009</span>
+    <span class="location">Canberra, Australia</span>
+  </address>
+</div><!-- End Page -->
+
+<!-- Delicious hits
+<script type="text/javascript">
+    if (typeof window.Delicious == "undefined") window.Delicious = {};
+    Delicious.BLOGBADGE_DEFAULT_CLASS = 'delicious-blogbadge-line';
+</script>
+<script src="http://static.delicious.com/js/blogbadge.js"></script>
+-->
+
+
+<!-- Discus Comments -->
+<div id="disqus_thread"></div>
+
+<!-- Enable Disqus comments -->
+<script type="text/javascript">
+	var disqus_iframe_css = "http://mark.reid.name/css/screen.css";
+	var disqus_title = "Minilight in Clojure: Triangles";
+	var disqus_message = "This is the second part of my attempt to port the Minilight ray-tracer to Clojure. This time it is triangles. Some bugs are found and fixed in the vector package.";
+</script>
+<script type="text/javascript" src="http://disqus.com/forums/structure-and-process/embed.js"></script>
+
+<noscript>
+	<a href="http://structure-and-process.disqus.com/?url=ref">View the discussion thread.</a>
+</noscript>
+  
+  <div id="footer">
+	<address>
+		<span class="copyright">
+			Content &amp; Design by 
+			<a href="/info/site.html">Mark Reid</a>
+			<br/>
+			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+		</span>
+		<span class="engine">
+			Powered by 
+			<a href="http://github.com/mreid/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+		</span>
+	</address>
+  </div>
+</div>
+
+<!-- Google Analytics script goes here -->
+<script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
+<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/mdreid.json?callback=t
+witterCallback2&count=1"></script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1051817-4");
+pageTracker._trackPageview();
+</script>
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+</body>
+</html>

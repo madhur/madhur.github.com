@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Visualising 19th Century Reading in Australia &larr; Inductio Ex Machina</title>
+   <meta name="author" content="Mark Reid" />
+
+   <link rel='openid.server' href='http://www.myopenid.com/server' />
+   <link rel='openid.delegate' href='http://mark.reid.name' />
+
+   <link rel="start" href="/" />
+
+	
+	
+	
+  	<link rel="alternate" type="application/atom+xml" href="atom.xml" title="RSS feed" />
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/files/css/screen.css" type="text/css" />
+
+</head>
+<body id="">
+<div id="site">
+
+  
+<div id="header">
+	<h1>
+	<a href="/iem/" title="A machine learning blog">Inductio ex Machina</a>
+	<span class="byline">&larr; <a href="/">Mark Reid</a></span>
+</h1>
+<ul class="nav">
+  <li><a class="home" href="/iem/">Home</a></li>
+  <li><a class="info" href="/iem/info.html">Info</a></li>
+  <li><a class="past" href="/iem/past.html">Past</a></li>
+  <li><a class="kith" href="/iem/kith.html">Kith</a></li>
+</ul>
+
+</div>
+
+<div id="page">
+	
+  <h1 class="emphnext">Visualising 19th Century Reading in Australia</h1>
+
+<p>I&#8217;ve recently spent a bit of time collaborating with my wife on a research project. Research collaboration by couples is not new but given that Julieanne is a <a href='http://cass.anu.edu.au/humanities/school_sites/staff.php'>lecturer in the English program</a> and I&#8217;m part of the <a href='http://csl.cecs.anu.edu.au/'>computer sciences laboratory</a>, this piece of joint research is a little unusual.</p>
+
+<p>The rest of this post describes the intersection of our interests &#8212; data from the Australian Common Reader Project &#8212; and the visualisation tool I wrote to explore it. The tool itself is based on a simple application of linear Principal Component Analysis (PCA). I&#8217;ll attempt to explain it here in such a way that readers who have not studied this technique might still be able to make use of the tool.</p>
+
+<p class='note'><strong>Note</strong>: The visualisation applet discussed in this post has been superseded. The most up-to-date version can be found here: <a href='http://mark.reid.name/code/acrp/'>http://mark.reid.name/code/acrp/</a></p>
+
+<h2 id='the_australian_common_reader_project'>The Australian Common Reader Project</h2>
+
+<p>One of Julieanne&#8217;s research interests is the Australian audience of the late 19th and early 20th centuries. As part of her PhD, she made use of an amazing database that is part of the <a href='http://www.api-network.com/hosted/acrp/'>Australian Common Reader Project</a> &#8212; a project that has collected and entered library borrowing records from Australian libraries along with annotations about when books were borrowed, their genres, borrower occupations, author information, <i>etc</i>. This sort of information makes it possible for Australian literature and cultural studies academics to ask empirical questions about Australian readers&#8217; relationship with books and periodicals.</p>
+
+<p>Ever on the lookout for <a href='http://conflate.net/inductio/2008/02/a-meta-index-of-data-sets/'>interesting data sets</a>, I suggested that we apply some basic data analysis tools to the database to see what kind of relationships between books and borrowers we might find. When asked if we could have access to the database, <a href='http://www.humanities.curtin.edu.au/staff.cfm/t.dolin'>Tim Dolin</a> graciously agreed and enlisted <a href='http://www.humanities.curtin.edu.au/staff.cfm/j.ensor'>Jason Ensor</a> to help with our technical questions.</p>
+
+<h2 id='books_and_borrowers'>Books and Borrowers</h2>
+
+<p>After an initial inspection, my first thought was to try to visualise the similarity of the books in the database as measured by the number of borrowers they have in common. The full database contains 99,692 loans of 7,078 different books from 11 libraries by one of the 2,642 people. To make this more manageable, I focused on books that had at least 20 different borrowers and only considered people who had borrowed one of these books. This distilled the database down to a simple table with each row representing one of 1,616 books and each column representing one of 2,473 people.</p>
+<table class='neat'>
+<caption>Table 1: A portion of the book and borrower table. A 1 indicates that the borrower (column)
+borrowed the book (row) at least once. A 0 indicates that the borrower never borrowed the book.
+</caption>
+<tr><th class='title' rowspan='2'>Book<br />ID</th><th class='title' colspan='4'>Borrower ID</th></tr>
+<tr><th>1</th><th>2</th><th>...</th><th>2,473</th></tr>
+<tr><th>1</th><td>1</td><td>0</td><td>...</td><td>1</td></tr>
+<tr><th>2</th><td>1</td><td>1</td><td>...</td><td>0</td></tr>
+<tr><th>3</th><td>0</td><td>0</td><td>...</td><td>1</td></tr>
+<tr><th>...</th><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+<tr><th>1,616</th><td>1</td><td>1</td><td>...</td><td>1</td></tr>
+</table>
+<p>Conceptually, each cell in the table contains a 1 if the person associated with the cell&#8217;s column borrowed the book associated with the cell&#8217;s row. If there was no such loan between a given book and borrower the corresponding cell contains a 0. For example, Table 1 shows that book 2 was borrowed (at least once) by borrower 1 but never by borrower 2,473.</p>
+
+<h2 id='book_similarity'>Book Similarity</h2>
+
+<p>The table view of the books and their borrowers does not readily lend itself to insight. The approach we took to get a better picture of this information was to plot each book as a point on a graph so that similar books are placed closer together than dissimilar books. To do this a notion of what &#8220;similar books&#8221; is required.</p>
+
+<p>Mathematically, row <span class='maruku-inline'><img class='maruku-png' src='/images/latex/61351f38a577ef7bb357e23b2ae497d0.png' alt='$i$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span> of Table 1 can be represented as a vector <span class='maruku-inline'><img class='maruku-png' src='/images/latex/3337cd2623f66792c3342e8e5e3faf56.png' alt='$\mathbf{b}_i$' style='vertical-align: -0.333333333333333ex;height: 1.88888888888889ex;' /></span> of 1s and 0s. The value of the cell in the <span class='maruku-inline'><img class='maruku-png' src='/images/latex/6f7474ea0da44dad381c0a6894aa2c0f.png' alt='$j$' style='vertical-align: -0.444444444444444ex;height: 2.0ex;' /></span><sup>th</sup> column of that row will be denoted <span class='maruku-inline'><img class='maruku-png' src='/images/latex/96ef31eea5f49bd14147f90207065a8c.png' alt='$b_{i,j}$' style='vertical-align: -0.666666666666667ex;height: 2.22222222222222ex;' /></span>. For example, the 2<sup>nd</sup> row in the table can be written as the vector <span class='maruku-inline'><img class='maruku-png' src='/images/latex/fa222fa7948547ca4e4587d55e0e52e6.png' alt='$\mathbf{b}_2 = (1,1,\ldots,0)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> and the value in its first column is <span class='maruku-inline'><img class='maruku-png' src='/images/latex/fb14fe7ee5e6c17b0f7f992e33c20742.png' alt='$b_{2,1} = 1$' style='vertical-align: -0.666666666666667ex;height: 2.22222222222222ex;' /></span>.</p>
+
+<p>A crude measure of the similarity between book 1 and book 2 can be computed from this table by counting how many borrowers they have in common. That is, the number of columns that have a <code>1</code> in the row for book 1 and the row for book 2.</p>
+
+<p>In terms of the vector representation, this similarity measure is simply the &#8221;<a href='http://en.wikipedia.org/wiki/Inner_product_space'>inner product</a>&#8221; between <span class='maruku-inline'><img class='maruku-png' src='/images/latex/794119cf94efbc35f44e253326d6dc4e.png' alt='$\mathbf{b}_1$' style='vertical-align: -0.333333333333333ex;height: 1.88888888888889ex;' /></span> and <span class='maruku-inline'><img class='maruku-png' src='/images/latex/6f8227418e20db5b337bef57dba89129.png' alt='$\mathbf{b}_2$' style='vertical-align: -0.333333333333333ex;height: 1.88888888888889ex;' /></span> and is written <span class='maruku-inline'><img class='maruku-png' src='/images/latex/73778cacb20805c7a1201d588ebb7f59.png' alt='$\left&lt;\mathbf{b}_1,\mathbf{b}_2\right&gt; = b_{1,1}b_{2,1} + \cdots + b_{1,N}b_{2,N}$' style='vertical-align: -0.666666666666667ex;height: 2.33333333333333ex;' /></span> where N = 2,473 is the total number of borrowers.</p>
+
+<p>It turns out that simply counting the number of borrowers two books is not a great measure of similarity. The problem is that two very popular books, each with 100 borrowers, that only share 10% of their borrowers would be considered as similar as two books, each with 10 readers, that share all of their borrowers. An easy way to correct this is to &#8220;normalise&#8221; the borrower counts by making sure the similarity of a book with itself is always equal to 1. A common way of doing this is by dividing the inner product of two books by the &#8220;size&#8221; of each of the vectors for those books.</p>
+
+<p>Mathematically, we will denote the size of a book vector <span class='maruku-inline'><img class='maruku-png' src='/images/latex/3337cd2623f66792c3342e8e5e3faf56.png' alt='$\mathbf{b}_i$' style='vertical-align: -0.333333333333333ex;height: 1.88888888888889ex;' /></span> as <span class='maruku-inline'><img class='maruku-png' src='/images/latex/2281c978d7566e6ceda2a29aa716d5ba.png' alt='$\|\mathbf{b}_i\| = \sqrt{\left&lt;\mathbf{b}_i,\mathbf{b}_i\right&gt;}$' style='vertical-align: -1.0ex;height: 3.33333333333333ex;' /></span>. The similarity between two books then becomes: <span class='maruku-inline'><img class='maruku-png' src='/images/latex/9ddc07716abbdefc40ec5beaaef90156.png' alt='$\text{sim}(\mathbf{b}_i,\mathbf{b}_j) = \frac{\left&lt; \mathbf{b}_i,\mathbf{b}_j \right&gt;}{\|\mathbf{b}_i\| \|\mathbf{b}_j\|}$' style='vertical-align: -1.22222222222222ex;height: 3.55555555555556ex;' /></span></p>
+
+<h2 id='principal_component_analysis'>Principal Component Analysis</h2>
+
+<p>Now that we have a similarity measure between books the idea is to create a plot of points &#8211; one per book &#8211; so that similar books are placed close together and dissimilar books are kept far apart.</p>
+
+<p>A standard technique for doing this is <a href='http://en.wikipedia.org/wiki/Principal_components_analysis'>Principal Component Analysis</a>. Intuitively, this technique aims to find a way of reducing the number of coordinates in each book vector in such a way that when the similarity between two books is computed using these smaller vectors it is as close as possible to the original similarity. That is, PCA creates a new table that represents books in terms of only two columns.</p>
+<table class='neat'>
+<caption>Table 2: A portion of the book table after PCA. The values in the two new columns (PCA IDs) can be used to plot the books.
+</caption>
+<tr><th class='title' rowspan='2'>Book<br />ID</th><th class='title' colspan='2'>PCA ID</th></tr>
+<tr>                 <th>1</th><th>2</th></tr>
+<tr><th>1</th><td>-8.2</td><td>2.3</td></tr>
+<tr><th>2</th><td>0.4</td><td>-4.3</td></tr>
+<tr><th>3</th><td>-1.3</td><td>-3.7</td></tr>
+<tr><th>...</th><td>...</td><td>...</td></tr>
+<tr><th>1,616</th><td>2.2</td><td>-5.6</td></tr>
+</table>
+<p>Table 2 gives an example of the book table after PCA that reduces the book vectors (rows) from 2,473 to two entries. The PCA columns cannot be as easily interpreted as the borrowers columns in Table 1 but the values in the columns are such that the similarity of the books in Table 2 are roughly as similar as if the values in Table 1 were used. That is, if <span class='maruku-inline'><img class='maruku-png' src='/images/latex/ee4baca61cc8ce922f9a0775c8d57920.png' alt='$\mathbf{c}_1 = (-8.2,2.3)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> and <span class='maruku-inline'><img class='maruku-png' src='/images/latex/452b626958635dd1ff017d811480cc0b.png' alt='$\mathbf{c}_2=(0.4,-4.3)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> are the vectors for the first two rows of Table 2 then <span class='maruku-inline'><img class='maruku-png' src='/images/latex/514d9551d269dc2160ea495bca2c2e7f.png' alt='$\text{sim}(\mathbf{c}_1,\mathbf{c}_2)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> would be close to <span class='maruku-inline'><img class='maruku-png' src='/images/latex/b3a8b940804950df5f9c051794609f12.png' alt='$\text{sim}(\mathbf{b}_1,\mathbf{b}_2)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span>, the similarity of the first two rows in Table 1.<sup id='fnref:1'><a href='#fn:1' rel='footnote'>1</a></sup></p>
+
+<h2 id='visualising_the_data'>Visualising the Data</h2>
+
+<p>Figure 1 shows a plot of the PCA reduced book data. Each circle represents one of the 1,616 books, plotted according to the coordinates in a table like Table 2. The size of each circle indicates how many borrowers each book had and its colour indicates which library the book belongs to.<sup id='fnref:2'><a href='#fn:2' rel='footnote'>2</a></sup></p>
+
+<dl class='figure'>
+<dt><img src='/images/figures/all_libraries.png' alt='Plot of the books across all libraries in the ACRP database' width='550' /></dt>
+
+<dd><strong>Figure 1</strong>: A PCA plot of all the books in the ACRP database coloured according to which library they belong to. The size of each circle indicates the number of borrowers of the corresponding book.</dd>
+</dl>
+
+<p>One immediate observation is that books are clustered according to which library they belong to. This is not too surprising since the books in a library limit what borrowers from that library can read. This means it is likely that two voracious readers that frequent the same library will read the same books. This, in turn, will mean the similarity of two books from a library will be higher than books from different libraries as there are very few borrowers that use more than one library.</p>
+
+<h2 id='drilling_down_and_interacting'>Drilling Down and Interacting</h2>
+
+<p>To get a better picture of the data, we decided to focus on books from a single library to avoid this clustering. The library we focused on was the <a href='http://en.wikipedia.org/wiki/Lambton,_New_South_Wales'>Lambton</a> Miners&#8217; and Mechanics&#8217; Institute in New South Wales. This library had the largest number of loans (20,253) and so was most likely to have interesting similarity data.</p>
+
+<p>There are a total of 789 books in the Lambton institute and 469 borrowers of those books. A separate PCA reduction was performed on this restricted part of the database to create a plot of only the Lambton books.</p>
+
+<p>To make it easier to explore this data, I wrote a simple tool that allows a viewer to interact with the PCA plot. A screenshot from this tool is shown in Figure 2. Once again, larger circles represent books with a larger number of borrowers.</p>
+
+<p>Clicking on <a href='/inductio/wp-content/public/acrp/'>this link</a> will open a new window and, after a short delay, the tool will run.</p>
+
+<dl class='figure'>
+<dt><img src='/images/figures/acrp.png' alt='Screenshot of the visualisation applet' width='550' /></dt>
+
+<dd><strong>Figure 2</strong>: A screenshot of the ACRP visualisation tool showing books from the Lambton Institute. Click the image to run the tool in a new window.</dd>
+</dl>
+
+<p>Instructions describing how to use the tool can be found below it. In a nutshell: hovering over a circle will reveal the title of the book corresponding to that circle; clicking on a circle will draw lines to its most similar neighbours; altering the &#8220;Borrowers&#8221; bar will only show books with at least that many borrowers; and altering the &#8220;Similarity&#8221; bar will only draw lines to books with at least that proportion of books in common.</p>
+
+<h2 id='future_work_and_distant_reading'>Future Work and Distant Reading</h2>
+
+<p>Julieanne and I are still at the early stages of our research using the ACRP database. The use of PCA for visualisation was a first step in our pursuit of what <a href='http://en.wikipedia.org/wiki/Franco_Moretti'>Franco Moretti</a> calls &#8220;distant reading&#8221; &#8211; looking at books as objects and how they are read rather than the &#8220;close reading&#8221; of the text of individual books.</p>
+
+<p>Now that we have this tool, we are able to quickly explore relationships between these books based on the reading habits of Australians at the turn of the century. Of course, there are many caveats that apply to any patterns we might see in these plots. For instance, the similarity between books is only based on habits of a small number of readers and will be influenced by the peculiarities of the libraries and the books they choose to buy. For this reason, these plots are not intended to provide conclusive answers to questions we might.</p>
+
+<p>Instead we hope that exploring the ACRP database in this way will lead us to interesting questions about particular pairs or groups of books that can be followed up by a more thorough analysis of their readers, their text as well as other historical and cultural factors about them.</p>
+
+<h2 id='data_and_code'>Data and Code</h2>
+
+<p>For the technically minded, I have made the code I used to do the visualisation is available on <a href='http://github.com/mreid/acrp/tree/master'>GitHub</a>. It is a combination of <a href='http://en.wikipedia.org/wiki/SQL'>SQL</a> for data preprocessing, <a href='http://www.r-project.org/'>R</a> for the PCA reduction and <a href='http://processing.org/'>Processing</a> for creating the visualisation tool. You will also find a number of images and some notes at the same location.</p>
+
+<p>Access to the data that the code acts upon is not mine to give, so the code is primarily to show how I did the visualisation rather than a way to let others analyse the data. If the founders of the <a href='http://www.api-network.com/hosted/acrp/'>ACRP</a> project decide to release the data to the public at a later date I will link to it from here.</p>
+
+<h2 id='updates'>Updates</h2>
+
+<ul>
+<li>
+<p><em>9 December 2008</em>: Julieanne and I presented a much improved version of this visualisation at the <a href='http://conferences.arts.usyd.edu.au/index.php?cf=20'>Resourceful Reading</a> conference held at the University of Sydney on the 5th of December. Those looking for the application I presented there: stay tuned, I will post the updated version here shortly.</p>
+</li>
+
+<li>
+<p><em>22 July 2009</em>: Added a note at the top of this post with a <a href='/code/acrp'>link</a> to the latest version of the visualisation applet.</p>
+</li>
+</ul>
+<div class='footnotes'><hr /><ol><li id='fn:1'>
+<p>Technically, the guarantee of the &#8220;closeness&#8221; of the similarity measures only holds on average, that is, over all possible pairs of books. There is no guarantee any particular pair&#8217;s similarity is estimated well.</p>
+<a href='#fnref:1' rev='footnote'>&#8617;</a></li><li id='fn:2'>
+<p>A book can belong to more than one library. In this case one library is chosen at random to determine a circle&#8217;s colour.</p>
+<a href='#fnref:2' rev='footnote'>&#8617;</a></li></ol></div>
+
+  <address class="signature">
+    <a class="author" href="http://mark.reid.name">Mark Reid</a> 
+    <span class="date">17 June 2008</span>
+    <span class="location">Canberra, Australia</span>
+  </address>
+</div><!-- End Page -->
+
+<!-- Delicious hits
+<script type="text/javascript">
+    if (typeof window.Delicious == "undefined") window.Delicious = {};
+    Delicious.BLOGBADGE_DEFAULT_CLASS = 'delicious-blogbadge-line';
+</script>
+<script src="http://static.delicious.com/js/blogbadge.js"></script>
+-->
+
+
+<!-- Discus Comments -->
+<div id="disqus_thread"></div>
+
+<!-- Enable Disqus comments -->
+<script type="text/javascript">
+	var disqus_iframe_css = "http://mark.reid.name/css/screen.css";
+	var disqus_title = "Visualising 19th Century Reading in Australia";
+	var disqus_message = "A description of a visualisation of some 19th century Australian borrowing records from the Australian Common Readers Project.";
+</script>
+<script type="text/javascript" src="http://disqus.com/forums/markreid/embed.js"></script>
+
+<noscript>
+		<a href="http://markreid.disqus.com/?url=ref">View the discussion thread.</a>
+</noscript>
+
+  
+  <div id="footer">
+	<address>
+		<span class="copyright">
+			Content &amp; Design by 
+			<a href="/info/site.html">Mark Reid</a>
+			<br/>
+			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+		</span>
+		<span class="engine">
+			Powered by 
+			<a href="http://github.com/mreid/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+		</span>
+	</address>
+  </div>
+</div>
+
+<!-- Google Analytics script goes here -->
+<script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
+<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/mdreid.json?callback=t
+witterCallback2&count=1"></script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1051817-4");
+pageTracker._trackPageview();
+</script>
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+</body>
+</html>

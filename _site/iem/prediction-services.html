@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Prediction Services &larr; Inductio Ex Machina</title>
+   <meta name="author" content="Mark Reid" />
+
+   <link rel='openid.server' href='http://www.myopenid.com/server' />
+   <link rel='openid.delegate' href='http://mark.reid.name' />
+
+   <link rel="start" href="/" />
+
+	
+	
+	
+  	<link rel="alternate" type="application/atom+xml" href="atom.xml" title="RSS feed" />
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/files/css/screen.css" type="text/css" />
+
+</head>
+<body id="">
+<div id="site">
+
+  
+<div id="header">
+	<h1>
+	<a href="/iem/" title="A machine learning blog">Inductio ex Machina</a>
+	<span class="byline">&larr; <a href="/">Mark Reid</a></span>
+</h1>
+<ul class="nav">
+  <li><a class="home" href="/iem/">Home</a></li>
+  <li><a class="info" href="/iem/info.html">Info</a></li>
+  <li><a class="past" href="/iem/past.html">Past</a></li>
+  <li><a class="kith" href="/iem/kith.html">Kith</a></li>
+</ul>
+
+</div>
+
+<div id="page">
+	
+  <h1 class="emphnext">Prediction Services</h1>
+
+<p>I have been thinking about learning and prediction as services for some time now. Like all good ideas, they tend to be thought of independently by several people when their time is ripe. Therefore I was not completely surprised when I heard the <a href='http://googlecode.blogspot.com/2010/05/bigquery-and-prediction-api-get-more.html'>news</a> yesterday that Google has released a new RESTful <a href='http://code.google.com/apis/predict/'>prediction API</a>.</p>
+
+<p>As a couple of other bloggers (<a href='http://hunch.net/?p=1383'>John</a>, <a href='http://behind-the-enemy-lines.blogspot.com/2010/05/google-prediction-api-commoditization.html#comments'>Panos</a>) have already noted, this is very exciting as it has the potential of making statistical inference a commodity and putting machine learning tools in the hands of everyday developers.</p>
+
+<h2 id='using_the_api'>Using the API</h2>
+
+<p>The details are a little scant as the API is not yet open to the public at the moment but, as the <a href='http://code.google.com/apis/predict/docs/faq.html'>FAQ</a> and <a href='http://code.google.com/apis/predict/docs/samples.html'>sample code</a> explain, it appears to work as follows:</p>
+
+<ol>
+<li>
+<p>A data set in CSV format is uploaded to <a href='http://code.google.com/apis/storage/'>Google storage</a>. This can contain up to 100 million rows of text or numeric features. Each row can be associated with one of up to several hundred classes.</p>
+</li>
+
+<li>
+<p>The URL obtained after uploading the data set is POSTed to a second URL, <code>/prediction/v1/train/DATA_ID</code>, for Google&#8217;s learning algorithm (all URLs are relative to <code>https://googleapis.com</code>). It is not clear what algorithms are being used behind the scenes for this step but the home page says the API will automatically choose from a variety of techniques.</p>
+</li>
+
+<li>
+<p>The training occurs asynchronously and its progress can be queried by issuing a GET to <code>/prediction/v1/query/DATA_ID</code>. Once training is completed, this query will return a cross-validated estimate of the learned model&#8217;s accuracy.</p>
+</li>
+
+<li>
+<p>To make a new prediction with the trained model, a POST request containing the data to classify is sent to the <code>/prediction/v1/query/DATA_ID</code> URL and a label prediction is returned.</p>
+</li>
+</ol>
+
+<p>Although this is a relatively simple API and, at present, only deals with classification, I believe it has the potential to cover a large proportion of most web developers&#8217; prediction needs (e.g., text classification, sentiment analysis, click-through analysis) as well as several scientific applications.</p>
+
+<h2 id='related_projects'>Related Projects</h2>
+
+<p>The Google Prediction API is not the first to offers inferential services over the web but I do think they are the first to focus on building reusable predictors and to do it with a clean API design.</p>
+
+<p>Some other projects offering prediction services include:</p>
+
+<ul>
+<li>
+<p><a href='http://www.uclassify.com/'>uClassify</a> &#8212; This is probably the closest existing service to Google&#8217;s. It also provides an API for training and predicting but, upon a cursory examination, appears a bit more complicated than the Google prediction API. I believe the <a href='http://www.uclassify.com/Products.aspx'>main algorithm</a> used by uClassify is a variant of naïve Bayes.</p>
+</li>
+
+<li>
+<p><a href='http://mlcomp.org'>MLcomp</a> &#8212; This recently announced service is more aimed at machine learning researchers and provides a convenient way to compare several algorithms on a selection of data sets using a variety of metrics. Unlike Google&#8217;s offering, MLcomp does not make the trained predictors available via an API and focuses more on providing easily repeatable experiments. One nice thing about the MLcomp service is that anyone is free to upload learning algorithms provided they implement a simple <a href='http://mlcomp.org/help/program_info.html'>calling pattern</a>.</p>
+</li>
+
+<li>
+<p><a href='http://predict.i2pi.com/'>predict</a> &#8212; A simpler MLcomp-like service built by <a href='http://i2pi.com/team.html'>Joshua Reich</a> that lets users upload CSV files to learn from and/or snippets of <a href=''>R</a> code to run. Once again, the aim is to evaluate algorithms rather than train predictors for subsequent use.</p>
+</li>
+
+<li>
+<p><a href='http://tunedit.org/'>TunedIT</a> &#8212; Similar to MLcomp and i2pi&#8217;s <em>predict</em>, this service aims to make comparing learning algorithms across data sets easier. As far as I can tell, it does not offer an API for running learners and predictors over the web but rather offers users the ability to create data-mining <a href='http://tunedit.org/challenges/docs'>challenges</a> that other users can compete within.</p>
+</li>
+
+<li>
+<p><a href='http://expdb.cs.kuleuven.be/expdb/index.php'>ExpDB</a> &#8212; This is not so much a service as a growing database of experimental results but I thought I&#8217;d include it here as it has a similar focus to the last three projects. The main innovation here is the creation of a language &#8211; <a href='http://expdb.cs.kuleuven.be/expdb/expml.php?tq='>ExpML</a> &#8211; for describing and querying the parameters, algorithms, data sets and results of machine learning experiments.</p>
+</li>
+
+<li>
+<p><a href='http://glue.rl-community.org/'>RL-Glue</a> &#8212; While not about prediction <em>per se</em>, this somewhat older project is related as it offers an API for defining reinforcement learning problems that can be solved in a programming language-independent way.</p>
+</li>
+</ul>
+
+<p>Of course, there are also many machine learning toolkits such as <a href='http://www.cs.waikato.ac.nz/ml/weka/'>Weka</a>, <a href='http://www.ailab.si/orange/'>Orange</a>, <a href='http://elefant.developer.nicta.com.au/'>Elefant</a>, <a href='http://rattle.togaware.com/'>Rattle</a> and more that provide implementations of algorithms, but these do not offer them as services.</p>
+
+<h2 id='future_predictions'>Future Predictions</h2>
+
+<p>Over the last few years we&#8217;ve seen a <a href='http://www.economist.com/opinion/displayStory.cfm?story_id=15579717&amp;source=hptextfeature'>dramatic increase</a> in the amount of data being generated and made available over the web (e.g., <a href='http://www.freebase.com/'>Freebase</a>, <a href='http://dbpedia.org/'>DBpedia</a>, <a href='http://www.data.gov/'>Data.gov</a>, <a href='http://www.netflix.com/'>Netflix</a>, and <a href='http://www.ncbi.nlm.nih.gov/protein'>protein databases</a>). Also, thanks to services by Google, Amazon and others, there has also been a large-scale commodification of computational power and storage.</p>
+
+<p>There are a handful of companies at present &#8212; <a href='http://flightcaster.com/'>Flightcaster</a>, for example &#8212; who have realised that there is immense opportunity at the intersection of these developments to start applying large-scale machine learning. Hopefully, what the Google Prediction API and other services will provide is the spark for an explosion of new and creative approaches to distilling knowledge from raw information.</p>
+
+<p>I will be watching how this all unfolds with great interest.</p>
+
+  <address class="signature">
+    <a class="author" href="http://mark.reid.name">Mark Reid</a> 
+    <span class="date">21 May 2010</span>
+    <span class="location">Canberra, Australia</span>
+  </address>
+</div><!-- End Page -->
+
+<!-- Delicious hits
+<script type="text/javascript">
+    if (typeof window.Delicious == "undefined") window.Delicious = {};
+    Delicious.BLOGBADGE_DEFAULT_CLASS = 'delicious-blogbadge-line';
+</script>
+<script src="http://static.delicious.com/js/blogbadge.js"></script>
+-->
+
+
+<!-- Discus Comments -->
+<div id="disqus_thread"></div>
+
+<!-- Enable Disqus comments -->
+<script type="text/javascript">
+	var disqus_iframe_css = "http://mark.reid.name/css/screen.css";
+	var disqus_title = "Prediction Services";
+	var disqus_message = "Thoughts on a number of recent prediction services including the Google Prediction API.";
+</script>
+<script type="text/javascript" src="http://disqus.com/forums/markreid/embed.js"></script>
+
+<noscript>
+		<a href="http://markreid.disqus.com/?url=ref">View the discussion thread.</a>
+</noscript>
+
+  
+  <div id="footer">
+	<address>
+		<span class="copyright">
+			Content &amp; Design by 
+			<a href="/info/site.html">Mark Reid</a>
+			<br/>
+			(<a rel="licence" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Some rights reserved</a>)			
+		</span>
+		<span class="engine">
+			Powered by 
+			<a href="http://github.com/mreid/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+		</span>
+	</address>
+  </div>
+</div>
+
+<!-- Google Analytics script goes here -->
+<script type="text/javascript" src="http://twitter.com/javascripts/blogger.js"></script>
+<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/mdreid.json?callback=t
+witterCallback2&count=1"></script>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1051817-4");
+pageTracker._trackPageview();
+</script>
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+</body>
+</html>
