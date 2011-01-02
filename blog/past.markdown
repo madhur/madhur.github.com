@@ -10,10 +10,10 @@ keywords: Machine Learning, Statistics, Blog, Research, Academia
 Archives
 ========
 
-This is the complete archive of posts from _[inductio ex machina](/iem)_
+This is the complete archive of posts from _[{% include blogname.txt %} ](/blog)_
 in reverse chronological order.
 
-{% for post in site.categories.iem %}
+{% for post in site.posts%}
 <div class="section list">
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
@@ -23,6 +23,12 @@ in reverse chronological order.
   <p class="excerpt">{{ post.excerpt }}</p>
 </div>
 {% endfor %}
+
+<ul>
+  {% for category, post in site.posts.categories["windbg"] %}
+    <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+  {% endfor %}
+</ul>
   
 <script type="text/javascript">
 //<![CDATA[

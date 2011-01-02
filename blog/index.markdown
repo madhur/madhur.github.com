@@ -7,8 +7,8 @@ feed: atom.xml
 keywords: C/C++, Windbg, Reverse Engineering
 ---
 
-Thoughts on Machine Learning and Inference
-==========================================
+Thoughts on this blog
+=====================
 
 {% include blogname.txt %} is [my](/) technical blog on C/C++, Windbg, Reverse Engineering, Assembly.
 
@@ -24,7 +24,7 @@ A [feed][] of the most recent posts is also available.
 Recent Posts
 ------------
 
-{% for post in site.categories.iem limit:5 %}
+{% for post in site.categories.blog limit:5 %}
 <div class="section list">
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
