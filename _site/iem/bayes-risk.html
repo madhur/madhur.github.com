@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Probability Estimation: Bayes Risk &larr; Inductio Ex Machina</title>
+   <meta name="author" content="Madhur Ahuja" />
+
+     <link rel="start" href="/" />
+
+	
+	
+	
+  	<link rel="alternate" type="application/atom+xml" href="atom.xml" title="RSS feed" />
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/files/css/screen.css" type="text/css" />
+
+</head>
+<body id="">
+<div id="site">
+
+  
+<div id="header">
+	<h1>
+	<a href="/iem/" title="A machine learning blog">Inductio ex Machina</a>
+	<span class="byline">&larr; <a href="/">Mark Reid</a></span>
+</h1>
+<ul class="nav">
+  <li><a class="home" href="/iem/">Home</a></li>
+  <li><a class="info" href="/iem/info.html">Info</a></li>
+  <li><a class="past" href="/iem/past.html">Past</a></li>
+  <li><a class="kith" href="/iem/kith.html">Kith</a></li>
+</ul>
+
+</div>
+
+<div id="page">
+	
+  <h1 class="emphnext">Probability Estimation: Bayes Risk</h1>
+
+<p>In my previous post on <a href='/iem/proper-losses.html'>probability estimation</a>, I introduced the notion of a proper loss. This is a way of assigning penalties to probability estimates so that the average loss is minimised by guessing the true conditional probability of a positive label for each example. This minimal possible risk is called the (conditional) <em>Bayes risk</em> and in this post I will highlight some of its properties.</p>
+
+<p>To recap briefly, we denote the loss of predicting the probability <span class='maruku-inline'><img class='maruku-png' src='/images/latex/1673ac8aa9b48203da9b40ba52ef26de.png' alt='$p$' style='vertical-align: -0.444444444444444ex;height: 1.44444444444444ex;' /></span> when the label <span class='maruku-inline'><img class='maruku-png' src='/images/latex/4d879bde964e549c6085ad630f56ad41.png' alt='$y$' style='vertical-align: -0.444444444444444ex;height: 1.44444444444444ex;' /></span> (1 for positive, 0 for negative) as <span class='maruku-inline'><img class='maruku-png' src='/images/latex/36588215fd5810c17501bb1214777fc8.png' alt='$\ell(y, p)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span>. Then the conditional risk for <span class='maruku-inline'><img class='maruku-png' src='/images/latex/b129a71d05546efeb2f1a32bf5ae49de.png' alt='$\ell$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span> of guessing <span class='maruku-inline'><img class='maruku-png' src='/images/latex/1673ac8aa9b48203da9b40ba52ef26de.png' alt='$p$' style='vertical-align: -0.444444444444444ex;height: 1.44444444444444ex;' /></span> when <span class='maruku-inline'><img class='maruku-png' src='/images/latex/4d879bde964e549c6085ad630f56ad41.png' alt='$y$' style='vertical-align: -0.444444444444444ex;height: 1.44444444444444ex;' /></span> has probability <span class='maruku-inline'><img class='maruku-png' src='/images/latex/12e861a5f85f27422a1a536ee1247b43.png' alt='$\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span> of being positive is</p>
+<div class='maruku-equation'><img class='maruku-png' src='/images/latex/971def66b105d5a4471d9420e48353e9.png' alt='$L(\eta,p) = (1-\eta)\,\ell(0,p) + \eta\,\ell(1,p).$' style='height: 2.33333333333333ex;' /><span class='maruku-eq-tex'><code style='display: none'>L(\eta,p) = (1-\eta)\,\ell(0,p) + \eta\,\ell(1,p).</code></span></div>
+<h2 id='pointwise_bayes_risk'>Point-wise Bayes Risk</h2>
+
+<p>The best possible estimate under this loss in terms of minimising the risk at when the probability of a positive label is <span class='maruku-inline'><img class='maruku-png' src='/images/latex/12e861a5f85f27422a1a536ee1247b43.png' alt='$\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span> is the <em>(point-wise) Bayes risk</em> at <span class='maruku-inline'><img class='maruku-png' src='/images/latex/12e861a5f85f27422a1a536ee1247b43.png' alt='$\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span>, which I will denote as</p>
+<div class='maruku-equation'><img class='maruku-png' src='/images/latex/bc1f935a6df2e0138b2b36d47aa30672.png' alt='$\displaystyle	L^*(\eta) = \min_{p \in [0,1]} L(\eta, p)$' style='height: 3.66666666666667ex;' /><span class='maruku-eq-tex'><code style='display: none'>\displaystyle	L^*(\eta) = \min_{p \in [0,1]} L(\eta, p)</code></span></div>
+<p>As argued in the <a href='/iem/proper-losses.html'>previous post</a>, a sensible loss is one that is <em>Fisher consistent</em>, that is, one with a risk that is minimised when <span class='maruku-inline'><img class='maruku-png' src='/images/latex/85c94d02a95009b5fd9410bf973ab842.png' alt='$p=\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span>. Such a loss is called <em>proper</em> and its risk and Bayes risk are closely related. Specifically, <span class='maruku-inline'><img class='maruku-png' src='/images/latex/aa61a59dff7a0f8072c8cae246fe4bec.png' alt='$L^*(\eta) = L(\eta,\eta)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span>.</p>
+
+<p>This relationship makes it trivial to compute the point-wise Bayes risk for any proper loss. For example, square loss is defined to be <span class='maruku-inline'><img class='maruku-png' src='/images/latex/7a777e1b2aa5f51dff949b9687d0ab4a.png' alt='$\ell_{\text{sq}}(y,p) = y\,(1-p)^2 + (1-y)\,p^2$' style='vertical-align: -0.666666666666667ex;height: 2.44444444444444ex;' /></span> and so its point-wise Bayes risk is</p>
+<div class='maruku-equation'><img class='maruku-png' src='/images/latex/5a25e4fd2fb87e5b4c541eeca7377ddc.png' alt='$L^*_{\text{sq}}(\eta) 
+	= L_{\text{sq}}(\eta,\eta)
+	= \eta(1-\eta)^2 + (1-\eta)\eta^2
+	= \eta(1-\eta).$' style='height: 2.66666666666667ex;' /><span class='maruku-eq-tex'><code style='display: none'>L^*_{\text{sq}}(\eta) 
+	= L_{\text{sq}}(\eta,\eta)
+	= \eta(1-\eta)^2 + (1-\eta)\eta^2
+	= \eta(1-\eta).</code></span></div>
+<p>Log loss is <span class='maruku-inline'><img class='maruku-png' src='/images/latex/1eade6c1c2a51b4e51f9645946eb7b71.png' alt='$\ell_{\text{log}}(y,p) = -y\log(p) - (1-y)\log(1-p)$' style='vertical-align: -0.666666666666667ex;height: 2.44444444444444ex;' /></span> and so its Bayes risk is</p>
+<div class='maruku-equation'><img class='maruku-png' src='/images/latex/d685c2bc43b4010ce1e032e7f9b2b529.png' alt='$L^*_{\text{log}}(\eta) 
+	= -\eta\log(\eta) - (1-\eta)\log(1-\eta).$' style='height: 2.66666666666667ex;' /><span class='maruku-eq-tex'><code style='display: none'>L^*_{\text{log}}(\eta) 
+	= -\eta\log(\eta) - (1-\eta)\log(1-\eta).</code></span></div>
+<h2 id='bayes_risk_functions_are_concave'>Bayes Risk Functions are Concave</h2>
+
+<p>One useful property of point-wise Bayes risk functions for proper losses is that they are necessarily <a href='http://en.wikipedia.org/wiki/Concave_function'>concave</a>. That is, a line joining any two points on the graph of <span class='maruku-inline'><img class='maruku-png' src='/images/latex/674f0c1ff63d83e949f77ea4b49304d4.png' alt='$L^*$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span> lies entirely below <span class='maruku-inline'><img class='maruku-png' src='/images/latex/674f0c1ff63d83e949f77ea4b49304d4.png' alt='$L^*$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span>.</p>
+
+<p>The quickest way to establish this is via a well-known result regarding concave functions is that the point-wise minimum of a set of concave functions is concave.<sup id='fnref:1'><a href='#fn:1' rel='footnote'>1</a></sup> Then, for note that for any fixed <span class='maruku-inline'><img class='maruku-png' src='/images/latex/5149a4274be71229194f7747c794fddb.png' alt='$p\in[0,1]$' style='vertical-align: -0.555555555555556ex;height: 2.22222222222222ex;' /></span> the function <span class='maruku-inline'><img class='maruku-png' src='/images/latex/7e9bca11beefb45069c6d75b142f50bc.png' alt='$L(\eta,p)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> is linear in <span class='maruku-inline'><img class='maruku-png' src='/images/latex/12e861a5f85f27422a1a536ee1247b43.png' alt='$\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span> since the terms <span class='maruku-inline'><img class='maruku-png' src='/images/latex/95873b7b1dcf9ab3c195e6ef1467dbf9.png' alt='$\ell(1,p)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> and <span class='maruku-inline'><img class='maruku-png' src='/images/latex/a2edf1d6931a714e2d6a15aca3b64c8f.png' alt='$\ell(0,p)$' style='vertical-align: -0.555555555555556ex;height: 2.33333333333333ex;' /></span> are constant. Since linear functions are concave and, by definition, <span class='maruku-inline'><img class='maruku-png' src='/images/latex/674f0c1ff63d83e949f77ea4b49304d4.png' alt='$L^*$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span> is their point-wise minimum we see that <span class='maruku-inline'><img class='maruku-png' src='/images/latex/674f0c1ff63d83e949f77ea4b49304d4.png' alt='$L^*$' style='vertical-align: -0.0ex;height: 1.55555555555556ex;' /></span> must also be concave.</p>
+
+<p>Concave functions have many useful properties that have implications for the study of point-wise risks. Firstly, they are necessarily continuous, and secondly, if they are twice differentiable, their second derivatives are non-positive. That is, for all <span class='maruku-inline'><img class='maruku-png' src='/images/latex/12e861a5f85f27422a1a536ee1247b43.png' alt='$\eta$' style='vertical-align: -0.555555555555556ex;height: 1.55555555555556ex;' /></span>,</p>
+<div class='maruku-equation'><img class='maruku-png' src='/images/latex/670f518d1b1d6fde80b700b26c0bf63f.png' alt='$(L^*)&apos;&apos;(\eta) \leq 0$' style='height: 2.33333333333333ex;' /><span class='maruku-eq-tex'><code style='display: none'>(L^*)''(\eta) \leq 0</code></span></div>
+<p>which also implies that their first derivatives are monotonically decreasing.<sup id='fnref:2'><a href='#fn:2' rel='footnote'>2</a></sup></p>
+
+<p>As we will see in the next post, the converse of this holds too. That is, each concave function on <span class='maruku-inline'><img class='maruku-png' src='/images/latex/09076d76213ded659a9c79d34d75bf19.png' alt='$[0,1]$' style='vertical-align: -0.555555555555556ex;height: 2.22222222222222ex;' /></span> can be interpreted as the point-wise Bayes risk for some proper loss.</p>
+<div class='footnotes'><hr /><ol><li id='fn:1'>
+<p>See, for example, §3.2.3 of Boyd &amp; Vandenberghe&#8217;s freely available book <a href='http://www.stanford.edu/~boyd/cvxbook/'>Convex Optimization</a>.</p>
+<a href='#fnref:1' rev='footnote'>&#8617;</a></li><li id='fn:2'>
+<p>You can easily check this is the case for the log- and square-losses.</p>
+<a href='#fnref:2' rev='footnote'>&#8617;</a></li></ol></div>
+
+  <address class="signature">
+    <a class="author" href="http://madhur.github.com">Madhur Ahuja</a> 
+    <span class="date">05 March 2009</span>
+    <span class="location">Canberra, Australia</span>
+  </address>
+</div><!-- End Page -->
+
+
+<!-- Discus Comments -->
+<div id="disqus_thread"></div>
+
+<!-- Enable Disqus comments -->
+<script type="text/javascript">
+	var disqus_iframe_css = "http://mark.reid.name/css/screen.css";
+	var disqus_title = "Probability Estimation: Bayes Risk";
+	var disqus_message = "An overview of some properties of conditional, or point-wise, Bayes risks for proper losses.";
+</script>
+<script type="text/javascript" src="http://disqus.com/forums/markreid/embed.js"></script>
+
+<noscript>
+		<a href="http://markreid.disqus.com/?url=ref">View the discussion thread.</a>
+</noscript>
+
+  
+  <div id="footer">
+	<address>
+		<span class="copyright">
+			Content &amp; Design by 
+			<a href="/info/site.html">Madhur Ahuja</a>
+			<br/>
+			(Some rights reserved)			
+		</span>
+		<span class="engine">
+			Powered by 
+			<a href="http://github.com/mreid/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+		</span>
+	</address>
+  </div>
+</div>
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+</body>
+</html>

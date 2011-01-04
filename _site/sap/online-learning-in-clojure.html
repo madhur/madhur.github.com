@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Online Learning in Clojure &larr; Structure &amp; Process</title>
+   <meta name="author" content="Madhur Ahuja" />
+
+     <link rel="start" href="/" />
+
+	
+	
+	
+  	<link rel="alternate" type="application/atom+xml" href="atom.xml" title="RSS feed" />
+	
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/files/css/screen.css" type="text/css" />
+
+</head>
+<body id="">
+<div id="site">
+
+  
+<div id="header">
+	<h1>
+	<a href="/sap/" title="A programming blog">Structure <i>&amp;</i> Process</a>
+	<span class="byline">&larr; <a href="/">Madhur Ahuja</a></span>
+</h1>
+
+</div>
+
+<div id="page">
+	
+  <h1 class="emphnext">Online Learning in Clojure</h1>
+
+<p><a href='http://en.wikipedia.org/wiki/Online_machine_learning'>Online Learning</a> is a relatively old branch of machine learning that has recently regained favour for two reasons. Firstly, online learning algorithms such as <a href='http://leon.bottou.org/research/stochastic'>Stochastic Gradient Descent</a> work extremely well on very large data sets which have become increasingly prevalent (and increasingly large!). Secondly, there has been a lot of <a href='http://homes.dsi.unimi.it/~cesabian/predbook/'>important theoretical steps</a> made recently in understand the convergence behaviour of these algorithms and their <a href='http://arxiv.org/abs/0903.5328'>relationship</a> to traditional Empirical Risk Minimisation (ERM) algorithms such as Support Vector Machines (SVMs).</p>
+
+<p>In order to understand these algorithms better, I implemented a recent one (Pegasos, described below) in <a href='http://clojure.org'>Clojure</a>. This had the added advantage of seeing how well Clojure&#8217;s performance held up when doing some serious number-crunching.</p>
+
+<h2 id='online_learning'>Online Learning</h2>
+
+<p>One very appealing property of online learning algorithms is that they are extremely simple. Here&#8217;s what a general supervised online learning algorithm looks like. Given a loss function $L$ and a stream of examples $S$ of the form $(x,y)$, do the following:</p>
+
+<pre><code>Initialise a starting model w
+While there are more examples in S
+    Get the next feature vector x
+    Predict the label y&#39; for x using the model w
+    Get the true label y for x and incur a penaly L(y,y&#39;)
+    Update the model w if y ≠ y&#39;</code></pre>
+
+<p>Models are usually represented as vectors of weights for the features used to represent the examples. For binary classification problems predictions involve looking at the sign of the innner product $\langle w,x \rangle$ and the update step in line 2.3 modifies the current model by moving $w$ in the direction that most reduces the loss of the incorrect prediction: that is, in the direction given by the negative <a href='http://en.wikipedia.org/wiki/Gradient'>gradient</a> of the loss.</p>
+
+<h2 id='pegasos'>Pegasos</h2>
+
+<p>One recent online algorithm (and the one I&#8217;ve chosen to implement) is <em><a href='http://www.machinelearning.org/proceedings/icml2007/abstracts/587.htm'>Pegasos: Primal Estimated sub-GrAdient SOlver for SVM</a></em> (<a href='http://www.machinelearning.org/proceedings/icml2007/papers/587.pdf'>PDF</a>) introduced by <a href='http://ttic.uchicago.edu/~shai/'>Shai Shalev-Shwartz</a>, <a href='http://www.cs.huji.ac.il/~singer/'>Yoram Singer</a> and <a href='http://ttic.uchicago.edu/~nati/'>Nathan Srebro</a> at <a href='http://oregonstate.edu/conferences/icml2007/'>ICML 2007</a> <sup id='fnref:1'><a href='#fn:1' rel='footnote'>1</a></sup>. As this is my programming blog (not my <a href='/iem/'>research blog</a>) I&#8217;ll just give enough of the detail of Pegasos so you can follow the implementation.</p>
+
+<p>Pegasos solves the same optimisation problem as <a href='http://en.wikipedia.org/wiki/Support_vector_machine'>support vector machines</a>. That is, it minimises the empirical hinge loss with $\ell_2$ regularisation: [ \displaystyle L(w,S) = \frac{\lambda}{2}|w|^2 + \frac{1}{m} \sum_{(x,y)\in S} h(w; (x,y)) ] where $S$ is a set of training examples, $|\cdot |$ the $\ell_2$ norm, $\lambda$ the regularisation constant and $h(w;(x,y)) = \max{0, 1-y\langle w, x \rangle}$ is the hinge loss.</p>
+
+<p>The neat observation that allows optimisation problems like this to be cast as online learning problems is that the above loss can be computed using example-by-example updates rather than as a large sum. With a little care about how these updates are made fast convergence guarantees can be established.</p>
+
+<p>In the case of Pegasos, if $w_t$ is the model after having seen $t$ examples and $(x,y)$ is an incorrectly predicted example, the (unnormalised) updated model is: [ \displaystyle w_{t+1} = (1-t^{-1})w_t + \frac{1}{\lambda t} yx. ] If the new model is outside a ball of radius $1/\sqrt{\lambda}$ it is projected back onto this ball.</p>
+
+<h2 id='implementing_it_in_clojure'>Implementing it in Clojure</h2>
+
+<p>Once I understood what it was doing, Pegasos struck me as a very simple algorithm so I was itching to implement it. As mentioned earler, I was also curious as to <a href='http://clojure.org'>Clojure</a>&#8217;s performance on number-crunching tasks like this, especially when the <a href='http://jmlr.csail.mit.edu/papers/volume5/lewis04a/lyrl2004_rcv1v2_README.htm'>canonical data set</a> for online learning has over 700,000 examples and over 45,000 features.</p>
+
+<p>Represented as 45k entry feature vectors, the examples and models would quickly become unwieldy so the first order of business was to implement some sparse vector operations. Here I chose to represent vectors as hash maps where non-zero elements of a vector are stored with their index as a key and the value of the entry as value.</p>
+<div class='highlight'><pre><span class='p'>(</span><span class='k'>defn </span><span class='nv'>add</span>
+	<span class='s'>&quot;Returns the sparse sum of two sparse vectors x y&quot;</span>
+	<span class='p'>[</span><span class='nv'>x</span> <span class='nv'>y</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>merge-with </span><span class='nv'>+</span> <span class='nv'>x</span> <span class='nv'>y</span><span class='p'>))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>inner</span>
+	<span class='s'>&quot;Computes the inner product of the sparse vectors (hashes) x and y&quot;</span>
+	<span class='p'>[</span><span class='nv'>x</span> <span class='nv'>y</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>reduce </span><span class='nv'>+</span> <span class='p'>(</span><span class='nb'>map </span><span class='o'>#</span><span class='p'>(</span><span class='nv'>*</span> <span class='p'>(</span><span class='nb'>get </span><span class='nv'>x</span> <span class='nv'>%</span> <span class='mi'>0</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>get </span><span class='nv'>y</span> <span class='nv'>%</span> <span class='mi'>0</span><span class='p'>))</span> <span class='p'>(</span><span class='nb'>keys </span><span class='nv'>y</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>norm</span>
+	<span class='s'>&quot;Returns the l_2 norm of the (sparse) vector v&quot;</span>
+	<span class='p'>[</span><span class='nv'>v</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>Math/sqrt</span> <span class='p'>(</span><span class='nf'>inner</span> <span class='nv'>v</span> <span class='nv'>v</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>scale</span>
+	<span class='s'>&quot;Returns the scalar product of the sparse vector v by the scalar a&quot;</span>
+	<span class='p'>[</span><span class='nv'>a</span> <span class='nv'>v</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>zipmap </span><span class='p'>(</span><span class='nb'>keys </span><span class='nv'>v</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>map </span><span class='nv'>*</span> <span class='p'>(</span><span class='nb'>vals </span><span class='nv'>v</span><span class='p'>)</span> <span class='p'>(</span><span class='nb'>repeat </span><span class='nv'>a</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>project</span>
+	<span class='s'>&quot;Returns the projection of a parameter vector w onto the ball of radius r&quot;</span>
+	<span class='p'>[</span><span class='nv'>w</span> <span class='nv'>r</span><span class='p'>]</span> <span class='p'>(</span><span class='nf'>scale</span> <span class='p'>(</span><span class='nb'>min </span><span class='p'>(</span><span class='nb'>/ </span><span class='nv'>r</span> <span class='p'>(</span><span class='nf'>norm</span> <span class='nv'>w</span><span class='p'>))</span> <span class='mi'>1</span><span class='p'>)</span> <span class='nv'>w</span><span class='p'>))</span>
+</pre>
+</div>
+<p>The only slightly tricky thing here is the use of <code>zipmap</code> to scale a sparse vector by mapping all the keys in the original vector to their values times a scalar multiple <code>a</code>.</p>
+
+<p>The other bit of framework code I required was to parse the training data. The format is a simple version of that used by <a href='http://svmlight.joachims.org/'>SVMlight</a>. Each line of the text file containing the training data is of the form:</p>
+
+<pre><code>y k_1:v_1 k_2:v_2 ... k_n:v_n</code></pre>
+
+<p>where <code>y</code> is the label (either <code>1</code> or <code>-1</code>), each <code>k_i</code> is an integer key representing a feature index, and each <code>v_i</code> is a floating point value.</p>
+
+<p>The Clojure code to parse this format is a pretty straight-forward application of regular expressions:</p>
+<div class='highlight'><pre><span class='p'>(</span><span class='k'>defn </span><span class='nv'>parse-feature</span> 
+	<span class='p'>[</span><span class='nv'>string</span><span class='p'>]</span> 
+	<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='p'>[</span><span class='nv'>_</span> <span class='nv'>key</span> <span class='nv'>val</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>re-matches </span><span class='o'>#</span><span class='s'>&quot;(\d+):(.*)&quot;</span> <span class='nv'>string</span><span class='p'>)]</span>
+		<span class='p'>[(</span><span class='nf'>Integer/parseInt</span> <span class='nv'>key</span><span class='p'>)</span> <span class='p'>(</span><span class='nf'>Float/parseFloat</span> <span class='nv'>val</span><span class='p'>)]))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>parse-features</span>
+	<span class='p'>[</span><span class='nv'>string</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='nb'>into </span><span class='p'>{}</span> <span class='p'>(</span><span class='nb'>map </span><span class='nv'>parse-feature</span> <span class='p'>(</span><span class='nb'>re-seq </span><span class='o'>#</span><span class='s'>&quot;[^\s]+&quot;</span> <span class='nv'>string</span><span class='p'>))))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>parse</span>
+	<span class='s'>&quot;Returns a map {:y label, :x sparse-feature-vector} parsed from given line&quot;</span>
+	<span class='p'>[</span><span class='nv'>line</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span> <span class='p'>[</span><span class='nv'>_</span> <span class='nv'>label</span> <span class='nv'>features</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>re-matches </span><span class='o'>#</span><span class='s'>&quot;^(-?\d+)(.*)$&quot;</span> <span class='nv'>line</span><span class='p'>)</span> <span class='p'>]</span>
+		<span class='p'>{</span><span class='nv'>:y</span> <span class='p'>(</span><span class='nf'>Float/parseFloat</span> <span class='nv'>label</span><span class='p'>)</span><span class='o'>,</span> <span class='nv'>:x</span> <span class='p'>(</span><span class='nf'>parse-features</span> <span class='nv'>features</span><span class='p'>)}))</span>
+</pre>
+</div>
+<p>The main parsing function <code>parse</code> takes a whole line in this format as input and returns a hash map with key <code>:y</code> giving the label of the example and <code>:x</code> giving a hash map representing the feature vector.</p>
+
+<p>Finally, the code to perform a single update step for a model given an example is built using some helper functions. The loss is computed by <code>hinge-loss</code>, the function <code>correct</code> performs a single gradient descent step, and <code>report</code> is just for diagnostics and prints some simple statistics about the model and its performance.</p>
+<div class='highlight'><pre><span class='p'>(</span><span class='k'>defn </span><span class='nv'>hinge-loss</span>
+	<span class='s'>&quot;Returns the hinge loss of the weight vector w on the given example&quot;</span>
+	<span class='p'>[</span><span class='nv'>w</span> <span class='nv'>example</span><span class='p'>]</span> <span class='p'>(</span><span class='nb'>max </span><span class='mi'>0</span> <span class='p'>(</span><span class='nb'>- </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>* </span><span class='p'>(</span><span class='nf'>:y</span> <span class='nv'>example</span><span class='p'>)</span> <span class='p'>(</span><span class='nf'>inner</span> <span class='nv'>w</span> <span class='p'>(</span><span class='nf'>:x</span> <span class='nv'>example</span><span class='p'>))))))</span>
+	
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>correct</span>
+	<span class='s'>&quot;Returns a corrected version of the weight vector w&quot;</span>
+	<span class='p'>[</span><span class='nv'>w</span> <span class='nv'>example</span> <span class='nv'>t</span> <span class='nv'>lambda</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>x</span>   <span class='p'>(</span><span class='nf'>:x</span> <span class='nv'>example</span><span class='p'>)</span>
+		  <span class='nv'>y</span>   <span class='p'>(</span><span class='nf'>:y</span> <span class='nv'>example</span><span class='p'>)</span>
+		  <span class='nv'>w1</span>  <span class='p'>(</span><span class='nf'>scale</span> <span class='p'>(</span><span class='nb'>- </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>/ </span><span class='mi'>1</span> <span class='nv'>t</span><span class='p'>))</span> <span class='nv'>w</span><span class='p'>)</span>
+		  <span class='nv'>eta</span> <span class='p'>(</span><span class='nb'>/ </span><span class='mi'>1</span> <span class='p'>(</span><span class='nb'>* </span><span class='nv'>lambda</span> <span class='nv'>t</span><span class='p'>))</span>
+		  <span class='nv'>r</span>   <span class='p'>(</span><span class='nb'>/ </span><span class='mi'>1</span> <span class='p'>(</span><span class='nf'>Math/sqrt</span> <span class='nv'>lambda</span><span class='p'>))]</span>
+		<span class='p'>(</span><span class='nb'>project </span><span class='p'>(</span><span class='nf'>add</span> <span class='nv'>w1</span> <span class='p'>(</span><span class='nf'>scale</span> <span class='p'>(</span><span class='nb'>* </span><span class='nv'>eta</span> <span class='nv'>y</span><span class='p'>)</span> <span class='nv'>x</span><span class='p'>))</span> <span class='nv'>r</span><span class='p'>)))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>report</span>
+	<span class='s'>&quot;Prints some statistics about the given model at the specified interval&quot;</span>
+	<span class='p'>[</span><span class='nv'>model</span> <span class='nv'>interval</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='k'>if </span><span class='p'>(</span><span class='nb'>zero? </span><span class='p'>(</span><span class='nf'>mod</span> <span class='p'>(</span><span class='nf'>:step</span> <span class='nv'>model</span><span class='p'>)</span> <span class='nv'>interval</span><span class='p'>))</span>
+		<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>t</span>      <span class='p'>(</span><span class='nf'>:step</span> <span class='nv'>model</span><span class='p'>)</span>
+		      <span class='nv'>size</span>   <span class='p'>(</span><span class='nb'>count </span><span class='p'>(</span><span class='nb'>keys </span><span class='p'>(</span><span class='nf'>:w</span> <span class='nv'>model</span><span class='p'>)))</span>
+		      <span class='nv'>errors</span> <span class='p'>(</span><span class='nf'>:errors</span> <span class='nv'>model</span><span class='p'>)</span> <span class='p'>]</span>
+			<span class='p'>(</span><span class='nb'>println </span><span class='s'>&quot;Step:&quot;</span> <span class='nv'>t</span> 
+				 <span class='s'>&quot;\t Features in w =&quot;</span> <span class='nv'>size</span> 
+				 <span class='s'>&quot;\t Errors =&quot;</span> <span class='nv'>errors</span> 
+				 <span class='s'>&quot;\t Accuracy =&quot;</span> <span class='p'>(</span><span class='nb'>/ </span><span class='p'>(</span><span class='nb'>float </span><span class='nv'>errors</span><span class='p'>)</span> <span class='nv'>t</span><span class='p'>)))))</span>
+
+<span class='p'>(</span><span class='k'>defn </span><span class='nv'>update</span>
+	<span class='s'>&quot;Returns an updated model by taking the last model, the next training </span>
+<span class='s'>	 and applying the Pegasos update step&quot;</span>
+	<span class='p'>[</span><span class='nv'>model</span> <span class='nv'>example</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>lambda</span> <span class='p'>(</span><span class='nf'>:lambda</span> <span class='nv'>model</span><span class='p'>)</span>
+		  <span class='nv'>t</span>      <span class='p'>(</span><span class='nf'>:step</span>   <span class='nv'>model</span><span class='p'>)</span>
+		  <span class='nv'>w</span>      <span class='p'>(</span><span class='nf'>:w</span>      <span class='nv'>model</span><span class='p'>)</span>
+		  <span class='nv'>errors</span> <span class='p'>(</span><span class='nf'>:errors</span> <span class='nv'>model</span><span class='p'>)</span>
+		  <span class='nv'>error</span>  <span class='p'>(</span><span class='nb'>&gt; </span><span class='p'>(</span><span class='nf'>hinge-loss</span> <span class='nv'>w</span> <span class='nv'>example</span><span class='p'>)</span> <span class='mi'>0</span><span class='p'>)]</span>
+		<span class='p'>(</span><span class='nf'>do</span> 
+			<span class='p'>(</span><span class='nf'>report</span> <span class='nv'>model</span> <span class='mi'>100</span><span class='p'>)</span>
+			<span class='p'>{</span> <span class='nv'>:w</span>      <span class='p'>(</span><span class='k'>if </span><span class='nv'>error</span> <span class='p'>(</span><span class='nf'>correct</span> <span class='nv'>w</span> <span class='nv'>example</span> <span class='nv'>t</span> <span class='nv'>lambda</span><span class='p'>)</span> <span class='nv'>w</span><span class='p'>)</span><span class='o'>,</span> 
+			  <span class='nv'>:lambda</span> <span class='nv'>lambda,</span> 
+			  <span class='nv'>:step</span>   <span class='p'>(</span><span class='nb'>inc </span><span class='nv'>t</span><span class='p'>)</span><span class='o'>,</span> 
+			  <span class='nv'>:errors</span> <span class='p'>(</span><span class='k'>if </span><span class='nv'>error</span> <span class='p'>(</span><span class='nb'>inc </span><span class='nv'>errors</span><span class='p'>)</span> <span class='nv'>errors</span><span class='p'>)}</span> <span class='p'>)))</span>
+</pre>
+</div>
+<p>As you can see, this function returns a new, updated model as a hash that contains the feature weights <code>:w</code> as well as several other useful bits of information including the culmulative number of errors (in <code>:errors</code>) and the total number of update steps (in <code>:steps</code>). The parameter $\lambda$ which controls the amount of regularisation is also passed along in the model (in <code>:lambda</code>) for convenience.</p>
+
+<p class='quiet'><em>A brief aside</em>: If I have one criticism of Clojure as a language it&#8217;s that implementing numerical procedures is a real pain. Prefix notation (while neatly side-stepping problems of operator precedence) is just a lot harder to read than the infix notation that many non-Lisp languages use.</p>
+
+<p>Now the update step is implemented, training a model online from a sequence of examples is a simple application of <code>reduce</code>. The following code repeated calls <code>(update model example)</code> where each example is taken from the sequence <code>examples</code> and the model output by the last call to <code>update</code> is used as input for the next.</p>
+<div class='highlight'><pre><span class='p'>(</span><span class='k'>defn </span><span class='nv'>train</span>
+	<span class='s'>&quot;Returns a model trained from the initial model on the given examples&quot;</span>
+	<span class='p'>[</span><span class='nv'>initial</span> <span class='nv'>examples</span><span class='p'>]</span>
+	<span class='p'>(</span><span class='nb'>reduce </span><span class='nv'>update</span> <span class='nv'>initial</span> <span class='nv'>examples</span><span class='p'>))</span>
+</pre>
+</div>
+<p>All that&#8217;s needed now is a main method to read examples from the standard input, parse them into vectors and train a model from some starting point:</p>
+<div class='highlight'><pre><span class='p'>(</span><span class='k'>defn </span><span class='nv'>main</span>
+	<span class='s'>&quot;Trains a model from the examples and prints out its weights&quot;</span>
+	<span class='p'>[]</span>
+	<span class='p'>(</span><span class='k'>let </span><span class='p'>[</span><span class='nv'>start</span> 	<span class='p'>{</span><span class='nv'>:lambda</span> <span class='mf'>0.0001</span><span class='o'>,</span> <span class='nv'>:step</span> <span class='mi'>1</span><span class='o'>,</span> <span class='nv'>:w</span> <span class='p'>{}</span><span class='o'>,</span> <span class='nv'>:errors</span> <span class='mi'>0</span><span class='p'>}</span> 
+		  <span class='nv'>examples</span> 	<span class='p'>(</span><span class='nb'>map </span><span class='nv'>parse</span> <span class='p'>(</span><span class='nb'>-&gt; </span><span class='nv'>*in*</span> <span class='nv'>BufferedReader</span><span class='o'>.</span> <span class='nv'>line-seq</span><span class='p'>))</span> 
+		  <span class='nv'>model</span>     <span class='p'>(</span><span class='nf'>train</span> <span class='nv'>start</span> <span class='nv'>examples</span><span class='p'>)]</span>
+		<span class='p'>(</span><span class='nb'>println </span><span class='p'>(</span><span class='nb'>map </span><span class='o'>#</span><span class='p'>(</span><span class='nv'>str</span> <span class='p'>(</span><span class='nb'>key </span><span class='nv'>%</span><span class='p'>)</span> <span class='s'>&quot;:&quot;</span> <span class='p'>(</span><span class='nb'>val </span><span class='nv'>%</span><span class='p'>))</span> <span class='p'>(</span><span class='nf'>:w</span> <span class='nv'>model</span><span class='p'>)))))</span>
+</pre>
+</div>
+<p>When finished the <code>main</code> function prints the weights for the final trained model to the command line in a format similar to the input data. The training starts with an empty model and a regularisation constant of 0.0001 (as was used in the paper describing Pegasos).</p>
+
+<p>The full version of the code is <a href='http://github.com/mreid/injuce/'>available at GitHub</a>.</p>
+
+<h2 id='running_it'>Running It</h2>
+
+<p>To see whether the algorithms (or at least my implementation of it) performs as advertised I ran it on the aforementioned RCV1 data set.</p>
+
+<p>This is a big data set.</p>
+
+<p>The gzipped version of the full data set weighs in at 423Mb. Understandably, I&#8217;m not going to host a file that size so to get the full data set it you will have to follow the <a href='http://leon.bottou.org/projects/sgd'>instructions at Léon Bottou&#8217;s SGD page</a> and make it yourself. However, for the purposes of this blog post I&#8217;ve created a 2,000 example version called <code>train2000.dat.gz</code> that is checked into the <a href='http://github.com/mreid/injuce/'>repository</a>.</p>
+
+<p>With the training data in hand I ran my implementation of Pegasos (in the file <code>sgd.clj</code>) like so:</p>
+
+<pre><code>$ zless train2000.dat.gz | clj sgd.clj &gt; output.txt
+Step: 100 	 Features in w = 2145 	 Errors = 64 	 Accuracy = 0.64
+Step: 200 	 Features in w = 3333 	 Errors = 123 	 Accuracy = 0.615
+Step: 300 	 Features in w = 4051 	 Errors = 175 	 Accuracy = 0.5833333
+Step: 400 	 Features in w = 4755 	 Errors = 229 	 Accuracy = 0.5725
+Step: 500 	 Features in w = 5236 	 Errors = 276 	 Accuracy = 0.552
+Step: 600 	 Features in w = 5576 	 Errors = 318 	 Accuracy = 0.53
+Step: 700 	 Features in w = 5870 	 Errors = 356 	 Accuracy = 0.50857145
+Step: 800 	 Features in w = 6050 	 Errors = 388 	 Accuracy = 0.485
+Step: 900 	 Features in w = 6325 	 Errors = 418 	 Accuracy = 0.46444446
+Step: 1000 	 Features in w = 6578 	 Errors = 444 	 Accuracy = 0.444
+Step: 1100 	 Features in w = 6747 	 Errors = 471 	 Accuracy = 0.42818183
+Step: 1200 	 Features in w = 6934 	 Errors = 502 	 Accuracy = 0.41833332
+Step: 1300 	 Features in w = 7109 	 Errors = 526 	 Accuracy = 0.40461537
+Step: 1400 	 Features in w = 7300 	 Errors = 555 	 Accuracy = 0.39642859
+Step: 1500 	 Features in w = 7515 	 Errors = 592 	 Accuracy = 0.39466667
+Step: 1600 	 Features in w = 7655 	 Errors = 615 	 Accuracy = 0.384375
+Step: 1700 	 Features in w = 7836 	 Errors = 644 	 Accuracy = 0.37882352
+Step: 1800 	 Features in w = 8040 	 Errors = 672 	 Accuracy = 0.37333333
+Step: 1900 	 Features in w = 8239 	 Errors = 697 	 Accuracy = 0.3668421
+Step: 2000 	 Features in w = 8425 	 Errors = 718 	 Accuracy = 0.359</code></pre>
+
+<p>As you can see the algorithm slowly adds more and more features to the weight vector and, as a result, slowly improves the accuracy.</p>
+
+<p>The reported accuracy is simply the cumulative total number of errors divided by the number of steps. This is a fairly pessimistic take on how the later models are performing. In the last 100 examples the models made a combined total of only 19 mistakes so the final model accuracy is probably closer to 20% than 35%.</p>
+
+<h2 id='performance'>Performance</h2>
+
+<p>My biggest issue with my implementation of online learning in Clojure is that it is too slow. The 2,000 example test described above took about 40 seconds to complete.</p>
+
+<p>These algorithms are meant to be ridiculously fast. Léon Bottou <a href='http://leon.bottou.org/projects/sgd'>reports</a> training times for his C++ stochastic gradient descent algorithm on the <em>full</em> 780k example RCV1 data set of <em>1.4 seconds</em>!</p>
+
+<p>Granted I was timing both the parsing and training of the data but on the other hand I&#8217;m using less than 0.3% of the data. Indeed, a quick test shows that just parsing the 2,000 examples takes less than 2 seconds so just training on the 2,000 examples takes 35 seconds or more.</p>
+
+<p>Firing up the <a href='http://www.fatvat.co.uk/2009/05/jvisualvm-and-clojure.html'>JVisualVM</a> to see where my code is spending most of its time reveals that a lot of time is spent getting variable values and looking up values in maps.</p>
+
+<p>The performance culprit then is very likely my hastily thrown together sparse vector &#8220;library&#8221; built from hash maps. Although hash maps are fast there is still a lot of overhead in packing float and integer values in and out of Java Objects and I suspect this is where most of the time is wasted.</p>
+
+<p>If I have time to write a next version, I&#8217;ll make use of the sparse vector data structures in the Java <a href='http://sites.google.com/site/piotrwendykier/software/parallelcolt'>Parallel Colt</a> library.</p>
+
+<h2 id='conclusions'>Conclusions</h2>
+
+<p>Despite its lack of speed, I was impressed with how easy it was to implement an online algorithm in Clojure. Minus the comments, the whole thing &#8211; vector operations, reporting, data parsing and training &#8211; weighs in at less than 100 lines of code.</p>
+
+<p>Given Clojure&#8217;s ability to call high-performance Java libraries such as <a href='http://sites.google.com/site/piotrwendykier/software/parallelcolt'>Parallel Colt</a>, I&#8217;m optimistic that I can keep the terseness and transparency of the code and get performance comparable to the C++ implementations. I would also like to experiment with exploiting Clojure&#8217;s concurrency features to chunk and parallelise the main training algorithm. I suspect that this will be relatively straight-forward and, with a bit of tuning I should get good performance on a multi-core machine.</p>
+<div class='footnotes'><hr /><ol><li id='fn:1'>
+<p>There&#8217;s a good discussion of Pegasos over at the <a href='http://lingpipe-blog.com/2009/04/08/convergence-relative-sgd-pegasos-liblinear-svmlight-svmper/'>LingPipe blog</a>.</p>
+<a href='#fnref:1' rev='footnote'>&#8617;</a></li></ol></div>
+
+  <address class="signature">
+    <a class="author" href="http://mark.reid.name">Mark Reid</a> 
+    <span class="date">14 July 2009</span>
+    <span class="location">Canberra, Australia</span>
+  </address>
+</div><!-- End Page -->
+
+<!-- Delicious hits
+<script type="text/javascript">
+    if (typeof window.Delicious == "undefined") window.Delicious = {};
+    Delicious.BLOGBADGE_DEFAULT_CLASS = 'delicious-blogbadge-line';
+</script>
+<script src="http://static.delicious.com/js/blogbadge.js"></script>
+-->
+
+
+<!-- Discus Comments -->
+<div id="disqus_thread"></div>
+
+<!-- Enable Disqus comments -->
+<script type="text/javascript">
+	var disqus_iframe_css = "http://mark.reid.name/css/screen.css";
+	var disqus_title = "Online Learning in Clojure";
+	var disqus_message = "In an attempt to better familiarise myself with online learning and Clojure I implemented the former in the latter.";
+</script>
+<script type="text/javascript" src="http://disqus.com/forums/structure-and-process/embed.js"></script>
+
+<noscript>
+	<a href="http://structure-and-process.disqus.com/?url=ref">View the discussion thread.</a>
+</noscript>
+  
+  <div id="footer">
+	<address>
+		<span class="copyright">
+			Content &amp; Design by 
+			<a href="/info/">Madhur Ahuja</a>
+			<br/>
+			(Some rights reserved)			
+		</span>
+		<span class="engine">
+			Powered by 
+			<a href="http://github.com/mreid/jekyll/" title="A static, minimalist CMS">Jekyll</a>
+		</span>
+	</address>
+  </div>
+</div>
+<!--[if IE 6]>
+<script type="text/javascript"> 
+	/*Load jQuery if not already loaded*/ if(typeof jQuery == 'undefined'){ document.write("<script type=\"text/javascript\"   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js\"></"+"script>"); var __noconflict = true; } 
+	var IE6UPDATE_OPTIONS = {
+		icons_path: "http://static.ie6update.com/hosted/ie6update/images/"
+	}
+</script>
+<script type="text/javascript" src="http://static.ie6update.com/hosted/ie6update/ie6update.js"></script>
+<![endif]-->
+</body>
+</html>
