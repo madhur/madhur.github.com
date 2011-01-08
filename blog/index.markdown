@@ -7,7 +7,7 @@ feed: atom.xml
 keywords: C/C++, Windbg, Reverse Engineering
 ---
 
-Madhur@Web:~# :(){ :|: & };:
+Blog
 =====================
 
 This is [my](/) technical blog on C/C++, Windbg, Reverse Engineering, Assembly.
