@@ -4,10 +4,11 @@ title: Home
 section: Home
 
 feed: atom.xml
-keywords: C/C++, Windbg, Reverse Engineering
+keywords: C/C++, Windbg, Reverse Engineering, important
+important: yes
 ---
 
-Madhur@Web:~# :(){ :|: & };:
+Blog
 =====================
 
 This is [my](/) technical blog on C/C++, Windbg, Reverse Engineering, Assembly.
@@ -49,6 +50,7 @@ Recent Posts
 				query += 'url' + i + '=' + encodeURIComponent(links[i].href) + '&';
 			}
 		}
+		
 		document.write('<script type="text/javascript" src="http://disqus.com/forums/madhur/get_num_replies.js' + query + '"></' + 'script>');
 	})();
 //]]>

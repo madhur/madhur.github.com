@@ -8,7 +8,7 @@ top: Madhur Ahuja
 
 ---
 
-<img class='inset right' src='/images/madhur.jpg' title='Madhur Ahuja' alt='Photo of Madhur Ahuja' width='120px' />
+
 
 About Me
 ========

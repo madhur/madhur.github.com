@@ -5,7 +5,6 @@ title: Home
 section: Home
 ---
 
-<img class='inset right' src='/images/madhur.jpg' title='Madhur Ahuja' alt='Photo of Madhur' width='120px' />
 
 Welcome
 =======
