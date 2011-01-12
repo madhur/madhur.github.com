@@ -10,7 +10,7 @@ keywords: Machine Learning, Statistics, Blog, Research, Academia
 Archives
 ========
 
-This is the complete archive of posts from _[{% include blogname.txt %} ](/blog)_
+This is the complete archive of posts from _[my blog](/blog)_
 in reverse chronological order.
 
 {% for post in site.posts%}
