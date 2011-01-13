@@ -3,20 +3,22 @@ layout: name
 
 title: Info
 section: Info
-
+left: left-codes
 top: Madhur Ahuja
 
 ---
 
 
 
-About Me
+About Me and This Site
 ========
 
+At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
+
+This homepage is result of my learnings throughout. I didnt did any serious web scripting here. Some of u might feel the contents on these pages to be outdated. These pages were composed only using a text editor and pure HTML, there are no Java scripts, Java applets, cookies or any active code of some kind.
 
 
-About This Site
-===============
+You'll see this page at its best when using a screen resolution of 1024 * 768 pixels. It should also work with lower resolutions.. Executable files you can download from these pages are free of any viruses (however I don't take any responsibility for what they may do). If you have any questions, suggestions, wishes or complaints, please feel free to send me an e-mail. However, I hope you have fun on my page.
 
 I designed this site [{% include blogurl.txt %}](/) in early 2010 with the intention of making it the one-stop-shop for all of my personal and professional information.
 

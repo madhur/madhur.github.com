@@ -93,3 +93,46 @@ $(window).bind("load", function() {
 		});
 	};*/
 });
+
+
+$(document).ready(function() {
+
+    $(".accordion").click(function() {
+
+        $(this).next().slideToggle("normal");
+
+        $(this).toggleClass("active");
+
+        return false;
+
+    }).next().hide();
+
+
+
+    $(".active").next().slideToggle("normal");
+
+
+
+    $("img", "#thumbs").hover(function() {
+
+        $(this).toggleClass("active");
+
+    },function() {
+
+        $(this).toggleClass("active");
+
+    });
+
+
+
+    $("img", "#featured").hover(function() {
+
+        $(this).toggleClass("active");
+
+    },function() {
+
+        $(this).toggleClass("active");
+
+    });
+
+});
