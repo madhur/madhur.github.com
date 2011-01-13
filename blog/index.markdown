@@ -1,7 +1,7 @@
 ---
 layout: blog
 title: Home
-section: Home
+section: Blog
 
 feed: atom.xml
 keywords: C/C++, Windbg, Reverse Engineering, important

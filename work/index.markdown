@@ -1,10 +1,10 @@
 ---
 layout: name
-title: Research
+title: Work
 section: Work
 ---
 
-<img class='inset right' src='/images/mark_reid2.jpg' title='Mark Reid' alt='Photo of Mark Reid at work' width='120px' />
+
 
 Research
 ========
