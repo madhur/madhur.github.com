@@ -2,7 +2,6 @@
 layout: blog
 title: Home
 section: Blog
-
 feed: atom.xml
 keywords: C/C++, Windbg, Reverse Engineering, important
 important: yes
@@ -29,7 +28,7 @@ Recent Posts
 <div class="section list">
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
-  <a class="title" href="{{ post.url }}">{{ post.title }}</a>
+  <a class="title" href="{{ post.url }}" data-disqus-identifier="{{ post.disqus_id }}">{{ post.title }}</a>
   <a class="comments" data-disqus-identifier="{{ post.disqus_id }}" href="{{ post.url }}#disqus_thread">View Comments</a>
   </p>
   <p class="excerpt">{{ post.excerpt }}</p>
@@ -40,15 +39,4 @@ Recent Posts
 <a href="past.html">Older Posts &rarr;</a>
 </p>
 
-<script type="text/javascript">
-    
-    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function () {
-        var s = document.createElement('script'); s.async = true;
-        s.type = 'text/javascript';
-        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
-        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-    }());
-</script>
+{% include commentcount.js %}
