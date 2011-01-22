@@ -30,7 +30,7 @@ Recent Posts
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
   <a class="title" href="{{ post.url }}">{{ post.title }}</a>
-  <a class="comments" href="{{ post.url }}#disqus_thread">View Comments</a>
+  <a class="comments" data-disqus-identifier="{{ post.disqus_id }}" href="{{ post.url }}#disqus_thread">View Comments</a>
   </p>
   <p class="excerpt">{{ post.excerpt }}</p>
 </div>
@@ -41,17 +41,14 @@ Recent Posts
 </p>
 
 <script type="text/javascript">
-//<![CDATA[
-(function() {
-		var links = document.getElementsByTagName('a');
-		var query = '?';
-		for(var i = 0; i < links.length; i++) {
-			if(links[i].href.indexOf('#disqus_thread') >= 0) {
-				query += 'url' + i + '=' + encodeURIComponent(links[i].href) + '&';
-			}
-		}
-		
-		document.write('<script type="text/javascript" src="http://disqus.com/forums/madhur/get_num_replies.js' + query + '"></' + 'script>');
-	})();
-//]]>
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
 </script>
