@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>Tips & Tricks</title>
+<link rel="stylesheet" type="text/css" href="programming.css" />
+<!--#include file="menu.htm" -->
+
+<h1 align="center">Tips & Tricks</h2>
+
+<ul>
+	<li><a href=#xor>Exchanging the value of 2 variables</li>
+	<li><a href=#gdt>Get Address of GDT base in windows</li>
+	
+</ul>
+<a name=gdt></a>
+<p>Windows shows the contents of CPU registers, when a program does errors. This feature, especially the 16x DWORD stack dump, may be used as an user interface for Hexadecimal outputs. As well as for coding the smallest and laziest Win32 programs. Following example shows the address of Global Descriptor Table.
+
+<pre>
+.486p
+.model flat,stdcall
+option casemap:none
+
+.data
+mgdt db 0,0,0,0,0,0
+
+.code
+findgdt:
+  mov eax,offset mgdt
+  sgdt [eax]              ; get GDTR contents
+  movzx edx,word ptr[eax] ; store size of GDT in EDX
+  mov ecx,[eax+2]         ; store address of GDT in ECX
+  mov eax,offset findgdt
+  mov ebx,cs:[eax]
+  mov cs:[eax],eax        ; writing to code area irritates kernel
+  ret
+end findgdt
+</pre>
+
+<a name=xor></a>
+<p>Usual methods uses temp variable to exchange the value of 2 variables. However fast exchange can be implemented with 
+the help of xor instruction.
+</td>
+</tr>
+</table>
+	
+<!--#include file="footer.html" -->
+
+</body>
+</html>

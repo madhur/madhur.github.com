@@ -1,0 +1,37 @@
+Q Configuring Telnet/FTP to login as root (Linux) 
+
+A Now before getting into the details of how to configure Red Hat Linux for root logins, keep in mind that this is VERY BAD security. Make sure that you NEVER configure your production servers for this type of login. 
+<b>Configure Telnet for root logins</b>
+Simply edit the file /etc/securetty and add the following to the end of the file: 
+<pre>
+pts/0
+pts/1
+pts/2
+pts/3
+pts/4
+pts/5
+pts/6
+pts/7
+pts/8
+pts/9
+</pre>
+
+This will allow up to 10 telnet sessions to the server as root. 
+<b>Configure FTP for root logins</b>
+First edit the file /etc/ftpaccess and comment out the 'deny-uid' and 'deny-gid' lines. 
+
+Also, don't forget to remove the 'root' line from /etc/ftpusers.
+-
+
+Q How do i enable and disable virtual consoles.
+
+A VCs are a great way to free up memory. Most Linux distributions run about 6 of them out of the box. On average running 6 VCs requires about 4MB of memory. Removing a couple of them can free up a couple MBs of memory. Most users can get away with running only 3 or 4 VCs. How many you choose to remove is a matter personal preference. Just remember that the fewer you run, the more memory your applications will have to run. 
+The file which outlines how many VCs get loaded is /etc/inittab. In order to remove VCs: 
+Load /etc/inittab in a text editor.
+Look for a line which looks like the following line (the key feature being a line which starts with c1): 
+<pre>c1:12345:respawn:/sbin/getty tty1 38400</pre>
+Start at the highest number (i.e. c6) and comment it out by inserting a '#' in the first row. Repeat this step as many times as needed. Remember every line you comment out is one less VC running. 
+Re-boot the system for your changes to take effect. 
+-
+
+

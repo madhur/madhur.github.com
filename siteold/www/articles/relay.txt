@@ -1,0 +1,53 @@
+An outside individual who uses your mail server to deliver email using a false email address is considered relaying mail via your server. A mail server that allows relaying is usually considered to be setup incorrectly and is frequently abused by spammers.  These spammers find and use unsecured mail servers to send out unsolicited commercial email.
+
+Tracking down a spammer who uses mail servers open to relaying is difficult.  This is because the email appears to be coming from your server, rather than from the original sender. Such spam being delivered by your mail server can give your company a bad reputation.
+
+How do you check your server for relaying?  Easy, just use a computer outside of your organization and type the commands included in the tables below - you'll want to do this from a command prompt.
+
+In the following examples, mail.example.com is the mail server you are checking, sender@example.com  is a valid email account at mail.example.com (or a fake email address - try both), and youremail@outsideaddress.com is the email account you want this message to go to.
+
+The parts you type are show in the table blow and replies from the server are shown to the right.  This is an example of a mail server that does NOT allow relaying
+You type this text Server should respond with this 
+<pre>
+TELNET mail.example.com 25 
+Trying 10.10.10.1.
+Connected to mail.example.com.
+Escape character is '^]'.
+<font color=yellow>220 mail.example.com </font>
+HELO mail.example
+<font color=yellow>250 OK</font>
+MAIL FROM: sender@example.com
+<font color=yellow>250 OK - Mail from <sender@example.com></font>
+RCPT TO: youremail@outsideaddress.com
+<font color=yellow>550 Relaying is prohibited</font>
+QUIT
+<font color=yellow>221 Closing connect, good bye</font>
+</pre>
+
+<p><p>This is an example of a mail server that DOES allow relaying.
+
+<pre>
+TELNET mail.example.com 25
+Trying 10.10.10.1.
+Connected to mail.example.com.
+Escape character is '^]'.
+<font color=yellow>220 mail.example.com </font>
+HELO mail.example
+<font color=yellow>250 OK</font>
+MAIL FROM: sender@example.com
+<font color=yellow>250 OK - Mail from <sender@example.com></font>
+RCPT TO: youremail@outsideaddress.com
+<font color=yellow>250 OK</font>
+DATA
+<font color=yellow>354 End data with <CR><LF><CR><LF></font>
+From: sender@example.com
+To: youremail@outsideaddress.com
+Subject: Relay test
+
+This is a relay test and only a test.
+(type  <CR><LF>.<CR><LF> or [enter].[enter] to end data)
+
+<font color=yellow>250 OK: Queued as T22122A5</font>
+QUIT
+<font color=yellow>221 Closing connect, good bye</font>
+</pre>
