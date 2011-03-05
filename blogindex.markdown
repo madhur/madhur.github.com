@@ -19,12 +19,13 @@ available via links at the top of the page.
 [![Feed icon](/files/css/feed-icon-14x14.png){:title="Atom feed of recent posts" .right}][feed]
 A [feed][] of the most recent posts is also available.
 
-[feed]: /blog/atom.xml
+[feed]: /atom.xml
 
 Recent Posts
 ------------
 
-{% for post in site.categories.blog limit:5 %}
+{% for post in site.posts limit:5 %}
+
 <div class="section list">
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
