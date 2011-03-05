@@ -4,7 +4,7 @@ title: Archives
 section: Past
 
 feed: atom.xml
-keywords: Machine Learning, Statistics, Blog, Research, Academia
+keywords: Blog, Research, Academia
 ---
 
 Archives
