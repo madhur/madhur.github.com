@@ -21,20 +21,24 @@ A [feed][] of the most recent posts is also available.
 
 [feed]: /atom.xml
 
-Recent Posts
+Latest Blog updates
 ------------
-
+<table id="highlight" cellpadding="0" cellspacing="0" border="0">
 {% for post in site.posts limit:5 %}
 
-<div class="section list">
-  <h1>{{ post.date | date_to_string }}</h1>
-  <p class="line">
-  <a class="title" href="{{ post.url }}" data-disqus-identifier="{{ post.disqus_id }}">{{ post.title }}</a>
-  <a class="comments" data-disqus-identifier="{{ post.disqus_id }}" href="{{ post.url }}#disqus_thread">View Comments</a>
-  </p>
-  <p class="excerpt">{{ post.excerpt }}</p>
-</div>
+
+<tr>
+
+  
+  <td class="title"><a  href="{{ post.url }}" data-disqus-identifier="{{ post.disqus_id }}">{{ post.title }}</a></td>
+  <td class="date">{{ post.date | date_to_string }}</td>
+  <td class="time"><a class="comments" data-disqus-identifier="{{ post.disqus_id }}" href="{{ post.url }}#disqus_thread">View Comments</a></td>
+  
+
+</tr>
+
 {% endfor %}
+</table>
 
 <p>
 <a href="past.html">Older Posts &rarr;</a>

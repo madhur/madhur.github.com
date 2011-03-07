@@ -10,10 +10,11 @@ keywords: Blog, Research, Academia
 Archives
 ========
 
-This is the complete archive of posts from _[my blog](/blog)_
+This is the complete archive of posts from _[my blog](/blogindex.html)_
 in reverse chronological order.
 
 {% for post in site.posts%}
+
 <div class="section list">
   <h1>{{ post.date | date_to_string }}</h1>
   <p class="line">
@@ -25,11 +26,26 @@ in reverse chronological order.
 {% endfor %}
 
 <ul>
-  {% for category, post in site.posts.categories["windbg"] %}
-    <li><a href="{{ post.url }}">{{ post.title }}</a></li>
-  {% endfor %}
+{% for y in (2007..2025) reversed %}
+{% for post in site.posts%}
+  {% if {{y}} == {{post.date | date: '%Y'}} %}
+    <li>{{ y }}
+    <ul>
+      {% for m in (1..12) reversed %}
+        {% if site.posts[y][m] %}
+          <li><a href='/{{ y }}/{{ m }}/'>{{ m | to_month}}</a></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+    </li>
+  {% endif %}
+{% endfor %}
+{% endfor %}
 </ul>
   
+
+
+
 <script type="text/javascript">
 //<![CDATA[
 (function() {
