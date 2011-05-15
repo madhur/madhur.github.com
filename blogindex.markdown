@@ -10,10 +10,7 @@ important: yes
 Blog
 =====================
 
-This is [my](/) technical blog on C/C++, Windbg, Reverse Engineering, Assembly.
-
-More [information](info.html) about this blog, its [kith](kith.html) (blogroll, 
-bookmarks, _etc._), and a complete archive of [past](past.html) posts, are 
+More [information](/info) about this blog and a complete archive of [past](past.html) posts, are 
 available via links at the top of the page.
 
 [![Feed icon](/files/css/feed-icon-14x14.png){:title="Atom feed of recent posts" .right}][feed]
@@ -21,8 +18,8 @@ A [feed][] of the most recent posts is also available.
 
 [feed]: /atom.xml
 
-Latest Blog updates
-------------
+###Latest Blog updates###
+
 <table id="highlight" cellpadding="0" cellspacing="0" border="0">
 {% for post in site.posts limit:5 %}
 
