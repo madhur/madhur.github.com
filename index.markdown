@@ -15,32 +15,28 @@ at the [Carnegie Mellon University][anu] in Pittsburgh, US.
 
 I am graduating in May 2012 and my focus is on information security. My background is in software design and engineering.
 
-My area of interests is in Penetration testing, Vulnerability Assessment and Reverse Engineering.
+Despite not being related to my profession I have significant interests in area  of Penetration testing, Vulnerability Assessment, Reverse Engineering, exploiting buffer overflows and sniffing.
 
-[rsise]: http://www.heinz.cmu.edu/school-of-information-systems-and-management
-[anu]: http://cmu.edu.au/. You can find out more about 
-me by poking around the links above and below.
+[rsise]: http://www.heinz.cmu.edu/school-of-information-systems-and-management/information-systems-management-mism/index.aspx
+[anu]: http://cmu.edu/. You can find out more about 
+
 
 I can also [code](/code) and have a done a little bit of it during my undergraduate studies and job and continue to do so whenever I get time.
 
 +--	{.section}
 Work
 ========
-I was previously working as [Consultant](/work) in Microsoft. I am currently a student and looking for part time employment. Have a look at my resume.
+I was previously working as [Consultant](/work) in Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This is the site for everything I do apart from my work. I am currently a student and looking for part time employment. Have a look at my resume.
 =--
 
 +-- {.section}
 Contact 
 =======
-I can be reached by phone on (+61) 2 6267 6297, 
+I can be reached by phone on (+1) 412.804.1793, 
 by email at [mahuja@cmu.edu](mailto:mahuja@cmu.edu).
 =--
 
-+-- {.section}
-Blog
-=====
-I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on 
-Microsoft technologies. This is the site for everything I do apart from my work at Microsoft.
-=--
+[![Pic](/images/linkedin3.png)](http://www.linkedin.com/in/madhurahuja) [![Pic](/images/icon_stackoverflow3.png)](http://stackoverflow.com/users/507256/madhur-ahuja)
+[![Pic](/images/github_32.png)](https://github.com/madhur) [![Pic](/images/facebook3.png)](https://www.facebook.com/ahuja.madhur) [![Pic](/images/icon_twitter.jpg)](http://twitter.com/#!/madhur25)  [![Pic](/images/icon_mail.png)](mailto:mahuja@cmu.edu) [![Pic](/images/rss2.png)](mailto:mahuja@cmu.edu)
 
 
