@@ -21,7 +21,7 @@ A [feed][] of the most recent posts is also available.
 ###Latest Blog updates###
 
 <table id="highlight" cellpadding="0" cellspacing="0" border="0">
-{% for post in site.posts limit:5 %}
+{% for post in site.posts %}
 
 
 <tr>
