@@ -8,7 +8,7 @@ title: Code
 Code
 ====
 This page  contain links to most of the research and non-research
-related programming I've done.
+related programming I've done. Almost all of the programs are including the source code. If not, you can find them up on [this](https://github.com/madhur/CollegeCode) git repository. If you still cannot find, shoot me a mail and I'll be happy to help.
 
 
 ###Beller###
@@ -24,14 +24,14 @@ The lists of connected hosts can be configured by the user.
 ###Error###
 The program shows the error description corresponding to error number using FormatMessage API. 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/error10.zip) | Visual C++
 
 ***
 
 ###Buffer###
 The TSR displays the contents of keyboard buffer. Useful for MS-DOS system programmers. 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/buffer10.zip) | DOS Assembly
 
 ***
 
@@ -53,7 +53,7 @@ This is a TSR written in Assembly language to display the clock on the DOS Scree
 ###TSR Screen###
 This is a screen saver for DOS. 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/screen10.zip) | DOS Assembly
 
 ***
 
@@ -89,7 +89,7 @@ VA2Offset is a nifty utility to convert the virtual address seen under debuggers
 Currently the program supports only Portable Executable Files. 
 I have tested this program on Win98/2000. 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/vaoffset10.zip) | Win32 Assembly
 
 ***
 
@@ -97,7 +97,7 @@ I have tested this program on Win98/2000.
 Demonstrates the use of Hooks in windows. This one shows a simple Mouse Hook to reveal asterisk passwords. 
 Although the program runs on all Windows versions, the revelation will occur on only win9x systems 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/plite10.zip) | Win32 Assembly
 
 ***
 
@@ -106,7 +106,7 @@ Port Scanner scans the system's ports and shows the open TCP and UDP ports.
 
 Written in: Win32(VC++)
 
-[Download](http://) | [Source](http://)
+[Download](/files) | [Source](http://)
 
 ***
 
@@ -114,7 +114,7 @@ Written in: Win32(VC++)
 Turn your Desktop Icon's background color to transparent using this cool utility. 
 The program remains in memory and consumes very little resources 
 
-[Download](http://) | [Source](http://) 
+[Download](/files/files/TRANS10.ZIP) | Win 32 Assembly
 
 ***
 
@@ -123,21 +123,21 @@ The program remains in memory and consumes very little resources
 This is a Perl script to convert c style equates to asm style equates.	Its an experimental program.
 Comments and suggestions will be appreciated. 
 
-[Download](http://) | [Source](http://)
+[Download](/files/files/h2inc.pl) | PERL
 
 ***
 
 ###Mail###
 A mail sender written in Java
 
-[Download](http://) | [Source](http://)
+[Download](http://) | Java
 
 ***
 
 ###Proxy Server###
 A multithreaded proxy server written in Java
 
-[Download](http://) | [Source](http://)
+[Download](http://) | Java
 
 ***
 
