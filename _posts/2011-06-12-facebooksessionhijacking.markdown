@@ -33,12 +33,12 @@ From this screen, we are mainly interested in grabbing the cookies, which are sp
 Cookie: datr=09bXXXQ2oOgQuUK0yAzK_JU9; lu=wgj9pmpkAsdXXXTp5vthfh2w; locale=en_US; L=2; act=13078123502562F3; c_user=xxxxxx; sct=1123416461; xs=603Afe43db8a71239bd8d7b2a831xxx6241f; presence=EM307818375L26REp_5f123422481F22X3078XXX1367K1H0V0Z21G307818375PEuoFD769839560FDexpF1307818409174EflF_5b_5dEolF-1CCCC; e=n
 {% endhighlight %}
 
+In my proof of concept, I was just required to copy the **xs** and **c_user** cookies to hijack the target session. **c_user** is the user ID of the user which is not at all a secret. However, **xs** does seems to be the authentication token and which should not be passed around in cleartext. 
+
 {% highlight bash %}
 c_user:xxxxxx
 xs:603Afe43db8a71239bd8d7b2a831aad6241f
 {% endhighlight %}
-
-In my proof of concept, I was just required to copy the **xs** and **c_user** cookies to hijack the target session. **c_user** is the user ID of the user which is not at all a secret. However, **xs** does seems to be the authentication token and which should not be passed around in cleartext. 
 
 Since now we have the cookies and one of it is indeed an authentication cookie. We can plug this in browser manually or using a Chrome extension such as 
 [Edit this Cookie](https://chrome.google.com/webstore/detail/fngmhnnpilhplaeedifhccceomclgfbg)
