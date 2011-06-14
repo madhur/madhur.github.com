@@ -1,7 +1,6 @@
 ---
 layout: name
 title: Home
-
 section: Home
 ---
 
@@ -9,17 +8,7 @@ section: Home
 Welcome
 =======
 
-![Pic](/images/pic.jpg) I'm a Master's student in the 
-[School of Information Systems and Management][rsise] 
-at the [Carnegie Mellon University][anu] in Pittsburgh, US. 
-
-I am graduating in May 2012 and my focus is on information security. My background is in software design and engineering.
-
-Despite not being related to my profession I have significant interests in area  of Penetration testing, Vulnerability Assessment, Reverse Engineering, exploiting buffer overflows and sniffing.
-
-[rsise]: http://www.heinz.cmu.edu/school-of-information-systems-and-management/information-systems-management-mism/index.aspx
-[anu]: http://cmu.edu/. You can find out more about 
-
+![Pic](/images/pic.jpg) I have significant interests in area  of Penetration testing, Vulnerability Assessment, Reverse Engineering, exploiting buffer overflows and sniffing.
 
 I can also [code](/code) and have a done a little bit of it during my undergraduate studies and job and continue to do so whenever I get time.
 
