@@ -18,37 +18,39 @@ However, if you are looking me who doesn't know Ruby and doesn't have time to co
 For example, to create list of categories in Jekyll, use the following code
 
 {% highlight html %}
-{ %  for category in site.categories % }
-<li><a href="/categories/{{ category[0] }}.html">{{ category[0] }}</a></li>
-{ % endfor % }
+{{ "{% if article.previous? " }}%}
+{{ "{%  for category in site.categories " }}%}
+<li><a href="/categories/{{ "{{" }} category[0] }}.html">{{ category[0] }}</a></li>
+{{ "{ % endfor "}}%}
+
 {% endhighlight %}
 
 Similarly, this nested loop code will give you a categories page, assuming that {page.title} contains the name of the category.
 
 {% highlight html %}
 
-{ % for  post in site.categories[page.title] % }
+{{ "{% for  post in site.categories[page.title] " }} % }
 
 <div class="postmeta extract">
 <p class="timestamp">
-{{ post.date }}
+{{ "{{" }} post.date }}
 <br/>
 <span class="time">{{ post.time }}</span>
 </div>
 
 <div class="post extract">
   
-    <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+    <h3><a href="{{ "{{" }} post.url }}">{{ "{{" }} post.title }}</a></h3>
 
 
-  <p>{{ post.content | strip_html | truncatewords:80 }}</p>
+  <p>{{ "{{" }} post.content | strip_html | truncatewords:80 }}</p>
 
 	<div class="blocked tags">
 <p>
-	{% for  tag in post.categories %}
-	<a href="/categories/{{tag}}.html">{{ tag }}</a>
+	{{ "{% for tag in post.categories  " }} % }
+	<a href="/categories/{{ "{{" }} tag}}.html">{{ tag }}</a>
 ,
-	{% endfor %}
+	{{ "{% endfor " }}%}
 </p>
 	</div>
 	<div class="hr"></div>
@@ -56,7 +58,7 @@ Similarly, this nested loop code will give you a categories page, assuming that 
 
 <div class="c">&nbsp;</div>
 
-{ % endfor % }
+{{ "{% endfor " }}%}
 
 
 

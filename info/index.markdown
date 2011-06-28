@@ -9,17 +9,6 @@ top: Madhur Ahuja
 ---
 
 
-
-About Me and This Site
-========
-
-At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
-
-This homepage is result of my learnings throughout. I didnt did any serious web scripting here. These pages were composed only using a text editor and pure HTML, there are no Java scripts, Java applets, cookies or any active code of some kind.
-
-I designed this site [{% include blogurl.txt %}](/) in early 2010 with the intention of making it the one-stop-shop for all of my personal and professional information.
-
-
 Engine behind this Site
 -------------
 
