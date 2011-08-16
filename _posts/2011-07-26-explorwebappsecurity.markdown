@@ -14,7 +14,7 @@ categories:
 
 There are many kinds of web application vulnerabilities which an attacker can exploit. Some of them common are SQL Injection, XSS. Let's look at the tools which are available to detect these vulnerabilities in an application.
 
-***Sqlmap***
+***Sql Injection***
 Sqlmap is a SQL Injection vulnerability scanner. You can give an Url input for example, http://www.salk.edu/events/index.php?id=150  to it and it will try to find out if the Url is susceptible to SQL injection attacks. For ex:
 
 {% highlight bash %}
@@ -23,3 +23,12 @@ Sqlmap is a SQL Injection vulnerability scanner. You can give an Url input for e
 
 Sqlmap takes different parameters for example, -D , -T, --dump to dump out different tables, databases and information within the databases.
 
+***Cross Site Request Forgery***
+
+
+***Remote command Execution***
+
+***Remote file inclusion***
+
+
+***Cross Site Scripting (XSS)***
