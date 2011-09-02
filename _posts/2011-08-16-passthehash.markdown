@@ -80,9 +80,7 @@ meterpreter >
 If you have trouble exploiting the target system, then it might be some security enabled your Administrator. For ex
 
 * Simple file sharing is disabled (Windows XP)
-
 * Windows UAC drops all the Administrator privileges from the SAT (Security Access Token) for REMOTE connections that are using LOCAL accounts. This restriction prevents all remote administrative functions such as connecting to administrative shares (C$, etc) installing services or launching a new process (psexec)
-
 * "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters" on the target systems and setting the value of "RequireSecuritySignature" to "0".
 
 References:
