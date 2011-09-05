@@ -31,7 +31,7 @@ I have created and published this C# programming wrapper which allows us to easi
 2. Create a .Net application and reference the ***CookComputing.XmlRpc*** that come in the above repository
 3. Create a class for the API provided.
 
-Notice that the above post contains an implemention of IBlogger interface, which is decorated with [XmlRpcUrl("http://blogs.msdn.com/metablog.ashx")] attribute. 
+Notice that the above post contains an implemention of IBlogger interface, which is decorated with \[XmlRpcUrl\("http://blogs.msdn.com/metablog.ashx"\)\] attribute. 
 
 Don't forget to change the URL of your Community Server Blogs metaBlog.
 

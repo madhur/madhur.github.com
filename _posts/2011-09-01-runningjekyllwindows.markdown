@@ -12,12 +12,12 @@ categories:
 
 #{{ page.title }}
 
-[Jekyll] can also be made to run on Windows Operating System. This prefer when I am working on my office laptop which has Windows 7 installed on it.
+Jekyll can also be made to run on Windows Operating System. This prefer when I am working on my office laptop which has Windows 7 installed on it.
 
 Following packages are required to setup Jekyll on Windows:
 
-* [Ruby] : Can be installed from [here](http://rubyinstaller.org/downloads/)
-* [Ruby Development Kit]: available on [here](http://rubyforge.org/frs/download.php/75127/rubyinstaller-1.9.2-p290.exe)
+* Ruby : Can be installed from [here](http://rubyinstaller.org/downloads/)
+* Ruby Development Kit: available on [here](http://rubyforge.org/frs/download.php/75127/rubyinstaller-1.9.2-p290.exe)
 * Jekyll
 * Python : I used the portable version available [here](http://portablepython.com/wiki/PortablePython3.2.1.1)
 * Pygments

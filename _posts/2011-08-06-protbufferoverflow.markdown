@@ -23,19 +23,19 @@ while some of them are part of compiler tools such as gcc, g++.
 
 **[Address Space Randomization](http://en.wikipedia.org/wiki/Address_space_layout_randomization)** is a technique in which various parts of executable such as data, stack and code are randomly given start addresses whenever a program starts. This makes difficult for an attacker to guess let's stay the base of stack in order for him to successfully launch the buffer overflow attack. ASLR can be disabled in linux with the following command
 
-{% highlight bash %}
+{% highlight text %}
 madhur@bt:~/buffer$ sudo echo 0 > /proc/sys/kernel/randomize_va_space
 {% endhighlight %}
 
 To reneable just echo it with a positive integer, for ex
 
-{% highlight bash %}
+{% highlight text %}
 madhur@bt:~/buffer$ sudo echo 2 > /proc/sys/kernel/randomize_va_space
 {% endhighlight %}
 
 **[Executable Stack Protection ](http://en.wikipedia.org/wiki/Executable_space_protection)** is another technique of preventing buffer overflow attacks. As a result of this protection, the stack portion of the memory is marked non executable. To check if the stack is executable or not, run the following command
 
-{% highlight bash %}
+{% highlight text %}
 madhur@bt:~/buffer$ readelf -l <filename>
 
 Elf file type is EXEC (Executable file)
@@ -67,24 +67,24 @@ Program Headers:
 {% endhighlight %}
 
 The following line , shows that stack is Read Write but not executable
-{% highlight bash %}
+{% highlight text %}
   GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW 0x4
 {% endhighlight %}
 
 In order to make the stack executable, the program needs to be compiled with ***-z execstack*** option
-{% highlight bash %}
+{% highlight text %}
 madhur@bt:~/buffer$ gcc -ggdb -m32 -z execstack -o buffer1 buffer1.c
 {% endhighlight %}
 
 In that case, the output of ***readelf*** program would be 
 
-{% highlight bash %}
+{% highlight text %}
   GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4
 {% endhighlight %}
 
 **[Stack smashing protection](http://en.wikipedia.org/wiki/Stack-smashing_protection)** refers to compiler generated protection techniques of smash stacking. Refer to wikipedia link to get more details about the techniques involved in this protection. This can be disabled in gcc as follows:
 
-{% highlight bash %}
+{% highlight text %}
 madhur@bt:~/buffer$ gcc -ggdb -m32 -o buffer1 -fno-stack-protector -mpreferred-stack-boundary=4 buffer1.c
 {% endhighlight %}
 
@@ -93,16 +93,16 @@ The /GS switch is a compiler option that will add some code to function’s prol
 
 When an application starts, a program-wide master cookie (4 bytes (dword), unsigned int) is calculated (pseudo-random number) and saved in the .data section of the loaded module. In the function prologue, this program-wide master cookie is copied to the stack, right before the saved EBP and EIP. (between the local variables and the return addresses)
 
-[buffer][cookie][saved EBP][saved EIP]
+\[buffer\]\[cookie\]\[saved EBP\]\[saved EIP\]
 During the epilogue, this cookie is compared again with the program-wide master cookie. If it is different, it concludes that corruption has occurred, and the program is terminated.
 
-In order to minimize the performance impact of the extra lines of code, the compiler will only add the stack cookie if the function contains string buffers or allocates memory on the stack using _alloca. Furthermore, the protection is only active when the buffer contains 5 bytes or more.
+In order to minimize the performance impact of the extra lines of code, the compiler will only add the stack cookie if the function contains string buffers or allocates memory on the stack using ***alloca***. Furthermore, the protection is only active when the buffer contains 5 bytes or more.
 
 In a typical buffer overflow, the stack is attacked with your own data in an attempt to overwrite the saved EIP. But before your data overwrites the saved EIP, the cookie is overwritten as well, rendering the exploit useless (but it may still lead to a DoS). The function epilogue would notice that the cookie has been changed, and the application dies.
 
 <pre>
-[buffer][cookie][saved EBP][saved EIP]
-[AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]
+|buffer||cookie||saved EBP||saved EIP|
+|AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA|
          ^
          |
 </pre>
