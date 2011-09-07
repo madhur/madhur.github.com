@@ -10,7 +10,7 @@ categories:
 - Code
 ---
 
-#{{ page.title }}
+
 I am a regular reader of [Jekyll Google group](https://groups.google.com/forum/?hl=en#!forum/jekyll-rb) and of late I am seeing lot of queries from users on how to create Tag cloud or list of categories in Jekyll without any coding. Many members in past have done it by creating plugins and code in Ruby, such as [this one](http://nova-fusion.com/blog/). Ofcourse creating such an awesome Tag cloud requires code and effort.
 
 However, if you are looking me who doesn't know Ruby and doesn't have time to code, you can get it done with simple lines of [Liqud code](http://www.liquidmarkup.org/).

@@ -10,7 +10,7 @@ categories:
 - Exploits
 ---
 
-#{{ page.title }}
+
 
 Linux has several inbuilt protection mechanisms to deal with malicious buffer overflow attacks. Some of them are built into kernel
 while some of them are part of compiler tools such as gcc, g++. 

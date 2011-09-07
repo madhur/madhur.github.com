@@ -11,7 +11,6 @@ categories:
 - Pass The Hash
 ---
 
-#{{ page.title }}
 
 A Windows 2000/NT/XP/Vista/7 system can be compromised with a technique called [pass the Hash](http://en.wikipedia.org/wiki/Pass_the_hash). For us to exploit this technique, we must know some basica.
 

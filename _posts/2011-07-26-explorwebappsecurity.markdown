@@ -10,7 +10,7 @@ categories:
 - Hacking
 ---
 
-#{{ page.title }}
+
 
 There are many kinds of web application vulnerabilities which an attacker can exploit. Some of them common are SQL Injection, XSS. Let's look at the tools which are available to detect these vulnerabilities in an application.
 

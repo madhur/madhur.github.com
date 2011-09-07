@@ -9,7 +9,7 @@ categories:
 - Security
 ---
 
-#{{ page.title }}
+
 * [Nmap](http://nmap.org)
 * [Wireshark](http://wireshark.org)
 * [Ettercap](http://ettercap.sourceforge.net)

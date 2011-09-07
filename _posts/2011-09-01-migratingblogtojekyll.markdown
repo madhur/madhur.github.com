@@ -10,7 +10,6 @@ categories:
 ---
 
 
-#{{ page.title }}
 
 There are 3rd party migrators avilable to migrate from Wordpress blog to Jekyll based blogs. In this post, I am going to outline simple process of migrating most 3rd 
 party blogs to Jekyll based blogs. Most of the blog web sites support a common interface called ***MetaWeblog***.

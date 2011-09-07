@@ -10,7 +10,7 @@ categories:
 - Hacking
 ---
 
-#{{ page.title }}
+
 
 [Hydra](http://thc.org/thc-hydra/) is a popular password cracker which can be used to crack passwords from various services such as http, ftp, telnet etc.
 

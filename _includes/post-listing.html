@@ -1,14 +1,32 @@
-{% for post in posts limit: listing_limit %}
-  <h2><a href="{{ post.url }}" class="dark-link">{{ post.title }}</a></h2>
-  <h4 class="low-top">
-    Posted on {{ post.date | format_date }}
-    {% unless no_category %}
-      {% if post.category %}
-        in <a href="/categories/{{ post.category | slugize }}">{{ post.category }}</a>
-      {% endif %}
-    {% endunless %}
-  </h4>
+<div class="blocked darkest"><p class="tagged">Posts tagged <span class="hilite">{{page.title}}</span></p></div>
+
+{% for  post in posts %}
+
+<div class="postmeta extract">
+<p class="timestamp">
+{{ post.date | format_date  }}
+<br/>
+<span class="time">{{ post.time }}</span>
+</div>
+
+<div class="post extract">
   
-  <p>{{ post.content | strip_html | truncatewords: 75 }}</p>
-  <p><a href="{{ post.url }}">Read more...</a></p>
+    <h4><a href="{{ post.url }}">{{ post.title }}</a></h4>
+   <!-- <time pubdate datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date_to_string }}</time> -->
+
+  <p>{{ post.content | strip_html |  truncatewords:80 }}</p>
+
+	<div class="blocked tags">
+<p>
+	{% for  tag in post.categories %}
+	<a href="/categories/{{tag}}.html">{{ tag }}</a>
+|
+	{% endfor %}
+</p>
+	</div>
+	<div class="hr"></div>
+</div>
+
+<div class="c">&nbsp;</div>
+
 {% endfor %}

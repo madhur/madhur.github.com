@@ -10,7 +10,7 @@ categories:
 - Code
 ---
 
-#{{ page.title }}
+
 [Earlier](http://localhost:4000/blog/2011/06/11/tagcloudjekyll.html) I showed you how we can integrate a simple HTML based tag cloud in Jekyll blog.
 
 In this post, Let's take a look at how we can integrate Wordpress Tag cloud plugin in Jekyll blog as shown in the right hand pane on this [blog](/blog).

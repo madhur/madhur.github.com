@@ -10,7 +10,6 @@ categories:
 - WebParts
 ---
 
-#{{ page.title }}
 
 I was recently asked how to remove the Editor Parts (Appearance, Layout, Advanced, etc) from custom Web Parts.
 

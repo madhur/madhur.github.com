@@ -10,7 +10,7 @@ categories:
 - Chrome
 ---
 
-#{{ page.title }}
+
 Google chrome extensions are basically zip files with .crx extension. As mentioned in this [post](http://www.google.com/support/forum/p/Chrome/thread?tid=7ead9bcf1528fbe3&hl=en) by Google, the chrome extensions can be opened by simply zip programs such as 7zip or Winzip.
 
 This is easy when you have direct access to the .crx file. However, most of the Google chrome extensions on its website do not have the link to the .crx file exposed.

@@ -10,7 +10,7 @@ categories:
 - Windows
 ---
 
-#{{ page.title }}
+
 
 Jekyll can also be made to run on Windows Operating System. This prefer when I am working on my office laptop which has Windows 7 installed on it.
 
