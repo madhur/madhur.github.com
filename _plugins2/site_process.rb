@@ -12,8 +12,8 @@ module Jekyll
       #s.render
       
       # these must come after render
-      #s.generate_tags_categories
-      s.generate_archives
+      s.generate_tags_categories
+      #s.generate_archives
       #s.generate_projects
       
       #s.cleanup

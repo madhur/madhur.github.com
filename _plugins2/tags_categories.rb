@@ -30,7 +30,8 @@ module Jekyll
   class Tags < CustomPage
     def initialize(site, base, dir)
       super site, base, dir, 'tags'
-      self.data['tags'] = site.tags.keys.sort
+      self.data['tags'] = site.categories.keys.sort
+	  
     end
   end
   
@@ -38,22 +39,16 @@ module Jekyll
     # generate_tags_categories is called by the custom process function in site_process.rb
         
     def generate_tags_categories
-      throw "No 'category' layout found." unless self.layouts.key? 'category'
-      throw "No 'tag' layout found." unless self.layouts.key? 'tag'
-      
-      # Categories
-      dir = self.config['category_dir'] || 'categories'
-      write_page Categories.new(self, self.source, dir) if self.layouts.key? 'categories'
-      
-      self.categories.keys.each do |category|
-        write_page Category.new(self, self.source, File.join(dir, category.slugize), category)
-      end
       
       # Tags
       dir = self.config['tag_dir'] || 'tags'
       write_page Tags.new(self, self.source, dir) if self.layouts.key? 'tags'
-      
-      self.tags.keys.each do |tag|
+      puts dir
+	  
+	  
+      self.categories.keys.each do |tag|
+	  puts tag
+	  puts File.join(dir, tag.slugize)
         write_page Tag.new(self, self.source, File.join(dir, tag.slugize), tag)
       end
     end
