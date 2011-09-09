@@ -2,7 +2,7 @@
 layout: blog-post
 title: "HackingLab Challenge: Disassemble .NET Clients"
 excerpt: "HackingLab Challenge: Disassemble .NET Clients"
-disqus_id: /2011/09/06/hackchallenge/
+disqus_id: /2011/09/10/hackchallenge/
 location: Delhi, India
 time: 8:00 PM
 categories:
