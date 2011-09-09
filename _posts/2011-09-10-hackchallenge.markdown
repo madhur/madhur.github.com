@@ -28,7 +28,10 @@ Compass Security has come up with a hacking challenge on their [site](https://ww
 Let's run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.
 ![](/images/netapp.png)
 
-Let's open the assembly in Reflector and see what it's doing. From the reflector, I could figure out the following
+Let's open the assembly in Reflector and see what it's doing. 
+![](/images/reflector.png)
+
+From the reflector, I could figure out the following
 * The form has got actually 3 buttons, 2 are hidden
 * There is a *BusinessClass* class in the assembly which is invoked by the hidden buttons
 * The visible button checks if the user is *Admin* and hides or shows the other two buttons
@@ -93,44 +96,7 @@ There are several ways to do it. I will write down from tedious to easiest
 
 Let's take a look at disassembly of *identifyuser()* function
 
-{% highlight text %}
-.method private hidebysig instance void  identifyUser() cil managed
-// SIG: 20 00 01
-{
-  // Method begins at RVA 0x23b8
-  // Code size       90 (0x5a)
-  .maxstack  2
-  IL_0000:  /* 02   |                  */ ldarg.0
-  IL_0001:  /* 28   | (06)000006       */ call       instance bool WindowsFormsApplication1.Form1::IsAdmin()
-  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031
-  IL_0008:  /* 02   |                  */ ldarg.0
-  IL_0009:  /* 7B   | (04)000002       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Label WindowsFormsApplication1.Form1::labUser
-  IL_000e:  /* 72   | (70)0000F5       */ ldstr      "Welcome Admin!"
-  IL_0013:  /* 6F   | (0A)00001E       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Text(string)
-  IL_0018:  /* 02   |                  */ ldarg.0
-  IL_0019:  /* 7B   | (04)000004       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Button WindowsFormsApplication1.Form1::butAdminHTTP
-  IL_001e:  /* 17   |                  */ ldc.i4.1
-  IL_001f:  /* 6F   | (0A)00002D       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Visible(bool)
-  IL_0024:  /* 02   |                  */ ldarg.0
-  IL_0025:  /* 7B   | (04)000006       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Button WindowsFormsApplication1.Form1::butAdminHTTPS
-  IL_002a:  /* 17   |                  */ ldc.i4.1
-  IL_002b:  /* 6F   | (0A)00002D       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Visible(bool)
-  IL_0030:  /* 2A   |                  */ ret
-  IL_0031:  /* 02   |                  */ ldarg.0
-  IL_0032:  /* 7B   | (04)000002       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Label WindowsFormsApplication1.Form1::labUser
-  IL_0037:  /* 72   | (70)000113       */ ldstr      "Welcome User!"
-  IL_003c:  /* 6F   | (0A)00001E       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Text(string)
-  IL_0041:  /* 02   |                  */ ldarg.0
-  IL_0042:  /* 7B   | (04)000004       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Button WindowsFormsApplication1.Form1::butAdminHTTP
-  IL_0047:  /* 16   |                  */ ldc.i4.0
-  IL_0048:  /* 6F   | (0A)00002D       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Visible(bool)
-  IL_004d:  /* 02   |                  */ ldarg.0
-  IL_004e:  /* 7B   | (04)000006       */ ldfld      class [System.Windows.Forms]System.Windows.Forms.Button WindowsFormsApplication1.Form1::butAdminHTTPS
-  IL_0053:  /* 16   |                  */ ldc.i4.0
-  IL_0054:  /* 6F   | (0A)00002D       */ callvirt   instance void [System.Windows.Forms]System.Windows.Forms.Control::set_Visible(bool)
-  IL_0059:  /* 2A   |                  */ ret
-} // end of method Form1::identifyUser
-{% endhighlight %}  
+![](/images/ildasm-output.png)
 
 If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is 
 {% highlight text %}
