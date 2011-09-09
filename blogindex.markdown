@@ -19,7 +19,7 @@ Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 {% for post in site.posts limit: listing_limit %}
   <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
   <h4 style="float:left">
-    Posted on {{ post.date | format_date }}
+    Posted on {{ post.date | date_to_string }}
  
   </h4>
  <span style="float:right"><a class="comments" data-disqus-identifier="{{ post.disqus_id }}" href="{{ post.url }}#disqus_thread">View Comments</a></span>  
