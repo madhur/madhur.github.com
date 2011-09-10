@@ -4,7 +4,7 @@ title: "HackingLab Challenge: Disassemble .NET Clients"
 excerpt: "HackingLab Challenge: Disassemble .NET Clients"
 disqus_id: /2011/09/10/hackchallenge/
 location: Delhi, India
-time: 8:00 PM
+time: 11:00 PM
 categories:
 - Hacking
 - Disassembling
@@ -26,9 +26,11 @@ Compass Security has come up with a hacking challenge on their [site](https://ww
 ##Solution##
 
 Let's run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.
+
 ![](/images/netapp.png)
 
 Let's open the assembly in Reflector and see what it's doing. 
+
 ![](/images/reflector.png)
 
 From the reflector, I could figure out the following
@@ -104,7 +106,7 @@ If you closely look at the disassembly above,  the instruction at IL_0006 is doi
 {% endhighlight %}  
 
 What this instruction means is that if output of *IsAdmin()* is false, branch to instruction at IL_0031, the instruction which hides the buttons.
-Now, we can just change this instruction to reverse, i.e. make it **brtrue.s**. A quick look at [MSDN](http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.brtrue_s(v=vs.71).aspx) tells me that its opcode is 2D as opposed to 2C which stands for **brfalse.s**.
+Now, we can just change this instruction to reverse, i.e. make it **brtrue.s**. A quick look at [MSDN](http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.brtrue_s\(v=vs.71\).aspx) tells me that its opcode is 2D as opposed to 2C which stands for **brfalse.s**.
 
 Now, we just need to fire up the favourite hex editor and **change just one byte.** from 2C to 2D.
 
