@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Privilege escalation on Windows using Service Hijacking"
-excerpt: "Privilege escalation on Windows using Service Hijacking"
+title: "Privilege escalation on Windows using Binary Planting"
+excerpt: "Privilege escalation on Windows using Binary Planting"
 disqus_id: /2011/09/23/privilegeescalation/
 location: New Delhi, India
 time: 11:00 PM
@@ -10,7 +10,7 @@ categories:
 - Windows
 ---
 
-This article is a tutorial on how to trick Windows XP into giving you system privileges using Service hijacking. There have been other previlege escalation methods which are no longer useable:
+This article is a tutorial on how to trick Windows XP into giving you system privileges using Binary Planting. There have been other previlege escalation methods which are no longer useable:
 
 * [Escalation using at command] (http://h0bbel.p0ggel.org/windows-xp-privilege-escalation-exploit-no-it-isnt)
 * [Escalation using Utilman.exe](http://technet.microsoft.com/en-us/security/bulletin/ms04-019)
