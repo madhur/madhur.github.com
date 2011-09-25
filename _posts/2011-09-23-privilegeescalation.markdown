@@ -33,7 +33,7 @@ However, depending on your computer configuration, there will be some other 3rd 
 
 ![](/images/Blog/gpupdate.png)  
 
-Now, even as a restricted user, nobody is stopping me from deleting or replacing this file. If we replace this **GoogleUpdate.exe** with the malicious one, no file integrety check on part of OS or Google Update Services is being performed. This makes the system vulnerable to be exploited since we can run any malicious code under System account simply by replacing this file, which can be done as restricted user.
+Now, even as a restricted user, nobody is stopping me from deleting or replacing this file. If we replace this **GoogleUpdate.exe** with the malicious one and then restart the Google Update Services, no file integrity check is performed by OS or Google Update Services to verify that file being executed is original or malicious. This makes the system vulnerable to be exploited since we can run any malicious code under System account simply by replacing this file and then executing the service, which can be done as restricted user.
 
 ![](/images/Blog/gservice.png)  
 
@@ -149,7 +149,7 @@ namespace Google.MakeAdmin.Exploit
 }
 {% endhighlight %}
 
-##Exploting the Service running with LocalSystem Account##
+##Exploiting the Service running with LocalSystem Account##
 
 1. Compile the file to generate a new service executable named **GoogleUpdate.exe** and replace it with the original file stored at the location **C:\Program Files\Google\GoogleUpdate.exe**
 2. Restart the service. This will cause our exploit code to be executed and a new user will be created in the system with Administrator privileges. In my example, user will have login name *superboy* and password *pass@word1*.
