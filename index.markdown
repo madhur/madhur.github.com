@@ -17,7 +17,7 @@ I can also [code](/code) and have a done a little bit of it during my undergradu
 +--	{.section}
 Work
 ========
-I was previously working as [Consultant](/work) in Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This is the site for everything I do apart from my work. 
+I previously worked as [Consultant](/work) at Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This is the site for everything I do apart from my work. 
 =--
 
 +-- {.section}
