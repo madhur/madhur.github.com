@@ -1,0 +1,42 @@
+Host routes define the interface (e.g. eth0, ppp0, eth1, etc.) which should be
+used to reach a specific host.
+
+Network routes come in two flavors. There is usually one network route per
+interface which is for that interface's "local net".  That is, if eth0 is
+123.123.123.123, there will be a network route for 123.123.123.0. 
+
+No gateway is required for such a route because the interface will (and must) 
+have the same netmask as this network and is, in fact, on this network. More 
+than one route such as this may exist, but only if you have more than one 
+interface.
+
+All other network routes must have a gateway specified.  These routes basically
+say, "If you have a packet bound for 123.123.124.0, send it to 123.123.123.1" 
+(123.123.123.1 is a machine on the local net and thus already reachable, and 
+123.123.124.0 is some external net that 123.123.123.1 knows how to reach 
+(likely via another interface on that machine)).
+
+You cannot have a gateway that is not on your local network.  Why? Because 
+your machine won't know how to reach the gateway.  That's what gateways are for.
+There is one special case route, that being the "default route" or 0.0.0.0. 
+This is the "route for packets bound for networks that I don't have any other
+routes for."  This is really how stuff works.
+
+It is not feasible for your machine to have routes for every network, and since
+virtually all of them would go to a local gateway, you need only specify this
+route, point it to your local gateway, and there they all go.  It's like, 
+"I have _no_clue_ how to reach Fred, so I'll transfer you to Wilma and _she_ 
+can deal with you."
+
+As for the "only one route" business, I think you're referring to the fact that 
+you wouldn't normally have two _network_ routes for the same network on two 
+different interfaces.  Sometimes you may, but if you do, you probably already 
+knew everything I just said and are way past that into dual-homing.
+
+*grin*  Note that it is perfectly legit to have a host route on a different 
+interface, although I can't think of a good example other than a single, 
+isolated machine that for whatever reason you demand is reachable _only_ through 
+a certain machine.  The "certain machine" would have a net route for the network 
+on say, eth0, and a host route for secluded-machine on say, eth1.  This is fine. 
+A host route takes priority over a network route.
+
