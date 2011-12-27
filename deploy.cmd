@@ -1,14 +1,16 @@
-git checkout source
-do whatever you need
-git status / add / commit
-jekyll
-checkout master
-execute
 
+echo "Checking out master"
+git checkout master
+
+
+echo "Copying the updated content to root"
 cp -r _site/* . && rm -rf _site/ && touch .nojekyll
 
-git status
+echo "Adding the content"
+git add .
 
-git add / commit
+echo "Updated content"
+git commit -am "Updated content"
 
+echo "Pushed content"
 git push -all origin
