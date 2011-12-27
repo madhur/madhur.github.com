@@ -10,14 +10,8 @@ module Jekyll
       self.read_yaml(File.join(base, '_layouts'), 'tags.html')
 	  
     end
-  end
-  
-  class Site
-    def write_page(page)
-      
-      page.render(self.layouts, site_payload)
-      page.write(self.dest)
-      self.pages << page
-    end
+	
+	 
+	
   end
 end
