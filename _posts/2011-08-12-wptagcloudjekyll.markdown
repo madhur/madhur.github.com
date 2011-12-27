@@ -11,7 +11,7 @@ categories:
 ---
 
 
-[Earlier](http://localhost:4000/blog/2011/06/11/tagcloudjekyll.html) I showed you how we can integrate a simple HTML based tag cloud in Jekyll blog.
+[Earlier](/blog/2011/06/11/tagcloudjekyll.html) I showed you how we can integrate a simple HTML based tag cloud in Jekyll blog.
 
 In this post, Let's take a look at how we can integrate Wordpress Tag cloud plugin in Jekyll blog as shown in the right hand pane on this [blog](/blog).
 Wordpress Tag cloud plugin is a simple Flash based plugin which accepts a group of Url encoded Anchor Hyperlinks as the parameter to display as the tag cloud.
