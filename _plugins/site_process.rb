@@ -28,16 +28,16 @@ module Jekyll
 
 
   class Madhur < Generator
-  safe true
-    def generate(site)
+  def generate(site)
 	
-	 dir = 'categories'      
-      site.categories.keys.each do |tag|	 				
+	dir = 'categories'      
+    site.categories.keys.each do |tag|	 
+		puts tag
 		write_page(site, dir, tag)	 	 
-	end
-	  
+	end		
 	
-    end
+	puts 'build complete'
+  end
 	
 	def write_page(site, dir, tag)
       tagpage=Tag.new(site, site.source, dir, tag)
