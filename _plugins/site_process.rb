@@ -32,11 +32,11 @@ module Jekyll
 	
 	dir = 'categories'      
     site.categories.keys.each do |tag|	 
-		puts tag
+		
 		write_page(site, dir, tag)	 	 
 	end		
 	
-	puts 'build complete'
+
   end
 	
 	def write_page(site, dir, tag)
