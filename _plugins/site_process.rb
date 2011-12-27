@@ -11,10 +11,7 @@ module Jekyll
       self.process(@name)
       self.read_yaml(File.join(base, '_layouts'), 'tags.html')
 	  
-    end
-	
-	 
-	
+    end		 		 	
   end
   
   
@@ -31,17 +28,14 @@ module Jekyll
 
 
   class Madhur < Generator
+  safe true
     def generate(site)
 	
-	 dir = 'categories'
-      #write_page Tags.new(self, self.source, dir) if self.layouts.key? 'tags'      	 	  
-      site.categories.keys.each do |tag|	 
-		
-		
-		write_page(site, dir, tag)
-	 
-	  end
-	  #puts "build complete"
+	 dir = 'categories'      
+      site.categories.keys.each do |tag|	 				
+		write_page(site, dir, tag)	 	 
+	end
+	  
 	
     end
 	
