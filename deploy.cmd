@@ -13,4 +13,4 @@ echo "Updated content"
 git commit -am "Updated content"
 
 echo "Pushed content"
-git push -all origin
+git push --all origin
