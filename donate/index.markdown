@@ -7,7 +7,9 @@ title: Donate
 
 Donate
 ========
-If you think that the utilities of mine are useful and you want to say thanks for making them available for free, and support the development of future versions, you're welcomed to donate some money to me by using the PayPal Donate form below. You can choose to send any amount you like. After filling the currency and the amount values, click the 'Continue' button, and you'll redirected to PayPal Web site to complete the donation process.
+If you think that the utilities of mine are useful and you want to say thanks for making them available for free, and support the development, you're welcomed to donate some money to me by using the PayPal Donate form below. 
+Your gratitude and finance help will motivate me to continue development.
+You can choose to send any amount you like. After filling the currency and the amount values, click the 'Continue' button, and you'll redirected to PayPal Web site to complete the donation process.
 
 <div class="paypal">
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
