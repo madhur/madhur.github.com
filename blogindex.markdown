@@ -15,6 +15,8 @@ width: 55em;
 
 Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 =====================
+<span class="low-top quiet large-bottom"><a href="/archives" class="small quiet">Archives</a></span>
+<p/>
 
 {% for post in site.posts limit: 10 %}
   <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
@@ -30,7 +32,7 @@ Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 {% endfor %}
 
 
-[feed]: {% include feedname.txt %}
+[feed]: {{ site.feedname }}
 
 
 

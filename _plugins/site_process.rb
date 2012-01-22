@@ -2,14 +2,14 @@ module Jekyll
 
 
   class CustomPage < Page
-    def initialize(site, base, dir, tag)
+    def initialize(site, base, dir, filename, layout)
       @site = site
       @base = base
       @dir  = dir
-      @name = tag+'.html'
+      @name = filename+'.html'
       
       self.process(@name)
-      self.read_yaml(File.join(base, '_layouts'), 'tags.html')
+      self.read_yaml(File.join(base, '_layouts'), layout)
 	  
     end		 		 	
   end
@@ -17,7 +17,7 @@ module Jekyll
   
   class Tag < CustomPage
     def initialize(site, base, dir, tag)
-      super site, base, dir, tag
+      super site, base, dir, tag, 'tags.html'
 	 
       self.data['tag'] = tag
       self.data['title'] = tag
