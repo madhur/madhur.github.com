@@ -5,7 +5,7 @@ excerpt: Creating Tag cloud of Categories in Jekyll
 disqus_id: /2011/06/03/tagcloud/
 location: Pittsburgh, US
 time: 05:00 PM
-categories:
+tags:
 - Jekyll
 - Code
 ---

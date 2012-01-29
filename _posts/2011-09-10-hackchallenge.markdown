@@ -5,7 +5,7 @@ excerpt: "HackingLab Challenge: Disassemble .NET Clients"
 disqus_id: /2011/09/10/hackchallenge/
 location: Delhi, India
 time: 11:00 PM
-categories:
+tags:
 - Hacking
 - Disassembling
 - .NET

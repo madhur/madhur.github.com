@@ -5,7 +5,7 @@ excerpt: My Top Network Security Tools
 disqus_id: /2011/06/22/topnetworksecuritytools/
 location: San Diego, US
 time: 11:00 PM
-categories:
+tags:
 - Security
 ---
 

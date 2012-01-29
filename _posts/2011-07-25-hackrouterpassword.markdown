@@ -5,7 +5,7 @@ excerpt: Hacking Router password using Hydra
 disqus_id: /2011/07/25/hackrouterpassword/
 location: New Delhi, India
 time: 9:00 PM
-categories:
+tags:
 - Security
 - Hacking
 ---

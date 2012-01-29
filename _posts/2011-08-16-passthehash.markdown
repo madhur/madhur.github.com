@@ -5,7 +5,7 @@ excerpt: Pass the Hash Exploitation on Windows
 disqus_id: /2011/08/16/passthehash/
 location: Delhi, India
 time: 10:00 PM
-categories:
+tags:
 - Hacking
 - Windows
 - Pass The Hash

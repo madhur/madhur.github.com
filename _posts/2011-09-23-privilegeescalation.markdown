@@ -5,7 +5,7 @@ excerpt: "Privilege escalation on Windows using Binary Planting"
 disqus_id: /2011/09/23/privilegeescalation/
 location: New Delhi, India
 time: 11:00 PM
-categories:
+tags:
 - Privilege Escalation
 - Windows
 ---

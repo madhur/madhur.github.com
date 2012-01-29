@@ -5,7 +5,7 @@ excerpt: How to reverse engineer Google Chrome extensions
 disqus_id: /2011/06/03/reverse engineer/
 location: Pittsburgh, US
 time: 12:18 AM
-categories:
+tags:
 - Reverse Engineering
 - Chrome
 ---

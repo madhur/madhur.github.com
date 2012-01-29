@@ -5,7 +5,7 @@ excerpt: Migrating 3rd party blogs to Jekyll
 disqus_id: /2011/09/01/migratingthirdjekyll/
 location: Delhi, India
 time: 10:00 PM
-categories:
+tags:
 - Jekyll
 ---
 

@@ -5,7 +5,7 @@ excerpt: Protections against buffer overflow exploits in Linux
 disqus_id: /2011/08/06/protbufferoverflow/
 location: New Delhi, India
 time: 11:00 AM
-categories:
+tags:
 - Security
 - Exploits
 ---

@@ -5,7 +5,7 @@ excerpt: Best fonts for programming
 disqus_id: /2011/09/09/bestfontscode/
 location: Delhi, India
 time: 8:00 PM
-categories:
+tags:
 - Code
 - Programming
 ---

@@ -5,7 +5,7 @@ excerpt: Integrating Wordpress Tag cloud Plugin in Jekyll
 disqus_id: /2011/09/12/wptagcloudjekyll/
 location: Delhi, India
 time: 11:00 PM
-categories:
+tags:
 - Jekyll
 - Code
 ---

@@ -5,7 +5,7 @@ excerpt: Github as a development platform
 disqus_id: /2011/06/03/githubplatform/
 location: Pittsburgh, US
 time: 05:00 PM
-categories:
+tags:
 - Github
 - Code
 ---

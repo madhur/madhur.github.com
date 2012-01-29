@@ -5,7 +5,7 @@ excerpt: Facebook Vulnerability - Session sidejacking
 disqus_id: /2011/06/12/facebooksessionhijacking/
 location: Pittsburgh, US
 time: 11:00 AM
-categories:
+tags:
 - Facebook
 - Session Sidejacking
 - Security

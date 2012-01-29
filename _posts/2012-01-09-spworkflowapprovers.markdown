@@ -5,7 +5,7 @@ excerpt: "Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using 
 disqus_id: /2012/01/09/spworkflowapprovers/
 location: New Delhi, India
 time: 12:00 PM
-categories:
+tags:
 - SharePoint 2010
 - Jquery
 ---

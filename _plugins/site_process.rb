@@ -31,7 +31,7 @@ module Jekyll
   def generate(site)
 	
 	dir = 'categories'      
-    site.categories.keys.each do |tag|	 
+    site.tags.keys.each do |tag|	 
 		
 		write_page(site, dir, tag)	 	 
 	end		

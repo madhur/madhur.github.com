@@ -5,7 +5,7 @@ excerpt: "Difference between Filtered vs Closed Ports"
 disqus_id: /2011/09/18/filteredclosed/
 location: Delhi, India
 time: 11:00 AM
-categories:
+tags:
 - Hacking
 - Nmap
 ---

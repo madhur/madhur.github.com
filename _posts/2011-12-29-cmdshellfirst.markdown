@@ -5,7 +5,7 @@ excerpt: "Windows command shell(cmd.exe) runs only first command"
 disqus_id: /2011/12/29/cmdshellfirst/
 location: New Delhi, India
 time: 8:00 PM
-categories:
+tags:
 - Windows
 ---
 

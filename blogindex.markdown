@@ -37,7 +37,7 @@ Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 
 
 <p>
-<a href="past.html">Older Posts &rarr;</a>
+<a href="/archives">Older Posts &rarr;</a>
 </p>
 
 {% include commentcount.js %}

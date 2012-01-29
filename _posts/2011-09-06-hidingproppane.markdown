@@ -5,7 +5,7 @@ excerpt: Removing the Default Editor Parts from SharePoint Web Parts
 disqus_id: /2011/09/06/hidingproppane/
 location: Delhi, India
 time: 8:00 PM
-categories:
+tags:
 - SharePoint
 - WebParts
 ---

@@ -5,7 +5,7 @@ excerpt: "Crack or Reset Windows Passwords"
 disqus_id: /2011/09/18/crackresetwindows/
 location: Delhi, India
 time: 11:00 AM
-categories:
+tags:
 - Hacking
 - Windows
 ---

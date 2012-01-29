@@ -5,7 +5,7 @@ excerpt: Running Jekyll on Windows
 disqus_id: /2011/09/01/runningjekyllwindows/
 location: Delhi, India
 time: 12:00 AM
-categories:
+tags:
 - Jekyll
 - Windows
 ---

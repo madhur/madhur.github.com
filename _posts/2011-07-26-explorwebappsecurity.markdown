@@ -5,7 +5,7 @@ excerpt: Exploring Web Application vulnerabilities
 disqus_id: /2011/07/26/explorwebappsecurity/
 location: New Delhi, India
 time: 12:00 PM
-categories:
+tags:
 - Security
 - Hacking
 ---
