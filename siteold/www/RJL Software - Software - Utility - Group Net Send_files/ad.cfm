@@ -1,0 +1,42 @@
+
+
+
+    
+    
+    
+
+        
+        
+    
+            
+            
+    
+             
+                
+                
+                
+
+                
+                
+                
+                
+                    
+                    
+                
+                
+
+                
+                
+                    
+                    
+                
+                
+                document.write('<font face="Arial">')
+                document.write('<div align="center"><font face="Arial"><b>Download FREE audit software</b><br>Inventory your entire company within seconds with our Log Info software. Very simple utility to work with, it integrates with your existing login script. New in v2.00 we have added more hardware information and now software!</font></div> <A HREF="http://www.adrotate.net/jump.cfm?ID=3251" target="_self" title="Click to download a free copy">Click to download a free copy</A>')
+                document.write('</font>')
+                
+            
+        
+    
+
+
