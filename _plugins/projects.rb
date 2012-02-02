@@ -24,7 +24,7 @@ module Jekyll
 			
 			
 			self.data['version']   = info['version_title'] || info['version']
-			self.data['repo']      = "https://github.com/#{site.config['github_user']}/#{name}"
+			#self.data['repo']      = "https://github.com/#{site.config['github_user']}/#{name}"
 			self.data['download']  = info['download'] || "#{self.data['repo']}/zipball/#{info['version'] || 'master'}"
 			self.data['docs']      = info['docs'] == 'wiki' ? "#{self.data['repo']}/wiki" : info['docs'] if info['docs']
 			
@@ -51,10 +51,10 @@ module Jekyll
 			readme =
 			if info['readme'] then
 				IO.read info['readme']
-			#	puts("1")
+				puts("1")
 			else
-				check_cache(name,"Readme.md")
-			#	puts("2")
+			#	check_cache(name,"Readme.md")
+				puts("2")
 			end
 			self.data['readme'] = Maruku.new(readme).to_html
 			self.data['readme_name'] = info['readme_name'] if info['readme_name']
@@ -119,7 +119,7 @@ module Jekyll
 			super site, base, dir, 'changelog', project, "changelog.html"
 			
 			changelog='test'
-			changelog = check_cache(name,"Changelog.md",  project.data['changelog_location'])
+			#changelog = check_cache(name,"Changelog.md",  project.data['changelog_location'])
 			changelog.gsub!(/\`{3} ?(\w+)\n(.+?)\n\`{3}/m, "{% highlight \\1 %}\n\\2\n{% endhighlight %}")
 			changelog = Liquid::Template.parse(changelog).render(
 				{}, :filters => [Jekyll::Filters], :registers => { :site => site }

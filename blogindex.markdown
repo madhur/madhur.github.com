@@ -12,7 +12,7 @@ Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 <p/>
 
 {% for post in site.posts limit: 10 %}
-<h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+<h2 class="prepend-top"><a href="{{ post.url }}">{{ post.title }}</a></h2>
 <h3 class="datetext" style="float:left">
 Posted on {{ post.date | date_to_string }}
 </h3>
