@@ -10,14 +10,14 @@ Welcome
 
 ![Pic](/images/pic.jpg) Hi there, I'm Madhur, a web developer/designer, programmer, and technology enthusiast in general. At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
 
-I have significant interests in area  of Penetration testing, Vulnerability Assessment, Reverse Engineering, exploiting buffer overflows and sniffing.
+
  
 I can also [code](/code) and have a done a little bit of it during my undergraduate studies and job and continue to do so whenever I get time.
 
 
 Work
 -----
-I previously worked as [Consultant](/work) at Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This is the site for everything I do apart from my work. 
+I previously worked as [Consultant](/work) at Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This site is for publishing everything I do apart from my work. 
 
 
 
