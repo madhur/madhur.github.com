@@ -25,7 +25,7 @@ to be used while assembling and linking their programs. However, with these tool
 who fiddles with 16bit, 32bit and 64 bit assembly programs, you have to add seperate commands for them. And not to forget, seperate commands for outputting debug and release binaries as well.
 
 To simplify the above process, I have been exploring the use of makefiles to assemble and link my programs and this has worked wonderfully well. I just maintain my each assembly project in seperate directory with the makefile
-and use that as a command to assembly and link the program from [Notepad++], using [NppExec plugin](https://sourceforge.net/projects/npp-plugins/files/NppExec/). Apart from Notepad++, I am using following tools as my development environment. You might be using different, but they can be applied in same concept.
+and use that as a command to assembly and link the program from [Notepad++](http://notepad-plus-plus.org/), using [NppExec plugin](https://sourceforge.net/projects/npp-plugins/files/NppExec/). Apart from Notepad++, I am using following tools as my development environment. You might be using different, but they can be applied in same concept.
 
 1. NMAKE(nmake.exe) v10.00.30319.01 which ships with Visual Studio 2010 available [here](http://www.microsoft.com/visualstudio/en-in)
 2. Borland Resource compiler (brcc32.exe) v4.50 which ships with Borland compiler tools available somewhere on the net
