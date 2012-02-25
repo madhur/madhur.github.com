@@ -18,7 +18,7 @@ Posted on {{ post.date | date_to_string }}
 </h3>
 <span class="tag-list"> 
 {% for tag in post.tags %}
-<a href="/categories/{{ tag }}.html">{{ tag }}</a> 
+<a href="/tags/{{ tag | slugize }}/">{{ tag }}</a> 
 {% endfor %}
 </span>
 

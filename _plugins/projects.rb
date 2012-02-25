@@ -54,7 +54,7 @@ module Jekyll
 				puts("1")
 			else
 			#	check_cache(name,"Readme.md")
-				puts("2")
+				#puts("2")
 			end
 			self.data['readme'] = Maruku.new(readme).to_html
 			self.data['readme_name'] = info['readme_name'] if info['readme_name']
