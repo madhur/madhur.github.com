@@ -12,6 +12,8 @@ Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
 <p/>
 
 {% for post in site.posts limit: 10 %}
+<article>
+<header>
 <h2 class="prepend-top"><a href="{{ post.url }}">{{ post.title }}</a></h2>
 <h3 class="datetext" style="float:left">
 Posted on {{ post.date | date_to_string }}
@@ -21,12 +23,15 @@ Posted on {{ post.date | date_to_string }}
 <a href="/tags/{{ tag | slugize }}/">{{ tag }}</a> 
 {% endfor %}
 </span>
-
+</header>
 
 
 <div class="c">&nbsp;</div>
 <p>{{ post.content | strip_html | truncatewords: 75 }}</p>
+<footer>
 <p><a href="{{ post.url }}">Read more...</a></p>
+</footer>
+</article>
 {% endfor %}
 
 
