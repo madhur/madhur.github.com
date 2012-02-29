@@ -27,6 +27,7 @@ The scene has changed from then. Now its the HTML5, CSS3 and Javascript which ar
   2. [HeadJS](http://headjs.com/)
   3. [KnockoutJS](http://knockoutjs.com/)
   
+  
 * **Emergence of HTML5:** W3C consortium has come up with new standard for HTML which includes advanced functionalities like local storage, audio and video. Since HTML5 is going to be uniquitous standard, it seems it is going to replace 
   technologies like Silverlight and Flash. 
   
