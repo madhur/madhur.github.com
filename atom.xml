@@ -4,13 +4,203 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2012-03-01T00:58:21+05:30</updated>
+ <updated>2012-03-05T20:21:47+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Enable code highlighting with Pygments/Jekyll</title>
+   <link href="http://madhur.co.in/blog/2012/03/05/codehighlightjekyll.html"/>
+   <updated>2012-03-05T00:00:00+05:30</updated>
+   <id>id:/blog/2012/03/05/codehighlightjekyll</id>
+   <content type="html">&lt;p&gt;If you have been using Jekyll, you must be aware of code highlighting feature using highlight blocks. This highlighting is accomplished by a neat python script called &lt;a href='http://pygments.org/'&gt;Pygments&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Pygments is a very powerful code syntax highlighter. It allows you to pass various options such as weather to display line no.s or which lines to be highlighted. When Jekyll was released, there was no way to use these options since Jekyll encapsulated the execution of Python internally through &lt;a href='https://github.com/github/albino'&gt;Albino gem&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;There has been some progress over this, a &lt;a href='https://github.com/mojombo/jekyll/issues/31'&gt;pull request&lt;/a&gt; was submitted in Jekyll which allowed various options to be passed to Pygments.&lt;/p&gt;
+
+&lt;p&gt;However, when I tried to use &lt;strong&gt;hl_lines&lt;/strong&gt; option to highlight the lines of code, I faced several issues. Following is the syntax I used&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt; highlight html hl_lines=2 4
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Running the above piece of code reults in only line 2 being highlighted and not both. So I decided to enclose it with quotation marks&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt; highlight html hl_lines=&amp;quot;2 4&amp;quot;  
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;The above piece of code gives the error.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;Invalid flag value -O
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in &lt;strong&gt;albino.rb&lt;/strong&gt; file.&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt;  &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;validate_shell_args&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;flag&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+    &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;flag&lt;/span&gt; &lt;span class='o'&gt;!~&lt;/span&gt; &lt;span class='sr'&gt;/^[a-z]+$/i&lt;/span&gt;
+      &lt;span class='k'&gt;raise&lt;/span&gt; &lt;span class='no'&gt;ShellArgumentError&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;Flag is invalid: &lt;/span&gt;&lt;span class='si'&gt;#{&lt;/span&gt;&lt;span class='n'&gt;flag&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;inspect&lt;/span&gt;&lt;span class='si'&gt;}&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;span class='hll'&gt;    &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt; &lt;span class='o'&gt;!~&lt;/span&gt; &lt;span class='sr'&gt;/^[a-z0-9\-\_\+\=\#\,\s]+$/i&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;      &lt;span class='k'&gt;raise&lt;/span&gt; &lt;span class='no'&gt;ShellArgumentError&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='s2'&gt;&amp;quot;Flag value is invalid: -&lt;/span&gt;&lt;span class='si'&gt;#{&lt;/span&gt;&lt;span class='n'&gt;flag&lt;/span&gt;&lt;span class='si'&gt;}&lt;/span&gt;&lt;span class='s2'&gt; &lt;/span&gt;&lt;span class='si'&gt;#{&lt;/span&gt;&lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;inspect&lt;/span&gt;&lt;span class='si'&gt;}&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;&lt;/span&gt;
+&lt;/span&gt;    &lt;span class='k'&gt;end&lt;/span&gt;
+  &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the &lt;strong&gt;highlight.rb&lt;/strong&gt; file in Jekyll to recombine them into the list. See the updated function below:&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='ruby'&gt; &lt;span class='k'&gt;def&lt;/span&gt; &lt;span class='nf'&gt;initialize&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;tag_name&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;markup&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;tokens&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='k'&gt;super&lt;/span&gt;	 
+      &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;markup&lt;/span&gt; &lt;span class='o'&gt;=~&lt;/span&gt; &lt;span class='no'&gt;SYNTAX&lt;/span&gt;	
+        &lt;span class='vi'&gt;@lang&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='vg'&gt;$1&lt;/span&gt;
+        &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;defined?&lt;/span&gt; &lt;span class='vg'&gt;$2&lt;/span&gt;
+		&lt;span class='c1'&gt;# puts $2&lt;/span&gt;
+          &lt;span class='n'&gt;tmp_options&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;{}&lt;/span&gt;
+          &lt;span class='vg'&gt;$2&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;split&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;each&lt;/span&gt; &lt;span class='k'&gt;do&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt;&lt;span class='n'&gt;opt&lt;/span&gt;&lt;span class='o'&gt;|&lt;/span&gt;		    
+            &lt;span class='n'&gt;key&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;opt&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;split&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;=&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;						
+			&lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;key&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;hl_lines&amp;#39;&lt;/span&gt;
+				&lt;span class='nb'&gt;puts&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt;
+				&lt;span class='n'&gt;value&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;gsub&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;,&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;,&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+			&lt;span class='k'&gt;end&lt;/span&gt;			
+            &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;nil?&lt;/span&gt;
+              &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='n'&gt;key&lt;/span&gt; &lt;span class='o'&gt;==&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;linenos&amp;#39;&lt;/span&gt;			
+                &lt;span class='n'&gt;value&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;inline&amp;#39;&lt;/span&gt;
+			  &lt;span class='k'&gt;else&lt;/span&gt;
+                &lt;span class='n'&gt;value&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='kp'&gt;true&lt;/span&gt;
+              &lt;span class='k'&gt;end&lt;/span&gt;
+            &lt;span class='k'&gt;end&lt;/span&gt;
+            &lt;span class='n'&gt;tmp_options&lt;/span&gt;&lt;span class='o'&gt;[&lt;/span&gt;&lt;span class='n'&gt;key&lt;/span&gt;&lt;span class='o'&gt;]&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;value&lt;/span&gt;
+          &lt;span class='k'&gt;end&lt;/span&gt;
+          &lt;span class='n'&gt;tmp_options&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='n'&gt;tmp_options&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;to_a&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;collect&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='o'&gt;|&lt;/span&gt;&lt;span class='n'&gt;opt&lt;/span&gt;&lt;span class='o'&gt;|&lt;/span&gt; &lt;span class='n'&gt;opt&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;=&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;
+		  
+          &lt;span class='c1'&gt;# additional options to pass to Albino&lt;/span&gt;
+          &lt;span class='vi'&gt;@options&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;{&lt;/span&gt; &lt;span class='s1'&gt;&amp;#39;O&amp;#39;&lt;/span&gt; &lt;span class='o'&gt;=&amp;gt;&lt;/span&gt; &lt;span class='n'&gt;tmp_options&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;join&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s1'&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt; &lt;span class='p'&gt;}&lt;/span&gt;		  		  		  
+        &lt;span class='k'&gt;else&lt;/span&gt;
+          &lt;span class='vi'&gt;@options&lt;/span&gt; &lt;span class='o'&gt;=&lt;/span&gt; &lt;span class='p'&gt;{}&lt;/span&gt;
+        &lt;span class='k'&gt;end&lt;/span&gt;
+      &lt;span class='k'&gt;else&lt;/span&gt;
+        &lt;span class='k'&gt;raise&lt;/span&gt; &lt;span class='no'&gt;SyntaxError&lt;/span&gt;&lt;span class='o'&gt;.&lt;/span&gt;&lt;span class='n'&gt;new&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s2'&gt;&amp;quot;Syntax Error in &amp;#39;highlight&amp;#39; - Valid syntax: highlight &amp;lt;lang&amp;gt; [linenos]&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
+      &lt;span class='k'&gt;end&lt;/span&gt;
+    &lt;span class='k'&gt;end&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;I cannot submit it as patch in Jekyll since this fix involves fixing two components: Jekyll and Albino. May be someone can come with better approach to fix this. This works for me as of now.&lt;/p&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>What's wrong with Microsoft</title>
+   <link href="http://madhur.co.in/blog/2012/03/01/whatswrongwithmsft.html"/>
+   <updated>2012-03-01T00:00:00+05:30</updated>
+   <id>id:/blog/2012/03/01/whatswrongwithmsft</id>
+   <content type="html">&lt;p&gt;Saw, this &lt;a href='http://www.glassdoor.com/Reviews/Employee-Review-Microsoft-RVW1366630.htm'&gt;post&lt;/a&gt; on Glassdoor. Being an ex-MS, I wonder what&amp;#8217;s slowly happening to this great company.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The most uncollaborative work environment on the planet - the only way to move forward is to stab your neighbor in the back. The culture here actually encourages self-promotion and to tear down others. Ironically they spend millions on programs to appear as if this is not the case - then reviews come, and its Social Darwinism in its pure form - the only thing I have not seen first hand, is for a VP to eat their young. I cannot wait to get out of here - and I am actually doing well in terms of reviews and bonus - but life is too short to move a career forward at this expense level. I suspect those who love this enviroment have not been here long enough to realize that for them to move forward - they will need to leave a wake of bodies in their path - which is not for everyone.&lt;/p&gt;
+&lt;/blockquote&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>How to upgrade your Jekyll Blog/Site to HTML5</title>
+   <link href="http://madhur.co.in/blog/2012/02/26/upgradehtml5.html"/>
+   <updated>2012-02-26T00:00:00+05:30</updated>
+   <id>id:/blog/2012/02/26/upgradehtml5</id>
+   <content type="html">&lt;p&gt;HTML5 is the next big thing. There is no reason which should hold you back from upgrading your site to new HTML5 which adds lot of features some of them which I discussed in my previous blog article.&lt;/p&gt;
+
+&lt;p&gt;If you think lack of browser compatiblity is holding you back, then there is good news - there are ways using which you can even have the incompatible browsers work with your new HTML5 site.&lt;/p&gt;
+
+&lt;p&gt;Here, I am going to show you how you can upgrade you site/blog to HTML 5. I am just going to show you very basic things. At a granular level, you might require more changes depending on your site.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Prepare a development branch. Since we will makeing a lot of changes to HTML/CSS, its good to have a new branch on your repository. You don&amp;#8217;t want to mess your master/source branch.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;git branch develop
+git checkout develop
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Once we have done the changes, we will test it throroughly and merge it back to our main branch.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Changes to main default.html&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='html'&gt;&lt;span class='cp'&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
+&lt;span class='hll'&gt;&lt;span class='nt'&gt;&amp;lt;html&lt;/span&gt; &lt;span class='na'&gt;lang=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;en&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='nt'&gt;&amp;lt;head&amp;gt;&lt;/span&gt;   
+&lt;span class='hll'&gt;   &lt;span class='nt'&gt;&amp;lt;meta&lt;/span&gt; &lt;span class='na'&gt;charset=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt; &lt;span class='nt'&gt;/&amp;gt;&lt;/span&gt;   
+&lt;/span&gt;   &lt;span class='nt'&gt;&amp;lt;meta&lt;/span&gt; &lt;span class='na'&gt;name=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;author&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;content=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;Madhur Ahuja&amp;quot;&lt;/span&gt; &lt;span class='nt'&gt;/&amp;gt;&lt;/span&gt;	
+&lt;span class='hll'&gt;	&lt;span class='c'&gt;&amp;lt;!--[if lt IE 9]&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;&lt;span class='c'&gt;		&amp;lt;script src=&amp;quot;/files/js/modernizr-2.5.3.js&amp;quot; type=&amp;quot;text/javascript&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;&lt;span class='c'&gt;	&amp;lt;![endif]--&amp;gt;&lt;/span&gt;
+&lt;/span&gt;	
+	&lt;span class='nt'&gt;&amp;lt;script &lt;/span&gt;&lt;span class='na'&gt;src=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;/files/js/site.js&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;type=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;gradient&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+	&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;container&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;container&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;header&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;header&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;/header&amp;gt;&lt;/span&gt;
+&lt;/span&gt;		&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;content&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+		&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;footer&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;footer&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;/footer&amp;gt;&lt;/span&gt;
+&lt;/span&gt;	&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;span class='nt'&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Changes to blog-post.html&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='html'&gt;---
+layout: default
+top: Madhur Ahuja
+---
+
+&lt;span class='hll'&gt;&lt;span class='nt'&gt;&amp;lt;section&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;	&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;blogcontent&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;aside&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;postmeta full span-5&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;/aside&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;article&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;post full span-18 last&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;			 
+&lt;/span&gt;&lt;span class='hll'&gt;			&lt;span class='nt'&gt;&amp;lt;footer&amp;gt;&lt;/span&gt;
+&lt;/span&gt;				&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;blocked tags&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&lt;/span&gt;
+					&lt;span class='nt'&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
+					&lt;span class='nt'&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+				&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class='hll'&gt;			&lt;span class='nt'&gt;&amp;lt;/footer&amp;gt;&lt;/span&gt;
+&lt;/span&gt;			&lt;span class='nt'&gt;&amp;lt;div&lt;/span&gt; &lt;span class='na'&gt;class=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;hr&amp;quot;&lt;/span&gt;&lt;span class='nt'&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+			&lt;span class='nt'&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+			&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class='hll'&gt;		&lt;span class='nt'&gt;&amp;lt;/article&amp;gt;&lt;/span&gt;		
+&lt;/span&gt;	&lt;span class='nt'&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;	
+&lt;span class='hll'&gt;&lt;span class='nt'&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Enable HTML5 input controls&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Since I use a search box to search my site, I can use HTML5 &lt;strong&gt;search&lt;/strong&gt; type box and also the &lt;strong&gt;required&lt;/strong&gt; attribute&lt;/p&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='html'&gt;&lt;span class='nt'&gt;&amp;lt;input&lt;/span&gt; &lt;span class='na'&gt;type=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;search&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;required&lt;/span&gt; &lt;span class='na'&gt;id=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;q&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;name=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;q&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;value=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class='na'&gt;placeholder=&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;Site Search&amp;quot;&lt;/span&gt; &lt;span class='nt'&gt;/&amp;gt;&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Polyfills for your old incompatible browsers (IE ?)&lt;/p&gt;
+
+&lt;p&gt;As I said above, even if your browser doesn&amp;#8217;t support HTML5, you can use &lt;a href=''&gt;pollyfills&lt;/a&gt; using which you can enable most of the HTML 5 features. Keep in mind that its not magic that using pollyfills suddenly enables your browser to enable HTML5. Most of the polyfills work by making necessary changes in the DOM behind the scenes so as to emulate HTML5 behaviour. I have already modernizer in the default.html to enable this.&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;Once we have done all the changes, we will review them, commit and merge into master branch. After that we can delete the development branch&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;git diff master..develop
+git commit -am &amp;quot;Updated my blog to HTML5&amp;quot;
+git checkout master
+git merge develop
+git branch -d develop
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</content>
+ </entry>
  
  <entry>
    <title>Learning HTML5</title>
@@ -855,269 +1045,6 @@ Loaded 1 password hash (NT MD4 [128/128 SSE2 + 32/32])
 &lt;/div&gt;
 &lt;p&gt;Or, you can directly reset it with chntpw&lt;/p&gt;
 &lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;/pentest/password/chntpw -u administrator SAM
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;</content>
- </entry>
- 
- <entry>
-   <title>HackingLab Challenge: Disassemble .NET Clients</title>
-   <link href="http://madhur.co.in/blog/2011/09/10/hackchallenge.html"/>
-   <updated>2011-09-10T00:00:00+05:30</updated>
-   <id>id:/blog/2011/09/10/hackchallenge</id>
-   <content type="html">&lt;p&gt;Compass Security has come up with a hacking challenge on their &lt;a href='https://www.hacking-lab.com/sh/LAE04Jf'&gt;site&lt;/a&gt;. The challenge consist of an .NET client having some hidden functionality which needs to be uncovered by the user. I decided to give it a try.&lt;/p&gt;
-
-&lt;h2 id='requirements'&gt;Requirements&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Download &lt;a href='http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe'&gt;Application: DotNetFatClientHacking.exe&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id='tools_used_in_the_trade'&gt;Tools used in the trade&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href='http://www.reflector.net/'&gt;Reflector&lt;/a&gt; or now better &lt;a href='http://www.jetbrains.com/decompiler/'&gt;DotPeek&lt;/a&gt;&lt;/li&gt;
-
-&lt;li&gt;ILDasm&lt;/li&gt;
-
-&lt;li&gt;Hex Editor&lt;/li&gt;
-
-&lt;li&gt;MSDN&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id='solution'&gt;Solution&lt;/h2&gt;
-
-&lt;p&gt;Let&amp;#8217;s run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/netapp.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;Let&amp;#8217;s open the assembly in Reflector and see what it&amp;#8217;s doing.&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/reflector.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;From the reflector, I could figure out the following&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The form has got actually 3 buttons, 2 are hidden&lt;/li&gt;
-
-&lt;li&gt;There is a &lt;em&gt;BusinessClass&lt;/em&gt; class in the assembly which is invoked by the hidden buttons&lt;/li&gt;
-
-&lt;li&gt;The visible button checks if the user is &lt;em&gt;Admin&lt;/em&gt; and hides or shows the other two buttons&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Now, our job is to become the Admin :) . That&amp;#8217;s the code which is called by the Visible button &lt;strong&gt;Identify me&lt;/strong&gt;&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='csharp'&gt; &lt;span class='k'&gt;private&lt;/span&gt; &lt;span class='k'&gt;void&lt;/span&gt; &lt;span class='nf'&gt;identifyUser&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;
-      &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;IsAdmin&lt;/span&gt;&lt;span class='p'&gt;())&lt;/span&gt;
-      &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;labUser&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Text&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Welcome Admin!&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;butAdminHTTP&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Visible&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;true&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;butAdminHTTPS&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Visible&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;true&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-      &lt;span class='p'&gt;}&lt;/span&gt;
-      &lt;span class='k'&gt;else&lt;/span&gt;
-      &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;labUser&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Text&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;Welcome User!&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;butAdminHTTP&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Visible&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;false&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;butAdminHTTPS&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Visible&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;false&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-      &lt;span class='p'&gt;}&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Clearly, our main interest is in &lt;em&gt;IsAdmin()&lt;/em&gt; function which is defined as follows:&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='csharp'&gt;&lt;span class='k'&gt;private&lt;/span&gt; &lt;span class='kt'&gt;bool&lt;/span&gt; &lt;span class='nf'&gt;IsAdmin&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;
-      &lt;span class='k'&gt;foreach&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='kt'&gt;object&lt;/span&gt; &lt;span class='n'&gt;obj&lt;/span&gt; &lt;span class='k'&gt;in&lt;/span&gt; &lt;span class='n'&gt;Dns&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;GetHostEntry&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;Dns&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;GetHostName&lt;/span&gt;&lt;span class='p'&gt;()).&lt;/span&gt;&lt;span class='n'&gt;AddressList&lt;/span&gt;&lt;span class='p'&gt;)&lt;/span&gt;
-      &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='k'&gt;if&lt;/span&gt; &lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;obj&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;ToString&lt;/span&gt;&lt;span class='p'&gt;().&lt;/span&gt;&lt;span class='n'&gt;Equals&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='s'&gt;&amp;quot;258.54.54.699&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;))&lt;/span&gt;
-          &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='k'&gt;true&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-      &lt;span class='p'&gt;}&lt;/span&gt;
-      &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='k'&gt;false&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;	
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Hmmm. Very Interesting !!! Do you understand what is it doing ?&lt;/p&gt;
-
-&lt;p&gt;It basically retrieving the host name of our computer and based on that hostname getting all the IP addresses assigned to the network interfaces present in the system. If any of its IP address matches &lt;em&gt;258.54.54.699&lt;/em&gt;, I am the Admin :).&lt;/p&gt;
-
-&lt;p&gt;Now the interesting part here is that &lt;em&gt;258.54.54.699&lt;/em&gt; is actually an invalid IP address otherwise I could have fooled the program by temporarily assigning this IP address to either one of my interfaces or even write that in &lt;em&gt;hosts&lt;/em&gt; file.&lt;/p&gt;
-
-&lt;p&gt;But since its invalid IP, it will never be returned by system API. So, we must patch the program.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;#8217;s open the function in &lt;em&gt;ILDASM&lt;/em&gt; and look at its disassembly.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;  IL_001c:  ldloc.1
-  IL_001d:  callvirt   instance string [mscorlib]System.Object::ToString()
-  IL_0022:  ldstr      &amp;quot;258.54.54.699&amp;quot;
-  IL_0027:  callvirt   instance bool [mscorlib]System.String::Equals(string)
-  IL_002c:  brfalse.s  IL_0032
-  IL_002e:  ldc.i4.1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;There are several ways to do it. I will write down from tedious to easiest&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Export the classes from Reflector to Visual Studio solution and change the IP address to our actual IP address. But then Why not just NOP out the call itself :). This requires boring effort&lt;/li&gt;
-
-&lt;li&gt;Use the ILASM or any other utility to change the instruction at &lt;em&gt;ldstr &amp;#8220;258.54.54.699&amp;#8221;&lt;/em&gt; to &lt;em&gt;ldstr actual ip&lt;/em&gt;. Even this requires some effort&lt;/li&gt;
-
-&lt;li&gt;Easiest Way: Actually we can just take advantage of if-else branch reversal.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Let&amp;#8217;s take a look at disassembly of &lt;em&gt;identifyuser()&lt;/em&gt; function&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/ildasm-output.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you closely look at the disassembly above, the instruction at IL_0006 is doing all the magic which is&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;What this instruction means is that if output of &lt;em&gt;IsAdmin()&lt;/em&gt; is false, branch to instruction at IL_0031, the instruction which hides the buttons. Now, we can just change this instruction to reverse, i.e. make it &lt;strong&gt;brtrue.s&lt;/strong&gt;. A quick look at &lt;a href='http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.brtrue_s\(v=vs.71\'&gt;MSDN&lt;/a&gt;.aspx) tells me that its opcode is 2D as opposed to 2C which stands for &lt;strong&gt;brfalse.s&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;Now, we just need to fire up the favourite hex editor and &lt;strong&gt;change just one byte.&lt;/strong&gt; from 2C to 2D.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
-
-000005A0  02 28 02 00 00 06 02 28 05 00 00 06 2A 1E 02 28  
-000005B0  05 00 00 06 2A 00 00 00 03 30 02 00 5A 00 00 00  
-000005C0  00 00 00 00 02 28 06 00 00 06 2D 29 02 7B 02 00  
-000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00  
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let&amp;#8217;s save the file and run it again.&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/cracked.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;Voilla !!! The Administrative buttons are visible and clicking them invokes the Business functions which fetch some HTML output over the internet :)&lt;/p&gt;</content>
- </entry>
- 
- <entry>
-   <title>Best fonts for programming</title>
-   <link href="http://madhur.co.in/blog/2011/09/09/bestfontscode.html"/>
-   <updated>2011-09-09T00:00:00+05:30</updated>
-   <id>id:/blog/2011/09/09/bestfontscode</id>
-   <content type="html">&lt;p&gt;Recently I have been observing the change in the trend in the preferred font for programming.&lt;/p&gt;
-
-&lt;p&gt;Back in the earlier days &lt;em&gt;Courier New&lt;/em&gt; used to be the preferred font for programming. This was the default font in Visual Studio 2008. However, with later operating Systems and tools such as Visual Studio 2010, &lt;em&gt;Consolas&lt;/em&gt; is becoming the top preferred font for programming.&lt;/p&gt;
-
-&lt;p&gt;The screenshot below shows the same code with Courier New and Consolas.&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/courier-vs.png' /&gt; &lt;img alt='' src='/images/consolas-vs.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;The prime difference between two fonts is that Consolas is Clear Type optimized font. &lt;a href='http://en.wikipedia.org/wiki/ClearType'&gt;Clear Type&lt;/a&gt; is the Microsoft implementation of &lt;a href='http://en.wikipedia.org/wiki/TrueType'&gt;True Type&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Programmers also need to work with Console and terminals as well be it Win OS or Linux. Still in Windows 7, 2008 R2, font in Command Prompt or Powershell is by default set to &lt;em&gt;Raster fonts&lt;/em&gt; which by default maps to either &lt;em&gt;Terminal&lt;/em&gt;.&lt;/p&gt;
-
-&lt;p&gt;You might be wondering why there are only limited options to set the font in Command prompt or Powershell. You can enable more options by editing the registry as outlined in this &lt;a href='http://support.microsoft.com/default.aspx?scid=kb;EN-US;Q247815'&gt;KB article&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The reasoning for this is also detailed by veteran MS employee &lt;strong&gt;Raymond Chen&lt;/strong&gt; in his &lt;a href='http://blogs.msdn.com/b/oldnewthing/archive/2007/05/16/2659903.aspx'&gt;The Old new thing blog&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Consolas works even better with Consoles and terminal windows as well. The screen shot below compares &lt;em&gt;Terminal&lt;/em&gt; and &lt;em&gt;Consolas&lt;/em&gt; in command prompt. Decide for yourself.&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/raster-con.png' /&gt; &lt;img alt='' src='/images/consolas-con.png' /&gt;&lt;/p&gt;
-
-&lt;p&gt;I have also switched from &lt;em&gt;Terminal&lt;/em&gt; to &lt;em&gt;Consolas&lt;/em&gt; in my favourite editor &lt;a href='http://notepad-plus-plus.org/'&gt;Notepad++&lt;/a&gt;. It definitely looks better, see below&lt;/p&gt;
-
-&lt;p&gt;&lt;img alt='' src='/images/notepad-term.png' /&gt; &lt;img alt='' src='/images/notepad-cons.png' /&gt;&lt;/p&gt;
-
-&lt;h2 id='installing_consolas_in_linux'&gt;Installing Consolas in Linux&lt;/h2&gt;
-
-&lt;p&gt;You might also want to use Consolas in Linux terminal and Gedit, Gvim or vim.&lt;/p&gt;
-
-&lt;h2 id='method_1'&gt;Method 1&lt;/h2&gt;
-
-&lt;p&gt;Create a &amp;#8216;.fonts&amp;#8217; folder in your home directory and copy the necessary fonts into it. Now you have access to the fonts on a per user basis.&lt;/p&gt;
-
-&lt;h2 id='method_2'&gt;Method 2&lt;/h2&gt;
-
-&lt;p&gt;First find out in which location linux has installed the truetype fonts.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;find /usr -iname \*.ttf |head -n 5
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Once you know the path of the fonts directory, move to this directory and create a folder there (it can be any name). Next copy all the windows ttf fonts to the windowsfonts directory that was just created.&lt;/p&gt;
-
-&lt;p&gt;Now change the ownership of the fonts as well as make sure they have a right of 644 .&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;# chown root.root *.ttf
-# chmod 644 *.ttf
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Run the command mkfontdir while in the windowsfonts directory.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;# mkfontdir
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;This will create an index of the fonts in the directory. It will also create two files fonts.dir and fonts.cache-1 . Now moving to the parent directory, edit the file fonts.cache-1 using your favourate editor and append the following line to it.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt;File: /usr/share/fonts/truetype/fonts.cache-1
-...
-&amp;quot;windowsfonts&amp;quot; 0 &amp;quot;.dir&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;Lastly run the command fc-cache.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='text'&gt; fc-cache
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;h2 id='other_good_programming_fonts'&gt;Other good programming fonts&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Inconsolata&lt;/li&gt;
-
-&lt;li&gt;Proggy Clean&lt;/li&gt;
-
-&lt;li&gt;Terminus&lt;/li&gt;
-
-&lt;li&gt;Fixed Sys&lt;/li&gt;
-
-&lt;li&gt;Andale Mono&lt;/li&gt;
-
-&lt;li&gt;Anonymous&lt;/li&gt;
-
-&lt;li&gt;Terminus&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id='references'&gt;References&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href='http://www.codeproject.com/KB/work/FontSurvey.aspx'&gt;http://www.codeproject.com/KB/work/FontSurvey.aspx&lt;/a&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;a href='http://stackoverflow.com/questions/485174/programming-fonts'&gt;http://stackoverflow.com/questions/485174/programming-fonts&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content>
- </entry>
- 
- <entry>
-   <title>Removing the Default Editor Parts from SharePoint Web Parts</title>
-   <link href="http://madhur.co.in/blog/2011/09/06/hidingproppane.html"/>
-   <updated>2011-09-06T00:00:00+05:30</updated>
-   <id>id:/blog/2011/09/06/hidingproppane</id>
-   <content type="html">&lt;p&gt;I was recently asked how to remove the Editor Parts (Appearance, Layout, Advanced, etc) from custom Web Parts.&lt;/p&gt;
-&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='csharp'&gt;&lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;MyEditorPart&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;EditorPart&lt;/span&gt;
-&lt;span class='p'&gt;{&lt;/span&gt;
-    &lt;span class='k'&gt;protected&lt;/span&gt; &lt;span class='k'&gt;override&lt;/span&gt; &lt;span class='k'&gt;void&lt;/span&gt; &lt;span class='nf'&gt;CreateChildControls&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;        &lt;span class='c1'&gt;// this line hides the default EditorParts&lt;/span&gt;
-        &lt;span class='n'&gt;Parent&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Controls&lt;/span&gt;&lt;span class='p'&gt;[&lt;/span&gt;&lt;span class='m'&gt;2&lt;/span&gt;&lt;span class='p'&gt;].&lt;/span&gt;&lt;span class='n'&gt;Visible&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;false&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='k'&gt;base&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;CreateChildControls&lt;/span&gt;&lt;span class='p'&gt;();&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;
-
-    &lt;span class='k'&gt;public&lt;/span&gt; &lt;span class='k'&gt;override&lt;/span&gt; &lt;span class='kt'&gt;bool&lt;/span&gt; &lt;span class='nf'&gt;ApplyChanges&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='c1'&gt;// do stuff here&lt;/span&gt;
-        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='k'&gt;true&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;
-
-    &lt;span class='k'&gt;public&lt;/span&gt; &lt;span class='k'&gt;override&lt;/span&gt; &lt;span class='k'&gt;void&lt;/span&gt; &lt;span class='nf'&gt;SyncChanges&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='c1'&gt;// do stuff here&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;
-&lt;span class='p'&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;&lt;div class='highlight'&gt;&lt;pre&gt;&lt;code class='csharp'&gt;&lt;span class='k'&gt;public&lt;/span&gt; &lt;span class='k'&gt;class&lt;/span&gt; &lt;span class='nc'&gt;MyWebPart&lt;/span&gt; &lt;span class='p'&gt;:&lt;/span&gt; &lt;span class='n'&gt;WebPart&lt;/span&gt;
-&lt;span class='p'&gt;{&lt;/span&gt;
-    &lt;span class='k'&gt;public&lt;/span&gt; &lt;span class='k'&gt;override&lt;/span&gt; &lt;span class='n'&gt;EditorPartCollection&lt;/span&gt; &lt;span class='nf'&gt;CreateEditorParts&lt;/span&gt;&lt;span class='p'&gt;()&lt;/span&gt;
-    &lt;span class='p'&gt;{&lt;/span&gt;
-        &lt;span class='n'&gt;ArrayList&lt;/span&gt; &lt;span class='n'&gt;aryParts&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;new&lt;/span&gt; &lt;span class='n'&gt;ArrayList&lt;/span&gt;&lt;span class='p'&gt;();&lt;/span&gt;
-
-        &lt;span class='n'&gt;MyEditorPart&lt;/span&gt; &lt;span class='n'&gt;myEditor&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;new&lt;/span&gt; &lt;span class='n'&gt;MyEditorPart&lt;/span&gt;&lt;span class='p'&gt;();&lt;/span&gt;
-        &lt;span class='n'&gt;myEditor&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;ID&lt;/span&gt; &lt;span class='p'&gt;=&lt;/span&gt; &lt;span class='k'&gt;this&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;ID&lt;/span&gt; &lt;span class='p'&gt;+&lt;/span&gt; &lt;span class='s'&gt;&amp;quot;_myEditorPart&amp;quot;&lt;/span&gt;&lt;span class='p'&gt;;&lt;/span&gt;
-        &lt;span class='n'&gt;aryParts&lt;/span&gt;&lt;span class='p'&gt;.&lt;/span&gt;&lt;span class='n'&gt;Add&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;myEditor&lt;/span&gt;&lt;span class='p'&gt;);&lt;/span&gt;
-
-        &lt;span class='k'&gt;return&lt;/span&gt; &lt;span class='k'&gt;new&lt;/span&gt; &lt;span class='nf'&gt;EditorPartCollection&lt;/span&gt;&lt;span class='p'&gt;(&lt;/span&gt;&lt;span class='n'&gt;aryParts&lt;/span&gt;&lt;span class='p'&gt;);&lt;/span&gt;
-    &lt;span class='p'&gt;}&lt;/span&gt;
-    &lt;span class='c1'&gt;// do more stuff here...&lt;/span&gt;
-&lt;span class='p'&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;</content>
  </entry>
