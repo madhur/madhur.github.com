@@ -21,7 +21,7 @@ I asked the question on [http://sharepoint.stackexchange.com](http://sharepoint.
 
 The most upvoted answer gives the preference to using Client object model over web services whenever possible.
 
-Recently, the auther of [SPServices] library - Marc Anderson also wrote an article covering the same topic. You can read the article [here](http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489)
+Recently, the auther of [SPServices](http://spservices.codeplex.com/) library - Marc Anderson also wrote an article covering the same topic. You can read the article [here](http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489)
 
 
 [When to Choose SPServices vs. the Client Side Object Model (CSOM)](http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489)
