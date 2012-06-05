@@ -6,7 +6,7 @@ top: Madhur Ahuja
 ---
 About
 ======
-Hello!!! I am Madhur. I am a programmer/technology guy from India. I like building web applications using all the standard technologies like HTML, CSS, JavaScript, JQuery, ASP.NET, and SQL Server. 
+I am a programmer/technology guy from India. I like building web applications using all the standard technologies like HTML, CSS, JavaScript, JQuery, ASP.NET, and SQL Server. 
 Recently, I have been working more with ECM technologies such as SharePoint and Documentum. I used to work with [Microsoft](http://www.microsoft.com) but now I work independently, trying to build a technology business.
 I also know a good variety of programming languages too. .NET C# is my favourite, I know Java very well, and I know Javascript pretty well too.
 I've been experimenting with Backtrack Linux in the last few months, using all the security tools such as Nmap, Wireshark, Metaspoilt, Sqlmap, Kismet, Ettercap etc.
