@@ -28,7 +28,7 @@ git checkout develop
 Once we have done the changes, we will test it throroughly and merge it back to our main branch.
 
 * Changes to main default.html
-{% highlight html hl_lines=2,4,6,7,8,15,16,19,20 %}
+{% highlight html linenos %}
 <!DOCTYPE html>
 <html lang="en">
 <head>   
@@ -56,7 +56,7 @@ Once we have done the changes, we will test it throroughly and merge it back to 
 {% endhighlight %}
 
 * Changes to blog-post.html
-{% highlight html hl_lines=6,9,10,11,12,17,21,23 %}
+{% highlight html linenos %}
 ---
 layout: default
 top: Madhur Ahuja

@@ -40,7 +40,7 @@ Invalid flag value -O
 
 Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in **albino.rb** file.
 
-{% highlight ruby hl_lines=5,6 %}
+{% highlight ruby %}
   def validate_shell_args(flag, value)
     if flag !~ /^[a-z]+$/i
       raise ShellArgumentError, "Flag is invalid: #{flag.inspect}"

@@ -1,6 +1,6 @@
 require_relative 'site_process'
-require "Nokogiri"
-require "Maruku"
+require "nokogiri"
+require "maruku"
 
 module Jekyll
 	
