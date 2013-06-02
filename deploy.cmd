@@ -1,6 +1,6 @@
 @echo off
 echo "Building Content"
-call jekyll build
+jekyll build
 
 echo "Checking out master"
 git checkout master
