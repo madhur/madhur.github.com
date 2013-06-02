@@ -51,17 +51,7 @@
 	  })();
 
 	</script>
-	
-	<script type="text/javascript">
-	
-	var cssLink = document.createElement("link") ;
-cssLink.href = "/files/css/disqus-form.css"; 
-cssLink .rel = "stylesheet"; 
-cssLink .type = "text/css"; 
-document.getElementById("dsq1").contentDocument.body.appendChild(cssLink);
-	</script>
-	
-	
+		
 	
 </head>
 <body>
@@ -84,7 +74,7 @@ document.getElementById("dsq1").contentDocument.body.appendChild(cssLink);
 					<li><a class="home" href="/">Home</a></li>
 					<li><a class="blog" href="/blogindex.html">Blog</a></li>
 					<!--<li><a class="work" href="/work">Resume</a></li>-->
-					<li><a class="code" href="/projects">Projects</a></li>
+					<!--<li><a class="code" href="/projects">Projects</a></li>-->
 					<li><a class="papers" href="/papers">Papers</a></li>
 					<li><a class="info" href="/info">About</a></li>
 					<li><a class="contact" href="/contact">Contact</a></li>
@@ -188,27 +178,23 @@ google_ad_height = 600;
 
 <p>However, when I tried to use <strong>hl_lines</strong> option to highlight the lines of code, I faced several issues. Following is the syntax I used</p>
 <div class='highlight'><pre><code class='text'> highlight html hl_lines=2 4
-</code></pre>
-</div>
+</code></pre></div>
 <p>Running the above piece of code reults in only line 2 being highlighted and not both. So I decided to enclose it with quotation marks</p>
 <div class='highlight'><pre><code class='text'> highlight html hl_lines=&quot;2 4&quot;  
-</code></pre>
-</div>
+</code></pre></div>
 <p>The above piece of code gives the error.</p>
 <div class='highlight'><pre><code class='text'>Invalid flag value -O
-</code></pre>
-</div>
+</code></pre></div>
 <p>Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in <strong>albino.rb</strong> file.</p>
 <div class='highlight'><pre><code class='ruby'>  <span class='k'>def</span> <span class='nf'>validate_shell_args</span><span class='p'>(</span><span class='n'>flag</span><span class='p'>,</span> <span class='n'>value</span><span class='p'>)</span>
     <span class='k'>if</span> <span class='n'>flag</span> <span class='o'>!~</span> <span class='sr'>/^[a-z]+$/i</span>
       <span class='k'>raise</span> <span class='no'>ShellArgumentError</span><span class='p'>,</span> <span class='s2'>&quot;Flag is invalid: </span><span class='si'>#{</span><span class='n'>flag</span><span class='o'>.</span><span class='n'>inspect</span><span class='si'>}</span><span class='s2'>&quot;</span>
     <span class='k'>end</span>
-<span class='hll'>    <span class='k'>if</span> <span class='n'>value</span> <span class='o'>!~</span> <span class='sr'>/^[a-z0-9\-\_\+\=\#\,\s]+$/i</span>
-</span><span class='hll'>      <span class='k'>raise</span> <span class='no'>ShellArgumentError</span><span class='p'>,</span> <span class='s2'>&quot;Flag value is invalid: -</span><span class='si'>#{</span><span class='n'>flag</span><span class='si'>}</span><span class='s2'> </span><span class='si'>#{</span><span class='n'>value</span><span class='o'>.</span><span class='n'>inspect</span><span class='si'>}</span><span class='s2'>&quot;</span>
-</span>    <span class='k'>end</span>
+    <span class='k'>if</span> <span class='n'>value</span> <span class='o'>!~</span> <span class='sr'>/^[a-z0-9\-\_\+\=\#\,\s]+$/i</span>
+      <span class='k'>raise</span> <span class='no'>ShellArgumentError</span><span class='p'>,</span> <span class='s2'>&quot;Flag value is invalid: -</span><span class='si'>#{</span><span class='n'>flag</span><span class='si'>}</span><span class='s2'> </span><span class='si'>#{</span><span class='n'>value</span><span class='o'>.</span><span class='n'>inspect</span><span class='si'>}</span><span class='s2'>&quot;</span>
+    <span class='k'>end</span>
   <span class='k'>end</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the <strong>highlight.rb</strong> file in Jekyll to recombine them into the list. See the updated function below:</p>
 <div class='highlight'><pre><code class='ruby'> <span class='k'>def</span> <span class='nf'>initialize</span><span class='p'>(</span><span class='n'>tag_name</span><span class='p'>,</span> <span class='n'>markup</span><span class='p'>,</span> <span class='n'>tokens</span><span class='p'>)</span>
       <span class='k'>super</span>	 
@@ -243,8 +229,7 @@ google_ad_height = 600;
         <span class='k'>raise</span> <span class='no'>SyntaxError</span><span class='o'>.</span><span class='n'>new</span><span class='p'>(</span><span class='s2'>&quot;Syntax Error in &#39;highlight&#39; - Valid syntax: highlight &lt;lang&gt; [linenos]&quot;</span><span class='p'>)</span>
       <span class='k'>end</span>
     <span class='k'>end</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>I cannot submit it as patch in Jekyll since this fix involves fixing two components: Jekyll and Albino. May be someone can come with better approach to fix this. This works for me as of now.</p>
 			<footer>
 				<div class="blocked tags">
@@ -278,22 +263,6 @@ google_ad_height = 600;
 </script>
 
 
-				<!-- Enable Facebook comments -->
-				<div id="fb-root"></div>
-<script>
-window.fbAsyncInit = function() {
-FB.init({appId: 'your app id', status: true, cookie: true,
-xfbml: true});
-};
-
-(function() {
-var e = document.createElement('script'); e.async = true;
-e.src = document.location.protocol +
-'//connect.facebook.net/en_US/all.js';
-document.getElementById('fb-root').appendChild(e);
-}());
-</script>
-
 			</div>
 
 
@@ -313,6 +282,7 @@ document.getElementById('fb-root').appendChild(e);
       dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
   })();
+
 </script>
 
 
@@ -355,12 +325,12 @@ document.getElementById('fb-root').appendChild(e);
 				<p id="copyright">
 					Content &amp; Design by 
 					<a href="/info/">Madhur Ahuja</a>
-					&copy; 2010-2012
+					&copy; 2010-2013
 					(Some rights reserved)			
 				</p>
 				<p id="poweredby">
 					Powered by 
-					<a href="https://github.com/mojombo/jekyll" title="A static, minimalist CMS">Jekyll</a> and <a href="http://disqus.com">Disqus</a>.
+					<a href="jekyllrb.com" title="A static, minimalist CMS">Jekyll 1.0.2</a> and <a href="http://disqus.com">Disqus</a>.
 				</p>
 
 				<div class="c">&nbsp;</div>

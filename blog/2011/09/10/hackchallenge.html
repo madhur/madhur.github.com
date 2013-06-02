@@ -51,17 +51,7 @@
 	  })();
 
 	</script>
-	
-	<script type="text/javascript">
-	
-	var cssLink = document.createElement("link") ;
-cssLink.href = "/files/css/disqus-form.css"; 
-cssLink .rel = "stylesheet"; 
-cssLink .type = "text/css"; 
-document.getElementById("dsq1").contentDocument.body.appendChild(cssLink);
-	</script>
-	
-	
+		
 	
 </head>
 <body>
@@ -84,7 +74,7 @@ document.getElementById("dsq1").contentDocument.body.appendChild(cssLink);
 					<li><a class="home" href="/">Home</a></li>
 					<li><a class="blog" href="/blogindex.html">Blog</a></li>
 					<!--<li><a class="work" href="/work">Resume</a></li>-->
-					<li><a class="code" href="/projects">Projects</a></li>
+					<!--<li><a class="code" href="/projects">Projects</a></li>-->
 					<li><a class="papers" href="/papers">Papers</a></li>
 					<li><a class="info" href="/info">About</a></li>
 					<li><a class="contact" href="/contact">Contact</a></li>
@@ -236,8 +226,7 @@ google_ad_height = 600;
         <span class='k'>this</span><span class='p'>.</span><span class='n'>butAdminHTTPS</span><span class='p'>.</span><span class='n'>Visible</span> <span class='p'>=</span> <span class='k'>false</span><span class='p'>;</span>
       <span class='p'>}</span>
     <span class='p'>}</span>
-</code></pre>
-</div>
+</code></pre></div>
 <p>Clearly, our main interest is in <em>IsAdmin()</em> function which is defined as follows:</p>
 <div class='highlight'><pre><code class='csharp'><span class='k'>private</span> <span class='kt'>bool</span> <span class='nf'>IsAdmin</span><span class='p'>()</span>
     <span class='p'>{</span>
@@ -248,8 +237,7 @@ google_ad_height = 600;
       <span class='p'>}</span>
       <span class='k'>return</span> <span class='k'>false</span><span class='p'>;</span>
     <span class='p'>}</span>	
-</code></pre>
-</div>
+</code></pre></div>
 <p>Hmmm. Very Interesting !!! Do you understand what is it doing ?</p>
 
 <p>It basically retrieving the host name of our computer and based on that hostname getting all the IP addresses assigned to the network interfaces present in the system. If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
@@ -265,8 +253,7 @@ google_ad_height = 600;
   IL_0027:  callvirt   instance bool [mscorlib]System.String::Equals(string)
   IL_002c:  brfalse.s  IL_0032
   IL_002e:  ldc.i4.1
-</code></pre>
-</div>
+</code></pre></div>
 <p>There are several ways to do it. I will write down from tedious to easiest</p>
 
 <ul>
@@ -283,8 +270,7 @@ google_ad_height = 600;
 
 <p>If you closely look at the disassembly above, the instruction at IL_0006 is doing all the magic which is</p>
 <div class='highlight'><pre><code class='text'>  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031
-</code></pre>
-</div>
+</code></pre></div>
 <p>What this instruction means is that if output of <em>IsAdmin()</em> is false, branch to instruction at IL_0031, the instruction which hides the buttons. Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue.s</strong>. A quick look at <a href='http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.brtrue_s\(v=vs.71\'>MSDN</a>.aspx) tells me that its opcode is 2D as opposed to 2C which stands for <strong>brfalse.s</strong>.</p>
 
 <p>Now, we just need to fire up the favourite hex editor and <strong>change just one byte.</strong> from 2C to 2D.</p>
@@ -294,8 +280,7 @@ google_ad_height = 600;
 000005B0  05 00 00 06 2A 00 00 00 03 30 02 00 5A 00 00 00  
 000005C0  00 00 00 00 02 28 06 00 00 06 2D 29 02 7B 02 00  
 000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00  
-</code></pre>
-</div>
+</code></pre></div>
 <p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let&#8217;s save the file and run it again.</p>
 
 <p><img alt='' src='/images/cracked.png' /></p>
@@ -337,22 +322,6 @@ google_ad_height = 600;
 </script>
 
 
-				<!-- Enable Facebook comments -->
-				<div id="fb-root"></div>
-<script>
-window.fbAsyncInit = function() {
-FB.init({appId: 'your app id', status: true, cookie: true,
-xfbml: true});
-};
-
-(function() {
-var e = document.createElement('script'); e.async = true;
-e.src = document.location.protocol +
-'//connect.facebook.net/en_US/all.js';
-document.getElementById('fb-root').appendChild(e);
-}());
-</script>
-
 			</div>
 
 
@@ -372,6 +341,7 @@ document.getElementById('fb-root').appendChild(e);
       dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
   })();
+
 </script>
 
 
@@ -414,12 +384,12 @@ document.getElementById('fb-root').appendChild(e);
 				<p id="copyright">
 					Content &amp; Design by 
 					<a href="/info/">Madhur Ahuja</a>
-					&copy; 2010-2012
+					&copy; 2010-2013
 					(Some rights reserved)			
 				</p>
 				<p id="poweredby">
 					Powered by 
-					<a href="https://github.com/mojombo/jekyll" title="A static, minimalist CMS">Jekyll</a> and <a href="http://disqus.com">Disqus</a>.
+					<a href="jekyllrb.com" title="A static, minimalist CMS">Jekyll 1.0.2</a> and <a href="http://disqus.com">Disqus</a>.
 				</p>
 
 				<div class="c">&nbsp;</div>
