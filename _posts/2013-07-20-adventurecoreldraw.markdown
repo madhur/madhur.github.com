@@ -11,7 +11,7 @@ tags:
 
 My adventure with Corel Draw. [Source here](/images/UUBlock.cdr)
 
-![Pic1](/images/uublock.png)
+![Pic1](/images/UUBlock.png)
 
 
 
