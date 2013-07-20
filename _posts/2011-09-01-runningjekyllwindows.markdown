@@ -10,7 +10,9 @@ tags:
 - Windows
 ---
 
-
+<div class="info">
+Update: If you would like to directly download the portable version of Jekyll. See my <a href="/blog/2013/07/20/buildportablejekyll.html">new blog post here</a>
+</div>
 
 Jekyll can also be made to run on Windows Operating System. This prefer when I am working on my office laptop which has Windows 7 installed on it.
 
