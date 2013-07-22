@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Buildilng portable Jekyll for Windows"
-excerpt: "Buildilng portable Jekyll for Windows"
+title: "Building portable Jekyll for Windows"
+excerpt: "Building portable Jekyll for Windows"
 disqus_id: /2013/07/20/buildportablejekyll/
 location: New Delhi, India
 time: 9:00 PM
