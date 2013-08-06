@@ -27,7 +27,7 @@ Following packages are required to setup Jekyll on Windows:
 
 **1** Install the Ruby from [http://rubyinstaller.org/downloads/](http://rubyinstaller.org/downloads/) and install it to path such as C:\ruby
 
-**2** Install the Ruby development kit from [here](http://rubyforge.org/frs/download.php/75127/rubyinstaller-1.9.2-p290.exe) and extract it to path such as c:\devkit.
+**2** Install the Ruby development kit from  [the same location above](http://rubyinstaller.org/downloads/) and extract it to path such as c:\devkit.
    Run the following commands 
 
 {% highlight text %}
