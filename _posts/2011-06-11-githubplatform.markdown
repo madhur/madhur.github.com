@@ -11,7 +11,7 @@ tags:
 ---
 
 
-Currently [Github](http://github.com) is an emerging and exciting platform for development. For those who don't know what Github is, here is the definition straight from [wikipedia](wikipedia.com)
+Currently [Github](http://github.com) is an emerging and exciting platform for development. For those who don't know what Github is, here is the definition straight from [wikipedia](http://wikipedia.com)
 
 *GitHub is a web-based hosting service for software development projects that use the Git revision control system*
 

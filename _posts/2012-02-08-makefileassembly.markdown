@@ -37,8 +37,8 @@ Note that all the above tools should be put preferable in the PATH variable for 
 setx PATH "f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;"
 {% endhighlight %}	
 
-I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. If not, you can 
-browse some excellent tutorials [here](http://web.sau.edu/lilliskevinm/csci240/masmdocs/envtools/26LMAETC16.pdf) and [here](http://webster.cs.ucr.edu/AoA/DOS/ch08/CH08-10.html#HEADING10-131).
+I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. 
+
 
 * A Win32 Assembly program without the use of resources:
 

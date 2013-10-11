@@ -94,4 +94,3 @@ Lastly run the command fc-cache.
 
 ##References##
 * [http://www.codeproject.com/KB/work/FontSurvey.aspx](http://www.codeproject.com/KB/work/FontSurvey.aspx)
-* [http://stackoverflow.com/questions/485174/programming-fonts](http://stackoverflow.com/questions/485174/programming-fonts)

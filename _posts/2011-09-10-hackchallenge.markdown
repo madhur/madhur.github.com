@@ -106,7 +106,7 @@ If you closely look at the disassembly above,  the instruction at IL_0006 is doi
 {% endhighlight %}  
 
 What this instruction means is that if output of *IsAdmin()* is false, branch to instruction at IL_0031, the instruction which hides the buttons.
-Now, we can just change this instruction to reverse, i.e. make it **brtrue.s**. A quick look at [MSDN](http://msdn.microsoft.com/en-us/library/system.reflection.emit.opcodes.brtrue_s\(v=vs.71\).aspx) tells me that its opcode is 2D as opposed to 2C which stands for **brfalse.s**.
+Now, we can just change this instruction to reverse, i.e. make it **brtrue.s**. A quick look at MSDN tells me that its opcode is 2D as opposed to 2C which stands for **brfalse.s**.
 
 Now, we just need to fire up the favourite hex editor and **change just one byte.** from 2C to 2D.
 

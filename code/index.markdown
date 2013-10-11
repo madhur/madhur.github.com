@@ -69,7 +69,7 @@ Works only on Win2000/XP
 ##FileHeader##
 File Header is an explorer shell extension which displays the complete information about the Portable Executable (PE ) file and header for DOS MZ files.. Current version only supports .exe extension. The program is useful for those involved in programming of packers, unpackers as it displays all header fields at a click of button.
 
-[Source](hhttps://github.com/madhur/CollegeCode/tree/master/WIN32ASM/header) | Win32 Assembly
+[Source](https://github.com/madhur/CollegeCode/tree/master/WIN32ASM/header) | Win32 Assembly
 
 ***
 

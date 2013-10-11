@@ -39,7 +39,7 @@ The scene has changed from then. Now its the HTML5, CSS3 and Javascript which ar
 * **Browser Extensions:** The war of browser between IE, Mozilla and Chrome has resulted in browser extensions. These extensions are particularly popular in Chrome and Mozilla browsers. And guess what ? Writing a custom extension
   for these browser require skills in HTML and Javascript.
   
-* **Windows 8:** The next version of Microsoft Windows OS is going to use a new UI called [Metro](http://en.wikipedia.org/wiki/Metro_(design_language). And apart from using Managed code such as C# and VB.NET , you can create Metro Style 
+* **Windows 8:** The next version of Microsoft Windows OS is going to use a new UI called Metro. And apart from using Managed code such as C# and VB.NET , you can create Metro Style 
   apps in javascritp as well. See the article [Building your first Windows Metro style app using JavaScript](http://msdn.microsoft.com/en-us/library/windows/apps/br211385.aspx)
 
 It looks clear to me that HTML5, CSS3 and Javascript is going to be future for building rich UI apps on Web and mobile or perhaps even desktop. What do you think ?  

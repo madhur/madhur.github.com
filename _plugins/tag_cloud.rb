@@ -44,4 +44,26 @@ module Jekyll
   end
 end
 
+
+
+module Jekyll
+  class Slugize < Liquid::Tag
+    def initialize(tag_name, text, tokens)
+      super
+			@temp = text
+			
+			
+      end
+    end
+    def render(context)
+		
+		@text = context[@temp]
+		puts @text
+		return 'madhurahuja'
+		
+    end
+  end
+
+
 Liquid::Template.register_tag('tag_cloud', Jekyll::TagCloud)
+Liquid::Template.register_tag('slug', Jekyll::Slugize)

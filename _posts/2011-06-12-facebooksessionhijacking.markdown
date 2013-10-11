@@ -12,7 +12,7 @@ tags:
 ---
 
 
-Recently, there was a [vulnerability](http://www.wtfuzz.com/blogs/linkedin-ssl-cookie-vulnerability/) discovered in popular professional networking site [LinkedIn](www.linkedin.com) in which an attacker could steal an authentication cookie used by the site to authenticate the client. It was a classic case of Session sidejacking, which is desribed by [Wikipedia](http://en.wikipedia.org/wiki/Session_hijacking) as
+Recently, there was a [vulnerability](http://www.wtfuzz.com/blogs/linkedin-ssl-cookie-vulnerability/) discovered in popular professional networking site [LinkedIn](http://www.linkedin.com) in which an attacker could steal an authentication cookie used by the site to authenticate the client. It was a classic case of Session sidejacking, which is desribed by [Wikipedia](http://en.wikipedia.org/wiki/Session_hijacking) as
 
 *where the attacker uses packet sniffing to read network traffic between two parties to steal the session cookie. Many web sites use SSL encryption for login pages to prevent attackers from seeing the password, but do not use encryption for the rest of the site once authenticated. This allows attackers that can read the network traffic to intercept all the data that is submitted to the server or web pages viewed by the client. Since this data includes the session cookie, it allows him to impersonate the victim, even if the password itself is not compromised. Unsecured Wi-Fi hotspots are particularly vulnerable, as anyone sharing the network will generally be able to read most of the web traffic between other nodes and the access point.*
 

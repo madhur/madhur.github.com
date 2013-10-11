@@ -89,7 +89,7 @@ madhur@bt:~/buffer$ gcc -ggdb -m32 -o buffer1 -fno-stack-protector -mpreferred-s
 {% endhighlight %}
 
 **Windows Implementation**
-The /GS switch is a compiler option that will add some code to function’s prologue and epilogue code in order to prevent successful abuse of typical stack based (string buffer) overflows.
+The /GS switch is a compiler option that will add some code to functionâ€™s prologue and epilogue code in order to prevent successful abuse of typical stack based (string buffer) overflows.
 
 When an application starts, a program-wide master cookie (4 bytes (dword), unsigned int) is calculated (pseudo-random number) and saved in the .data section of the loaded module. In the function prologue, this program-wide master cookie is copied to the stack, right before the saved EBP and EIP. (between the local variables and the return addresses)
 
@@ -108,7 +108,7 @@ In a typical buffer overflow, the stack is attacked with your own data in an att
 </pre>
 The second important protection mechanism of /GS is variable reordering. In order to prevent attackers from overwriting local variables or arguments used by the function, the compiler will rearrange the layout of the stack frame, and will put string buffers at a higher address than all other variables. So when a string buffer overflow occurs, it cannot overwrite any other local variables.
 
-**Position Independent Executables (PIE)** In order to take advantage of Address Space Layout Randomization (ASLR), programs need to be built as Position Independent Executables (PIE) with -fPIE –pie flag. PIE has a 5-10% performance penalty on architectures with small numbers of general registers (e.g. x86). 
+**Position Independent Executables (PIE)** In order to take advantage of Address Space Layout Randomization (ASLR), programs need to be built as Position Independent Executables (PIE) with -fPIE â€“pie flag. PIE has a 5-10% performance penalty on architectures with small numbers of general registers (e.g. x86). 
 
 **Fortify Source** enables several compile-time and run-time protections including protections against overflows. In order to use Fortify Source which provides run-time checks of buffer lengths and memory regions, programs need to be built with -D_FORTIFY_SOURCE=2 flag. 
 
