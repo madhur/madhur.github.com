@@ -61,7 +61,7 @@ $(document).ready(function() {
 
 
 
-    $(".active").next().slideToggle("normal");
+    // $(".active").next().slideToggle("normal");
 
 
 
@@ -107,11 +107,8 @@ function Clickheretoprint()
   var sWinHTML = document.getElementById('container').innerHTML; 
    var heading = document.getElementsByTagName('h1')[0].innerHTML; 
    docprint.document.open(); 
-   docprint.document.write('<html><head><title>'+heading+'</title>'); 
-   docprint.document.write('<link rel="stylesheet" href="/files/css/global.css" type="text/css" />');
-   docprint.document.write('<link rel="stylesheet" href="/files/css/layout.css" type="text/css" />');
-   docprint.document.write('<link rel="stylesheet" href="/files/css/non-blog.css" type="text/css" />');
-   
+   docprint.document.write('<html><head><title>'+heading+'</title>');      	
+   docprint.document.write('<link rel="stylesheet" href="/files/css/blueprint/screen.css" type="text/css" />');   
    docprint.document.write('<link rel="stylesheet" type="text/css" href="/files/css/print.css">');
    docprint.document.write('</head><body onLoad="self.print()"><center>');          
    docprint.document.write(sWinHTML);          
