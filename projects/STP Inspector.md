@@ -5,7 +5,7 @@ github: SPProjects
 ---
 
 <div class="thumbnail">
-<a  href="/images/projects/stp.jpg" title="STP Inspector"><img  src='/images/projects/stp.jpg' /></a>
+<a  href="/images/projects/stp.JPG" title="STP Inspector"><img  src='/images/projects/stp.JPG' /></a>
 </div>  
 
 <p></p>

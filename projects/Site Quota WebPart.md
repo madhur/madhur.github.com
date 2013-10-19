@@ -1,5 +1,5 @@
 ---
-title: Site Quota Webpart
+title: Site Quota WebPart
 layout: project-detail
 github: SPProjects 
 ---

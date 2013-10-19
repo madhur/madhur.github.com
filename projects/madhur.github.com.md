@@ -1,5 +1,5 @@
 ---
-title: My Site
+title: madhur.github.com
 layout: project-detail
 github: madhur.github.com 
 ---
