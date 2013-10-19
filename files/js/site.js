@@ -19,22 +19,39 @@ $(document).ready(function() {
 	}, function() {
 		$(this).stop().animate({ opacity: 0.4 }, 400);
 	});
-});
-
-
-$(window).bind("load", function() {
-
-
-	if (!$.browser.msie) {
-		window.setTimeout(function() { $('#intro').fadeTo(3000, 0.5); }, 3000);
 	
-		$("#intro").hover(function() {
-			$(this).stop().fadeTo("fast", 0.99999);
-		},function() {
-			$(this).stop().fadeTo("fast", 0.5);
-		});
+	var basefile;
+	if(document.URL.indexOf("projects")!=-1)
+	{
+		
+		var uri = new URI(document.URL);
+		var filename=uri.filename(); // returns string "hello.html" (no leading slash)
+		var names=filename.split(".html");
+		
+		basefile=names[0];			
 	}
+	
+	basefile=decodeURIComponent(basefile.trim());
+	
+	$("div#projects ul li a").each(function()
+	{
+		var anchorText=$(this).text();
+		if(basefile==anchorText)
+			$(this).addClass("active");
+	});
+	
+	$("a").each(function(){
+		if($(this).has("img").length)
+		{
+			console.log("1");
+			$(this).fancybox();
+		}
+	});  
+	
+	$("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox();
 });
+
+
 
 
 $(document).ready(function() {
