@@ -5,7 +5,7 @@ github: SPProjects
 ---
 
 <div class="thumbnail">
-<a  href="/images/projects/screenshot.JPG" title="My Site WebPart Property Changer"><img  src='/images/projects/screenshot.JPG'/></a>
+<a  href="/images/projects/screenshot.jpg" title="My Site WebPart Property Changer"><img  src='/images/projects/screenshot.jpg'/></a>
 </div> 
 <p></p>
 
