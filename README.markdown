@@ -20,4 +20,4 @@ Some of the unique features of this site are:
 
 
 This site is heavily inspired and borrows some of the plugins and design from [Carl Boettiger](http://carlboettiger.info/index.html)
-and [Damien du Toit](http://coda.co.za/)
+and [Damien du Toit](http://coda.co.za/) and [Bilal Syed Hussain](http://bilalh.github.io/)

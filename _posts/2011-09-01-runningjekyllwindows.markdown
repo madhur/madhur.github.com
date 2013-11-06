@@ -20,15 +20,17 @@ Following packages are required to setup Jekyll on Windows:
 
 * Ruby & Ruby Development Kit : Can be installed from [here](http://rubyinstaller.org/downloads/)
 * Jekyll
-* Python : I used the portable version available [here](http://portablepython.com/wiki/PortablePython3.2.1.1)
+* Python : I strongly recommend using 2.7.5 as opposed to version 3. I used the portable version available [here](http://portablepython.com/wiki/PortablePython2.7.5.1/)
 * Pygments
 
 
 
 **1** Install the Ruby from [http://rubyinstaller.org/downloads/](http://rubyinstaller.org/downloads/) and install it to path such as C:\ruby
 
-**2** Install the Ruby development kit from  [the same location above](http://rubyinstaller.org/downloads/) and extract it to path such as c:\devkit.
-   Run the following commands 
+**2** Download "DEVELOPMENT KIT" installer that matches the Windows architecture and the Ruby version just installed. For example, DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe is for 64-bit Windows   with Ruby 2.0.0 x64. 
+Install the Ruby development kit from  [the same location above](http://rubyinstaller.org/downloads/) and extract it to path such as c:\devkit.
+
+Run the following commands 
 
 {% highlight text %}
 ruby dk.rb init
@@ -71,9 +73,8 @@ gem install jekyll
 {% endhighlight %}
 	
 **6** Now, you can start using Jekyll. If you require code highlighting using pygments as well, follow the additional steps as well.
-Install Portable Python from [here](http://portablepython.com/wiki/PortablePython3.2.1.1)
 
-**7** Now we need to install, easy_install. For python versions > 3, this can be installed from [http://pypi.python.org/pypi/distribute](http://pypi.python.org/pypi/distribute)
+**7** Now we need to install, easy_install. This can be installed from [http://pypi.python.org/pypi/distribute](https://pypi.python.org/pypi/setuptools#windows)
 Download distribute_setup.py and run the following command in python
 
 {% highlight text %}
@@ -82,12 +83,29 @@ python distribute_setup.py
 
 **8** Now to install pygments, simply run this command:
 
+Note that using Pygments version 0.5.0 is highly recommended. Latest version of Pygmnents has issues with Jekyll.
+
 {% highlight text %}
-easy_install Pygments	
+easy_install Pygments 	
 {% endhighlight %}
 
-**9** Note that if you are using Python > 3 as discussed in this blog,  you are likely to hit the following error when running Pygmentize
+**9** Start Jekyll
 
+Following the commands on official Jekyll Quick-start guide, a new Jekyll blog should be able to be created and browsed at localhost:4000.
+
+{% highlight text %}
+jekyll new myblog
+cd myblog
+jekyll serve
+{% endhighlight %}
+
+Now browse to http://localhost:4000
+
+#Troubleshooting#
+
+##Liquid error: Bad file descriptor##
+
+You are likely to hit this error if you are using Python version >3 as opposed to 2.7.5 as mentioned in the beginning
 
 {% highlight text %}
 Liquid error: Bad file descriptor
@@ -103,3 +121,39 @@ https://github.com/rtomayko/posix-spawn/issues/17
 This requires a change in C:\ruby\lib\ruby\gems\1.9.1\gems\albino-1.3.3\lib\albino.rb file.
 
 I have created the gist of the changes required [here](https://gist.github.com/1185645)
+
+
+## Build Failed ##
+
+This will occur if Pygments is not installed. In that case, edit the \_config.yml and Change 'pygments: true' to 'pygments: false'
+
+##Pygments not working ##
+
+{% highlight text %}
+gem uninstall pygments.rb --version "=0.5.2"  ; or whatever version you got installed
+gem install pygments.rb --version "=0.5.0"
+{% endhighlight %}
+
+##Failed to build gem native extension. or  "python" is not recognized as an internal or external command, operable program or batch file. ##
+
+"python" here can also be "ruby", "gem" or "easy_install", etc.
+
+One of the reason of this error could be that your Ruby Dev kit binaries are not in PATH. Make sure that C:\devkit or whatever path you installed Ruby Development kit to is in path.
+
+I make sure all the binaries of Ruby, Ruby Dev kit, Python are in path.
+
+{% highlight text %}
+SET PATH=%PATH%;C:\ruby\bin;C:\devkit\bin;C:\git\bin;C:\Python\App;C:\devkit\mingw\bin
+{% endhighlight %}
+
+In Windows, you can also set PATH permanently by following the steps below
+
+1. Hold Win and press Pause.
+2. Click Advanced System Settings.
+3. Click Environment Variables.
+4. Append ;C:\python27 to the Path variable.
+5. Restart Command Prompt.
+
+
+
+
