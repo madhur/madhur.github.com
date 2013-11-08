@@ -187,14 +187,16 @@ Update: If you would like to directly download the portable version of Jekyll. S
 
 <li>Jekyll</li>
 
-<li>Python : I used the portable version available <a href='http://portablepython.com/wiki/PortablePython3.2.1.1'>here</a></li>
+<li>Python : I strongly recommend using 2.7.5 as opposed to version 3. I used the portable version available <a href='http://portablepython.com/wiki/PortablePython2.7.5.1/'>here</a></li>
 
 <li>Pygments</li>
 </ul>
 
 <p><strong>1</strong> Install the Ruby from <a href='http://rubyinstaller.org/downloads/'>http://rubyinstaller.org/downloads/</a> and install it to path such as C:\ruby</p>
 
-<p><strong>2</strong> Install the Ruby development kit from <a href='http://rubyinstaller.org/downloads/'>the same location above</a> and extract it to path such as c:\devkit. Run the following commands</p>
+<p><strong>2</strong> Download &#8220;DEVELOPMENT KIT&#8221; installer that matches the Windows architecture and the Ruby version just installed. For example, DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe is for 64-bit Windows with Ruby 2.0.0 x64. Install the Ruby development kit from <a href='http://rubyinstaller.org/downloads/'>the same location above</a> and extract it to path such as c:\devkit.</p>
+
+<p>Run the following commands</p>
 <div class='highlight'><pre><code class='text'>ruby dk.rb init
 </code></pre></div>
 <p>to generate the config.yml file to be used later in this Step</p>
@@ -222,15 +224,30 @@ Update: If you would like to directly download the portable version of Jekyll. S
 <p><strong>5</strong> Install Jekyll using following command</p>
 <div class='highlight'><pre><code class='text'>gem install jekyll
 </code></pre></div>
-<p><strong>6</strong> Now, you can start using Jekyll. If you require code highlighting using pygments as well, follow the additional steps as well. Install Portable Python from <a href='http://portablepython.com/wiki/PortablePython3.2.1.1'>here</a></p>
+<p><strong>6</strong> Now, you can start using Jekyll. If you require code highlighting using pygments as well, follow the additional steps as well.</p>
 
-<p><strong>7</strong> Now we need to install, easy_install. For python versions &gt; 3, this can be installed from <a href='http://pypi.python.org/pypi/distribute'>http://pypi.python.org/pypi/distribute</a> Download distribute_setup.py and run the following command in python</p>
+<p><strong>7</strong> Now we need to install, easy_install. This can be installed from <a href='https://pypi.python.org/pypi/setuptools#windows'>http://pypi.python.org/pypi/distribute</a> Download distribute_setup.py and run the following command in python</p>
 <div class='highlight'><pre><code class='text'>python distribute_setup.py
 </code></pre></div>
 <p><strong>8</strong> Now to install pygments, simply run this command:</p>
-<div class='highlight'><pre><code class='text'>easy_install Pygments	
+
+<p>Note that using Pygments version 0.5.0 is highly recommended. Latest version of Pygmnents has issues with Jekyll.</p>
+<div class='highlight'><pre><code class='text'>easy_install Pygments 	
 </code></pre></div>
-<p><strong>9</strong> Note that if you are using Python &gt; 3 as discussed in this blog, you are likely to hit the following error when running Pygmentize</p>
+<p><strong>9</strong> Start Jekyll</p>
+
+<p>Following the commands on official Jekyll Quick-start guide, a new Jekyll blog should be able to be created and browsed at localhost:4000.</p>
+<div class='highlight'><pre><code class='text'>jekyll new myblog
+cd myblog
+jekyll serve
+</code></pre></div>
+<p>Now browse to http://localhost:4000</p>
+
+<h1 id='troubleshooting'>Troubleshooting</h1>
+
+<h2 id='liquid_error_bad_file_descriptor'>Liquid error: Bad file descriptor</h2>
+
+<p>You are likely to hit this error if you are using Python version &gt;3 as opposed to 2.7.5 as mentioned in the beginning</p>
 <div class='highlight'><pre><code class='text'>Liquid error: Bad file descriptor
 </code></pre></div><div class='highlight'><pre><code class='text'>TypeError: Can&#39;t convert &#39;bytes&#39; object to str implicitly
 </code></pre></div>
@@ -239,6 +256,37 @@ Update: If you would like to directly download the portable version of Jekyll. S
 <p>This requires a change in C:\ruby\lib\ruby\gems\1.9.1\gems\albino-1.3.3\lib\albino.rb file.</p>
 
 <p>I have created the gist of the changes required <a href='https://gist.github.com/1185645'>here</a></p>
+
+<h2 id='build_failed'>Build Failed</h2>
+
+<p>This will occur if Pygments is not installed. In that case, edit the _config.yml and Change &#8216;pygments: true&#8217; to &#8216;pygments: false&#8217;</p>
+
+<h2 id='pygments_not_working'>Pygments not working</h2>
+<div class='highlight'><pre><code class='text'>gem uninstall pygments.rb --version &quot;=0.5.2&quot;  ; or whatever version you got installed
+gem install pygments.rb --version &quot;=0.5.0&quot;
+</code></pre></div>
+<h2 id='failed_to_build_gem_native_extension_or_python_is_not_recognized_as_an_internal_or_external_command_operable_program_or_batch_file'>Failed to build gem native extension. or &#8220;python&#8221; is not recognized as an internal or external command, operable program or batch file.</h2>
+
+<p>&#8220;python&#8221; here can also be &#8220;ruby&#8221;, &#8220;gem&#8221; or &#8220;easy_install&#8221;, etc.</p>
+
+<p>One of the reason of this error could be that your Ruby Dev kit binaries are not in PATH. Make sure that C:\devkit or whatever path you installed Ruby Development kit to is in path.</p>
+
+<p>I make sure all the binaries of Ruby, Ruby Dev kit, Python are in path.</p>
+<div class='highlight'><pre><code class='text'>SET PATH=%PATH%;C:\ruby\bin;C:\devkit\bin;C:\git\bin;C:\Python\App;C:\devkit\mingw\bin
+</code></pre></div>
+<p>In Windows, you can also set PATH permanently by following the steps below</p>
+
+<ol>
+<li>Hold Win and press Pause.</li>
+
+<li>Click Advanced System Settings.</li>
+
+<li>Click Environment Variables.</li>
+
+<li>Append ;C:\python27 to the Path variable.</li>
+
+<li>Restart Command Prompt.</li>
+</ol>
 			<footer>
 				<div class="blocked tags">
 					<p>
@@ -278,22 +326,6 @@ Update: If you would like to directly download the portable version of Jekyll. S
 
 			<!-- Discus Comments -->
 			<div id="disqus_thread"></div>
-
-			
-			<!-- Enable Disqus comments -->
-			<script type="text/javascript">
-  var disqus_developer = 0; // developer mode is on
-  var disqus_shortname = 'madhur';
-  var disqus_identifier = '/2011/09/01/runningjekyllwindows/';
-  var disqus_title = 'Running Jekyll on Windows';
-  var disqus_url = 'http://madhur.co.in/blog/2011/09/01/runningjekyllwindows.html';
-  (function() {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  })();
-
-</script>
 
 			
 			
