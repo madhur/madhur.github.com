@@ -1,7 +1,7 @@
 ---
 title: SharePoint Gadget
 layout: project-detail
-github: SPGadget 
+github: SPGadget.gadget
 ---
 
 
