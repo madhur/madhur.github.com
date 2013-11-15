@@ -116,5 +116,28 @@ end
 Liquid::Template.register_tag('octokit_commits', Jekyll::OctokitCommits)
 
 
+module Jekyll
+  class OctokitReadme < Liquid::Tag
+    def initialize(tag_name, text, tokens)
+      super
+	  @temp=text
+    end
+    def render(context)
+      puts "Getting Github Readme via octokit.rb"
+      # day = Time.now # context.environments.first["page"]["date"]
+      # @until = Chronic.parse("Now") #(day + 60*60*24).iso8601
+      # @since = Chronic.parse("One day ago") #day.iso8601
+      # repo = Octokit.commits(@address, "master", {:since => @since, :until => @until}) 
+	  
+      @address = "madhur/"+"#{@temp}"
+	  puts @address
+     # cred = YAML.load_file("d:/github.yml")
+     # client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+      out=Octokit.readme @address, :accept => 'application/vnd.github.html'
+	  out
+    end
+  end
+end
+Liquid::Template.register_tag('octokit_readme', Jekyll::OctokitReadme)
 
 
