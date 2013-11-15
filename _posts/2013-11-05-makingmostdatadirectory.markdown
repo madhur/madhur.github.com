@@ -12,16 +12,33 @@ categories:
 ---
 
 
-Jekyll 1.3.0 comes with exiciting new features especially the use of \_data directories. The ***\_data*** directory is very useful in cases where you want to store
-metadata related to your site or blog and want to load it in runtime. Earlier people used to put this in \_config.yml which was kind of a hack.
+Jekyll 1.3.0 comes with exciting new features especially the use of `\_data` directories. The `\_data` directory is very useful in cases where you want to store
+metadata related to your site or blog and want to load it in runtime. Earlier people used to put this in `\_config.yml` which was kind of a hack.
 
 ##How can you make most out of \_data directory ?##
 
-If you've a file trucks.yaml under \_data/, then you can access it with **{ for truck in site.data.trucks }**. So you can have members.yaml, projects.yaml, products.yaml under \_data, and access them respectively as site.data.members, site.data.projects and site.data.products.
+If you've a file `trucks.yaml` under `\_data`, then you can access it with 
+{% highlight text %}
+{% raw %} 
+{% for truck in site.data.trucks %}
+{% endraw %} 
+{% endhighlight %}  
 
-For instance, this current site itself makes use of \_data directory extensively. Have a look at [Projects](/projects) section.
 
-The entire left navigation of [Projects](/projects) section is driven dynamically through a simple YAML file in \_data directory, which is [projects.yaml](https://github.com/madhur/madhur.github.com/blob/source/_data/projects.yaml) and looks like:
+So you can have `members.yaml, projects.yaml, products.yaml` under `\_data`, and access them respectively as
+
+{% highlight text %}
+{% raw %} 
+site.data.members
+site.data.projects 
+site.data.products
+{% endraw %} 
+{% endhighlight %}  
+
+
+For instance, this current site itself makes use of `\_data` directory extensively. Have a look at [Projects](/projects) section.
+
+The entire left navigation of [Projects](/projects) section is driven dynamically through a simple YAML file in `\_data` directory, which is [`projects.yaml`](https://github.com/madhur/madhur.github.com/blob/source/_data/projects.yaml) and looks like:
 
 {% highlight yaml %}
 ---
@@ -45,7 +62,7 @@ The entire left navigation of [Projects](/projects) section is driven dynamicall
   features and site collection features.  
 {% endhighlight %}  
 
-Now what I can in Jekyll is simply refer to Project Name, cateogy, description using the site variable array as **site.data.projects** and loop through it using
+Now what I can in Jekyll is simply refer to Project Name, category, description using the site variable array as `site.data.projects` and loop through it using
 
 {% highlight html %}
 {% raw %} 
@@ -55,9 +72,9 @@ Now what I can in Jekyll is simply refer to Project Name, cateogy, description u
 {% endraw %} 
 {% endhighlight %}  
 
-Using the simple structure above, I have dynamically generated both my left navigation and content page. In future, if I work on a new project, I just need to edit this ***projects.yaml*** file and Jekyll would automatically update the left navigation and content page.
+Using the simple structure above, I have dynamically generated both my left navigation and content page. In future, if I work on a new project, I just need to edit the `projects.yaml` file and Jekyll would automatically update the left navigation and content page.
 
-This is the simple code of generating left navigation which I have done in my includes file  [***projects-left.html***]()
+This is the simple code of generating left navigation which I have done in my includes file  [`projects-left.html`]()
 
 {% highlight html %}
 {% raw %} 
@@ -101,6 +118,6 @@ This is how I generate my content page which nicely generates the project names 
 {% endraw %} 
 {% endhighlight %} 
 
-This is where \_data directory comes in handly where you don't want to embed little pieces of information regarding your site in dirty repeating html. Using \_data directory, you can make the information which is going to change over the period of time structurable and also provide dynamism at the same time.
+This is where `\_data` directory comes in handy where you don't want to embed little pieces of information regarding your site in dirty repeating html. Using `\_data` directory, you can make the information which is going to change over the period of time structured and also provide dynamism at the same time.
 
 
