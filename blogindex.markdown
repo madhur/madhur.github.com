@@ -6,7 +6,7 @@ keywords: C/C++, Windbg, Reverse Engineering, important
 important: yes
 ---
 
-Blog [![Feed icon](/files/css/feed-icon-14x14.png)][feed]
+Blog [![Feed icon](/images/feed-icon-14x14.png)][feed]
 =====================
 <span class="low-top quiet large-bottom"><a href="/archives" class="small quiet">Archives</a></span>
 <p/>
