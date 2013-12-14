@@ -154,6 +154,28 @@ In Windows, you can also set PATH permanently by following the steps below
 4. Append ;C:\python27 to the Path variable.
 5. Restart Command Prompt.
 
+##If you get the following error with the --watch option##
 
+{% highlight text %}
+C:/Ruby193/lib/ruby/gems/1.9.1/gems/listen-1.3.1/lib/listen/adapter.rb:207:in `require': cannot load such file -- wdm (LoadError)
+{% endhighlight %}
 
+To fix that error, open the gemfile in your jekyll project directory and add these two lines:
 
+{% highlight ruby %}
+require 'rbconfig'
+gem 'wdm', '>= 0.1.0' if RbConfig::CONFIG['target_os'] =~ /mswin|mingw/i
+{% endhighlight %}
+
+##UTF-8 breaks on windows##
+UTF-8 files have sometimes problems on Windows. To fix this error, either have your files in non-UTF-8 format or specify `RedCarpet` as your Markdown engine in `_config.yml`
+
+{% highlight text %}
+# GitHub Defaults
+lsi: false
+pygments: true
+safe: true
+
+# UTF-8 & parse errors fix
+markdown: redcarpet
+{% endhighlight %}

@@ -78,7 +78,7 @@ module Jekyll
 	  @temp = text
     end
     def render(context)
-      puts "Getting Github Commits via octokit.rb"
+     
       # day = Time.now # context.environments.first["page"]["date"]
       # @until = Chronic.parse("Now") #(day + 60*60*24).iso8601
       # @since = Chronic.parse("One day ago") #day.iso8601
@@ -88,6 +88,7 @@ module Jekyll
 	  puts @text
       @address = "madhur/"+"#{@text}"
 	  
+	   puts "Getting Github Commits via octokit.rb " + @address
       cred = YAML.load_file("d:/github.yml")
       client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
       repo = client.commits(@address, "master")
@@ -116,5 +117,38 @@ end
 Liquid::Template.register_tag('octokit_commits', Jekyll::OctokitCommits)
 
 
+module Jekyll
+  class OctokitReadme < Liquid::Tag
+    def initialize(tag_name, text, tokens)
+      super
+	  @temp=text
+    end
+    def render(context)
+      @address = "madhur/"+"#{@temp}"
+	   puts "Getting Github Readme via octokit.rb " + @address
+      out=Octokit.readme @address, :accept => 'application/vnd.github.html'
+	  out
+    end
+  end
+end
+Liquid::Template.register_tag('octokit_readme', Jekyll::OctokitReadme)
+
+
+
+module Jekyll
+  class OctokitContents < Liquid::Tag
+    def initialize(tag_name, text, tokens)
+      super
+	  @temp=text.split(';')
+    end
+    def render(context)
+		@address = "madhur/"+"#{@temp[0]}"
+	   puts "Getting Github Conents via octokit.rb " + @address + @temp[1]
+       out=Octokit.contents @address, :accept => 'application/vnd.github.html', :path =>  @temp[1]
+	   out
+    end
+  end
+end
+Liquid::Template.register_tag('octokit_contents', Jekyll::OctokitContents)
 
 

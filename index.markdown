@@ -5,10 +5,10 @@ section: Home
 ---
 
 
-Welcome
+Intro
 =======
 
-![Pic](/images/pic.jpg) Hi there, I'm Madhur, a web developer/designer, programmer, and technology enthusiast in general. At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
+Hi there, I'm Madhur, a web developer/designer, programmer, and technology enthusiast in general. At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
 
 
  
