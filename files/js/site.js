@@ -29,9 +29,10 @@ $(document).ready(function() {
 		var names=filename.split(".html");
 		
 		basefile=names[0];			
+		basefile=decodeURIComponent(basefile.trim());
 	}
 	
-	basefile=decodeURIComponent(basefile.trim());
+	
 	
 	$("div#projects ul li a").each(function()
 	{

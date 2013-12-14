@@ -27,6 +27,6 @@ Feel free to contact me through any of the below channels or through this [conta
 
 
 [![Pic](/images/linkedin3.png)](http://www.linkedin.com/in/madhurahuja) [![Pic](/images/icon_stackoverflow3.png)](http://stackoverflow.com/users/507256/madhur-ahuja)
-[![Pic](/images/github_32.png)](https://github.com/madhur) [![Pic](/images/facebook3.png)](https://www.facebook.com/ahuja.madhur) [![Pic](/images/icon_twitter.jpg)](http://twitter.com/#!/madhur25)  [![Pic](/images/icon_mail.png)](mailto:ahuja.madhur@gmail.com) [![Pic](/images/rss2.png)]({{ site.feedname }})
+[![Pic](/images/github_32.png)](https://github.com/madhur) [![Pic](/images/icon_twitter.jpg)](http://twitter.com/#!/madhur25)  [![Pic](/images/icon_mail.png)](mailto:ahuja.madhur@gmail.com) 
 
 
