@@ -29,16 +29,19 @@ $(document).ready(function() {
 		var names=filename.split(".html");
 		
 		basefile=names[0];			
+		basefile=decodeURIComponent(basefile.trim());
+		
+		$("div#projects ul li a").each(function()
+		{
+			var anchorText=$(this).text();
+			if(basefile==anchorText)
+				$(this).addClass("active");
+		});
 	}
 	
-	basefile=decodeURIComponent(basefile.trim());
 	
-	$("div#projects ul li a").each(function()
-	{
-		var anchorText=$(this).text();
-		if(basefile==anchorText)
-			$(this).addClass("active");
-	});
+	
+	
 	
 	$("a").each(function(){
 		if($(this).has("img").length)

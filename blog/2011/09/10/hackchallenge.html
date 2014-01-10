@@ -18,12 +18,16 @@
 	<link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
    
 	<link rel="stylesheet" href="/files/css/blueprint/screen.css" type="text/css" />   	
-	<link rel="stylesheet" href="/files/css/disqus-form.css" type="text/css" />   	
-	<link rel="stylesheet" href="/files/css/site.css" type="text/css" />
-	<link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />
+	<!--<link rel="stylesheet" href="/files/css/disqus-form.css" type="text/css" /> -->
+	
+	<!--<link rel="stylesheet" href="/files/css/syntax.css" type="text/css" />-->
 	<link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
 	<link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 	
+	<link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+	
+	
+		<link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
 	
 			
    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
@@ -91,8 +95,6 @@
 <div class="c">
 &nbsp;
 </div>
-
-
 
 
 
@@ -175,18 +177,18 @@ google_ad_height = 600;
 
 		<article class="post full span-18 last">
 					<header><h1>HackingLab Challenge: Disassemble .NET Clients</h1></header>
-			 <p>Compass Security has come up with a hacking challenge on their <a href='https://www.hacking-lab.com/sh/LAE04Jf'>site</a>. The challenge consist of an .NET client having some hidden functionality which needs to be uncovered by the user. I decided to give it a try.</p>
+			 <p>Compass Security has come up with a hacking challenge on their <a href="https://www.hacking-lab.com/sh/LAE04Jf">site</a>. The challenge consist of an .NET client having some hidden functionality which needs to be uncovered by the user. I decided to give it a try.</p>
 
-<h2 id='requirements'>Requirements</h2>
+<h2 id="requirements">Requirements</h2>
 
 <ul>
-<li>Download <a href='http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe'>Application: DotNetFatClientHacking.exe</a></li>
+<li>Download <a href="http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe">Application: DotNetFatClientHacking.exe</a></li>
 </ul>
 
-<h2 id='tools_used_in_the_trade'>Tools used in the trade</h2>
+<h2 id="tools_used_in_the_trade">Tools used in the trade</h2>
 
 <ul>
-<li><a href='http://www.reflector.net/'>Reflector</a> or now better <a href='http://www.jetbrains.com/decompiler/'>DotPeek</a></li>
+<li><a href="http://www.reflector.net/">Reflector</a> or now better <a href="http://www.jetbrains.com/decompiler/">DotPeek</a></li>
 
 <li>ILDasm</li>
 
@@ -195,15 +197,15 @@ google_ad_height = 600;
 <li>MSDN</li>
 </ul>
 
-<h2 id='solution'>Solution</h2>
+<h2 id="solution">Solution</h2>
 
-<p>Let&#8217;s run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.</p>
+<p>Let’s run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.</p>
 
-<p><img alt='' src='/images/netapp.png' /></p>
+<p><img src="/images/netapp.png" alt="" /></p>
 
-<p>Let&#8217;s open the assembly in Reflector and see what it&#8217;s doing.</p>
+<p>Let’s open the assembly in Reflector and see what it’s doing.</p>
 
-<p><img alt='' src='/images/reflector.png' /></p>
+<p><img src="/images/reflector.png" alt="" /></p>
 
 <p>From the reflector, I could figure out the following</p>
 
@@ -215,7 +217,7 @@ google_ad_height = 600;
 <li>The visible button checks if the user is <em>Admin</em> and hides or shows the other two buttons</li>
 </ul>
 
-<p>Now, our job is to become the Admin :) . That&#8217;s the code which is called by the Visible button <strong>Identify me</strong></p>
+<p>Now, our job is to become the Admin :) . That’s the code which is called by the Visible button <strong>Identify me</strong></p>
 <div class='highlight'><pre><code class='csharp'> <span class='k'>private</span> <span class='k'>void</span> <span class='nf'>identifyUser</span><span class='p'>()</span>
     <span class='p'>{</span>
       <span class='k'>if</span> <span class='p'>(</span><span class='k'>this</span><span class='p'>.</span><span class='n'>IsAdmin</span><span class='p'>())</span>
@@ -251,7 +253,7 @@ google_ad_height = 600;
 
 <p>But since its invalid IP, it will never be returned by system API. So, we must patch the program.</p>
 
-<p>Let&#8217;s open the function in <em>ILDASM</em> and look at its disassembly.</p>
+<p>Let’s open the function in <em>ILDASM</em> and look at its disassembly.</p>
 <div class='highlight'><pre><code class='text'>  IL_001c:  ldloc.1
   IL_001d:  callvirt   instance string [mscorlib]System.Object::ToString()
   IL_0022:  ldstr      &quot;258.54.54.699&quot;
@@ -264,14 +266,14 @@ google_ad_height = 600;
 <ul>
 <li>Export the classes from Reflector to Visual Studio solution and change the IP address to our actual IP address. But then Why not just NOP out the call itself :). This requires boring effort</li>
 
-<li>Use the ILASM or any other utility to change the instruction at <em>ldstr &#8220;258.54.54.699&#8221;</em> to <em>ldstr actual ip</em>. Even this requires some effort</li>
+<li>Use the ILASM or any other utility to change the instruction at <em>ldstr “258.54.54.699”</em> to <em>ldstr actual ip</em>. Even this requires some effort</li>
 
 <li>Easiest Way: Actually we can just take advantage of if-else branch reversal.</li>
 </ul>
 
-<p>Let&#8217;s take a look at disassembly of <em>identifyuser()</em> function</p>
+<p>Let’s take a look at disassembly of <em>identifyuser()</em> function</p>
 
-<p><img alt='' src='/images/ildasm-output.png' /></p>
+<p><img src="/images/ildasm-output.png" alt="" /></p>
 
 <p>If you closely look at the disassembly above, the instruction at IL_0006 is doing all the magic which is</p>
 <div class='highlight'><pre><code class='text'>  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031
@@ -286,9 +288,9 @@ google_ad_height = 600;
 000005C0  00 00 00 00 02 28 06 00 00 06 2D 29 02 7B 02 00  
 000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00  
 </code></pre></div>
-<p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let&#8217;s save the file and run it again.</p>
+<p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let’s save the file and run it again.</p>
 
-<p><img alt='' src='/images/cracked.png' /></p>
+<p><img src="/images/cracked.png" alt="" /></p>
 
 <p>Voilla !!! The Administrative buttons are visible and clicking them invokes the Business functions which fetch some HTML output over the internet :)</p>
 			<footer>
@@ -304,8 +306,8 @@ google_ad_height = 600;
 					</p>
 				</div>
 			</footer>
-			<div class="hr"></div>
-
+			
+			<br/>
 			<div>
 
 
@@ -313,6 +315,10 @@ google_ad_height = 600;
 				<!-- Place this tag where you want the +1 button to render -->
 <div class="social">
 <g:plusone></g:plusone>
+
+<a href="https://twitter.com/share" class="twitter-share-button" data-via="madhur25">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
 <fb:like href="http://madhur.co.in/blog/2011/09/10/hackchallenge.html" send="true" layout="button_count" width="450" show_faces="true" colorscheme="dark" font="lucida grande"></fb:like>
 </div>
 
@@ -328,6 +334,11 @@ google_ad_height = 600;
 
 
 			</div>
+			
+			
+			<div class="hr"></div>
+
+		
 
 
 			<!-- Discus Comments -->
@@ -390,14 +401,12 @@ google_ad_height = 600;
 		<footer id="footer" class="span-24 last">
 			
 				<p id="copyright">
-					Content &amp; Design by 
-					<a href="/info/">Madhur Ahuja</a>
-					&copy; 2010-2013
-					(Some rights reserved)			
+					&copy; 2011-2014
+					Madhur Ahuja
 				</p>
 				<p id="poweredby">
 					Powered by 
-					<a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll 1.3.0</a>, <a href="http://octokit.github.io/">Octokit</a> and <a href="http://disqus.com">Disqus</a>.
+					<a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
 				</p>
 
 				<div class="c">&nbsp;</div>
