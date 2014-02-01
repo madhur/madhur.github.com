@@ -4,13 +4,357 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2014-01-10T23:41:50+05:30</updated>
+ <updated>2014-02-01T12:10:24+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Writing Silverlight people picker control using SharePoint 2010 Client object model</title>
+   <link href="http://madhur.co.in/blog/2014/01/29/silverlight-people-picker.html"/>
+   <updated>2014-01-29T00:00:00+05:30</updated>
+   <id>id:/blog/2014/01/29/silverlight-people-picker</id>
+   <content type="html">&lt;p&gt;Whenever you are developing a silverlight solution on SharePoint 2010, one of the basic functionality you will require is the ability to select people from your Active Directory.&lt;/p&gt;
+
+&lt;p&gt;Sadly, I could not find a ready made custom silverlight control which I could utilize for my solution. I decided to write on my own. Rather than writing from scratch, I decided to use the boilerplate code &lt;a href=&quot;http://blogs.technet.com/b/speschka/archive/2011/08/09/writing-a-sharepoint-2010-people-picker-control-for-silverlight.aspx&quot;&gt;provided&lt;/a&gt; by Steve.&lt;/p&gt;
+
+&lt;p&gt;In this post, I am going to deep dive how I built this control.&lt;/p&gt;
+
+&lt;p&gt;My solution consists of two controls, &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt;. &lt;code&gt;PeopleChooser&lt;/code&gt; is a user control which is configured to either single select or multi select depending upon the configuration. Here’s a screenshot of my people Chooser control, implemented as a user control in Silverlight.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/singlepicker.png&quot; alt=&quot;PeopleChooser Single Selection&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In case of multiple results, user can right click on the textbox to display multiple results and select one of them.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/pickermultipleresults.png&quot; alt=&quot;PeopleChooser Multiple results&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The multi select configuraiton is rendered as a listbox instead of a textbox. I made a conscious design decision to do this so that user instantly comes to know that this is a multi select picker by directly looking at it.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/multiplepicker.png&quot; alt=&quot;PeopleChooser Multiple selection&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;PeoplePicker&lt;/code&gt; is a &lt;code&gt;ChildWindow&lt;/code&gt; which is launched from the &lt;code&gt;PeopleChooser&lt;/code&gt; to search and enumerate people from the active directory. Clicking on the address book button opens the people picker, where the user can select either multiple people or single people depending upon the configuration of the control. This is the screenshot of people picker control.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/peoplepicker.png&quot; alt=&quot;PeoplePicker&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Feel free to &lt;a href=&quot;&quot;&gt;download&lt;/a&gt; this control or customize by downloding the source from my &lt;a href=&quot;&quot;&gt;github repo&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Anyone, who wants to reuse or customize this control further, I will explain in brief how this works.&lt;/p&gt;
+
+&lt;p&gt;Both &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt; have a listbox which employ two-way data binding. Both listbox are bound to a following data structure &lt;code&gt;SelectedAccounts&lt;/code&gt; which is an &lt;code&gt;ObservableCollection&lt;/code&gt; of type &lt;code&gt;AccountList&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;class&lt;/span&gt; &lt;span class=&#39;nc&#39;&gt;SelectedAccounts&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ObservableCollection&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+    &lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;SelectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;():&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;base&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;()&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;         
+    &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;class&lt;/span&gt; &lt;span class=&#39;nc&#39;&gt;AccountList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;INotifyPropertyChanged&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+    &lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;_accountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+    &lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;_displayName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;       
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The below XAML shows the two way databinding with this data structure&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;xml&#39;&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;x:Name=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;UsersListBox&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;DataContext=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;selectedAccounts&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;ItemsSource=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;{Binding SelectedAccounts, Mode=TwoWay}&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;HorizontalAlignment=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Left&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Height=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;100&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Margin=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;26,43,0,0&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;VerticalAlignment=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Top&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Width=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;182&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox.RenderTransform&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;CompositeTransform&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;SkewX=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0.661&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;TranslateX=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0.606&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox.RenderTransform&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;DataTemplate&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;StackPanel&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Orientation=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Horizontal&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&#39;nt&#39;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Text=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;{Binding DisplayName}&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&#39;nt&#39;&gt;&amp;lt;/StackPanel&amp;gt;&lt;/span&gt;
+        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/DataTemplate&amp;gt;&lt;/span&gt;
+    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
+&lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;SelectedAccounts&lt;/code&gt; data structure is populated using People WebService.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;PeopleSoapClient&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PeopleSoapClient&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Endpoint&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Address&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt;
+&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ServiceModel&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;EndpointAddress&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;siteUrl&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;peopleWsUrl&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsCompleted&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;EventHandler&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsCompletedEventArgs&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ps_SearchPrincipalsCompleted&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchTxt&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Text&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;50&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPPrincipalType&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;User&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Depending upon if multiple selection is allowed or not, &lt;code&gt;ListBox&lt;/code&gt; is hidden and &lt;code&gt;TextBox&lt;/code&gt; is shown instead along with a resolve button.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;bool&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;get&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;set&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;PeopleChooser_Loaded&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;UsersListBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;ResolveButton&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;UsersListBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;ResolveButton&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;peoplePicker&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If there are muliple results, right mouse button on &lt;code&gt;TextBox&lt;/code&gt; is handled and displays choices to user to enable him to select a single result.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;UserTextBox_MouseRightButtonUp&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MouseButtonEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+    &lt;span class=&#39;c1&#39;&gt;// Display a menu on mouse right button up&lt;/span&gt;
+    &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ContextMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+    
+    &lt;span class=&#39;k&#39;&gt;foreach&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;in&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+    &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Header&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;DisplayName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Click&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IsOpen&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+    &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+    &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Dictionary&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;();&lt;/span&gt;
+    &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Header&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ToString&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(),&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Empty&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Empty&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
+
+    &lt;span class=&#39;n&#39;&gt;SetSingleResult&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Reading and writing People Values in SharePoint List through Silverlight Client object model</title>
+   <link href="http://madhur.co.in/blog/2014/01/29/read-write-people-values-sharepoint-silverlight.html"/>
+   <updated>2014-01-29T00:00:00+05:30</updated>
+   <id>id:/blog/2014/01/29/read-write-people-values-sharepoint-silverlight</id>
+   <content type="html">&lt;p&gt;While working on the silverlight client object model, I figured out that it is not very straight forward to read and write people values to the list. Especially reading the people picker field requires enumerating &lt;code&gt;SiteUserInfoList&lt;/code&gt; list as well. In this post I am going to cover how you can write/read people values to the list.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Write single selection people field&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;Singleuser&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;context&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;EnsureUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;].&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+&lt;span class=&#39;n&#39;&gt;newItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Singleuser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Write multiple selection people field&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;List&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;();&lt;/span&gt;
+&lt;span class=&#39;k&#39;&gt;foreach&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ac&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;in&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+        &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FromUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ac&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;span class=&#39;n&#39;&gt;newItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Read single selection people field&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Reading is more complex. First you retrieve the &lt;code&gt;FieldUserValue&lt;/code&gt; from the people field. Unfortunately, this field only contains the &lt;code&gt;display name&lt;/code&gt; and &lt;code&gt;Site User ID&lt;/code&gt; of the user. You will not get the &lt;code&gt;AccountName&lt;/code&gt; from this object which is a common requirement. You will have to perform the lookup against &lt;code&gt;SiteUserInfo&lt;/code&gt; list to retrieve the Account Name&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;LoadButton_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;siteUrl&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;web&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;list&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Lists&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetByTitle&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Madhur&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;list&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;list&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItemById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;1&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+
+		&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[];&lt;/span&gt;
+
+		&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+			&lt;span class=&#39;n&#39;&gt;LoadUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+		&lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+
+	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+   &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+   &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	   &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+   &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;LoadUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ListItemCollection&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItems&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CamlQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;());&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Include&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Id&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]));&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;LookupId&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;username&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Utils&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+			&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+			&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Clear&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+
+				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
+				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Text&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+			&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+		&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+		  &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+		  &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+			  &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+		  &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+
+
+	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+	 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		 &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	 &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItems&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CamlQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;());&lt;/span&gt;
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Include&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Id&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]));&lt;/span&gt;
+
+
+	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
+
+		&lt;span class=&#39;k&#39;&gt;for&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;int&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;++)&lt;/span&gt;
+		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+			&lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;].&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;LookupId&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+			&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]);&lt;/span&gt;
+		&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+			&lt;span class=&#39;k&#39;&gt;for&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;int&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;++)&lt;/span&gt;
+			&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+
+
+				&lt;span class=&#39;k&#39;&gt;try&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+					&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;][&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+				&lt;span class=&#39;k&#39;&gt;catch&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IndexOutOfRangeException&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ii&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+					&lt;span class=&#39;k&#39;&gt;return&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+				&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Utils&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+				&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;][&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+				&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+					&lt;span class=&#39;n&#39;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+				&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+			&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+
+		&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+	   &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	   &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		   &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	   &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+
+	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+
+	 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
+	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		 &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+
+	 &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+ </entry>
+ 
+ <entry>
+   <title>Convert claims based login name in SharePoint Client object model</title>
+   <link href="http://madhur.co.in/blog/2014/01/29/convert-claim-based-login-name.html"/>
+   <updated>2014-01-29T00:00:00+05:30</updated>
+   <id>id:/blog/2014/01/29/convert-claim-based-login-name</id>
+   <content type="html">&lt;p&gt;Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already part of the site collection. This issue can occur if SharePoint is using claim based authentication model.&lt;/p&gt;
+
+&lt;p&gt;On close inspection I found that the returned duplicate results were having different login names. For example if one result was &lt;code&gt;ads\john&lt;/code&gt; then the other one was &lt;code&gt;i:0#.w|ads\john&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It is easy to remove such duplicates if you are programming against server side directly with the following API code:&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;GetLoginName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	 &lt;span class=&#39;kt&#39;&gt;var&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Local&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	 &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;!=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;null&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		 &lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IsEncodedClaim&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;?&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;DecodeClaim&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;).&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Value&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	 &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	 &lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;However, if you are programming against Client object model, you do not have luxury of calling such API’s. For those scenarios , I wrote a small function which will take the Claim encoded login name and return the pure Windows login name.&lt;/p&gt;
+&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;static&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;String&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+
+	&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Contains&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;|&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Split&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Char&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;sc&#39;&gt;&amp;#39;|&amp;#39;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;},&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;StringSplitOptions&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;None&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+		&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
+			&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;1&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
+		&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
+			&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+		&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+
+	&lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ToLower&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+
+&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+ </entry>
  
  <entry>
    <title>New look for my site</title>
@@ -425,270 +769,6 @@ yajl-ruby (1.1.0)
 &lt;blockquote&gt;
 &lt;p&gt;The most uncollaborative work environment on the planet - the only way to move forward is to stab your neighbor in the back. The culture here actually encourages self-promotion and to tear down others. Ironically they spend millions on programs to appear as if this is not the case - then reviews come, and its Social Darwinism in its pure form - the only thing I have not seen first hand, is for a VP to eat their young. I cannot wait to get out of here - and I am actually doing well in terms of reviews and bonus - but life is too short to move a career forward at this expense level. I suspect those who love this enviroment have not been here long enough to realize that for them to move forward - they will need to leave a wake of bodies in their path - which is not for everyone.&lt;/p&gt;
 &lt;/blockquote&gt;</content>
- </entry>
- 
- <entry>
-   <title>How to upgrade your Jekyll Blog/Site to HTML5</title>
-   <link href="http://madhur.co.in/blog/2012/02/26/upgradehtml5.html"/>
-   <updated>2012-02-26T00:00:00+05:30</updated>
-   <id>id:/blog/2012/02/26/upgradehtml5</id>
-   <content type="html">&lt;p&gt;HTML5 is the next big thing. There is no reason which should hold you back from upgrading your site to new HTML5 which adds lot of features some of them which I discussed in my previous blog article.&lt;/p&gt;
-
-&lt;p&gt;If you think lack of browser compatiblity is holding you back, then there is good news - there are ways using which you can even have the incompatible browsers work with your new HTML5 site.&lt;/p&gt;
-
-&lt;p&gt;Here, I am going to show you how you can upgrade you site/blog to HTML 5. I am just going to show you very basic things. At a granular level, you might require more changes depending on your site.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Prepare a development branch. Since we will makeing a lot of changes to HTML/CSS, its good to have a new branch on your repository. You don’t want to mess your master/source branch.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;git branch develop
-git checkout develop
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Once we have done the changes, we will test it throroughly and merge it back to our main branch.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Changes to main default.html&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;&lt;span class=&#39;lineno&#39;&gt; 1&lt;/span&gt; &lt;span class=&#39;cp&#39;&gt;&amp;lt;!DOCTYPE html&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 2&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;html&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;lang=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;en&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 3&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;   
-&lt;span class=&#39;lineno&#39;&gt; 4&lt;/span&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;charset=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;utf-8&amp;quot;&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;   
-&lt;span class=&#39;lineno&#39;&gt; 5&lt;/span&gt;    &lt;span class=&#39;nt&#39;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;name=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;author&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;content=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Madhur Ahuja&amp;quot;&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;	
-&lt;span class=&#39;lineno&#39;&gt; 6&lt;/span&gt; 	&lt;span class=&#39;c&#39;&gt;&amp;lt;!--[if lt IE 9]&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 7&lt;/span&gt; &lt;span class=&#39;c&#39;&gt;		&amp;lt;script src=&amp;quot;/files/js/modernizr-2.5.3.js&amp;quot; type=&amp;quot;text/javascript&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 8&lt;/span&gt; &lt;span class=&#39;c&#39;&gt;	&amp;lt;![endif]--&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 9&lt;/span&gt; 	
-&lt;span class=&#39;lineno&#39;&gt;10&lt;/span&gt; 	&lt;span class=&#39;nt&#39;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&#39;na&#39;&gt;src=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;/files/js/site.js&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;11&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;12&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;13&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;gradient&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;14&lt;/span&gt; 	&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;container&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;container&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;15&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;header&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;header&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;16&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;/header&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;17&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;content&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;18&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;19&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;footer&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;footer&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;20&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;/footer&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;21&lt;/span&gt; 	&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;22&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;23&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;24&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;Changes to blog-post.html&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;&lt;span class=&#39;lineno&#39;&gt; 1&lt;/span&gt; ---
-&lt;span class=&#39;lineno&#39;&gt; 2&lt;/span&gt; layout: default
-&lt;span class=&#39;lineno&#39;&gt; 3&lt;/span&gt; top: Madhur Ahuja
-&lt;span class=&#39;lineno&#39;&gt; 4&lt;/span&gt; ---
-&lt;span class=&#39;lineno&#39;&gt; 5&lt;/span&gt; 
-&lt;span class=&#39;lineno&#39;&gt; 6&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;section&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;primary&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;span-24 last&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 7&lt;/span&gt; 	&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;blogcontent&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt; 8&lt;/span&gt; 
-&lt;span class=&#39;lineno&#39;&gt; 9&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;aside&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;postmeta full span-5&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;10&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;/aside&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;11&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;article&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;post full span-18 last&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;			 
-&lt;span class=&#39;lineno&#39;&gt;12&lt;/span&gt; 			&lt;span class=&#39;nt&#39;&gt;&amp;lt;footer&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;13&lt;/span&gt; 				&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;blocked tags&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;14&lt;/span&gt; 					&lt;span class=&#39;nt&#39;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;15&lt;/span&gt; 					&lt;span class=&#39;nt&#39;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;16&lt;/span&gt; 				&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;17&lt;/span&gt; 			&lt;span class=&#39;nt&#39;&gt;&amp;lt;/footer&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;18&lt;/span&gt; 			&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;hr&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;19&lt;/span&gt; 			&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;20&lt;/span&gt; 			&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;lineno&#39;&gt;21&lt;/span&gt; 		&lt;span class=&#39;nt&#39;&gt;&amp;lt;/article&amp;gt;&lt;/span&gt;		
-&lt;span class=&#39;lineno&#39;&gt;22&lt;/span&gt; 	&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;	
-&lt;span class=&#39;lineno&#39;&gt;23&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;Enable HTML5 input controls&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Since I use a search box to search my site, I can use HTML5 &lt;strong&gt;search&lt;/strong&gt; type box and also the &lt;strong&gt;required&lt;/strong&gt; attribute&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt;&lt;span class=&#39;nt&#39;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;type=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;search&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;required&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;q&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;name=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;q&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;value=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;placeholder=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Site Search&amp;quot;&lt;/span&gt; &lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt; 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Polyfills for your old incompatible browsers (IE ?)&lt;/p&gt;
-
-&lt;p&gt;As I said above, even if your browser doesn’t support HTML5, you can use &lt;a href=&quot;&quot;&gt;pollyfills&lt;/a&gt; using which you can enable most of the HTML 5 features. Keep in mind that its not magic that using pollyfills suddenly enables your browser to enable HTML5. Most of the polyfills work by making necessary changes in the DOM behind the scenes so as to emulate HTML5 behaviour. I have already modernizer in the default.html to enable this.&lt;/p&gt;
-&lt;/li&gt;
-
-&lt;li&gt;
-&lt;p&gt;Once we have done all the changes, we will review them, commit and merge into master branch. After that we can delete the development branch&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;git diff master..develop
-git commit -am &amp;quot;Updated my blog to HTML5&amp;quot;
-git checkout master
-git merge develop
-git branch -d develop
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
- </entry>
- 
- <entry>
-   <title>Learning HTML5</title>
-   <link href="http://madhur.co.in/blog/2012/02/20/learnhtml5.html"/>
-   <updated>2012-02-20T00:00:00+05:30</updated>
-   <id>id:/blog/2012/02/20/learnhtml5</id>
-   <content type="html">&lt;p&gt;I came across two excellent sites to learn HTML5:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://html5demos.com/&quot;&gt;HTML 5 Demos&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://diveintohtml5.ep.io/index.html&quot;&gt;Dive into HTML5&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://html5boilerplate.com/&quot;&gt;HTML5 BoilerPlate&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-
-&lt;li&gt;
-&lt;p&gt;&lt;a href=&quot;http://html5test.com&quot;&gt;HTML 5 Test&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;detecting_html_5_features&quot;&gt;Detecting HTML 5 Features&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://www.modernizr.com/&quot;&gt;Modernizr&lt;/a&gt; is an open source, MIT-licensed JavaScript library that detects support for many HTML5 &amp;amp; CSS3 features. For example, following are the results from your browser:&lt;/p&gt;
-
-&lt;h2 id=&quot;html_5_features_detected&quot;&gt;HTML 5 Features Detected&lt;/h2&gt;
-
-&lt;h3 id=&quot;canvas&quot;&gt;Canvas&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.canvas)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;Canvas is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;Canvas is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;
-&lt;h3 id=&quot;video&quot;&gt;Video&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.video)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;Video is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;Video is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;
-&lt;h3 id=&quot;localstorage&quot;&gt;LocalStorage&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.localstorage)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;LocalStorage is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;LocalStorage is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;
-&lt;h3 id=&quot;web_workers&quot;&gt;Web Workers&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.webworkers)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;Web Workers is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;Web Workers is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;
-&lt;h3 id=&quot;offline_web_applications&quot;&gt;Offline Web Applications&lt;/h3&gt;
-
-&lt;h3 id=&quot;geolocation&quot;&gt;GeoLocation&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.geolocation)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;GeoLocation is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;GeoLocation is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;
-&lt;h3 id=&quot;input_types&quot;&gt;Input Types&lt;/h3&gt;
-
-&lt;h3 id=&quot;placeholder_text&quot;&gt;PlaceHolder Text&lt;/h3&gt;
-
-&lt;h3 id=&quot;form_autofocus&quot;&gt;Form Autofocus&lt;/h3&gt;
-
-&lt;h3 id=&quot;history_api&quot;&gt;History API&lt;/h3&gt;
-&lt;script type=&#39;text/javascript&#39;&gt;&lt;![CDATA[
-if(Modernizr.history)
-	document.write(&quot;&lt;div class=&#39;success&#39;&gt;History API is supported&lt;/div&gt;&quot;);
-else
-	document.write(&quot;&lt;div class=&#39;error&#39;&gt;History API is not supported&lt;/div&gt;&quot;);
-
-]]&gt;&lt;/script&gt;</content>
- </entry>
- 
- <entry>
-   <title>Conditional comments in Internet Explorer</title>
-   <link href="http://madhur.co.in/blog/2012/02/20/conditionalcommentsie.html"/>
-   <updated>2012-02-20T00:00:00+05:30</updated>
-   <id>id:/blog/2012/02/20/conditionalcommentsie</id>
-   <content type="html">&lt;p&gt;Since IE5, Internet Explorer supports something called &lt;a href=&quot;http://en.wikipedia.org/wiki/Conditional_comment&quot;&gt;Conditional Comments&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Conditional comments can be used to provide and hide code to and from Internet Explorer. For example, I can find the version of Internet Explorer you are running as follows:&lt;/p&gt;
-&lt;div class=&#39;notice&#39;&gt;
-&lt;!--[if IE]&gt;
-According to the conditional comment this is IE&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if IE 6]&gt;
-According to the conditional comment this is IE 6&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if IE 7]&gt;
-According to the conditional comment this is IE 7&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if IE 8]&gt;
-According to the conditional comment this is IE 8&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if IE 9]&gt;
-According to the conditional comment this is IE 9&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if gte IE 8]&gt;
-According to the conditional comment this is IE 8 or higher&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if lt IE 9]&gt;
-According to the conditional comment this is IE lower than 9&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if lte IE 7]&gt;
-According to the conditional comment this is IE lower or equal to 7&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if gt IE 6]&gt;
-According to the conditional comment this is IE greater than 6&lt;br /&gt;
-&lt;![endif]--&gt;
-&lt;!--[if !IE]&gt; --&gt;
-According to the conditional comment this is not IE&lt;br /&gt;
-&lt;!-- &lt;![endif]--&gt;
-&lt;/div&gt;
-&lt;p&gt;The snippet below is used to show this:&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;&amp;lt;!--[if IE]&amp;gt;
-According to the conditional comment this is IE&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if IE 6]&amp;gt;
-According to the conditional comment this is IE 6&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if IE 7]&amp;gt;
-According to the conditional comment this is IE 7&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if IE 8]&amp;gt;
-According to the conditional comment this is IE 8&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if IE 9]&amp;gt;
-According to the conditional comment this is IE 9&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if gte IE 8]&amp;gt;
-According to the conditional comment this is IE 8 or higher&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if lt IE 9]&amp;gt;
-According to the conditional comment this is IE lower than 9&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if lte IE 7]&amp;gt;
-According to the conditional comment this is IE lower or equal to 7&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if gt IE 6]&amp;gt;
-According to the conditional comment this is IE greater than 6&amp;lt;br /&amp;gt;
-&amp;lt;![endif]--&amp;gt;
-&amp;lt;!--[if !IE]&amp;gt; --&amp;gt;
-According to the conditional comment this is not IE&amp;lt;br /&amp;gt;
-&amp;lt;!-- &amp;lt;![endif]--&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Also, checkout conditional comments on &lt;a href=&quot;http://msdn.microsoft.com/en-us/library/ms537512.aspx&quot;&gt;MSDN&lt;/a&gt;&lt;/p&gt;</content>
  </entry>
  
  

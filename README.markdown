@@ -1,5 +1,3 @@
-madhur.github.com
-=================
 
 This current site built with [Jekyll](http://jekyllrb.com) is a project in itself. It has come a long way since I started in this 2011.
 
@@ -20,5 +18,8 @@ Some of the unique features of this site are:
 
 
 
-This site is heavily inspired and borrows some of the plugins and design from [Carl Boettiger](http://carlboettiger.info/index.html)
-and [Damien du Toit](http://coda.co.za/) and [Bilal Syed Hussain](http://bilalh.github.io/)
+This site is heavily inspired and borrows some of the plugins and designs from:
+* [Carl Boettiger](http://carlboettiger.info/index.html)
+* [Damien du Toit](http://coda.co.za/) 
+* [Bilal Syed Hussain](http://bilalh.github.io/)
+* [ActionBarSherlock](http://actionbarsherlock.com)

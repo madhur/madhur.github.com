@@ -46,9 +46,10 @@ $(document).ready(function() {
 	$("a").each(function(){
 		if($(this).has("img").length)
 		{
-			console.log("1");
+			
 			$(this).fancybox();
-		}
+
+	}
 	});  
 	
 	$("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox();
