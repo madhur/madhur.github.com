@@ -39,7 +39,7 @@ This is the screenshot of  people picker control.
 
 ![PeoplePicker](/images/Blog/peoplepicker.png)
 
-Feel free to [download]() this control or customize by downloding the source from my [github repo]()
+Feel free to [download](https://github.com/madhur/SLControls/archive/master.zip) this control or customize by downloding the source from my [github repo](https://github.com/madhur/SLControls)
 
 Anyone, who wants to reuse or customize this control further, I will explain in brief how this works. 
 
