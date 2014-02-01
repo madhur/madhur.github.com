@@ -126,7 +126,14 @@ module Jekyll
     def render(context)
       @address = "madhur/"+"#{@temp}"
 	   puts "Getting Github Readme via octokit.rb " + @address
-      out=Octokit.readme @address, :accept => 'application/vnd.github.html'
+        cred = YAML.load_file("d:/github.yml")
+
+
+      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+
+     
+
+      out=client.readme @address, :accept => 'application/vnd.github.html'
 	  out
     end
   end
@@ -143,8 +150,12 @@ module Jekyll
     end
     def render(context)
 		@address = "madhur/"+"#{@temp[0]}"
-	   puts "Getting Github Conents via octokit.rb " + @address + @temp[1]
-       out=Octokit.contents @address, :accept => 'application/vnd.github.html', :path =>  @temp[1]
+
+     cred = YAML.load_file("d:/github.yml")
+      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+
+	   puts "Getting Github Contents via octokit.rb " + @address + @temp[1]
+       out=client.contents @address, :accept => 'application/vnd.github.html', :path =>  @temp[1]
 	   out
     end
   end
