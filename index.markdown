@@ -12,12 +12,12 @@ Hi there, I'm Madhur, a web developer/designer, programmer, and technology enthu
 
 
  
-I can also [code](/code) and have a done a little bit of it during my undergraduate studies and job and continue to do so whenever I get time.
+I also [code](/projects) and have a done a little bit of it during my undergraduate studies and job and continue to do so whenever I get time.
 
 
 Work
 -----
-I previously worked as [Consultant](/work) at Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. This site is for publishing everything I do apart from my work. 
+I previously worked as Consultant at Microsoft. I keep a technical blog called _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. 
 
 
 
