@@ -177,44 +177,49 @@ google_ad_height = 600;
 
 		<article class="post full span-18 last">
 					<header><h1>Convert claims based login name in SharePoint Client object model</h1></header>
-			 <p>Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already part of the site collection. This issue can occur if SharePoint is using claim based authentication model.</p>
+			 <p>Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already 
+part of the site collection. This issue can occur if SharePoint is using claim based authentication model.</p>
 
 <p>On close inspection I found that the returned duplicate results were having different login names. For example if one result was <code>ads\john</code> then the other one was <code>i:0#.w|ads\john</code>.</p>
 
 <p>It is easy to remove such duplicates if you are programming against server side directly with the following API code:</p>
-<div class='highlight'><pre><code class='c#'><span class='k'>private</span> <span class='kt'>string</span> <span class='nf'>GetLoginName</span><span class='p'>(</span><span class='kt'>string</span> <span class='n'>name</span><span class='p'>)</span>
-<span class='p'>{</span>
-	 <span class='kt'>var</span> <span class='n'>manager</span> <span class='p'>=</span> <span class='n'>SPClaimProviderManager</span><span class='p'>.</span><span class='n'>Local</span><span class='p'>;</span>
-	 <span class='k'>if</span> <span class='p'>(</span><span class='n'>manager</span> <span class='p'>!=</span> <span class='k'>null</span><span class='p'>)</span>
-	 <span class='p'>{</span>
-		 <span class='k'>return</span> <span class='n'>SPClaimProviderManager</span><span class='p'>.</span><span class='n'>IsEncodedClaim</span><span class='p'>(</span><span class='n'>name</span><span class='p'>)</span> <span class='p'>?</span> <span class='n'>manager</span><span class='p'>.</span><span class='n'>DecodeClaim</span><span class='p'>(</span><span class='n'>name</span><span class='p'>).</span><span class='n'>Value</span> <span class='p'>:</span> <span class='n'>name</span><span class='p'>;</span>
-	 <span class='p'>}</span>
-	 <span class='k'>return</span> <span class='n'>name</span><span class='p'>;</span>
-<span class='p'>}</span>
+
+<div class="highlight"><pre><code class="c#"><span class="k">private</span> <span class="kt">string</span> <span class="nf">GetLoginName</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
+<span class="p">{</span>
+	 <span class="kt">var</span> <span class="n">manager</span> <span class="p">=</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="n">Local</span><span class="p">;</span>
+	 <span class="k">if</span> <span class="p">(</span><span class="n">manager</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+	 <span class="p">{</span>
+		 <span class="k">return</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="n">IsEncodedClaim</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">?</span> <span class="n">manager</span><span class="p">.</span><span class="n">DecodeClaim</span><span class="p">(</span><span class="n">name</span><span class="p">).</span><span class="n">Value</span> <span class="p">:</span> <span class="n">name</span><span class="p">;</span>
+	 <span class="p">}</span>
+	 <span class="k">return</span> <span class="n">name</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div>
+
 <p>However, if you are programming against Client object model, you do not have luxury of calling such API’s. For those scenarios , I wrote a small function which will take the Claim encoded login name and return the pure Windows login name.</p>
-<div class='highlight'><pre><code class='c#'><span class='k'>public</span> <span class='k'>static</span> <span class='kt'>string</span> <span class='nf'>checkClaimsUser</span><span class='p'>(</span><span class='n'>String</span> <span class='n'>userName</span><span class='p'>)</span>
-<span class='p'>{</span>
-	<span class='kt'>string</span> <span class='n'>decodedName</span><span class='p'>;</span>
 
-	<span class='k'>if</span> <span class='p'>(</span><span class='n'>userName</span><span class='p'>.</span><span class='n'>Contains</span><span class='p'>(</span><span class='s'>&quot;|&quot;</span><span class='p'>))</span>
-	<span class='p'>{</span>
-		<span class='kt'>string</span><span class='p'>[]</span> <span class='n'>splitUserName</span> <span class='p'>=</span> <span class='n'>userName</span><span class='p'>.</span><span class='n'>Split</span><span class='p'>(</span><span class='k'>new</span> <span class='n'>Char</span><span class='p'>[]</span> <span class='p'>{</span> <span class='sc'>&#39;|&#39;</span> <span class='p'>},</span> <span class='n'>StringSplitOptions</span><span class='p'>.</span><span class='n'>None</span><span class='p'>);</span>
-		<span class='k'>if</span> <span class='p'>(</span><span class='n'>splitUserName</span><span class='p'>.</span><span class='n'>Length</span> <span class='p'>&gt;</span> <span class='m'>0</span><span class='p'>)</span>
-			<span class='n'>decodedName</span> <span class='p'>=</span> <span class='n'>splitUserName</span><span class='p'>[</span><span class='m'>1</span><span class='p'>];</span>
-		<span class='k'>else</span>
-			<span class='n'>decodedName</span> <span class='p'>=</span> <span class='n'>userName</span><span class='p'>;</span>
-	<span class='p'>}</span>
-	<span class='k'>else</span>
-	<span class='p'>{</span>
-		<span class='n'>decodedName</span> <span class='p'>=</span> <span class='n'>userName</span><span class='p'>;</span>
-	<span class='p'>}</span>
+<div class="highlight"><pre><code class="c#"><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">checkClaimsUser</span><span class="p">(</span><span class="n">String</span> <span class="n">userName</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">string</span> <span class="n">decodedName</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">userName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;|&quot;</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="kt">string</span><span class="p">[]</span> <span class="n">splitUserName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">.</span><span class="n">Split</span><span class="p">(</span><span class="k">new</span> <span class="n">Char</span><span class="p">[]</span> <span class="p">{</span> <span class="sc">&#39;|&#39;</span> <span class="p">},</span> <span class="n">StringSplitOptions</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">splitUserName</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+			<span class="n">decodedName</span> <span class="p">=</span> <span class="n">splitUserName</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+		<span class="k">else</span>
+			<span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">else</span>
+	<span class="p">{</span>
+		<span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
+	<span class="p">}</span>
 
 
-	<span class='k'>return</span> <span class='n'>decodedName</span><span class='p'>.</span><span class='n'>ToLower</span><span class='p'>();</span>
+	<span class="k">return</span> <span class="n">decodedName</span><span class="p">.</span><span class="n">ToLower</span><span class="p">();</span>
 
-<span class='p'>}</span>
+<span class="p">}</span>
 </code></pre></div>
+
 			<footer>
 				<div class="blocked tags">
 					<p>

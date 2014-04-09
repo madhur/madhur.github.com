@@ -177,91 +177,96 @@ google_ad_height = 600;
 
 		<article class="post full span-18 last">
 					<header><h1>Using MakeFile with Assembly Programming</h1></header>
-			 <p>I have been a big fan of assembly programming since my old school days. The raw power of CPU which you get is just pure awesome. But, with that power, you also get much headache of non-availablity of standard IDE’s for using Assembly language.</p>
+			 <p>I have been a big fan of assembly programming since my old school days. The raw power of CPU which you get is just pure awesome.
+But, with that power, you also get much headache of non-availablity of standard IDE’s for using Assembly language.</p>
 
 <ul>
-<li>
-<p>Visual Studio is one of the options, but it restricts you to the installed version of Microsoft Macro Assembler (ml.exe)</p>
-</li>
-
-<li>
-<p>Some prefer using QEditor.exe which ships with <a href="http://masm32.com">MASM32 SDK</a></p>
-</li>
-
-<li>
-<p>Some like me, just cannot stay away from there favourite editors such as Notepad++, Ultraedit etc.</p>
-</li>
+  <li>
+    <p>Visual Studio is one of the options, but it restricts you to the installed version of Microsoft Macro Assembler (ml.exe)</p>
+  </li>
+  <li>
+    <p>Some prefer using QEditor.exe which ships with <a href="http://masm32.com">MASM32 SDK</a></p>
+  </li>
+  <li>
+    <p>Some like me, just cannot stay away from there favourite editors such as Notepad++, Ultraedit etc.</p>
+  </li>
 </ul>
 
-<p>The benefit of using editors such as Notepad++, Ultraedit is that you get fully customizable syntax highlighting and command line tools to be used while assembling and linking their programs. However, with these tools you have to add commands to both assemble and link your programs. And if you are like me, who fiddles with 16bit, 32bit and 64 bit assembly programs, you have to add seperate commands for them. And not to forget, seperate commands for outputting debug and release binaries as well.</p>
+<p>The benefit of using editors such as Notepad++, Ultraedit is that you get fully customizable syntax highlighting and command line tools
+to be used while assembling and linking their programs. However, with these tools you have to add commands to both assemble and link your programs. And if you are like me,
+who fiddles with 16bit, 32bit and 64 bit assembly programs, you have to add seperate commands for them. And not to forget, seperate commands for outputting debug and release binaries as well.</p>
 
-<p>To simplify the above process, I have been exploring the use of makefiles to assemble and link my programs and this has worked wonderfully well. I just maintain my each assembly project in seperate directory with the makefile and use that as a command to assembly and link the program from <a href="http://notepad-plus-plus.org/">Notepad++</a>, using <a href="https://sourceforge.net/projects/npp-plugins/files/NppExec/">NppExec plugin</a>. Apart from Notepad++, I am using following tools as my development environment. You might be using different, but they can be applied in same concept.</p>
+<p>To simplify the above process, I have been exploring the use of makefiles to assemble and link my programs and this has worked wonderfully well. I just maintain my each assembly project in seperate directory with the makefile
+and use that as a command to assembly and link the program from <a href="http://notepad-plus-plus.org/">Notepad++</a>, using <a href="https://sourceforge.net/projects/npp-plugins/files/NppExec/">NppExec plugin</a>. Apart from Notepad++, I am using following tools as my development environment. You might be using different, but they can be applied in same concept.</p>
 
 <ol>
-<li>NMAKE(nmake.exe) v10.00.30319.01 which ships with Visual Studio 2010 available <a href="http://www.microsoft.com/visualstudio/en-in">here</a></li>
-
-<li>Borland Resource compiler (brcc32.exe) v4.50 which ships with Borland compiler tools available somewhere on the net</li>
-
-<li>Microsoft Macro Assembler(ml.exe) v6.14 and Linker (link.exe) v5.12 which ships with Masm 32 SDK available <a href="http://www.masm32.com/">here</a></li>
+  <li>NMAKE(nmake.exe) v10.00.30319.01 which ships with Visual Studio 2010 available <a href="http://www.microsoft.com/visualstudio/en-in">here</a></li>
+  <li>Borland Resource compiler (brcc32.exe) v4.50 which ships with Borland compiler tools available somewhere on the net</li>
+  <li>Microsoft Macro Assembler(ml.exe) v6.14 and Linker (link.exe) v5.12 which ships with Masm 32 SDK available <a href="http://www.masm32.com/">here</a></li>
 </ol>
 
 <p>Note that all the above tools should be put preferable in the PATH variable for easy access. I do this by creating a simple command script as follows:</p>
-<div class='highlight'><pre><code class='text'>setx PATH &quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&quot;
+
+<div class="highlight"><pre><code class="text">setx PATH &quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&quot;
 </code></pre></div>
-<p>I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it.</p>
+
+<p>I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. </p>
 
 <ul>
-<li>A Win32 Assembly program without the use of resources:</li>
+  <li>A Win32 Assembly program without the use of resources:</li>
 </ul>
-<div class='highlight'><pre><code class='makefile'><span class='nv'>MASMPATH</span><span class='o'>=</span>F:<span class='se'>\M</span>ASM32
-<span class='nv'>ML</span><span class='o'>=</span>ml
-<span class='nv'>DEBUG</span> <span class='o'>=</span> 1
-<span class='err'>!IF</span> <span class='k'>$(</span>DEBUG<span class='k'>)</span><span class='o'>==</span>1
-<span class='nv'>CFLAGS</span><span class='o'>=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
+
+<div class="highlight"><pre><code class="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
+<span class="nv">ML</span><span class="o">=</span>ml
+<span class="nv">DEBUG</span> <span class="o">=</span> 1
+<span class="err">!IF</span> <span class="k">$(</span>DEBUG<span class="k">)</span><span class="o">==</span>1
+<span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
 !ELSE
-<span class='nv'>CFLAGS</span><span class='o'>=</span>/c /coff /Fl /Sn /nologo /I
+<span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
 !ENDIF
-<span class='nv'>LDFLAGS</span><span class='o'>=</span>
-<span class='nv'>SOURCES</span><span class='o'>=</span>trans.asm
-<span class='nv'>OBJECTS</span><span class='o'>=</span><span class='k'>$(</span>SOURCES:.asm<span class='o'>=</span>.obj<span class='k'>)</span>
-<span class='nv'>PROJ</span><span class='o'>=</span>trans.exe
+<span class="nv">LDFLAGS</span><span class="o">=</span>
+<span class="nv">SOURCES</span><span class="o">=</span>trans.asm
+<span class="nv">OBJECTS</span><span class="o">=</span><span class="k">$(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="k">)</span>
+<span class="nv">PROJ</span><span class="o">=</span>trans.exe
 
 
-<span class='k'>$(</span>PROJ<span class='k'>)</span>: <span class='k'>$(</span>OBJECTS<span class='k'>)</span>
-	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class='k'>$(</span>MASMPATH<span class='k'>)</span><span class='se'>\L</span>IB <span class='k'>$(</span>OBJECTS<span class='k'>)</span>
+<span class="k">$(</span>PROJ<span class="k">)</span>: <span class="k">$(</span>OBJECTS<span class="k">)</span>
+	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB <span class="k">$(</span>OBJECTS<span class="k">)</span>
 	
-<span class='k'>$(</span>OBJECTS<span class='k'>)</span>: <span class='k'>$(</span>SOURCES<span class='k'>)</span>
-	<span class='k'>$(</span>ML<span class='k'>)</span> <span class='k'>$(</span>CFLAGS<span class='k'>)</span> <span class='k'>$(</span>MASMPATH<span class='k'>)</span><span class='se'>\i</span>nclude <span class='k'>$(</span>SOURCES<span class='k'>)</span> 
+<span class="k">$(</span>OBJECTS<span class="k">)</span>: <span class="k">$(</span>SOURCES<span class="k">)</span>
+	<span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
 	
 clean:
 	del *.exe
 	del *.obj
 	del *.lst
 </code></pre></div>
+
 <ul>
-<li>A win32 Assembly program with the use of resources:</li>
+  <li>A win32 Assembly program with the use of resources:</li>
 </ul>
-<div class='highlight'><pre><code class='makefile'><span class='nv'>MASMPATH</span><span class='o'>=</span>F:<span class='se'>\M</span>ASM32
-<span class='nv'>ML</span><span class='o'>=</span>ml
-<span class='nv'>DEBUG</span> <span class='o'>=</span> 1
-<span class='err'>!IF</span> <span class='k'>$(</span>DEBUG<span class='k'>)</span><span class='o'>==</span>1
-<span class='nv'>CFLAGS</span><span class='o'>=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
+
+<div class="highlight"><pre><code class="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
+<span class="nv">ML</span><span class="o">=</span>ml
+<span class="nv">DEBUG</span> <span class="o">=</span> 1
+<span class="err">!IF</span> <span class="k">$(</span>DEBUG<span class="k">)</span><span class="o">==</span>1
+<span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
 !ELSE
-<span class='nv'>CFLAGS</span><span class='o'>=</span>/c /coff /Fl /Sn /nologo /I
+<span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
 !ENDIF
-<span class='nv'>LDFLAGS</span><span class='o'>=</span>
-<span class='nv'>SOURCES</span><span class='o'>=</span>vaoffset.asm
-<span class='nv'>RESOURCES</span><span class='o'>=</span>vaoffset.rc
-<span class='nv'>OBJECTS</span><span class='o'>=</span><span class='k'>$(</span>SOURCES:.asm<span class='o'>=</span>.obj<span class='k'>)</span> vaoffset.res
-<span class='nv'>PROJ</span><span class='o'>=</span>vaoffset.exe
+<span class="nv">LDFLAGS</span><span class="o">=</span>
+<span class="nv">SOURCES</span><span class="o">=</span>vaoffset.asm
+<span class="nv">RESOURCES</span><span class="o">=</span>vaoffset.rc
+<span class="nv">OBJECTS</span><span class="o">=</span><span class="k">$(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="k">)</span> vaoffset.res
+<span class="nv">PROJ</span><span class="o">=</span>vaoffset.exe
 
 
-<span class='k'>$(</span>PROJ<span class='k'>)</span>: <span class='k'>$(</span>OBJECTS<span class='k'>)</span>
-	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class='k'>$(</span>MASMPATH<span class='k'>)</span><span class='se'>\L</span>IB /LIBPATH:f:<span class='se'>\p</span>rojects<span class='se'>\p</span>rograms<span class='se'>\w</span>insock<span class='se'>\n</span>etsend <span class='k'>$(</span>OBJECTS<span class='k'>)</span>
+<span class="k">$(</span>PROJ<span class="k">)</span>: <span class="k">$(</span>OBJECTS<span class="k">)</span>
+	link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB /LIBPATH:f:<span class="se">\p</span>rojects<span class="se">\p</span>rograms<span class="se">\w</span>insock<span class="se">\n</span>etsend <span class="k">$(</span>OBJECTS<span class="k">)</span>
 	
-<span class='k'>$(</span>OBJECTS<span class='k'>)</span>: <span class='k'>$(</span>SOURCES<span class='k'>)</span>
-	<span class='k'>$(</span>ML<span class='k'>)</span> <span class='k'>$(</span>CFLAGS<span class='k'>)</span> <span class='k'>$(</span>MASMPATH<span class='k'>)</span><span class='se'>\i</span>nclude <span class='k'>$(</span>SOURCES<span class='k'>)</span> 
-	C:<span class='se'>\B</span>orland<span class='se'>\B</span>CC55<span class='se'>\B</span>in<span class='se'>\b</span>rcc32.exe vaoffset.rc
+<span class="k">$(</span>OBJECTS<span class="k">)</span>: <span class="k">$(</span>SOURCES<span class="k">)</span>
+	<span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
+	C:<span class="se">\B</span>orland<span class="se">\B</span>CC55<span class="se">\B</span>in<span class="se">\b</span>rcc32.exe vaoffset.rc
 	
 	
 clean:
@@ -270,8 +275,10 @@ clean:
 	del *.lst
 	
 </code></pre></div>
+
 <p>Now, Provided <strong>NMAKE</strong> is in your path variable, you can simply set a command in Notepad++ or in your favourite text editor to invoke nmake in current directory.</p>
-<div class='highlight'><pre><code class='text'>F:\projects\programs\WIN32ASM\transparent&gt;nmake /U
+
+<div class="highlight"><pre><code class="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake /U
 
 Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.
@@ -280,8 +287,10 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
  Assembling: trans.asm
         link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:F:\MASM32\LIB trans.obj
 </code></pre></div>
+
 <p>And to clean the output,</p>
-<div class='highlight'><pre><code class='text'>F:\projects\programs\WIN32ASM\transparent&gt;nmake clean
+
+<div class="highlight"><pre><code class="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake clean
 
 Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.
@@ -290,6 +299,8 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
         del *.obj
         del *.lst		
 </code></pre></div>
+
+
 			<footer>
 				<div class="blocked tags">
 					<p>

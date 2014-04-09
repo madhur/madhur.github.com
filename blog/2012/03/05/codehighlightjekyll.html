@@ -177,67 +177,81 @@ google_ad_height = 600;
 
 		<article class="post full span-18 last">
 					<header><h1>Enable code highlighting with Pygments/Jekyll</h1></header>
-			 <p>If you have been using Jekyll, you must be aware of code highlighting feature using highlight blocks. This highlighting is accomplished by a neat python script called <a href="http://pygments.org/">Pygments</a></p>
+			 <p>If you have been using Jekyll, you must be aware of code highlighting feature using highlight blocks. This highlighting is accomplished by
+a neat python script called <a href="http://pygments.org/">Pygments</a></p>
 
-<p>Pygments is a very powerful code syntax highlighter. It allows you to pass various options such as weather to display line no.s or which lines to be highlighted. When Jekyll was released, there was no way to use these options since Jekyll encapsulated the execution of Python internally through <a href="https://github.com/github/albino">Albino gem</a></p>
+<p>Pygments is a very powerful code syntax highlighter. It allows you to pass various options such as weather to display line no.s or which lines to be highlighted.
+When Jekyll was released, there was no way to use these options since Jekyll encapsulated the execution of Python internally through <a href="https://github.com/github/albino">Albino gem</a></p>
 
 <p>There has been some progress over this, a <a href="https://github.com/mojombo/jekyll/issues/31">pull request</a> was submitted in Jekyll which allowed various options to be passed to Pygments.</p>
 
 <p>However, when I tried to use <strong>hl_lines</strong> option to highlight the lines of code, I faced several issues. Following is the syntax I used</p>
-<div class='highlight'><pre><code class='text'> highlight html hl_lines=2 4
+
+<div class="highlight"><pre><code class="text"> highlight html hl_lines=2 4
 </code></pre></div>
+
 <p>Running the above piece of code reults in only line 2 being highlighted and not both. So I decided to enclose it with quotation marks</p>
-<div class='highlight'><pre><code class='text'> highlight html hl_lines=&quot;2 4&quot;  
+
+<div class="highlight"><pre><code class="text"> highlight html hl_lines=&quot;2 4&quot;  
 </code></pre></div>
-<p>The above piece of code gives the error.</p>
-<div class='highlight'><pre><code class='text'>Invalid flag value -O
+
+<p>The above piece of code gives the error. </p>
+
+<div class="highlight"><pre><code class="text">Invalid flag value -O
 </code></pre></div>
+
 <p>Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in <strong>albino.rb</strong> file.</p>
-<div class='highlight'><pre><code class='ruby'>  <span class='k'>def</span> <span class='nf'>validate_shell_args</span><span class='p'>(</span><span class='n'>flag</span><span class='p'>,</span> <span class='n'>value</span><span class='p'>)</span>
-    <span class='k'>if</span> <span class='n'>flag</span> <span class='o'>!~</span> <span class='sr'>/^[a-z]+$/i</span>
-      <span class='k'>raise</span> <span class='no'>ShellArgumentError</span><span class='p'>,</span> <span class='s2'>&quot;Flag is invalid: </span><span class='si'>#{</span><span class='n'>flag</span><span class='o'>.</span><span class='n'>inspect</span><span class='si'>}</span><span class='s2'>&quot;</span>
-    <span class='k'>end</span>
-    <span class='k'>if</span> <span class='n'>value</span> <span class='o'>!~</span> <span class='sr'>/^[a-z0-9\-\_\+\=\#\,\s]+$/i</span>
-      <span class='k'>raise</span> <span class='no'>ShellArgumentError</span><span class='p'>,</span> <span class='s2'>&quot;Flag value is invalid: -</span><span class='si'>#{</span><span class='n'>flag</span><span class='si'>}</span><span class='s2'> </span><span class='si'>#{</span><span class='n'>value</span><span class='o'>.</span><span class='n'>inspect</span><span class='si'>}</span><span class='s2'>&quot;</span>
-    <span class='k'>end</span>
-  <span class='k'>end</span>
+
+<div class="highlight"><pre><code class="ruby">  <span class="k">def</span> <span class="nf">validate_shell_args</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flag</span> <span class="o">!~</span> <span class="sr">/^[a-z]+$/i</span>
+      <span class="k">raise</span> <span class="no">ShellArgumentError</span><span class="p">,</span> <span class="s2">&quot;Flag is invalid: </span><span class="si">#{</span><span class="n">flag</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">!~</span> <span class="sr">/^[a-z0-9\-\_\+\=\#\,\s]+$/i</span>
+      <span class="k">raise</span> <span class="no">ShellArgumentError</span><span class="p">,</span> <span class="s2">&quot;Flag value is invalid: -</span><span class="si">#{</span><span class="n">flag</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">value</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
 </code></pre></div>
-<p>The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the <strong>highlight.rb</strong> file in Jekyll to recombine them into the list. See the updated function below:</p>
-<div class='highlight'><pre><code class='ruby'> <span class='k'>def</span> <span class='nf'>initialize</span><span class='p'>(</span><span class='n'>tag_name</span><span class='p'>,</span> <span class='n'>markup</span><span class='p'>,</span> <span class='n'>tokens</span><span class='p'>)</span>
-      <span class='k'>super</span>	 
-      <span class='k'>if</span> <span class='n'>markup</span> <span class='o'>=~</span> <span class='no'>SYNTAX</span>	
-        <span class='vi'>@lang</span> <span class='o'>=</span> <span class='vg'>$1</span>
-        <span class='k'>if</span> <span class='n'>defined?</span> <span class='vg'>$2</span>
-		<span class='c1'># puts $2</span>
-          <span class='n'>tmp_options</span> <span class='o'>=</span> <span class='p'>{}</span>
-          <span class='vg'>$2</span><span class='o'>.</span><span class='n'>split</span><span class='o'>.</span><span class='n'>each</span> <span class='k'>do</span> <span class='o'>|</span><span class='n'>opt</span><span class='o'>|</span>		    
-            <span class='n'>key</span><span class='p'>,</span> <span class='n'>value</span> <span class='o'>=</span> <span class='n'>opt</span><span class='o'>.</span><span class='n'>split</span><span class='p'>(</span><span class='s1'>&#39;=&#39;</span><span class='p'>)</span>						
-			<span class='k'>if</span> <span class='n'>key</span> <span class='o'>==</span> <span class='s1'>&#39;hl_lines&#39;</span>
-				<span class='nb'>puts</span> <span class='n'>value</span>
-				<span class='n'>value</span> <span class='o'>=</span> <span class='n'>value</span><span class='o'>.</span><span class='n'>gsub</span><span class='p'>(</span><span class='s2'>&quot;,&quot;</span><span class='p'>,</span><span class='s2'>&quot; &quot;</span><span class='p'>)</span>
-			<span class='k'>end</span>			
-            <span class='k'>if</span> <span class='n'>value</span><span class='o'>.</span><span class='n'>nil?</span>
-              <span class='k'>if</span> <span class='n'>key</span> <span class='o'>==</span> <span class='s1'>&#39;linenos&#39;</span>			
-                <span class='n'>value</span> <span class='o'>=</span> <span class='s1'>&#39;inline&#39;</span>
-			  <span class='k'>else</span>
-                <span class='n'>value</span> <span class='o'>=</span> <span class='kp'>true</span>
-              <span class='k'>end</span>
-            <span class='k'>end</span>
-            <span class='n'>tmp_options</span><span class='o'>[</span><span class='n'>key</span><span class='o'>]</span> <span class='o'>=</span> <span class='n'>value</span>
-          <span class='k'>end</span>
-          <span class='n'>tmp_options</span> <span class='o'>=</span> <span class='n'>tmp_options</span><span class='o'>.</span><span class='n'>to_a</span><span class='o'>.</span><span class='n'>collect</span> <span class='p'>{</span> <span class='o'>|</span><span class='n'>opt</span><span class='o'>|</span> <span class='n'>opt</span><span class='o'>.</span><span class='n'>join</span><span class='p'>(</span><span class='s1'>&#39;=&#39;</span><span class='p'>)</span> <span class='p'>}</span>
+
+<p>The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the 
+<strong>highlight.rb</strong> file in Jekyll to recombine them into the list. See the updated function below:</p>
+
+<div class="highlight"><pre><code class="ruby"> <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">tag_name</span><span class="p">,</span> <span class="n">markup</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
+      <span class="k">super</span>	 
+      <span class="k">if</span> <span class="n">markup</span> <span class="o">=~</span> <span class="no">SYNTAX</span>	
+        <span class="vi">@lang</span> <span class="o">=</span> <span class="vg">$1</span>
+        <span class="k">if</span> <span class="n">defined?</span> <span class="vg">$2</span>
+		<span class="c1"># puts $2</span>
+          <span class="n">tmp_options</span> <span class="o">=</span> <span class="p">{}</span>
+          <span class="vg">$2</span><span class="o">.</span><span class="n">split</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">opt</span><span class="o">|</span>		    
+            <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>						
+			<span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;hl_lines&#39;</span>
+				<span class="nb">puts</span> <span class="n">value</span>
+				<span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+			<span class="k">end</span>			
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">nil?</span>
+              <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;linenos&#39;</span>			
+                <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;inline&#39;</span>
+			  <span class="k">else</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kp">true</span>
+              <span class="k">end</span>
+            <span class="k">end</span>
+            <span class="n">tmp_options</span><span class="o">[</span><span class="n">key</span><span class="o">]</span> <span class="o">=</span> <span class="n">value</span>
+          <span class="k">end</span>
+          <span class="n">tmp_options</span> <span class="o">=</span> <span class="n">tmp_options</span><span class="o">.</span><span class="n">to_a</span><span class="o">.</span><span class="n">collect</span> <span class="p">{</span> <span class="o">|</span><span class="n">opt</span><span class="o">|</span> <span class="n">opt</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="p">}</span>
 		  
-          <span class='c1'># additional options to pass to Albino</span>
-          <span class='vi'>@options</span> <span class='o'>=</span> <span class='p'>{</span> <span class='s1'>&#39;O&#39;</span> <span class='o'>=&gt;</span> <span class='n'>tmp_options</span><span class='o'>.</span><span class='n'>join</span><span class='p'>(</span><span class='s1'>&#39;,&#39;</span><span class='p'>)</span> <span class='p'>}</span>		  		  		  
-        <span class='k'>else</span>
-          <span class='vi'>@options</span> <span class='o'>=</span> <span class='p'>{}</span>
-        <span class='k'>end</span>
-      <span class='k'>else</span>
-        <span class='k'>raise</span> <span class='no'>SyntaxError</span><span class='o'>.</span><span class='n'>new</span><span class='p'>(</span><span class='s2'>&quot;Syntax Error in &#39;highlight&#39; - Valid syntax: highlight &lt;lang&gt; [linenos]&quot;</span><span class='p'>)</span>
-      <span class='k'>end</span>
-    <span class='k'>end</span>
+          <span class="c1"># additional options to pass to Albino</span>
+          <span class="vi">@options</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;O&#39;</span> <span class="o">=&gt;</span> <span class="n">tmp_options</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="p">}</span>		  		  		  
+        <span class="k">else</span>
+          <span class="vi">@options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">end</span>
+      <span class="k">else</span>
+        <span class="k">raise</span> <span class="no">SyntaxError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Syntax Error in &#39;highlight&#39; - Valid syntax: highlight &lt;lang&gt; [linenos]&quot;</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
 </code></pre></div>
-<p>I cannot submit it as patch in Jekyll since this fix involves fixing two components: Jekyll and Albino. May be someone can come with better approach to fix this. This works for me as of now.</p>
+
+<p>I cannot submit it as patch in Jekyll since this fix involves fixing two components: Jekyll and Albino. May be someone can come with better approach to fix this. This works for me as of now.	</p>
+
 			<footer>
 				<div class="blocked tags">
 					<p>

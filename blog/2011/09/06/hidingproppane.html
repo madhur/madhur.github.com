@@ -178,40 +178,45 @@ google_ad_height = 600;
 		<article class="post full span-18 last">
 					<header><h1>Removing the Default Editor Parts from SharePoint Web Parts</h1></header>
 			 <p>I was recently asked how to remove the Editor Parts (Appearance, Layout, Advanced, etc) from custom Web Parts.</p>
-<div class='highlight'><pre><code class='csharp'><span class='k'>class</span> <span class='nc'>MyEditorPart</span> <span class='p'>:</span> <span class='n'>EditorPart</span>
-<span class='p'>{</span>
-    <span class='k'>protected</span> <span class='k'>override</span> <span class='k'>void</span> <span class='nf'>CreateChildControls</span><span class='p'>()</span>
-    <span class='p'>{</span>        <span class='c1'>// this line hides the default EditorParts</span>
-        <span class='n'>Parent</span><span class='p'>.</span><span class='n'>Controls</span><span class='p'>[</span><span class='m'>2</span><span class='p'>].</span><span class='n'>Visible</span> <span class='p'>=</span> <span class='k'>false</span><span class='p'>;</span>
-        <span class='k'>base</span><span class='p'>.</span><span class='n'>CreateChildControls</span><span class='p'>();</span>
-    <span class='p'>}</span>
 
-    <span class='k'>public</span> <span class='k'>override</span> <span class='kt'>bool</span> <span class='nf'>ApplyChanges</span><span class='p'>()</span>
-    <span class='p'>{</span>
-        <span class='c1'>// do stuff here</span>
-        <span class='k'>return</span> <span class='k'>true</span><span class='p'>;</span>
-    <span class='p'>}</span>
+<div class="highlight"><pre><code class="csharp"><span class="k">class</span> <span class="nc">MyEditorPart</span> <span class="p">:</span> <span class="n">EditorPart</span>
+<span class="p">{</span>
+    <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">CreateChildControls</span><span class="p">()</span>
+    <span class="p">{</span>        <span class="c1">// this line hides the default EditorParts</span>
+        <span class="n">Parent</span><span class="p">.</span><span class="n">Controls</span><span class="p">[</span><span class="m">2</span><span class="p">].</span><span class="n">Visible</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
+        <span class="k">base</span><span class="p">.</span><span class="n">CreateChildControls</span><span class="p">();</span>
+    <span class="p">}</span>
 
-    <span class='k'>public</span> <span class='k'>override</span> <span class='k'>void</span> <span class='nf'>SyncChanges</span><span class='p'>()</span>
-    <span class='p'>{</span>
-        <span class='c1'>// do stuff here</span>
-    <span class='p'>}</span>
-<span class='p'>}</span>
-</code></pre></div><div class='highlight'><pre><code class='csharp'><span class='k'>public</span> <span class='k'>class</span> <span class='nc'>MyWebPart</span> <span class='p'>:</span> <span class='n'>WebPart</span>
-<span class='p'>{</span>
-    <span class='k'>public</span> <span class='k'>override</span> <span class='n'>EditorPartCollection</span> <span class='nf'>CreateEditorParts</span><span class='p'>()</span>
-    <span class='p'>{</span>
-        <span class='n'>ArrayList</span> <span class='n'>aryParts</span> <span class='p'>=</span> <span class='k'>new</span> <span class='n'>ArrayList</span><span class='p'>();</span>
+    <span class="k">public</span> <span class="k">override</span> <span class="kt">bool</span> <span class="nf">ApplyChanges</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// do stuff here</span>
+        <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+    <span class="p">}</span>
 
-        <span class='n'>MyEditorPart</span> <span class='n'>myEditor</span> <span class='p'>=</span> <span class='k'>new</span> <span class='n'>MyEditorPart</span><span class='p'>();</span>
-        <span class='n'>myEditor</span><span class='p'>.</span><span class='n'>ID</span> <span class='p'>=</span> <span class='k'>this</span><span class='p'>.</span><span class='n'>ID</span> <span class='p'>+</span> <span class='s'>&quot;_myEditorPart&quot;</span><span class='p'>;</span>
-        <span class='n'>aryParts</span><span class='p'>.</span><span class='n'>Add</span><span class='p'>(</span><span class='n'>myEditor</span><span class='p'>);</span>
-
-        <span class='k'>return</span> <span class='k'>new</span> <span class='nf'>EditorPartCollection</span><span class='p'>(</span><span class='n'>aryParts</span><span class='p'>);</span>
-    <span class='p'>}</span>
-    <span class='c1'>// do more stuff here...</span>
-<span class='p'>}</span>
+    <span class="k">public</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">SyncChanges</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">// do stuff here</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre></div>
+
+<div class="highlight"><pre><code class="csharp"><span class="k">public</span> <span class="k">class</span> <span class="nc">MyWebPart</span> <span class="p">:</span> <span class="n">WebPart</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">override</span> <span class="n">EditorPartCollection</span> <span class="nf">CreateEditorParts</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">ArrayList</span> <span class="n">aryParts</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="p">();</span>
+
+        <span class="n">MyEditorPart</span> <span class="n">myEditor</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MyEditorPart</span><span class="p">();</span>
+        <span class="n">myEditor</span><span class="p">.</span><span class="n">ID</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">ID</span> <span class="p">+</span> <span class="s">&quot;_myEditorPart&quot;</span><span class="p">;</span>
+        <span class="n">aryParts</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">myEditor</span><span class="p">);</span>
+
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">EditorPartCollection</span><span class="p">(</span><span class="n">aryParts</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="c1">// do more stuff here...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
 			<footer>
 				<div class="blocked tags">
 					<p>

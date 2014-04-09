@@ -177,177 +177,185 @@ google_ad_height = 600;
 
 		<article class="post full span-18 last">
 					<header><h1>Reading and writing People Values in SharePoint List through Silverlight Client object model</h1></header>
-			 <p>While working on the silverlight client object model, I figured out that it is not very straight forward to read and write people values to the list. Especially reading the people picker field requires enumerating <code>SiteUserInfoList</code> list as well. In this post I am going to cover how you can write/read people values to the list.</p>
+			 <p>While working on the silverlight client object model, I figured out that it is not very straight forward to read and write people values to the list.
+Especially reading the people picker field requires enumerating <code>SiteUserInfoList</code> list as well. In this post I am going to cover how you can write/read people values to the list.</p>
 
 <ul>
-<li>Write single selection people field</li>
+  <li>Write single selection people field</li>
 </ul>
-<div class='highlight'><pre><code class='c#'><span class='n'>Singleuser</span> <span class='p'>=</span> <span class='n'>context</span><span class='p'>.</span><span class='n'>Web</span><span class='p'>.</span><span class='n'>EnsureUser</span><span class='p'>(</span><span class='n'>SinglePeopleChooser</span><span class='p'>.</span><span class='n'>selectedAccounts</span><span class='p'>[</span><span class='m'>0</span><span class='p'>].</span><span class='n'>AccountName</span><span class='p'>);</span>
-<span class='n'>newItem</span><span class='p'>[</span><span class='s'>&quot;Single&quot;</span><span class='p'>]</span> <span class='p'>=</span> <span class='n'>Singleuser</span><span class='p'>;</span>
-</code></pre></div>
-<ul>
-<li>Write multiple selection people field</li>
-</ul>
-<div class='highlight'><pre><code class='c#'><span class='n'>List</span><span class='p'>&lt;</span><span class='n'>FieldUserValue</span><span class='p'>&gt;</span> <span class='n'>usersList</span> <span class='p'>=</span> <span class='k'>new</span> <span class='n'>List</span><span class='p'>&lt;</span><span class='n'>FieldUserValue</span><span class='p'>&gt;();</span>
-<span class='k'>foreach</span> <span class='p'>(</span><span class='n'>AccountList</span> <span class='n'>ac</span> <span class='k'>in</span> <span class='n'>MultiplePeopleChooser</span><span class='p'>.</span><span class='n'>selectedAccounts</span><span class='p'>)</span>
-<span class='p'>{</span>
-        <span class='n'>usersList</span><span class='p'>.</span><span class='n'>Add</span><span class='p'>(</span><span class='n'>FieldUserValue</span><span class='p'>.</span><span class='n'>FromUser</span><span class='p'>(</span><span class='n'>ac</span><span class='p'>.</span><span class='n'>AccountName</span><span class='p'>));</span>
-<span class='p'>}</span>
 
-<span class='n'>newItem</span><span class='p'>[</span><span class='s'>&quot;Multiple&quot;</span><span class='p'>]</span> <span class='p'>=</span> <span class='n'>usersList</span><span class='p'>;</span>
+<div class="highlight"><pre><code class="c#"><span class="n">Singleuser</span> <span class="p">=</span> <span class="n">context</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">EnsureUser</span><span class="p">(</span><span class="n">SinglePeopleChooser</span><span class="p">.</span><span class="n">selectedAccounts</span><span class="p">[</span><span class="m">0</span><span class="p">].</span><span class="n">AccountName</span><span class="p">);</span>
+<span class="n">newItem</span><span class="p">[</span><span class="s">&quot;Single&quot;</span><span class="p">]</span> <span class="p">=</span> <span class="n">Singleuser</span><span class="p">;</span>
 </code></pre></div>
+
 <ul>
-<li>Read single selection people field</li>
+  <li>Write multiple selection people field</li>
+</ul>
+
+<div class="highlight"><pre><code class="c#"><span class="n">List</span><span class="p">&lt;</span><span class="n">FieldUserValue</span><span class="p">&gt;</span> <span class="n">usersList</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">FieldUserValue</span><span class="p">&gt;();</span>
+<span class="k">foreach</span> <span class="p">(</span><span class="n">AccountList</span> <span class="n">ac</span> <span class="k">in</span> <span class="n">MultiplePeopleChooser</span><span class="p">.</span><span class="n">selectedAccounts</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="n">usersList</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="n">FieldUserValue</span><span class="p">.</span><span class="n">FromUser</span><span class="p">(</span><span class="n">ac</span><span class="p">.</span><span class="n">AccountName</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="n">newItem</span><span class="p">[</span><span class="s">&quot;Multiple&quot;</span><span class="p">]</span> <span class="p">=</span> <span class="n">usersList</span><span class="p">;</span>
+</code></pre></div>
+
+<ul>
+  <li>Read single selection people field</li>
 </ul>
 
 <p>Reading is more complex. First you retrieve the <code>FieldUserValue</code> from the people field. Unfortunately, this field only contains the <code>display name</code> and <code>Site User ID</code> of the user. You will not get the <code>AccountName</code> from this object which is a common requirement. You will have to perform the lookup against <code>SiteUserInfo</code> list to retrieve the Account Name</p>
-<div class='highlight'><pre><code class='c#'><span class='k'>private</span> <span class='k'>void</span> <span class='nf'>LoadButton_Click</span><span class='p'>(</span><span class='kt'>object</span> <span class='n'>sender</span><span class='p'>,</span> <span class='n'>RoutedEventArgs</span> <span class='n'>e</span><span class='p'>)</span>
-<span class='p'>{</span>
-	<span class='n'>ClientContext</span> <span class='n'>ctx</span> <span class='p'>=</span> <span class='k'>new</span> <span class='n'>ClientContext</span><span class='p'>(</span><span class='n'>siteUrl</span><span class='p'>);</span>
 
-	<span class='n'>Web</span> <span class='n'>web</span> <span class='p'>=</span> <span class='n'>ctx</span><span class='p'>.</span><span class='n'>Web</span><span class='p'>;</span>
+<div class="highlight"><pre><code class="c#"><span class="k">private</span> <span class="k">void</span> <span class="nf">LoadButton_Click</span><span class="p">(</span><span class="kt">object</span> <span class="n">sender</span><span class="p">,</span> <span class="n">RoutedEventArgs</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">ClientContext</span> <span class="n">ctx</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ClientContext</span><span class="p">(</span><span class="n">siteUrl</span><span class="p">);</span>
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>web</span><span class='p'>);</span>
+	<span class="n">Web</span> <span class="n">web</span> <span class="p">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">Web</span><span class="p">;</span>
 
-	<span class='n'>List</span> <span class='n'>list</span> <span class='p'>=</span> <span class='n'>ctx</span><span class='p'>.</span><span class='n'>Web</span><span class='p'>.</span><span class='n'>Lists</span><span class='p'>.</span><span class='n'>GetByTitle</span><span class='p'>(</span><span class='s'>&quot;Madhur&quot;</span><span class='p'>);</span>
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>list</span><span class='p'>);</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">web</span><span class="p">);</span>
 
-	<span class='n'>ListItem</span> <span class='n'>targetItem</span> <span class='p'>=</span> <span class='n'>list</span><span class='p'>.</span><span class='n'>GetItemById</span><span class='p'>(</span><span class='m'>1</span><span class='p'>);</span>
+	<span class="n">List</span> <span class="n">list</span> <span class="p">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">Lists</span><span class="p">.</span><span class="n">GetByTitle</span><span class="p">(</span><span class="s">&quot;Madhur&quot;</span><span class="p">);</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">list</span><span class="p">);</span>
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>targetItem</span><span class='p'>);</span>
+	<span class="n">ListItem</span> <span class="n">targetItem</span> <span class="p">=</span> <span class="n">list</span><span class="p">.</span><span class="n">GetItemById</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>ExecuteQueryAsync</span><span class='p'>((</span><span class='n'>s</span><span class='p'>,</span> <span class='n'>ee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	<span class='p'>{</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">targetItem</span><span class="p">);</span>
 
-		<span class='n'>FieldUserValue</span> <span class='n'>singleValue</span> <span class='p'>=</span> <span class='p'>(</span><span class='n'>FieldUserValue</span><span class='p'>)</span><span class='n'>targetItem</span><span class='p'>[</span><span class='s'>&quot;Single&quot;</span><span class='p'>];</span>
-		<span class='n'>FieldUserValue</span><span class='p'>[]</span> <span class='n'>multValue</span> <span class='p'>=</span> <span class='n'>targetItem</span><span class='p'>[</span><span class='s'>&quot;Multiple&quot;</span><span class='p'>]</span> <span class='k'>as</span> <span class='n'>FieldUserValue</span><span class='p'>[];</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">ExecuteQueryAsync</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">ee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	<span class="p">{</span>
 
-		<span class='n'>Dispatcher</span><span class='p'>.</span><span class='n'>BeginInvoke</span><span class='p'>(()</span> <span class='p'>=&gt;</span>
-		<span class='p'>{</span>
-			<span class='n'>LoadUser</span><span class='p'>(</span><span class='n'>ctx</span><span class='p'>,</span> <span class='n'>singleValue</span><span class='p'>,</span> <span class='n'>multValue</span><span class='p'>);</span>
+		<span class="n">FieldUserValue</span> <span class="n">singleValue</span> <span class="p">=</span> <span class="p">(</span><span class="n">FieldUserValue</span><span class="p">)</span><span class="n">targetItem</span><span class="p">[</span><span class="s">&quot;Single&quot;</span><span class="p">];</span>
+		<span class="n">FieldUserValue</span><span class="p">[]</span> <span class="n">multValue</span> <span class="p">=</span> <span class="n">targetItem</span><span class="p">[</span><span class="s">&quot;Multiple&quot;</span><span class="p">]</span> <span class="k">as</span> <span class="n">FieldUserValue</span><span class="p">[];</span>
 
-		<span class='p'>});</span>
+		<span class="n">Dispatcher</span><span class="p">.</span><span class="n">BeginInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span>
+		<span class="p">{</span>
+			<span class="n">LoadUser</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">singleValue</span><span class="p">,</span> <span class="n">multValue</span><span class="p">);</span>
 
-	<span class='p'>},</span>
-   <span class='p'>(</span><span class='n'>s</span><span class='p'>,</span> <span class='n'>ee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-   <span class='p'>{</span>
-	   <span class='n'>Console</span><span class='p'>.</span><span class='n'>WriteLine</span><span class='p'>(</span><span class='n'>ee</span><span class='p'>.</span><span class='n'>Message</span><span class='p'>);</span>
+		<span class="p">});</span>
 
-   <span class='p'>});</span>
-<span class='p'>}</span>
+	<span class="p">},</span>
+   <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ee</span><span class="p">)</span> <span class="p">=&gt;</span>
+   <span class="p">{</span>
+	   <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">ee</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
 
-<span class='k'>private</span> <span class='k'>void</span> <span class='nf'>LoadUser</span><span class='p'>(</span><span class='n'>ClientContext</span> <span class='n'>ctx</span><span class='p'>,</span> <span class='n'>FieldUserValue</span> <span class='n'>singleValue</span><span class='p'>,</span> <span class='n'>FieldUserValue</span><span class='p'>[]</span> <span class='n'>multValue</span><span class='p'>)</span>
-<span class='p'>{</span>
-	<span class='n'>List</span> <span class='n'>userList</span> <span class='p'>=</span> <span class='n'>ctx</span><span class='p'>.</span><span class='n'>Web</span><span class='p'>.</span><span class='n'>SiteUserInfoList</span><span class='p'>;</span>
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>userList</span><span class='p'>);</span>
+   <span class="p">});</span>
+<span class="p">}</span>
 
-	<span class='n'>ListItemCollection</span> <span class='n'>users</span> <span class='p'>=</span> <span class='n'>userList</span><span class='p'>.</span><span class='n'>GetItems</span><span class='p'>(</span><span class='n'>CamlQuery</span><span class='p'>.</span><span class='n'>CreateAllItemsQuery</span><span class='p'>());</span>
+<span class="k">private</span> <span class="k">void</span> <span class="nf">LoadUser</span><span class="p">(</span><span class="n">ClientContext</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">FieldUserValue</span> <span class="n">singleValue</span><span class="p">,</span> <span class="n">FieldUserValue</span><span class="p">[]</span> <span class="n">multValue</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">List</span> <span class="n">userList</span> <span class="p">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">SiteUserInfoList</span><span class="p">;</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">userList</span><span class="p">);</span>
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>users</span><span class='p'>,</span> <span class='n'>items</span> <span class='p'>=&gt;</span> <span class='n'>items</span><span class='p'>.</span><span class='n'>Include</span><span class='p'>(</span>
-		<span class='n'>item</span> <span class='p'>=&gt;</span> <span class='n'>item</span><span class='p'>.</span><span class='n'>Id</span><span class='p'>,</span> <span class='n'>item</span> <span class='p'>=&gt;</span> <span class='n'>item</span><span class='p'>[</span><span class='s'>&quot;Name&quot;</span><span class='p'>]));</span>
+	<span class="n">ListItemCollection</span> <span class="n">users</span> <span class="p">=</span> <span class="n">userList</span><span class="p">.</span><span class="n">GetItems</span><span class="p">(</span><span class="n">CamlQuery</span><span class="p">.</span><span class="n">CreateAllItemsQuery</span><span class="p">());</span>
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>ExecuteQueryAsync</span><span class='p'>((</span><span class='n'>ss</span><span class='p'>,</span> <span class='n'>eee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	<span class='p'>{</span>
-		<span class='n'>ListItem</span> <span class='n'>principal</span> <span class='p'>=</span> <span class='n'>users</span><span class='p'>.</span><span class='n'>GetById</span><span class='p'>(</span><span class='n'>singleValue</span><span class='p'>.</span><span class='n'>LookupId</span><span class='p'>);</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">items</span> <span class="p">=&gt;</span> <span class="n">items</span><span class="p">.</span><span class="n">Include</span><span class="p">(</span>
+		<span class="n">item</span> <span class="p">=&gt;</span> <span class="n">item</span><span class="p">.</span><span class="n">Id</span><span class="p">,</span> <span class="n">item</span> <span class="p">=&gt;</span> <span class="n">item</span><span class="p">[</span><span class="s">&quot;Name&quot;</span><span class="p">]));</span>
 
-		<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>principal</span><span class='p'>);</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">ExecuteQueryAsync</span><span class="p">((</span><span class="n">ss</span><span class="p">,</span> <span class="n">eee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	<span class="p">{</span>
+		<span class="n">ListItem</span> <span class="n">principal</span> <span class="p">=</span> <span class="n">users</span><span class="p">.</span><span class="n">GetById</span><span class="p">(</span><span class="n">singleValue</span><span class="p">.</span><span class="n">LookupId</span><span class="p">);</span>
 
-		<span class='n'>ctx</span><span class='p'>.</span><span class='n'>ExecuteQueryAsync</span><span class='p'>((</span><span class='n'>sss</span><span class='p'>,</span> <span class='n'>eeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-		<span class='p'>{</span>
-			<span class='kt'>string</span> <span class='n'>username</span> <span class='p'>=</span> <span class='n'>principal</span><span class='p'>[</span><span class='s'>&quot;Name&quot;</span><span class='p'>]</span> <span class='k'>as</span> <span class='kt'>string</span><span class='p'>;</span>
+		<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">principal</span><span class="p">);</span>
 
-			<span class='kt'>string</span> <span class='n'>decodedName</span> <span class='p'>=</span> <span class='n'>Utils</span><span class='p'>.</span><span class='n'>checkClaimsUser</span><span class='p'>(</span><span class='n'>username</span><span class='p'>);</span>
-			<span class='kt'>string</span> <span class='n'>dispName</span> <span class='p'>=</span> <span class='n'>principal</span><span class='p'>[</span><span class='s'>&quot;Title&quot;</span><span class='p'>]</span> <span class='k'>as</span> <span class='kt'>string</span><span class='p'>;</span>
+		<span class="n">ctx</span><span class="p">.</span><span class="n">ExecuteQueryAsync</span><span class="p">((</span><span class="n">sss</span><span class="p">,</span> <span class="n">eeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+		<span class="p">{</span>
+			<span class="kt">string</span> <span class="n">username</span> <span class="p">=</span> <span class="n">principal</span><span class="p">[</span><span class="s">&quot;Name&quot;</span><span class="p">]</span> <span class="k">as</span> <span class="kt">string</span><span class="p">;</span>
 
-			<span class='n'>Dispatcher</span><span class='p'>.</span><span class='n'>BeginInvoke</span><span class='p'>(()</span> <span class='p'>=&gt;</span>
-			<span class='p'>{</span>
-				<span class='n'>SinglePeopleChooser</span><span class='p'>.</span><span class='n'>selectedAccounts</span><span class='p'>.</span><span class='n'>Clear</span><span class='p'>();</span>
+			<span class="kt">string</span> <span class="n">decodedName</span> <span class="p">=</span> <span class="n">Utils</span><span class="p">.</span><span class="n">checkClaimsUser</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
+			<span class="kt">string</span> <span class="n">dispName</span> <span class="p">=</span> <span class="n">principal</span><span class="p">[</span><span class="s">&quot;Title&quot;</span><span class="p">]</span> <span class="k">as</span> <span class="kt">string</span><span class="p">;</span>
 
-				<span class='n'>SinglePeopleChooser</span><span class='p'>.</span><span class='n'>selectedAccounts</span><span class='p'>.</span><span class='n'>Add</span><span class='p'>(</span><span class='k'>new</span> <span class='n'>AccountList</span><span class='p'>(</span><span class='n'>decodedName</span><span class='p'>,</span> <span class='n'>dispName</span><span class='p'>));</span>
-				<span class='n'>SinglePeopleChooser</span><span class='p'>.</span><span class='n'>UserTextBox</span><span class='p'>.</span><span class='n'>Text</span> <span class='p'>=</span> <span class='n'>dispName</span><span class='p'>;</span>
+			<span class="n">Dispatcher</span><span class="p">.</span><span class="n">BeginInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span>
+			<span class="p">{</span>
+				<span class="n">SinglePeopleChooser</span><span class="p">.</span><span class="n">selectedAccounts</span><span class="p">.</span><span class="n">Clear</span><span class="p">();</span>
 
-			<span class='p'>}</span>
-				<span class='p'>);</span>
+				<span class="n">SinglePeopleChooser</span><span class="p">.</span><span class="n">selectedAccounts</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="k">new</span> <span class="n">AccountList</span><span class="p">(</span><span class="n">decodedName</span><span class="p">,</span> <span class="n">dispName</span><span class="p">));</span>
+				<span class="n">SinglePeopleChooser</span><span class="p">.</span><span class="n">UserTextBox</span><span class="p">.</span><span class="n">Text</span> <span class="p">=</span> <span class="n">dispName</span><span class="p">;</span>
 
-		<span class='p'>},</span>
-		  <span class='p'>(</span><span class='n'>sss</span><span class='p'>,</span> <span class='n'>eeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-		  <span class='p'>{</span>
-			  <span class='n'>Console</span><span class='p'>.</span><span class='n'>WriteLine</span><span class='p'>(</span><span class='n'>eeee</span><span class='p'>.</span><span class='n'>Message</span><span class='p'>);</span>
+			<span class="p">}</span>
+				<span class="p">);</span>
 
-		  <span class='p'>});</span>
+		<span class="p">},</span>
+		  <span class="p">(</span><span class="n">sss</span><span class="p">,</span> <span class="n">eeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+		  <span class="p">{</span>
+			  <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">eeee</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
 
-
-	<span class='p'>},</span>
-	 <span class='p'>(</span><span class='n'>sss</span><span class='p'>,</span> <span class='n'>eeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	 <span class='p'>{</span>
-		 <span class='n'>Console</span><span class='p'>.</span><span class='n'>WriteLine</span><span class='p'>(</span><span class='n'>eeee</span><span class='p'>.</span><span class='n'>Message</span><span class='p'>);</span>
-
-	 <span class='p'>});</span>
-
-	<span class='n'>userList</span> <span class='p'>=</span> <span class='n'>ctx</span><span class='p'>.</span><span class='n'>Web</span><span class='p'>.</span><span class='n'>SiteUserInfoList</span><span class='p'>;</span>
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>userList</span><span class='p'>);</span>
-
-	<span class='n'>users</span> <span class='p'>=</span> <span class='n'>userList</span><span class='p'>.</span><span class='n'>GetItems</span><span class='p'>(</span><span class='n'>CamlQuery</span><span class='p'>.</span><span class='n'>CreateAllItemsQuery</span><span class='p'>());</span>
-
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>users</span><span class='p'>,</span> <span class='n'>items</span> <span class='p'>=&gt;</span> <span class='n'>items</span><span class='p'>.</span><span class='n'>Include</span><span class='p'>(</span>
-		<span class='n'>item</span> <span class='p'>=&gt;</span> <span class='n'>item</span><span class='p'>.</span><span class='n'>Id</span><span class='p'>,</span> <span class='n'>item</span> <span class='p'>=&gt;</span> <span class='n'>item</span><span class='p'>[</span><span class='s'>&quot;Name&quot;</span><span class='p'>]));</span>
+		  <span class="p">});</span>
 
 
-	<span class='n'>ctx</span><span class='p'>.</span><span class='n'>ExecuteQueryAsync</span><span class='p'>((</span><span class='n'>s</span><span class='p'>,</span> <span class='n'>ee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	<span class='p'>{</span>
-		<span class='n'>ListItem</span><span class='p'>[]</span> <span class='n'>principals</span> <span class='p'>=</span> <span class='k'>new</span> <span class='n'>ListItem</span><span class='p'>[</span><span class='n'>multValue</span><span class='p'>.</span><span class='n'>Length</span><span class='p'>];</span>
+	<span class="p">},</span>
+	 <span class="p">(</span><span class="n">sss</span><span class="p">,</span> <span class="n">eeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	 <span class="p">{</span>
+		 <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">eeee</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
 
-		<span class='k'>for</span> <span class='p'>(</span><span class='kt'>int</span> <span class='n'>i</span> <span class='p'>=</span> <span class='m'>0</span><span class='p'>;</span> <span class='n'>i</span> <span class='p'>&lt;</span> <span class='n'>multValue</span><span class='p'>.</span><span class='n'>Length</span><span class='p'>;</span> <span class='n'>i</span><span class='p'>++)</span>
-		<span class='p'>{</span>
-			<span class='n'>principals</span><span class='p'>[</span><span class='n'>i</span><span class='p'>]</span> <span class='p'>=</span> <span class='n'>users</span><span class='p'>.</span><span class='n'>GetById</span><span class='p'>(</span><span class='n'>multValue</span><span class='p'>[</span><span class='n'>i</span><span class='p'>].</span><span class='n'>LookupId</span><span class='p'>);</span>
-			<span class='n'>ctx</span><span class='p'>.</span><span class='n'>Load</span><span class='p'>(</span><span class='n'>principals</span><span class='p'>[</span><span class='n'>i</span><span class='p'>]);</span>
-		<span class='p'>}</span>
+	 <span class="p">});</span>
 
-		<span class='n'>ctx</span><span class='p'>.</span><span class='n'>ExecuteQueryAsync</span><span class='p'>((</span><span class='n'>ssss</span><span class='p'>,</span> <span class='n'>eeeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-		<span class='p'>{</span>
-			<span class='kt'>string</span> <span class='n'>username</span><span class='p'>;</span>
+	<span class="n">userList</span> <span class="p">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">Web</span><span class="p">.</span><span class="n">SiteUserInfoList</span><span class="p">;</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">userList</span><span class="p">);</span>
 
-			<span class='k'>for</span> <span class='p'>(</span><span class='kt'>int</span> <span class='n'>i</span> <span class='p'>=</span> <span class='m'>0</span><span class='p'>;</span> <span class='n'>i</span> <span class='p'>&lt;</span> <span class='n'>multValue</span><span class='p'>.</span><span class='n'>Length</span><span class='p'>;</span> <span class='n'>i</span><span class='p'>++)</span>
-			<span class='p'>{</span>
+	<span class="n">users</span> <span class="p">=</span> <span class="n">userList</span><span class="p">.</span><span class="n">GetItems</span><span class="p">(</span><span class="n">CamlQuery</span><span class="p">.</span><span class="n">CreateAllItemsQuery</span><span class="p">());</span>
+
+	<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">items</span> <span class="p">=&gt;</span> <span class="n">items</span><span class="p">.</span><span class="n">Include</span><span class="p">(</span>
+		<span class="n">item</span> <span class="p">=&gt;</span> <span class="n">item</span><span class="p">.</span><span class="n">Id</span><span class="p">,</span> <span class="n">item</span> <span class="p">=&gt;</span> <span class="n">item</span><span class="p">[</span><span class="s">&quot;Name&quot;</span><span class="p">]));</span>
 
 
-				<span class='k'>try</span>
-				<span class='p'>{</span>
-					<span class='n'>username</span> <span class='p'>=</span> <span class='n'>principals</span><span class='p'>[</span><span class='n'>i</span><span class='p'>][</span><span class='s'>&quot;Name&quot;</span><span class='p'>]</span> <span class='k'>as</span> <span class='kt'>string</span><span class='p'>;</span>
-				<span class='p'>}</span>
-				<span class='k'>catch</span> <span class='p'>(</span><span class='n'>IndexOutOfRangeException</span> <span class='n'>ii</span><span class='p'>)</span>
-				<span class='p'>{</span>
-					<span class='k'>return</span><span class='p'>;</span>
-				<span class='p'>}</span>
+	<span class="n">ctx</span><span class="p">.</span><span class="n">ExecuteQueryAsync</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="n">ee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	<span class="p">{</span>
+		<span class="n">ListItem</span><span class="p">[]</span> <span class="n">principals</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ListItem</span><span class="p">[</span><span class="n">multValue</span><span class="p">.</span><span class="n">Length</span><span class="p">];</span>
 
-				<span class='kt'>string</span> <span class='n'>decodedName</span> <span class='p'>=</span> <span class='n'>Utils</span><span class='p'>.</span><span class='n'>checkClaimsUser</span><span class='p'>(</span><span class='n'>username</span><span class='p'>);</span>
-				<span class='kt'>string</span> <span class='n'>dispName</span> <span class='p'>=</span> <span class='n'>principals</span><span class='p'>[</span><span class='n'>i</span><span class='p'>][</span><span class='s'>&quot;Title&quot;</span><span class='p'>]</span> <span class='k'>as</span> <span class='kt'>string</span><span class='p'>;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">multValue</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+		<span class="p">{</span>
+			<span class="n">principals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">=</span> <span class="n">users</span><span class="p">.</span><span class="n">GetById</span><span class="p">(</span><span class="n">multValue</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">LookupId</span><span class="p">);</span>
+			<span class="n">ctx</span><span class="p">.</span><span class="n">Load</span><span class="p">(</span><span class="n">principals</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="p">}</span>
 
-				<span class='n'>Dispatcher</span><span class='p'>.</span><span class='n'>BeginInvoke</span><span class='p'>(()</span> <span class='p'>=&gt;</span>
-				<span class='p'>{</span>
-					<span class='n'>MultiplePeopleChooser</span><span class='p'>.</span><span class='n'>selectedAccounts</span><span class='p'>.</span><span class='n'>Add</span><span class='p'>(</span><span class='k'>new</span> <span class='n'>AccountList</span><span class='p'>(</span><span class='n'>decodedName</span><span class='p'>,</span> <span class='n'>dispName</span><span class='p'>));</span>
-				<span class='p'>}</span>
-				<span class='p'>);</span>
-			<span class='p'>}</span>
+		<span class="n">ctx</span><span class="p">.</span><span class="n">ExecuteQueryAsync</span><span class="p">((</span><span class="n">ssss</span><span class="p">,</span> <span class="n">eeeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+		<span class="p">{</span>
+			<span class="kt">string</span> <span class="n">username</span><span class="p">;</span>
+
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="p">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="p">&lt;</span> <span class="n">multValue</span><span class="p">.</span><span class="n">Length</span><span class="p">;</span> <span class="n">i</span><span class="p">++)</span>
+			<span class="p">{</span>
 
 
-		<span class='p'>},</span>
-	   <span class='p'>(</span><span class='n'>ssss</span><span class='p'>,</span> <span class='n'>eeeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	   <span class='p'>{</span>
-		   <span class='n'>Console</span><span class='p'>.</span><span class='n'>WriteLine</span><span class='p'>(</span><span class='n'>eeeee</span><span class='p'>.</span><span class='n'>Message</span><span class='p'>);</span>
+				<span class="k">try</span>
+				<span class="p">{</span>
+					<span class="n">username</span> <span class="p">=</span> <span class="n">principals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&quot;Name&quot;</span><span class="p">]</span> <span class="k">as</span> <span class="kt">string</span><span class="p">;</span>
+				<span class="p">}</span>
+				<span class="k">catch</span> <span class="p">(</span><span class="n">IndexOutOfRangeException</span> <span class="n">ii</span><span class="p">)</span>
+				<span class="p">{</span>
+					<span class="k">return</span><span class="p">;</span>
+				<span class="p">}</span>
 
-	   <span class='p'>});</span>
+				<span class="kt">string</span> <span class="n">decodedName</span> <span class="p">=</span> <span class="n">Utils</span><span class="p">.</span><span class="n">checkClaimsUser</span><span class="p">(</span><span class="n">username</span><span class="p">);</span>
+				<span class="kt">string</span> <span class="n">dispName</span> <span class="p">=</span> <span class="n">principals</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&quot;Title&quot;</span><span class="p">]</span> <span class="k">as</span> <span class="kt">string</span><span class="p">;</span>
 
-	<span class='p'>},</span>
+				<span class="n">Dispatcher</span><span class="p">.</span><span class="n">BeginInvoke</span><span class="p">(()</span> <span class="p">=&gt;</span>
+				<span class="p">{</span>
+					<span class="n">MultiplePeopleChooser</span><span class="p">.</span><span class="n">selectedAccounts</span><span class="p">.</span><span class="n">Add</span><span class="p">(</span><span class="k">new</span> <span class="n">AccountList</span><span class="p">(</span><span class="n">decodedName</span><span class="p">,</span> <span class="n">dispName</span><span class="p">));</span>
+				<span class="p">}</span>
+				<span class="p">);</span>
+			<span class="p">}</span>
 
-	 <span class='p'>(</span><span class='n'>ssss</span><span class='p'>,</span> <span class='n'>eeeee</span><span class='p'>)</span> <span class='p'>=&gt;</span>
-	 <span class='p'>{</span>
-		 <span class='n'>Console</span><span class='p'>.</span><span class='n'>WriteLine</span><span class='p'>(</span><span class='n'>eeeee</span><span class='p'>.</span><span class='n'>Message</span><span class='p'>);</span>
 
-	 <span class='p'>});</span>
+		<span class="p">},</span>
+	   <span class="p">(</span><span class="n">ssss</span><span class="p">,</span> <span class="n">eeeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	   <span class="p">{</span>
+		   <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">eeeee</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
 
-<span class='p'>}</span>
+	   <span class="p">});</span>
+
+	<span class="p">},</span>
+
+	 <span class="p">(</span><span class="n">ssss</span><span class="p">,</span> <span class="n">eeeee</span><span class="p">)</span> <span class="p">=&gt;</span>
+	 <span class="p">{</span>
+		 <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">eeeee</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+
+	 <span class="p">});</span>
+
+<span class="p">}</span>
 </code></pre></div>
+
+
 			<footer>
 				<div class="blocked tags">
 					<p>

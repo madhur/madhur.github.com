@@ -4,7 +4,7 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2014-02-01T13:06:53+05:30</updated>
+ <updated>2014-04-09T23:27:11+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -13,17 +13,114 @@
  
  
  <entry>
+   <title>Updating Created By field in SharePoint through Client Object Model</title>
+   <link href="http://madhur.co.in/blog/2014/05/09/updatingcreatedby.html"/>
+   <updated>2014-05-09T00:00:00+05:30</updated>
+   <id>id:/blog/2014/05/09/updatingcreatedby</id>
+   <content type="html">&lt;p&gt;Recently, we did a migration from SharePoint 2010 old site to a new site and as a result imported a bunch of records.&lt;/p&gt;
+
+&lt;p&gt;However, the &lt;code&gt;Created By&lt;/code&gt; field was reset to the Account of the person performing the migration. To overcome this, I wrote a quick script to update the 
+&lt;code&gt;Created By&lt;/code&gt; field. The field was updated from another field &lt;code&gt;Old_Created_By_Person&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;csharp&quot;&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;Microsoft.SharePoint.Client&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Collections.Generic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Linq&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;System.Threading.Tasks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;SPUpdateField&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Program&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+            &lt;span class=&quot;n&quot;&gt;ClientContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ClientContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;https://teams.aexp.com/sites/excel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Lists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetByTitle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Idea&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ListItemCollection&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CamlQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// loading all the fields&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// important thing is, that here you must have the right type&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// i.e. item[&amp;quot;Modified&amp;quot;] is DateTime&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Old_Created_By_Person&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Author&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+                    &lt;span class=&quot;c1&quot;&gt;// do whatever changes you want&lt;/span&gt;
+
+                    &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// important, rembeber changes&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+                    &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Updating &amp;quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+           
+
+            &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Done&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ReadLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Hosting Git repository on a Windows LAN</title>
+   <link href="http://madhur.co.in/blog/2014/05/09/hostgitwindowslan.html"/>
+   <updated>2014-05-09T00:00:00+05:30</updated>
+   <id>id:/blog/2014/05/09/hostgitwindowslan</id>
+   <content type="html">&lt;p&gt;Recently, I had a small team of developers and was looking to setup a version control system for them.&lt;/p&gt;
+
+&lt;p&gt;I evaluated many tools like VSTS, Subversion and finally decided on Git repository hosted on a Windows LAN.&lt;/p&gt;
+
+&lt;p&gt;First of all, find or create a network share on which everybody will have a read/write access. For example:
+&lt;code&gt;\\Group03\Silverlight_Projects\EXCEL\Solution&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;First of all, you need to create a blank bare repository at this location. However, since you cannot &lt;code&gt;cd&lt;/code&gt; into a network
+shared location, we will use &lt;code&gt;pushd&lt;/code&gt; command as follows:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;pushd \\Group03\Silverlight_Projects\EXCEL\Solution
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This command will map it to a network drive and &lt;code&gt;cd&lt;/code&gt; into it.&lt;/p&gt;
+
+&lt;p&gt;Create a bare git repository.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;git init --bare
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now all we need to do is add the newly created remote bare repository to our local repo and push our code up.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;git remote add origin //Group03/Silverlight_Projects/EXCEL/Solution
+git push origin master
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
    <title>Writing Silverlight people picker control using SharePoint 2010 Client object model</title>
    <link href="http://madhur.co.in/blog/2014/01/29/silverlight-people-picker.html"/>
    <updated>2014-01-29T00:00:00+05:30</updated>
    <id>id:/blog/2014/01/29/silverlight-people-picker</id>
    <content type="html">&lt;p&gt;Whenever you are developing a silverlight solution on SharePoint 2010, one of the basic functionality you will require is the ability to select people from your Active Directory.&lt;/p&gt;
 
-&lt;p&gt;Sadly, I could not find a ready made custom silverlight control which I could utilize for my solution. I decided to write on my own. Rather than writing from scratch, I decided to use the boilerplate code &lt;a href=&quot;http://blogs.technet.com/b/speschka/archive/2011/08/09/writing-a-sharepoint-2010-people-picker-control-for-silverlight.aspx&quot;&gt;provided&lt;/a&gt; by Steve.&lt;/p&gt;
+&lt;p&gt;Sadly, I could not find a ready made custom silverlight control which I could utilize for my solution. I decided to write on my own. Rather than writing from scratch, I decided to
+use the boilerplate code &lt;a href=&quot;http://blogs.technet.com/b/speschka/archive/2011/08/09/writing-a-sharepoint-2010-people-picker-control-for-silverlight.aspx&quot;&gt;provided&lt;/a&gt; by Steve.&lt;/p&gt;
 
 &lt;p&gt;In this post, I am going to deep dive how I built this control.&lt;/p&gt;
 
-&lt;p&gt;My solution consists of two controls, &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt;. &lt;code&gt;PeopleChooser&lt;/code&gt; is a user control which is configured to either single select or multi select depending upon the configuration. Here’s a screenshot of my people Chooser control, implemented as a user control in Silverlight.&lt;/p&gt;
+&lt;p&gt;My solution consists of two controls, &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt;. &lt;code&gt;PeopleChooser&lt;/code&gt; is a user control which is configured to either single select or multi select depending upon the 
+configuration.  Here’s a screenshot of my people Chooser control, implemented as a user control in Silverlight.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/singlepicker.png&quot; alt=&quot;PeopleChooser Single Selection&quot; /&gt;&lt;/p&gt;
 
@@ -31,106 +128,120 @@
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/pickermultipleresults.png&quot; alt=&quot;PeopleChooser Multiple results&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;The multi select configuraiton is rendered as a listbox instead of a textbox. I made a conscious design decision to do this so that user instantly comes to know that this is a multi select picker by directly looking at it.&lt;/p&gt;
+&lt;p&gt;The multi select configuraiton is rendered as a listbox instead of a textbox. I made a conscious design decision to do this so that user instantly comes to know that this is a multi select
+picker by directly looking at it. &lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/multiplepicker.png&quot; alt=&quot;PeopleChooser Multiple selection&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;PeoplePicker&lt;/code&gt; is a &lt;code&gt;ChildWindow&lt;/code&gt; which is launched from the &lt;code&gt;PeopleChooser&lt;/code&gt; to search and enumerate people from the active directory. Clicking on the address book button opens the people picker, where the user can select either multiple people or single people depending upon the configuration of the control. This is the screenshot of people picker control.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;PeoplePicker&lt;/code&gt; is a &lt;code&gt;ChildWindow&lt;/code&gt; which is launched from the &lt;code&gt;PeopleChooser&lt;/code&gt; to search and enumerate people from the active directory. 
+Clicking on the address book button opens the people picker, where the user can select either multiple people or single people depending upon the configuration of the control.
+This is the screenshot of  people picker control. &lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/peoplepicker.png&quot; alt=&quot;PeoplePicker&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Feel free to &lt;a href=&quot;https://github.com/madhur/SLControls/archive/master.zip&quot;&gt;download&lt;/a&gt; this control or customize by downloding the source from my &lt;a href=&quot;https://github.com/madhur/SLControls&quot;&gt;github repo&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Anyone, who wants to reuse or customize this control further, I will explain in brief how this works.&lt;/p&gt;
+&lt;p&gt;Anyone, who wants to reuse or customize this control further, I will explain in brief how this works. &lt;/p&gt;
 
-&lt;p&gt;Both &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt; have a listbox which employ two-way data binding. Both listbox are bound to a following data structure &lt;code&gt;SelectedAccounts&lt;/code&gt; which is an &lt;code&gt;ObservableCollection&lt;/code&gt; of type &lt;code&gt;AccountList&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;class&lt;/span&gt; &lt;span class=&#39;nc&#39;&gt;SelectedAccounts&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ObservableCollection&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;SelectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;():&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;base&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;()&lt;/span&gt;
-    &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;         
-    &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;p&gt;Both &lt;code&gt;PeopleChooser&lt;/code&gt; and &lt;code&gt;PeoplePicker&lt;/code&gt; have a listbox which employ two-way data binding.
+Both listbox are bound to a following data structure &lt;code&gt;SelectedAccounts&lt;/code&gt; which is an &lt;code&gt;ObservableCollection&lt;/code&gt; of type &lt;code&gt;AccountList&lt;/code&gt;&lt;/p&gt;
 
-&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;class&lt;/span&gt; &lt;span class=&#39;nc&#39;&gt;AccountList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;INotifyPropertyChanged&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;_accountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;_displayName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;       
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SelectedAccounts&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ObservableCollection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AccountList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;SelectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;         
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;AccountList&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;INotifyPropertyChanged&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_accountName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_displayName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;       
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;The below XAML shows the two way databinding with this data structure&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;xml&#39;&gt; &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;x:Name=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;UsersListBox&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;DataContext=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;selectedAccounts&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;ItemsSource=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;{Binding SelectedAccounts, Mode=TwoWay}&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;HorizontalAlignment=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Left&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Height=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;100&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Margin=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;26,43,0,0&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;VerticalAlignment=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Top&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Width=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;182&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-    &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox.RenderTransform&amp;gt;&lt;/span&gt;
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;CompositeTransform&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;SkewX=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0.661&amp;quot;&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;TranslateX=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;0.606&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
-    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox.RenderTransform&amp;gt;&lt;/span&gt;
-    &lt;span class=&#39;nt&#39;&gt;&amp;lt;ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;DataTemplate&amp;gt;&lt;/span&gt;
-            &lt;span class=&#39;nt&#39;&gt;&amp;lt;StackPanel&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Orientation=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Horizontal&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-                &lt;span class=&#39;nt&#39;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;Text=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;{Binding DisplayName}&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&#39;nt&#39;&gt;&amp;lt;/StackPanel&amp;gt;&lt;/span&gt;
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/DataTemplate&amp;gt;&lt;/span&gt;
-    &lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
-&lt;span class=&#39;nt&#39;&gt;&amp;lt;/ListBox&amp;gt;&lt;/span&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;ListBox&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;x:Name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;UsersListBox&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;DataContext=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;selectedAccounts&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ItemsSource=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;{Binding SelectedAccounts, Mode=TwoWay}&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;HorizontalAlignment=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Left&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;100&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Margin=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;26,43,0,0&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;VerticalAlignment=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Top&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;182&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;ListBox.RenderTransform&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;CompositeTransform&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;SkewX=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;0.661&amp;quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;TranslateX=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;0.606&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/ListBox.RenderTransform&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;DataTemplate&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;StackPanel&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Orientation=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Horizontal&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextBlock&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;{Binding DisplayName}&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;/StackPanel&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/DataTemplate&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/ListBox.ItemTemplate&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/ListBox&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;&lt;code&gt;SelectedAccounts&lt;/code&gt; data structure is populated using People WebService.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;PeopleSoapClient&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PeopleSoapClient&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
-&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Endpoint&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Address&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt;
-&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ServiceModel&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;EndpointAddress&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;siteUrl&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;peopleWsUrl&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
 
-&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsCompleted&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;EventHandler&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsCompletedEventArgs&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ps_SearchPrincipalsCompleted&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;n&quot;&gt;PeopleSoapClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ps&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PeopleSoapClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Endpoint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Address&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ServiceModel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EndpointAddress&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;siteUrl&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;peopleWsUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-&lt;span class=&#39;n&#39;&gt;ps&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchPrincipalsAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SearchTxt&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Text&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;50&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPPrincipalType&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;User&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SearchPrincipalsCompleted&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EventHandler&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SearchPrincipalsCompletedEventArgs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ps_SearchPrincipalsCompleted&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SearchPrincipalsAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SearchTxt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SPPrincipalType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;Depending upon if multiple selection is allowed or not, &lt;code&gt;ListBox&lt;/code&gt; is hidden and &lt;code&gt;TextBox&lt;/code&gt; is shown instead along with a resolve button.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;bool&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;get&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;set&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
 
-&lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;PeopleChooser_Loaded&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;UsersListBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;ResolveButton&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-	&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;UsersListBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Collapsed&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;System&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Windows&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;ResolveButton&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Visibility&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Visible&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;peoplePicker&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PeopleChooser_Loaded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;UsersListBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visible&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;UserTextBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collapsed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ResolveButton&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collapsed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;UsersListBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Collapsed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;UserTextBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Windows&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visible&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ResolveButton&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Visibility&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Visible&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;peoplePicker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AllowMultiple&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AllowMultiple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;If there are muliple results, right mouse button on &lt;code&gt;TextBox&lt;/code&gt; is handled and displays choices to user to enable him to select a single result.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;UserTextBox_MouseRightButtonUp&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MouseButtonEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-    &lt;span class=&#39;c1&#39;&gt;// Display a menu on mouse right button up&lt;/span&gt;
-    &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ContextMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;UserTextBox_MouseRightButtonUp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MouseButtonEventArgs&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// Display a menu on mouse right button up&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cMenu&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ContextMenu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
     
-    &lt;span class=&#39;k&#39;&gt;foreach&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;in&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-    &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Header&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;DisplayName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;pi&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Click&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;+=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PickerEntry&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;mnuItem&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MenuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;mnuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Header&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DisplayName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;mnuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AccountName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;mnuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Click&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cMenu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mnuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-    &lt;span class=&#39;n&#39;&gt;cMenu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IsOpen&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;true&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cMenu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IsOpen&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-&lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-    &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MenuItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;mnuItem_Click&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;MenuItem&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mnu&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MenuItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-    &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Dictionary&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;();&lt;/span&gt;
-    &lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;PickerEntry&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Header&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ToString&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(),&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;mnu&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Empty&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Empty&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Dictionary&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PickerEntry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mnu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PickerEntry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mnu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Header&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ToString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mnu&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Empty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
 
-    &lt;span class=&#39;n&#39;&gt;SetSingleResult&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;values&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+    &lt;span class=&quot;n&quot;&gt;SetSingleResult&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</content>
  </entry>
  
  <entry>
@@ -138,177 +249,185 @@
    <link href="http://madhur.co.in/blog/2014/01/29/read-write-people-values-sharepoint-silverlight.html"/>
    <updated>2014-01-29T00:00:00+05:30</updated>
    <id>id:/blog/2014/01/29/read-write-people-values-sharepoint-silverlight</id>
-   <content type="html">&lt;p&gt;While working on the silverlight client object model, I figured out that it is not very straight forward to read and write people values to the list. Especially reading the people picker field requires enumerating &lt;code&gt;SiteUserInfoList&lt;/code&gt; list as well. In this post I am going to cover how you can write/read people values to the list.&lt;/p&gt;
+   <content type="html">&lt;p&gt;While working on the silverlight client object model, I figured out that it is not very straight forward to read and write people values to the list.
+Especially reading the people picker field requires enumerating &lt;code&gt;SiteUserInfoList&lt;/code&gt; list as well. In this post I am going to cover how you can write/read people values to the list.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Write single selection people field&lt;/li&gt;
+  &lt;li&gt;Write single selection people field&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;Singleuser&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;context&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;EnsureUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;].&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-&lt;span class=&#39;n&#39;&gt;newItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Singleuser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;Write multiple selection people field&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;List&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;&amp;gt;();&lt;/span&gt;
-&lt;span class=&#39;k&#39;&gt;foreach&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ac&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;in&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-        &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FromUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ac&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;AccountName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
 
-&lt;span class=&#39;n&#39;&gt;newItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;usersList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;n&quot;&gt;Singleuser&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EnsureUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AccountName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;newItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Singleuser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;ul&gt;
-&lt;li&gt;Read single selection people field&lt;/li&gt;
+  &lt;li&gt;Write multiple selection people field&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;usersList&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;();&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AccountList&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ac&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;usersList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FromUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ac&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;AccountName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;newItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;usersList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Read single selection people field&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Reading is more complex. First you retrieve the &lt;code&gt;FieldUserValue&lt;/code&gt; from the people field. Unfortunately, this field only contains the &lt;code&gt;display name&lt;/code&gt; and &lt;code&gt;Site User ID&lt;/code&gt; of the user. You will not get the &lt;code&gt;AccountName&lt;/code&gt; from this object which is a common requirement. You will have to perform the lookup against &lt;code&gt;SiteUserInfo&lt;/code&gt; list to retrieve the Account Name&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;LoadButton_Click&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;object&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;sender&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;e&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	&lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;siteUrl&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;web&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;LoadButton_Click&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RoutedEventArgs&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ClientContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ClientContext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;siteUrl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;web&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;list&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Lists&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetByTitle&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Madhur&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;list&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;list&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItemById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;1&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Lists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetByTitle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Madhur&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ListItem&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetItem&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetItemById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;targetItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-		&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;targetItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[];&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 
-		&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-			&lt;span class=&#39;n&#39;&gt;LoadUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;singleValue&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;targetItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Single&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;targetItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Multiple&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
 
-		&lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;LoadUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;singleValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
-   &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-   &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	   &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
-   &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	   &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;void&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;LoadUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ClientContext&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	&lt;span class=&#39;n&#39;&gt;List&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ListItemCollection&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItems&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CamlQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;());&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;LoadUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ClientContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;singleValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FieldUserValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Include&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Id&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]));&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ListItemCollection&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;users&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CamlQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;singleValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;LookupId&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;users&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Include&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]));&lt;/span&gt;
 
-		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ListItem&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principal&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;users&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;singleValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LookupId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;username&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;principal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Utils&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principal&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;username&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-			&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-			&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Clear&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+			&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Utils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
-				&lt;span class=&#39;n&#39;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;UserTextBox&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Text&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+				&lt;span class=&quot;n&quot;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Clear&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 
-			&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+				&lt;span class=&quot;n&quot;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AccountList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+				&lt;span class=&quot;n&quot;&gt;SinglePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;UserTextBox&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Text&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-		&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
-		  &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-		  &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-			  &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-		  &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+		  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+		  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			  &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-
-	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
-	 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;sss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		 &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-
-	 &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
-
-	&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Web&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-
-	&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetItems&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CamlQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;());&lt;/span&gt;
-
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;items&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Include&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Id&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;item&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]));&lt;/span&gt;
+		  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
 
-	&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;s&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ListItem&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		 &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-		&lt;span class=&#39;k&#39;&gt;for&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;int&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;++)&lt;/span&gt;
-		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-			&lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;users&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;GetById&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;].&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;LookupId&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-			&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Load&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]);&lt;/span&gt;
-		&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
-		&lt;span class=&#39;n&#39;&gt;ctx&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;((&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-		&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-			&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Web&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SiteUserInfoList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-			&lt;span class=&#39;k&#39;&gt;for&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;int&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;multValue&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;++)&lt;/span&gt;
-			&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;users&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetItems&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CamlQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CreateAllItemsQuery&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;());&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;users&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Include&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]));&lt;/span&gt;
 
 
-				&lt;span class=&#39;k&#39;&gt;try&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-					&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;][&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-				&lt;span class=&#39;k&#39;&gt;catch&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IndexOutOfRangeException&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;ii&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-					&lt;span class=&#39;k&#39;&gt;return&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ListItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principals&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ListItem&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
 
-				&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Utils&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;username&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-				&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;principals&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;i&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;][&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;as&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;++)&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;principals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;users&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;LookupId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Load&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;principals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-				&lt;span class=&#39;n&#39;&gt;Dispatcher&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(()&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-					&lt;span class=&#39;n&#39;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Add&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;AccountList&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;dispName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;));&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-				&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-			&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;ctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ExecuteQueryAsync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ssss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+			&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;multValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;++)&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 
 
-		&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
-	   &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	   &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		   &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
+				&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+					&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+				&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IndexOutOfRangeException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ii&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+					&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-	   &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+				&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Utils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+				&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;principals&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Title&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
-	&lt;span class=&#39;p&#39;&gt;},&lt;/span&gt;
+				&lt;span class=&quot;n&quot;&gt;Dispatcher&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;BeginInvoke&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+					&lt;span class=&quot;n&quot;&gt;MultiplePeopleChooser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;selectedAccounts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AccountList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dispName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+				&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-	 &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ssss&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&amp;gt;&lt;/span&gt;
-	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		 &lt;span class=&#39;n&#39;&gt;Console&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;WriteLine&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;eeeee&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Message&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
 
-	 &lt;span class=&#39;p&#39;&gt;});&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+	   &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ssss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	   &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		   &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eeeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+	   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+	&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+	 &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ssss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;eeeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		 &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eeeee&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+	 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+</content>
  </entry>
  
  <entry>
@@ -316,44 +435,49 @@
    <link href="http://madhur.co.in/blog/2014/01/29/convert-claim-based-login-name.html"/>
    <updated>2014-01-29T00:00:00+05:30</updated>
    <id>id:/blog/2014/01/29/convert-claim-based-login-name</id>
-   <content type="html">&lt;p&gt;Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already part of the site collection. This issue can occur if SharePoint is using claim based authentication model.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already 
+part of the site collection. This issue can occur if SharePoint is using claim based authentication model.&lt;/p&gt;
 
 &lt;p&gt;On close inspection I found that the returned duplicate results were having different login names. For example if one result was &lt;code&gt;ads\john&lt;/code&gt; then the other one was &lt;code&gt;i:0#.w|ads\john&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;It is easy to remove such duplicates if you are programming against server side directly with the following API code:&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;private&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;GetLoginName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	 &lt;span class=&#39;kt&#39;&gt;var&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Local&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	 &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;!=&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;null&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-	 &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		 &lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;IsEncodedClaim&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;?&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;manager&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;DecodeClaim&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;).&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Value&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	 &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-	 &lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetLoginName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	 &lt;span class=&quot;kt&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Local&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		 &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SPClaimProviderManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IsEncodedClaim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;manager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DecodeClaim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Value&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	 &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;However, if you are programming against Client object model, you do not have luxury of calling such API’s. For those scenarios , I wrote a small function which will take the Claim encoded login name and return the pure Windows login name.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;c#&#39;&gt;&lt;span class=&#39;k&#39;&gt;public&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;static&lt;/span&gt; &lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;String&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-	&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
 
-	&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Contains&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;|&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;))&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;kt&#39;&gt;string&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Split&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;k&#39;&gt;new&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;Char&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[]&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;sc&#39;&gt;&amp;#39;|&amp;#39;&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;},&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;StringSplitOptions&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;None&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;);&lt;/span&gt;
-		&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;Length&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#39;m&#39;&gt;0&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-			&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;splitUserName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;m&#39;&gt;1&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;];&lt;/span&gt;
-		&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-			&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-	&lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;{&lt;/span&gt;
-		&lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;userName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;;&lt;/span&gt;
-	&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;c#&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;checkClaimsUser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Contains&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;|&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;splitUserName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;&amp;#39;|&amp;#39;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;StringSplitOptions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;splitUserName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Length&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;splitUserName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+			&lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;userName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
 
-	&lt;span class=&#39;k&#39;&gt;return&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;decodedName&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;ToLower&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decodedName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ToLower&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 
-&lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</content>
  </entry>
  
  <entry>
@@ -361,31 +485,35 @@
    <link href="http://madhur.co.in/blog/2014/01/10/newlookofmysite.html"/>
    <updated>2014-01-10T00:00:00+05:30</updated>
    <id>id:/blog/2014/01/10/newlookofmysite</id>
-   <content type="html">&lt;p&gt;Happy New year.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Happy New year. &lt;/p&gt;
 
 &lt;p&gt;To start the New Year my web site has had a makeover, but it is not just a change to my 2014 new look, visitors can now browse my site on their mobile phones and tablets with the new compatible formatting.&lt;/p&gt;
 
 &lt;p&gt;The screenshots demonstrates below how this site looks on an Samsung Galaxy S3 compared to how it used to look previously. Thanks to the new CSS media query features in CSS 3.&lt;/p&gt;
 
-&lt;h2 id=&quot;old_look&quot;&gt;Old look&lt;/h2&gt;
-&lt;div style=&#39;;text-align:center&#39;&gt;
-&lt;a href=&#39;/images/oldsite11.png&#39;&gt;&lt;img src=&#39;/images/oldsite1.png&#39; /&gt;&lt;/a&gt;
-&lt;a href=&#39;/images/oldsite22.png&#39;&gt;&lt;img src=&#39;/images/oldsite2.png&#39; /&gt;&lt;/a&gt;
-&lt;a href=&#39;/images/oldsite33.png&#39;&gt;&lt;img src=&#39;/images/oldsite3.png&#39; /&gt;&lt;/a&gt;
+&lt;h2 id=&quot;old-look&quot;&gt;Old look&lt;/h2&gt;
+
+&lt;div style=&quot;;text-align:center&quot;&gt;
+&lt;a href=&quot;/images/oldsite11.png&quot;&gt;&lt;img src=&quot;/images/oldsite1.png&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;/images/oldsite22.png&quot;&gt;&lt;img src=&quot;/images/oldsite2.png&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;/images/oldsite33.png&quot;&gt;&lt;img src=&quot;/images/oldsite3.png&quot; /&gt;&lt;/a&gt;
 &lt;/div&gt;
-&lt;h2 id=&quot;new_look&quot;&gt;New look&lt;/h2&gt;
-&lt;div style=&#39;;text-align:center&#39;&gt;
-&lt;a href=&#39;/images/newsite11.png&#39;&gt;&lt;img src=&#39;/images/newsite1.png&#39; /&gt;&lt;/a&gt;
-&lt;a href=&#39;/images/newsite22.png&#39;&gt;&lt;img src=&#39;/images/newsite2.png&#39; /&gt;&lt;/a&gt;
-&lt;a href=&#39;/images/newsite44.png&#39;&gt;&lt;img src=&#39;/images/newsite4.png&#39; /&gt;&lt;/a&gt;
+
+&lt;h2 id=&quot;new-look&quot;&gt;New look&lt;/h2&gt;
+&lt;div style=&quot;;text-align:center&quot;&gt;
+&lt;a href=&quot;/images/newsite11.png&quot;&gt;&lt;img src=&quot;/images/newsite1.png&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;/images/newsite22.png&quot;&gt;&lt;img src=&quot;/images/newsite2.png&quot; /&gt;&lt;/a&gt;
+&lt;a href=&quot;/images/newsite44.png&quot;&gt;&lt;img src=&quot;/images/newsite4.png&quot; /&gt;&lt;/a&gt;
 &lt;/div&gt;
+
 &lt;p&gt;I believe the new look is much more responsive.&lt;/p&gt;
 
 &lt;p&gt;That’s just not all. Behind the scenes, the site CSS is now generated handsomely through &lt;a href=&quot;http://lesscss.org/&quot;&gt;LESS CSS pre-processor&lt;/a&gt; resulting in huge reduction of maintainence of CSS. I wanted to use &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS pre-processor&lt;/a&gt; instead of LESS but preferred LESS because of lower learning curve. However, I plan to switch to SASS once I learn it as I believe that is the future.&lt;/p&gt;
 
 &lt;p&gt;The design of this site is heavily inspired from &lt;a href=&quot;http://actionbarsherlock.com/index.html&quot;&gt;ActionBarSherlock&lt;/a&gt;. Thanks to Jake Wharton&lt;/p&gt;
 
-&lt;p&gt;Leave on in comments, how did you find the new look of the site !!&lt;/p&gt;</content>
+&lt;p&gt;Leave on in comments, how did you find the new look of the site !!&lt;/p&gt;
+</content>
  </entry>
  
  <entry>
@@ -400,16 +528,15 @@
 &lt;p&gt;The portable version contains everything which is required to run Jekyll on Windows:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Ruby 2.0&lt;/li&gt;
-
-&lt;li&gt;Ruby development Kit&lt;/li&gt;
-
-&lt;li&gt;Git 1.8.3&lt;/li&gt;
-
-&lt;li&gt;Python 2.7.5&lt;/li&gt;
+  &lt;li&gt;Ruby 2.0&lt;/li&gt;
+  &lt;li&gt;Ruby development Kit&lt;/li&gt;
+  &lt;li&gt;Git 1.8.3&lt;/li&gt;
+  &lt;li&gt;Python 2.7.5&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;You can download the complete updated PortableJekyll package &lt;a href=&quot;https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d&quot;&gt;here from my dropbox link&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;You can download the complete updated PortableJekyll package &lt;a href=&quot;https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d&quot;&gt;here from my dropbox link&lt;/a&gt;&lt;/p&gt;
+
+</content>
  </entry>
  
  <entry>
@@ -417,93 +544,108 @@
    <link href="http://madhur.co.in/blog/2013/11/05/makingmostdatadirectory.html"/>
    <updated>2013-11-05T00:00:00+05:30</updated>
    <id>id:/blog/2013/11/05/makingmostdatadirectory</id>
-   <content type="html">&lt;p&gt;Jekyll 1.3.0 comes with exciting new features especially the use of &lt;code&gt;\_data&lt;/code&gt; directories. The &lt;code&gt;\_data&lt;/code&gt; directory is very useful in cases where you want to store metadata related to your site or blog and want to load it in runtime. Earlier people used to put this in &lt;code&gt;\_config.yml&lt;/code&gt; which was kind of a hack.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Jekyll 1.3.0 comes with exciting new features especially the use of &lt;code&gt;\_data&lt;/code&gt; directories. The &lt;code&gt;\_data&lt;/code&gt; directory is very useful in cases where you want to store
+metadata related to your site or blog and want to load it in runtime. Earlier people used to put this in &lt;code&gt;\_config.yml&lt;/code&gt; which was kind of a hack.&lt;/p&gt;
 
-&lt;h2 id=&quot;how_can_you_make_most_out_of__data_directory_&quot;&gt;How can you make most out of _data directory ?&lt;/h2&gt;
+&lt;h2 id=&quot;how-can-you-make-most-out-of-data-directory-&quot;&gt;How can you make most out of _data directory ?&lt;/h2&gt;
 
-&lt;p&gt;If you’ve a file &lt;code&gt;trucks.yaml&lt;/code&gt; under &lt;code&gt;\_data&lt;/code&gt;, then you can access it with&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt; 
+&lt;p&gt;If you’ve a file &lt;code&gt;trucks.yaml&lt;/code&gt; under &lt;code&gt;\_data&lt;/code&gt;, then you can access it with &lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt; 
 {% for truck in site.data.trucks %}
  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;So you can have &lt;code&gt;members.yaml, projects.yaml, products.yaml&lt;/code&gt; under &lt;code&gt;\_data&lt;/code&gt;, and access them respectively as&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt; 
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt; 
 site.data.members
 site.data.projects 
 site.data.products
  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;For instance, this current site itself makes use of &lt;code&gt;\_data&lt;/code&gt; directory extensively. Have a look at &lt;a href=&quot;/projects&quot;&gt;Projects&lt;/a&gt; section.&lt;/p&gt;
 
 &lt;p&gt;The entire left navigation of &lt;a href=&quot;/projects&quot;&gt;Projects&lt;/a&gt; section is driven dynamically through a simple YAML file in &lt;code&gt;\_data&lt;/code&gt; directory, which is &lt;a href=&quot;https://github.com/madhur/madhur.github.com/blob/source/_data/projects.yaml&quot;&gt;&lt;code&gt;projects.yaml&lt;/code&gt;&lt;/a&gt; and looks like:&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;yaml&#39;&gt;&lt;span class=&#39;nn&#39;&gt;---&lt;/span&gt;
-&lt;span class=&#39;p-Indicator&#39;&gt;-&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;project&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;Hermes&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;category&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;Android&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;publish&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;yes&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;description&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;Hermes is an attempt to provide a sense of security to all the travelers&lt;/span&gt; 
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;of all over the world and especially the women in India who use the public transport to&lt;/span&gt; 
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;commute to their work place and back home.&lt;/span&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;p-Indicator&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;Hermes&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;category&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;Android&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;yes&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;Hermes is an attempt to provide a sense of security to all the travelers&lt;/span&gt; 
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;of all over the world and especially the women in India who use the public transport to&lt;/span&gt; 
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;commute to their work place and back home.&lt;/span&gt;
   
-&lt;span class=&#39;p-Indicator&#39;&gt;-&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;project&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;Silverlight Organization Chart for SharePoint&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;category&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;SharePoint&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;publish&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;yes&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;description&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;A silverlight Chart control which retrieves data from the SharePoint list.&lt;/span&gt; 
+&lt;span class=&quot;p-Indicator&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;Silverlight Organization Chart for SharePoint&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;category&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;SharePoint&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;yes&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;A silverlight Chart control which retrieves data from the SharePoint list.&lt;/span&gt; 
   
-&lt;span class=&#39;p-Indicator&#39;&gt;-&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;project&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;STP Inspector&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;category&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;SharePoint&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;publish&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;yes&lt;/span&gt;
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;description&lt;/span&gt;&lt;span class=&#39;p-Indicator&#39;&gt;:&lt;/span&gt; &lt;span class=&#39;l-Scalar-Plain&#39;&gt;STP Inspector is an site template inspector for WSS/MOSS 2007.&lt;/span&gt; 
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;It analyzes a site template file (.stp) and basically shows its dependencies on the site&lt;/span&gt; 
-  &lt;span class=&#39;l-Scalar-Plain&#39;&gt;features and site collection features.&lt;/span&gt;  
+&lt;span class=&quot;p-Indicator&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;STP Inspector&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;category&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;SharePoint&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;yes&lt;/span&gt;
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;p-Indicator&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;l-Scalar-Plain&quot;&gt;STP Inspector is an site template inspector for WSS/MOSS 2007.&lt;/span&gt; 
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;It analyzes a site template file (.stp) and basically shows its dependencies on the site&lt;/span&gt; 
+  &lt;span class=&quot;l-Scalar-Plain&quot;&gt;features and site collection features.&lt;/span&gt;  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;Now what I can in Jekyll is simply refer to Project Name, category, description using the site variable array as &lt;code&gt;site.data.projects&lt;/code&gt; and loop through it using&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt; 
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;html&quot;&gt; 
 {% for project in site.data.projects %}
 {{ project.project }}
 {% endfor %}
  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;Using the simple structure above, I have dynamically generated both my left navigation and content page. In future, if I work on a new project, I just need to edit the &lt;code&gt;projects.yaml&lt;/code&gt; file and Jekyll would automatically update the left navigation and content page.&lt;/p&gt;
 
-&lt;p&gt;This is the simple code of generating left navigation which I have done in my includes file &lt;a href=&quot;&quot;&gt;&lt;code&gt;projects-left.html&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt; 
-&lt;span class=&#39;nt&#39;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;id=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;projects&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
-    &lt;span class=&#39;nt&#39;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;single&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;href=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;/projects&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;Projects&lt;span class=&#39;nt&#39;&gt;&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+&lt;p&gt;This is the simple code of generating left navigation which I have done in my includes file  &lt;a href=&quot;&quot;&gt;&lt;code&gt;projects-left.html&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;html&quot;&gt; 
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;projects&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;single&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;/projects&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Projects&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
 
     {% for category in site.data.categories %}
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;project-category&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;{{ category.category }}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
-            &lt;span class=&#39;nt&#39;&gt;&amp;lt;ul&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;subcategory&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;project-category&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ category.category }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;ul&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;subcategory&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
 
                 {% for project in site.data.projects %}
                 
                     {% if project.category == category.category and project.publish == true %}
-                        &lt;span class=&#39;nt&#39;&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;href=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;/projects/{{ project.project }}.html&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;{{ project.project }}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;nt&quot;&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;/projects/{{ project.project }}.html&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ project.project }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
                     {% endif %}
 
                 {% endfor %}
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
     {% endfor %}
 
-&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt; 
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt; 
  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;This is how I generate my content page which nicely generates the project names along with descriptions. You can have a look at source &lt;a href=&quot;https://raw.github.com/madhur/madhur.github.com/source/projects/index.markdown&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;html&#39;&gt; 
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;html&quot;&gt; 
 {% for project in site.data.projects %}
                     
     {% if project.publish == true %}
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;strong&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;href=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;/projects/{{ project.project }}.html&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;{{ project.project }}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/a&amp;gt;&amp;lt;/strong&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;strong&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;/projects/{{ project.project }}.html&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ project.project }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&amp;lt;/strong&amp;gt;&lt;/span&gt;
         
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&#39;na&#39;&gt;class=&lt;/span&gt;&lt;span class=&#39;s&#39;&gt;&amp;quot;tag-project&amp;quot;&lt;/span&gt;&lt;span class=&#39;nt&#39;&gt;&amp;gt;&lt;/span&gt;{{ project.category }}&lt;span class=&#39;nt&#39;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;tag-project&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ project.category }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
         {{ project.description }}
-        &lt;span class=&#39;nt&#39;&gt;&amp;lt;hr/&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;hr/&amp;gt;&lt;/span&gt;
     {% endif %}
         
 {% endfor %}
-&lt;span class=&#39;nt&#39;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;This is where &lt;code&gt;\_data&lt;/code&gt; directory comes in handy where you don’t want to embed little pieces of information regarding your site in dirty repeating html. Using &lt;code&gt;\_data&lt;/code&gt; directory, you can make the information which is going to change over the period of time structured and also provide dynamism at the same time.&lt;/p&gt;</content>
+
+&lt;p&gt;This is where &lt;code&gt;\_data&lt;/code&gt; directory comes in handy where you don’t want to embed little pieces of information regarding your site in dirty repeating html. Using &lt;code&gt;\_data&lt;/code&gt; directory, you can make the information which is going to change over the period of time structured and also provide dynamism at the same time.&lt;/p&gt;
+
+</content>
  </entry>
  
  <entry>
@@ -521,7 +663,8 @@ site.data.products
 
 &lt;p&gt;Hermes is available for free in the &lt;a href=&quot;https://play.google.com/store/apps/details?id=in.co.madhur.mapmylocation&quot;&gt;Google Play Store&lt;/a&gt;, there will never be a pro / paid version.&lt;/p&gt;
 
-&lt;p&gt;Head over to &lt;a href=&quot;/projects&quot;&gt;projects&lt;/a&gt; section to find out &lt;a href=&quot;/projects/Hermes.html&quot;&gt;more about this app&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;Head over to &lt;a href=&quot;/projects&quot;&gt;projects&lt;/a&gt; section to find out &lt;a href=&quot;/projects/Hermes.html&quot;&gt;more about this app&lt;/a&gt;&lt;/p&gt;
+</content>
  </entry>
  
  <entry>
@@ -533,22 +676,21 @@ site.data.products
 
 &lt;p&gt;If anyone of you have seen my earlier blogpost on &lt;a href=&quot;/blog/2011/09/01/runningjekyllwindows.html&quot;&gt;Installing Jekyll on Windows&lt;/a&gt; , you would agree that it requires considerable amount of effort.&lt;/p&gt;
 
-&lt;p&gt;Hence, I decided to build a portable version of Jekyll for myself, which I could easily copy on multiple computers. The portable version contains everything which is required to run Jekyll on Windows:&lt;/p&gt;
+&lt;p&gt;Hence, I decided to build a portable version of Jekyll for myself, which I could easily copy on multiple computers. The portable version contains 
+everything which is required to run Jekyll on Windows:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Ruby 2.0&lt;/li&gt;
-
-&lt;li&gt;Ruby development Kit&lt;/li&gt;
-
-&lt;li&gt;Git 1.8.3&lt;/li&gt;
-
-&lt;li&gt;Python 2.7.5&lt;/li&gt;
+  &lt;li&gt;Ruby 2.0&lt;/li&gt;
+  &lt;li&gt;Ruby development Kit&lt;/li&gt;
+  &lt;li&gt;Git 1.8.3&lt;/li&gt;
+  &lt;li&gt;Python 2.7.5&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;You can download the Complete PortableJekyll package &lt;a href=&quot;https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d&quot;&gt;here from my dropbox link&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;It comes with following pre-installed gems including Jekyll 1.0.3&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;bigdecimal (1.2.0)
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;bigdecimal (1.2.0)
 classifier (1.3.3)
 colorator (0.1)
 commander (4.1.3)
@@ -573,10 +715,14 @@ syntax (1.0.0)
 test-unit (2.0.0.0)
 yajl-ruby (1.1.0)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;There is a command prompt script which you might want to change&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;SET PATH=%PATH%;D:\PortableJekyll\ruby\bin;D:\PortableJekyll\devkit\bin;D:\PortableJekyll\git\bin;D:\PortableJekyll\Python\App;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;SET PATH=%PATH%;D:\PortableJekyll\ruby\bin;D:\PortableJekyll\devkit\bin;D:\PortableJekyll\git\bin;D:\PortableJekyll\Python\App;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;This script above sets the PATH variable so that jekyll can be exeucted from any directory.&lt;/p&gt;</content>
+
+&lt;p&gt;This script above sets the PATH variable so that jekyll can be exeucted from any directory.&lt;/p&gt;
+</content>
  </entry>
  
  <entry>
@@ -586,7 +732,9 @@ yajl-ruby (1.1.0)
    <id>id:/blog/2013/07/20/adventurecoreldraw</id>
    <content type="html">&lt;p&gt;My adventure with Corel Draw. &lt;a href=&quot;/images/UUBlock.cdr&quot;&gt;Source here&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/UUBlock.png&quot; alt=&quot;Pic1&quot; /&gt;&lt;/p&gt;</content>
+&lt;p&gt;&lt;img src=&quot;/images/UUBlock.png&quot; alt=&quot;Pic1&quot; /&gt;&lt;/p&gt;
+
+</content>
  </entry>
  
  <entry>
@@ -598,7 +746,9 @@ yajl-ruby (1.1.0)
 
 &lt;p&gt;There are tons of new features included in the new release. Check out the changelog &lt;a href=&quot;https://github.com/mojombo/jekyll/blob/master/History.markdown&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Good to see &lt;a href=&quot;http://jekyllrb.com/docs/installation/&quot;&gt;Jekyll&lt;/a&gt; referring my post of &lt;a href=&quot;/blog/2011/09/01/runningjekyllwindows.html&quot;&gt;Installing Jekyll on Windows&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;Good to see &lt;a href=&quot;http://jekyllrb.com/docs/installation/&quot;&gt;Jekyll&lt;/a&gt; referring my post of &lt;a href=&quot;/blog/2011/09/01/runningjekyllwindows.html&quot;&gt;Installing Jekyll on Windows&lt;/a&gt;&lt;/p&gt;
+
+</content>
  </entry>
  
  <entry>
@@ -606,47 +756,40 @@ yajl-ruby (1.1.0)
    <link href="http://madhur.co.in/blog/2012/05/05/browsermarketshare.html"/>
    <updated>2012-05-05T00:00:00+05:30</updated>
    <id>id:/blog/2012/05/05/browsermarketshare</id>
-   <content type="html">&lt;p&gt;Recently, there has been lot of discussion over the market share of Internet Explorer. At first, &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/&quot;&gt;Windows Team blog&lt;/a&gt; published an &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/archive/2012/03/18/understanding-browser-usage-share-data.aspx&quot;&gt;article&lt;/a&gt; which says the traditional methods of calculating browser market share are wrong and misleading. This is partly because browsers such as Google Chrome have a builtin &lt;a href=&quot;http://news.softpedia.com/news/Google-Chrome-s-Prerendering-May-Be-Linked-to-It-Losing-Market-Share-256767.shtml&quot;&gt;Pre-rendering&lt;/a&gt; feature which fetches the hyperlinks on the page invisibly even if user has not explicitly clicked on it.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Recently, there has been lot of discussion over the market share of Internet Explorer. At first, &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/&quot;&gt;Windows Team blog&lt;/a&gt; published an &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/archive/2012/03/18/understanding-browser-usage-share-data.aspx&quot;&gt;article&lt;/a&gt; which says the traditional
+methods of calculating browser market share are wrong and misleading. This is partly because browsers such as Google Chrome have a builtin &lt;a href=&quot;http://news.softpedia.com/news/Google-Chrome-s-Prerendering-May-Be-Linked-to-It-Losing-Market-Share-256767.shtml&quot;&gt;Pre-rendering&lt;/a&gt; feature which fetches
+the hyperlinks on the page invisibly even if user has not explicitly clicked on it.&lt;/p&gt;
 
-&lt;p&gt;Anyways, Focusing away from all that attention, I would like to present the statistics of browser share of visitors of my blog. I really do believe that results of my blog will be applicable to all of the community. My blog recieves approximately 100 vists/day.&lt;/p&gt;
+&lt;p&gt;Anyways, Focusing away from all that attention, I would like to present the statistics of browser share of visitors of my blog. I really do believe that results of my blog will be applicable
+to all of the community. My blog recieves approximately 100 vists/day.&lt;/p&gt;
 
-&lt;h2 id=&quot;overall_market_share&quot;&gt;Overall Market Share&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/share.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;&lt;br /&gt; In my opinion, the high usage of Internet explorer is clearly because of usage of IE as an Enterprise standard browser. Many users, who are working in companies and use company provided assets, have no choice but to use the browser installed on their devices, which in 99% of the cases is Internet Explorer&lt;/p&gt;
+&lt;h2 id=&quot;overall-market-share&quot;&gt;Overall Market Share&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&quot;/images/share.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+&lt;br /&gt;
+In my opinion, the high usage of Internet explorer is clearly because of usage of IE as an Enterprise standard browser. Many users, who are working in companies and use company
+provided assets, have no choice but to use the browser installed on their devices, which in 99% of the cases is Internet Explorer&lt;/p&gt;
 
 &lt;p&gt;It is interesting to see how drastically the share of Internet Explorer drops to &lt;strong&gt;single digit&lt;/strong&gt; percentages on &lt;strong&gt;Weekends&lt;/strong&gt;.&lt;/p&gt;
 
 &lt;h2 id=&quot;monday&quot;&gt;Monday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/monday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;tuesday&quot;&gt;Tuesday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/tuesday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;wednesday&quot;&gt;Wednesday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/wednesday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;thursday&quot;&gt;Thursday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/thursday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;friday&quot;&gt;Friday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/friday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;saturday&quot;&gt;Saturday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/saturday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;sunday&quot;&gt;Sunday&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/sunday.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/images/monday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Tuesday##&lt;br /&gt;
+&lt;img src=&quot;/images/tuesday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Wednesday##&lt;br /&gt;
+&lt;img src=&quot;/images/wednesday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Thursday##&lt;br /&gt;
+&lt;img src=&quot;/images/thursday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Friday##&lt;br /&gt;
+&lt;img src=&quot;/images/friday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Saturday##&lt;br /&gt;
+&lt;img src=&quot;/images/saturday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
+##Sunday##&lt;br /&gt;
+&lt;img src=&quot;/images/sunday.png&quot; alt=&quot;&quot; /&gt;  &lt;/p&gt;
 
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;To conclude, high market share of IE is only and only because its a standard browser on Microsoft Windows Operating System. The gain which Microsoft gets because of monopoly in Operating System market is still unparalleled. It would be interesting to see, how the share of IE slides when the enterprise starts moving more and more on mobile platforms and start introducing &lt;a href=&quot;http://en.wikipedia.org/wiki/Bring_your_own_device&quot;&gt;BYOD&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;To conclude, high market share of IE is only and only because its a standard browser on Microsoft Windows Operating System. The gain which Microsoft gets because of monopoly in Operating System market
+is still unparalleled. It would be interesting to see, how the share of IE slides when the enterprise starts moving more and more on mobile platforms and start introducing &lt;a href=&quot;http://en.wikipedia.org/wiki/Bring_your_own_device&quot;&gt;BYOD&lt;/a&gt;&lt;/p&gt;
+</content>
  </entry>
  
  <entry>
@@ -666,7 +809,8 @@ yajl-ruby (1.1.0)
 
 &lt;p&gt;Recently, the auther of &lt;a href=&quot;http://spservices.codeplex.com/&quot;&gt;SPServices&lt;/a&gt; library - Marc Anderson also wrote an article covering the same topic. You can read the article &lt;a href=&quot;http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489&quot;&gt;When to Choose SPServices vs. the Client Side Object Model (CSOM)&lt;/a&gt;&lt;/p&gt;</content>
+&lt;p&gt;&lt;a href=&quot;http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489&quot;&gt;When to Choose SPServices vs. the Client Side Object Model (CSOM)&lt;/a&gt;&lt;/p&gt;
+</content>
  </entry>
  
  <entry>
@@ -674,101 +818,23 @@ yajl-ruby (1.1.0)
    <link href="http://madhur.co.in/blog/2012/03/27/codeplexmovegit.html"/>
    <updated>2012-03-27T00:00:00+05:30</updated>
    <id>id:/blog/2012/03/27/codeplexmovegit</id>
-   <content type="html">&lt;p&gt;Microsoft’s open source project community - &lt;a href=&quot;http://www.codeplex.com/&quot;&gt;Codeplex&lt;/a&gt; finally added support of &lt;a href=&quot;http://en.wikipedia.org/wiki/Git_(software)&quot;&gt;Git&lt;/a&gt; source control system to its system. It’s a surprise decision in part that &lt;a href=&quot;http://en.wikipedia.org/wiki/Git_(software)&quot;&gt;Git&lt;/a&gt; was created by none other than &lt;a href=&quot;http://en.wikipedia.org/wiki/Linus_Torvalds&quot;&gt;Linus Torvalds&lt;/a&gt; and &lt;a href=&quot;http://en.wikipedia.org/wiki/Steve_Ballmer&quot;&gt;Steve Ballmer&lt;/a&gt; once described &lt;a href=&quot;http://en.wikipedia.org/wiki/Linux&quot;&gt;Linux&lt;/a&gt; as a cancer.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Microsoft’s open source project community - &lt;a href=&quot;http://www.codeplex.com/&quot;&gt;Codeplex&lt;/a&gt; finally added support of &lt;a href=&quot;http://en.wikipedia.org/wiki/Git_(software)&quot;&gt;Git&lt;/a&gt; source control system to its system. It’s a surprise decision in part that &lt;a href=&quot;http://en.wikipedia.org/wiki/Git_(software)&quot;&gt;Git&lt;/a&gt; was created by none other than
+&lt;a href=&quot;http://en.wikipedia.org/wiki/Linus_Torvalds&quot;&gt;Linus Torvalds&lt;/a&gt; and &lt;a href=&quot;http://en.wikipedia.org/wiki/Steve_Ballmer&quot;&gt;Steve Ballmer&lt;/a&gt; once described &lt;a href=&quot;http://en.wikipedia.org/wiki/Linux&quot;&gt;Linux&lt;/a&gt; as a cancer.&lt;/p&gt;
 
-&lt;p&gt;It’s a good news for me in that I don’t have to worry about Team Explorer in each of my computers and I can work offline until I decide to sync changes with the online repository. I have already moved my projects to Git based repositories. If you want to do that too, you need to send a mail to &lt;a href=&quot;https://www.codeplex.com/site/contact&quot;&gt;Codeplex support&lt;/a&gt; giving them the link of their projects. Ideally, I would have liked to see an online interface to make this switch but I am sure days are not far ahead when this will be the one of the most desirable feature requested.&lt;/p&gt;
+&lt;p&gt;It’s a good news for me in that I don’t have to worry about Team Explorer in each of my computers and I can work offline until I decide to sync changes with the online repository. I have already moved my 
+projects to Git based repositories. If you want to do that too, you need to send a mail to &lt;a href=&quot;https://www.codeplex.com/site/contact&quot;&gt;Codeplex support&lt;/a&gt; giving them the link of their projects. Ideally, I would have liked to see an online interface to make this switch but I am sure days are not far ahead when this will be the one of the most desirable feature requested.&lt;/p&gt;
 
-&lt;p&gt;No surprise that this move is direct result of huge rise in Git popularity. Recently many people have left Codeplex and moved to &lt;a href=&quot;http://www.github.com&quot;&gt;Github&lt;/a&gt; which is a dedicated open source community project site based on Git and has become immensely popular. The rise of movement from Codeplex to Github can be just gauged by this simple &lt;a href=&quot;https://www.google.co.in/search?sourceid=chrome&amp;ie=UTF-8&amp;q=moving+from+codeplex+to+github&quot;&gt;Google search query&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;No surprise that this move is direct result of huge rise in Git popularity. Recently many people have left Codeplex and moved to &lt;a href=&quot;http://www.github.com&quot;&gt;Github&lt;/a&gt; which is a dedicated open source community project site based on Git and has become immensely popular. The rise of movement from Codeplex to Github can be just gauged by this simple &lt;a href=&quot;https://www.google.co.in/search?sourceid=chrome&amp;amp;ie=UTF-8&amp;amp;q=moving+from+codeplex+to+github&quot;&gt;Google search query&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;I have already moved all of my projects to Git. If you are contributing on them, see the Source code tab for updated Urls of the Git repository.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://madhur.codeplex.com&quot;&gt;madhur.codeplex.com&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://madhur.codeplex.com&quot;&gt;madhur.codeplex.com&lt;/a&gt; &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://spfeaturecollection.codeplex.com&quot;&gt;spfeaturecollection.codeplex.com&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://stpinspector.codeplex.com&quot;&gt;stpinspector.codeplex.com&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
-&lt;li&gt;&lt;a href=&quot;http://spfeaturecollection.codeplex.com&quot;&gt;spfeaturecollection.codeplex.com&lt;/a&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;a href=&quot;http://stpinspector.codeplex.com&quot;&gt;stpinspector.codeplex.com&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content>
- </entry>
- 
- <entry>
-   <title>Enable code highlighting with Pygments/Jekyll</title>
-   <link href="http://madhur.co.in/blog/2012/03/05/codehighlightjekyll.html"/>
-   <updated>2012-03-05T00:00:00+05:30</updated>
-   <id>id:/blog/2012/03/05/codehighlightjekyll</id>
-   <content type="html">&lt;p&gt;If you have been using Jekyll, you must be aware of code highlighting feature using highlight blocks. This highlighting is accomplished by a neat python script called &lt;a href=&quot;http://pygments.org/&quot;&gt;Pygments&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Pygments is a very powerful code syntax highlighter. It allows you to pass various options such as weather to display line no.s or which lines to be highlighted. When Jekyll was released, there was no way to use these options since Jekyll encapsulated the execution of Python internally through &lt;a href=&quot;https://github.com/github/albino&quot;&gt;Albino gem&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;There has been some progress over this, a &lt;a href=&quot;https://github.com/mojombo/jekyll/issues/31&quot;&gt;pull request&lt;/a&gt; was submitted in Jekyll which allowed various options to be passed to Pygments.&lt;/p&gt;
-
-&lt;p&gt;However, when I tried to use &lt;strong&gt;hl_lines&lt;/strong&gt; option to highlight the lines of code, I faced several issues. Following is the syntax I used&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt; highlight html hl_lines=2 4
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Running the above piece of code reults in only line 2 being highlighted and not both. So I decided to enclose it with quotation marks&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt; highlight html hl_lines=&amp;quot;2 4&amp;quot;  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The above piece of code gives the error.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;text&#39;&gt;Invalid flag value -O
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in &lt;strong&gt;albino.rb&lt;/strong&gt; file.&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;ruby&#39;&gt;  &lt;span class=&#39;k&#39;&gt;def&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;validate_shell_args&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;flag&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;flag&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;!~&lt;/span&gt; &lt;span class=&#39;sr&#39;&gt;/^[a-z]+$/i&lt;/span&gt;
-      &lt;span class=&#39;k&#39;&gt;raise&lt;/span&gt; &lt;span class=&#39;no&#39;&gt;ShellArgumentError&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;s2&#39;&gt;&amp;quot;Flag is invalid: &lt;/span&gt;&lt;span class=&#39;si&#39;&gt;#{&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;flag&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;inspect&lt;/span&gt;&lt;span class=&#39;si&#39;&gt;}&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;!~&lt;/span&gt; &lt;span class=&#39;sr&#39;&gt;/^[a-z0-9\-\_\+\=\#\,\s]+$/i&lt;/span&gt;
-      &lt;span class=&#39;k&#39;&gt;raise&lt;/span&gt; &lt;span class=&#39;no&#39;&gt;ShellArgumentError&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;s2&#39;&gt;&amp;quot;Flag value is invalid: -&lt;/span&gt;&lt;span class=&#39;si&#39;&gt;#{&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;flag&lt;/span&gt;&lt;span class=&#39;si&#39;&gt;}&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt; &lt;/span&gt;&lt;span class=&#39;si&#39;&gt;#{&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;inspect&lt;/span&gt;&lt;span class=&#39;si&#39;&gt;}&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-  &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the &lt;strong&gt;highlight.rb&lt;/strong&gt; file in Jekyll to recombine them into the list. See the updated function below:&lt;/p&gt;
-&lt;div class=&#39;highlight&#39;&gt;&lt;pre&gt;&lt;code class=&#39;ruby&#39;&gt; &lt;span class=&#39;k&#39;&gt;def&lt;/span&gt; &lt;span class=&#39;nf&#39;&gt;initialize&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;tag_name&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;markup&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;tokens&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-      &lt;span class=&#39;k&#39;&gt;super&lt;/span&gt;	 
-      &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;markup&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=~&lt;/span&gt; &lt;span class=&#39;no&#39;&gt;SYNTAX&lt;/span&gt;	
-        &lt;span class=&#39;vi&#39;&gt;@lang&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;vg&#39;&gt;$1&lt;/span&gt;
-        &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;defined?&lt;/span&gt; &lt;span class=&#39;vg&#39;&gt;$2&lt;/span&gt;
-		&lt;span class=&#39;c1&#39;&gt;# puts $2&lt;/span&gt;
-          &lt;span class=&#39;n&#39;&gt;tmp_options&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{}&lt;/span&gt;
-          &lt;span class=&#39;vg&#39;&gt;$2&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;split&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;each&lt;/span&gt; &lt;span class=&#39;k&#39;&gt;do&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;|&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;opt&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;|&lt;/span&gt;		    
-            &lt;span class=&#39;n&#39;&gt;key&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;opt&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;split&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s1&#39;&gt;&amp;#39;=&amp;#39;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;						
-			&lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;key&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;==&lt;/span&gt; &lt;span class=&#39;s1&#39;&gt;&amp;#39;hl_lines&amp;#39;&lt;/span&gt;
-				&lt;span class=&#39;nb&#39;&gt;puts&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;
-				&lt;span class=&#39;n&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;gsub&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;,&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;,&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot; &amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-			&lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;			
-            &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;nil?&lt;/span&gt;
-              &lt;span class=&#39;k&#39;&gt;if&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;key&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;==&lt;/span&gt; &lt;span class=&#39;s1&#39;&gt;&amp;#39;linenos&amp;#39;&lt;/span&gt;			
-                &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;s1&#39;&gt;&amp;#39;inline&amp;#39;&lt;/span&gt;
-			  &lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-                &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;kp&#39;&gt;true&lt;/span&gt;
-              &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-            &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-            &lt;span class=&#39;n&#39;&gt;tmp_options&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;[&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;key&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;]&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;value&lt;/span&gt;
-          &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-          &lt;span class=&#39;n&#39;&gt;tmp_options&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;tmp_options&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;to_a&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;collect&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;|&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;opt&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;|&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;opt&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;join&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s1&#39;&gt;&amp;#39;=&amp;#39;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;
-		  
-          &lt;span class=&#39;c1&#39;&gt;# additional options to pass to Albino&lt;/span&gt;
-          &lt;span class=&#39;vi&#39;&gt;@options&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{&lt;/span&gt; &lt;span class=&#39;s1&#39;&gt;&amp;#39;O&amp;#39;&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#39;n&#39;&gt;tmp_options&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;join&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s1&#39;&gt;&amp;#39;,&amp;#39;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;}&lt;/span&gt;		  		  		  
-        &lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-          &lt;span class=&#39;vi&#39;&gt;@options&lt;/span&gt; &lt;span class=&#39;o&#39;&gt;=&lt;/span&gt; &lt;span class=&#39;p&#39;&gt;{}&lt;/span&gt;
-        &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-      &lt;span class=&#39;k&#39;&gt;else&lt;/span&gt;
-        &lt;span class=&#39;k&#39;&gt;raise&lt;/span&gt; &lt;span class=&#39;no&#39;&gt;SyntaxError&lt;/span&gt;&lt;span class=&#39;o&#39;&gt;.&lt;/span&gt;&lt;span class=&#39;n&#39;&gt;new&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;(&lt;/span&gt;&lt;span class=&#39;s2&#39;&gt;&amp;quot;Syntax Error in &amp;#39;highlight&amp;#39; - Valid syntax: highlight &amp;lt;lang&amp;gt; [linenos]&amp;quot;&lt;/span&gt;&lt;span class=&#39;p&#39;&gt;)&lt;/span&gt;
-      &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-    &lt;span class=&#39;k&#39;&gt;end&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;I cannot submit it as patch in Jekyll since this fix involves fixing two components: Jekyll and Albino. May be someone can come with better approach to fix this. This works for me as of now.&lt;/p&gt;</content>
- </entry>
- 
- <entry>
-   <title>What's wrong with Microsoft</title>
-   <link href="http://madhur.co.in/blog/2012/03/01/whatswrongwithmsft.html"/>
-   <updated>2012-03-01T00:00:00+05:30</updated>
-   <id>id:/blog/2012/03/01/whatswrongwithmsft</id>
-   <content type="html">&lt;p&gt;Saw, this &lt;a href=&quot;http://www.glassdoor.com/Reviews/Employee-Review-Microsoft-RVW1366630.htm&quot;&gt;post&lt;/a&gt; on Glassdoor. Being an ex-MS, I wonder what’s slowly happening to this great company.&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;The most uncollaborative work environment on the planet - the only way to move forward is to stab your neighbor in the back. The culture here actually encourages self-promotion and to tear down others. Ironically they spend millions on programs to appear as if this is not the case - then reviews come, and its Social Darwinism in its pure form - the only thing I have not seen first hand, is for a VP to eat their young. I cannot wait to get out of here - and I am actually doing well in terms of reviews and bonus - but life is too short to move a career forward at this expense level. I suspect those who love this enviroment have not been here long enough to realize that for them to move forward - they will need to leave a wake of bodies in their path - which is not for everyone.&lt;/p&gt;
-&lt;/blockquote&gt;</content>
+</content>
  </entry>
  
  
