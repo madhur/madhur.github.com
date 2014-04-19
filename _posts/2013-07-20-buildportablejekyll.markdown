@@ -62,3 +62,4 @@ SET PATH=%PATH%;D:\PortableJekyll\ruby\bin;D:\PortableJekyll\devkit\bin;D:\Porta
 {% endhighlight %}
 
 This script above sets the PATH variable so that jekyll can be exeucted from any directory.
+
