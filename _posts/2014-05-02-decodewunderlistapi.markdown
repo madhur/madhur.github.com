@@ -18,7 +18,7 @@ its API to public so that users can build great apps around it and integrate it 
 
 Although, Wunderlist has yet not exposed any public API but it seems there are definite plans for that going by post such as [this](http://techcrunch.com/2013/11/12/to-do-app-wunderlist-confirms-19m-series-b-and-expands-to-the-us-while-sequoia-heads-into-germany/)
 Nevertheless, what I found is that it is easy to discover the Wunderlist API by simply inspecting the HTTPS traffic over the Wunderlist web site. If we see their Licenses section, it is easy to see that they 
-use [backbone.js]() along with [Jquery]() and [RequireJs]() giving the clear indication of MVC pattern being in use along with [JSON]() as the data exchange format
+use [backbone.js](http://backbonejs.org/) along with [Jquery](http://jquery.com/) and [RequireJs](http://requirejs.org/) giving the clear indication of MVC pattern being in use along with [JSON]() as the data exchange format
 
 ![](/images/Blog/screenshot.1.png)
 
