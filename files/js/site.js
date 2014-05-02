@@ -1,4 +1,8 @@
 $(document).ready(function() {
+
+$div = $('div.pocket-btn');
+$div.replaceWith($div.html());
+
 	$("#intro").css("opacity", 0.99999);
 
 	var logoSwf = "/swf/logo.swf";
