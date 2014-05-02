@@ -23,10 +23,10 @@ public interface WunderAPI
 {
 	@FormUrlEncoded
 	@POST("/login")
-	  LoginResponse login(@Field("email") String username, @Field("password")String password);
+	LoginResponse login(@Field("email") String username, @Field("password")String password);
 	
 	@GET(value = "/me")
-	  Me getUserInfo(@Header("Authorization") String authorization);
+	Me getUserInfo(@Header("Authorization") String authorization);
 	
 	@GET(value = "/me/tasks")
 	List<WTask> GetWunderTasks(@Header("Authorization") String authorization);
