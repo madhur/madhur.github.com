@@ -4,7 +4,7 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2014-04-19T11:17:45+05:30</updated>
+ <updated>2014-05-02T14:20:36+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -13,10 +13,269 @@
  
  
  <entry>
+   <title>Decoding the hidden Wunderlist API (Part II)</title>
+   <link href="http://madhur.co.in/blog/2014/05/02/decodewunderlistapi2.html"/>
+   <updated>2014-05-02T00:00:00+05:30</updated>
+   <id>id:/blog/2014/05/02/decodewunderlistapi2</id>
+   <content type="html">&lt;p&gt;In &lt;a href=&quot;/blog/2014/05/02/decodewunderlistapi.html&quot;&gt;part I&lt;/a&gt; we discovered the hidden Wunderlist API. In this post, I am to show partial implementation of this API client in Java using &lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt;.
+The implementation is hosted in my &lt;a href=&quot;https://github.com/madhur/wunder-java&quot;&gt;Git repository&lt;/a&gt;. Feed free to fork, extend or submit appropriate pull requests. I will be glad to accept your contribution.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt; is a java library which turns your REST API into java interfaces. For example, the REST API which we discovered in Part I will be defined as:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WunderAPI&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;nd&quot;&gt;@FormUrlEncoded&lt;/span&gt;
+	&lt;span class=&quot;nd&quot;&gt;@POST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;/login&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;LoginResponse&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;login&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Field&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@Field&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	
+	&lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;Me&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getUserInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	
+	&lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/tasks&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetWunderTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	
+	&lt;span class=&quot;nd&quot;&gt;@POST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/tasks&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateWunderTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listId&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isStarred&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dueDate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+	
+	&lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/lists&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetLists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Java Classes such as &lt;code&gt;WList&lt;/code&gt;, &lt;code&gt;WTask&lt;/code&gt;  and &lt;code&gt;Me&lt;/code&gt; all map to the JSON response returned by individual REST API. &lt;/p&gt;
+
+&lt;h2 id=&quot;how-do-i-invoke-the-api&quot;&gt;How do I invoke the API?&lt;/h2&gt;
+
+&lt;p&gt;Invoking the API is simple. There is a helper class &lt;code&gt;WunderList&lt;/code&gt; which is basically a singleton and you have get its instance by providing the wunderlist &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt;. Once we have
+the instance we can invoke the corresponding helper methods such as &lt;code&gt;GetLists&lt;/code&gt; and &lt;code&gt;GetTasks&lt;/code&gt;. &lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wlists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GetLists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GetTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;contributing&quot;&gt;Contributing&lt;/h2&gt;
+
+&lt;p&gt;I will be glad to accept pull requests to make this API client as complete as possible. Since this is still a very partial implementation, I look forward to the contributions from people who want to build something awesome using Wunderlist API.&lt;/p&gt;
+
+&lt;p&gt;The project is an Eclipse java application. You can either use eclipse or gradle to build it. For example, using gradle use the task &lt;code&gt;mainjar&lt;/code&gt; to build the executable jar&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;text&quot;&gt;D:\Users\madhur\workspace\location\Wunderjava&amp;gt;gradle mainjar
+:mainjar UP-TO-DATE
+
+BUILD SUCCESSFUL
+
+Total time: 3.945 secs
+D:\Users\madhur\workspace\location\Wunderjava&amp;gt;cd build
+
+D:\Users\madhur\workspace\location\Wunderjava\build&amp;gt;cd libs
+
+D:\Users\madhur\workspace\location\Wunderjava\build\libs&amp;gt;java -jar Wunderjava.jar
+Enter the Wunderlist username:
+ahuja.madhur@gmail.com
+Enter the Wunderlist password:
+thisisnottherightpassword
+Name: madhur
+Authorization Toekn: 8758a4a0f983177a427a879a30b144d92bc2f01e
+Press enter to print out the lists
+
+Printing out the lists:
+Private
+Work
+Shopping
+Movies to Watch
+Wishlist
+Places
+Activities
+App ideas
+Healthy foods
+Lunch
+Role models
+Friends
+Kanika session
+Learning
+Blog Articles
+Coconut milk
+Home shpng
+Kwality bazar
+Saturday
+Press enter to print out the tasks&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Decoding the hidden Wunderlist API (Part I)</title>
+   <link href="http://madhur.co.in/blog/2014/05/02/decodewunderlistapi.html"/>
+   <updated>2014-05-02T00:00:00+05:30</updated>
+   <id>id:/blog/2014/05/02/decodewunderlistapi</id>
+   <content type="html">&lt;p&gt;Without any doubt, &lt;a href=&quot;https://www.wunderlist.com&quot;&gt;Wunderlist&lt;/a&gt; is the most popular to do list manager. With its increasing popularity, demand is growing for people to let Wunderlist expose 
+its API to public so that users can build great apps around it and integrate it with their systems. Posts such as &lt;a href=&quot;https://wunderlist.uservoice.com/forums/136230-wunderlist-feature-requests/suggestions/2378704-developers-api&quot;&gt;this&lt;/a&gt; on Wunderlist support forum clearly indicate the popularity and demand for such an API.&lt;/p&gt;
+
+&lt;p&gt;Although, Wunderlist has yet not exposed any public API but it seems there are definite plans for that going by post such as &lt;a href=&quot;http://techcrunch.com/2013/11/12/to-do-app-wunderlist-confirms-19m-series-b-and-expands-to-the-us-while-sequoia-heads-into-germany/&quot;&gt;this&lt;/a&gt;
+Nevertheless, what I found is that it is easy to discover the Wunderlist API by simply inspecting the HTTPS traffic over the Wunderlist web site. If we see their Licenses section, it is easy to see that they 
+use &lt;a href=&quot;http://backbonejs.org/&quot;&gt;backbone.js&lt;/a&gt; along with &lt;a href=&quot;http://jquery.com/&quot;&gt;Jquery&lt;/a&gt; and &lt;a href=&quot;http://requirejs.org/&quot;&gt;RequireJs&lt;/a&gt; giving the clear indication of MVC pattern being in use along with &lt;a href=&quot;&quot;&gt;JSON&lt;/a&gt; as the data exchange format&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot.1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, lets head over to the browser to inspect the HTTPS traffic and see if we can get some information about their API. What I am going to do is login to Wunderlist website with my credentials and record the 
+HTTPS traffic in the Chrome inspector. I have also turned on the button for &lt;code&gt;Preserve log upon Navigation&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot.2.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;/images/Blog/screenshot.3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If we filter by requests of type XML HTTP Request(XHR), we will see a &lt;code&gt;POST&lt;/code&gt; request &lt;code&gt;/login&lt;/code&gt; to the host &lt;code&gt;api.wunderlist.com&lt;/code&gt;. In the request payload, I also see my username and password in cleartext. Although
+I do not have anything to worry since this is transmitted over SSL&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot.4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If we just scroll few lines down, I see another request &lt;code&gt;/batch&lt;/code&gt; to &lt;code&gt;api.wunderlist.com&lt;/code&gt; with this JSON payload and the response is a considerable JSON response. I could the names of lists and tasks in the JSON response.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot.5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;ops&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:[&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;put&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/settings&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_significant_event_count&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;5&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_shortcut_add_new_task&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;CTRL + 0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/settings&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/contacts&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/services&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/lists&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;since&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;1399004140&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/tasks&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;before&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1399141799&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;limit&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;compact&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/reminders&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/shares&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/events&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;locale&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;en_US&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}},&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;method&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;get&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;url&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;/me/quota&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;quot;params&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{}}],&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;sequential&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Great, it seems that we have just discovered a bunch of REST API calls. These are batched together in single HTTP request for optimization. We also know the method &lt;code&gt;GET&lt;/code&gt; or &lt;code&gt;POST&lt;/code&gt; of these requests and also the parameters some of them. The next step is to take this request individually and test it one by one. But how do we do it?&lt;/p&gt;
+
+&lt;p&gt;For this purpose, I am using an excellent Chrome extension called &lt;a href=&quot;https://chrome.google.com/webstore/detail/dev-http-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en&quot;&gt;Dev HTTP Client&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;First, lets authenticate ourselves using the &lt;code&gt;/login&lt;/code&gt; API. This will be a post request containing the &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt; for the Wunderlist.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/screenshot.7.png&quot;&gt;&lt;img src=&quot;/images/Blog/screenshot.7.png&quot; alt=&quot;&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The result is the following JSON response:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;AAAEAABXCxQ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2014-04-30T11:59:36Z&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;updated_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2014-04-30T11:59:36Z&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;madhur&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;User&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;avatar&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;https://graph.facebook.com/522955158/picture?width=0&amp;amp;height=0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;ahuja.madhur@gmail.com&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;token&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;8758a4a0f983177a427a879a30b144d92bc2f01e&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;terms_accepted_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-07-07&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;confirmation_state&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;confirmed_email&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;email_confirmed&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;channel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;me.updates.2ea715786fc5ed6af21a97d2104ac4a095349e9b&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;product&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;group_product&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;facebook&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;522955158&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;settings&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;account_locale&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;en&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;background&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;wlbackground03&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;campaign_iyf4_notification&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;campaign_iyf4_notification_last_date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-12-16T00:47:14Z&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;campaign_iyf4_notification_variation&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;c&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_assigning_daily&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_assigning_daily_date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-09-26&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_assigning_overall&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_comments_daily&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_comments_daily_date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-09-26&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_comments_overall&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_files_daily&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_files_daily_date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-09-26&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;consumed_quota_files_overall&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_by_compound_id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;AAAEAABXCxQ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_by_id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;5704468&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_by_type&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;User&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;experiment_chatter_notifications&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;compacted&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;notifications_email_enabled&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;notifications_push_enabled&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;setting&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;{}&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;show_completed_items&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;sound_checkoff_enabled&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;sound_notification_enabled&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;start_of_week&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;mon&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;use_badge_icon&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;notifications&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_app_open_count&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_coach_mark_detail_view&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;completed&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_coach_mark_inbox&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;completed&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_coach_mark_smart_list&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;completed&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_last_app_open_date&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;1398969000000&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_last_used_release&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2.3.8.3&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_new_installation&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_shortcut_add_new_task&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;CTRL + 0&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_significant_event_count&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;5&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;web_uuid&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;d45186f5-0699-4986-906d-c6ad3f88c180&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This piece of information is very important for us in JSON response: &lt;code&gt;token:8758a4a0f983177a427a879a30b144d92bc2f01e&lt;/code&gt;. This is the token which we need to send in 
+any of the other REST API requests otherwise you will get this error in response:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;quot;errors&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;You must be authenticated to continue.&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;unauthorized&amp;quot;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Let’s try to retrieve the lists using the &lt;code&gt;/lists&lt;/code&gt; API and the token:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/screenshot.8.png&quot;&gt;&lt;img src=&quot;/images/Blog/screenshot.8.png&quot; alt=&quot;&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The result is the list of Wunderlist lists I have in my account:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;json&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;ABAEAAS9pWM&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;List&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;local_identifier&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;localId:prepopulated:AAAEAABXCxQ:List:private&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;owner_id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;AAAEAABXCxQ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;4.37502&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;title&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Private&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-07-07T01:25:06Z&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;updated_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2014-04-29T11:05:46Z&amp;quot;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;ABAEAAS9pWQ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;List&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;local_identifier&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;localId:prepopulated:AAAEAABXCxQ:List:work&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;owner_id&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;AAAEAABXCxQ&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.87502&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;title&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Work&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;created_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2013-07-07T01:25:06Z&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;quot;updated_at&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;2014-04-11T07:52:33Z&amp;quot;&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Using a similar approach, we can invoke the following REST API’s and get their responses in JSON:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;/me/settings&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/contacts&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/services&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/lists&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/tasks&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/reminders&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/shares&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/events&lt;/code&gt;&lt;br /&gt;
+&lt;code&gt;/me/quota&lt;/code&gt;  &lt;/p&gt;
+
+&lt;h2 id=&quot;a-note-about-authentication&quot;&gt;A note about authentication&lt;/h2&gt;
+
+&lt;p&gt;At this moment, there is no OAuth implementation for the authorization on this API and probably this is the reason the API is not public yet.
+This means, the token we recieve in response &lt;code&gt;/login&lt;/code&gt; call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,
+it is sufficient to assume that we need to re-authenticate using the &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt; once the token expires.&lt;/p&gt;
+
+&lt;p&gt;In the part II of this blog post, I am going to share a partial implementation of this API in java using &lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>Feedly OAuth 2.0 implementation using Scribe in Java</title>
-   <link href="http://madhur.co.in/blog/2014/05/17/feedlyoauth2flow.html"/>
-   <updated>2014-05-17T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/17/feedlyoauth2flow</id>
+   <link href="http://madhur.co.in/blog/2014/04/17/feedlyoauth2flow.html"/>
+   <updated>2014-04-17T00:00:00+05:30</updated>
+   <id>id:/blog/2014/04/17/feedlyoauth2flow</id>
    <content type="html">&lt;p&gt;Since the Google Reader retirement, &lt;a href=&quot;http://feedly.com&quot;&gt;Feedly&lt;/a&gt; hasb been slowly becoming more and more popular. Recently, Feedly announced their &lt;a href=&quot;http://developer.feedly.com/&quot;&gt;API Model&lt;/a&gt; which 
 allows developers to create apps which integrate with feedly. Applications authenticate users using a feedly OAuth 2.0 interface. In this post, I am going to cover the Feedly OAuth 2.0 authentication flow 
 which can be used in  Mobile/Web apps. I am not going to cover any details into OAuth 2. The official specs of OAuth2 can be read &lt;a href=&quot;http://tools.ietf.org/html/rfc6749&quot;&gt;here&lt;/a&gt; and a nice tutorial &lt;a href=&quot;http://www.codecademy.com/tracks/oauth&quot;&gt;here&lt;/a&gt; on &lt;a href=&quot;http://www.codecademy.com&quot;&gt;Code Academy&lt;/a&gt;. Wikipedia too gives a nice little intro about OAuth 2 given below:&lt;/p&gt;
@@ -60,9 +319,9 @@ Thats it man! Go and build something awesome with Scribe! :&lt;span class=&quot;
  
  <entry>
    <title>Updating Created By field in SharePoint through Client Object Model</title>
-   <link href="http://madhur.co.in/blog/2014/05/09/updatingcreatedby.html"/>
-   <updated>2014-05-09T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/09/updatingcreatedby</id>
+   <link href="http://madhur.co.in/blog/2014/04/09/updatingcreatedby.html"/>
+   <updated>2014-04-09T00:00:00+05:30</updated>
+   <id>id:/blog/2014/04/09/updatingcreatedby</id>
    <content type="html">&lt;p&gt;Recently, we did a migration from SharePoint 2010 old site to a new site and as a result imported a bunch of records.&lt;/p&gt;
 
 &lt;p&gt;However, the &lt;code&gt;Created By&lt;/code&gt; field was reset to the Account of the person performing the migration. To overcome this, I wrote a quick script to update the 
@@ -120,9 +379,9 @@ Thats it man! Go and build something awesome with Scribe! :&lt;span class=&quot;
  
  <entry>
    <title>Hosting Git repository on a Windows LAN</title>
-   <link href="http://madhur.co.in/blog/2014/05/09/hostgitwindowslan.html"/>
-   <updated>2014-05-09T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/09/hostgitwindowslan</id>
+   <link href="http://madhur.co.in/blog/2014/04/09/hostgitwindowslan.html"/>
+   <updated>2014-04-09T00:00:00+05:30</updated>
+   <id>id:/blog/2014/04/09/hostgitwindowslan</id>
    <content type="html">&lt;p&gt;Recently, I had a small team of developers and was looking to setup a version control system for them.&lt;/p&gt;
 
 &lt;p&gt;I evaluated many tools like VSTS, Subversion and finally decided on Git repository hosted on a Windows LAN.&lt;/p&gt;
@@ -759,68 +1018,6 @@ yajl-ruby (1.1.0)&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Good to see &lt;a href=&quot;http://jekyllrb.com/docs/installation/&quot;&gt;Jekyll&lt;/a&gt; referring my post of &lt;a href=&quot;/blog/2011/09/01/runningjekyllwindows.html&quot;&gt;Installing Jekyll on Windows&lt;/a&gt;&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Browser Market Share of Internet Explorer</title>
-   <link href="http://madhur.co.in/blog/2012/05/05/browsermarketshare.html"/>
-   <updated>2012-05-05T00:00:00+05:30</updated>
-   <id>id:/blog/2012/05/05/browsermarketshare</id>
-   <content type="html">&lt;p&gt;Recently, there has been lot of discussion over the market share of Internet Explorer. At first, &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/&quot;&gt;Windows Team blog&lt;/a&gt; published an &lt;a href=&quot;http://windowsteamblog.com/ie/b/ie/archive/2012/03/18/understanding-browser-usage-share-data.aspx&quot;&gt;article&lt;/a&gt; which says the traditional
-methods of calculating browser market share are wrong and misleading. This is partly because browsers such as Google Chrome have a builtin &lt;a href=&quot;http://news.softpedia.com/news/Google-Chrome-s-Prerendering-May-Be-Linked-to-It-Losing-Market-Share-256767.shtml&quot;&gt;Pre-rendering&lt;/a&gt; feature which fetches
-the hyperlinks on the page invisibly even if user has not explicitly clicked on it.&lt;/p&gt;
-
-&lt;p&gt;Anyways, Focusing away from all that attention, I would like to present the statistics of browser share of visitors of my blog. I really do believe that results of my blog will be applicable
-to all of the community. My blog recieves approximately 100 vists/day.&lt;/p&gt;
-
-&lt;h2 id=&quot;overall-market-share&quot;&gt;Overall Market Share&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&quot;/images/share.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-&lt;br /&gt;
-In my opinion, the high usage of Internet explorer is clearly because of usage of IE as an Enterprise standard browser. Many users, who are working in companies and use company
-provided assets, have no choice but to use the browser installed on their devices, which in 99% of the cases is Internet Explorer&lt;/p&gt;
-
-&lt;p&gt;It is interesting to see how drastically the share of Internet Explorer drops to &lt;strong&gt;single digit&lt;/strong&gt; percentages on &lt;strong&gt;Weekends&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;monday&quot;&gt;Monday&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&quot;/images/monday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Tuesday##&lt;br /&gt;
-&lt;img src=&quot;/images/tuesday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Wednesday##&lt;br /&gt;
-&lt;img src=&quot;/images/wednesday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Thursday##&lt;br /&gt;
-&lt;img src=&quot;/images/thursday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Friday##&lt;br /&gt;
-&lt;img src=&quot;/images/friday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Saturday##&lt;br /&gt;
-&lt;img src=&quot;/images/saturday.png&quot; alt=&quot;&quot; /&gt;&lt;br /&gt;
-##Sunday##&lt;br /&gt;
-&lt;img src=&quot;/images/sunday.png&quot; alt=&quot;&quot; /&gt;  &lt;/p&gt;
-
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-&lt;p&gt;To conclude, high market share of IE is only and only because its a standard browser on Microsoft Windows Operating System. The gain which Microsoft gets because of monopoly in Operating System market
-is still unparalleled. It would be interesting to see, how the share of IE slides when the enterprise starts moving more and more on mobile platforms and start introducing &lt;a href=&quot;http://en.wikipedia.org/wiki/Bring_your_own_device&quot;&gt;BYOD&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>WebServices or Client Object Model</title>
-   <link href="http://madhur.co.in/blog/2012/04/15/webservicescom.html"/>
-   <updated>2012-04-15T00:00:00+05:30</updated>
-   <id>id:/blog/2012/04/15/webservicescom</id>
-   <content type="html">&lt;p&gt;SharePoint 2010 introduces a new object model to access sharepoint data on the client side which is the client &lt;a href=&quot;http://msdn.microsoft.com/en-us/gg620623&quot;&gt;Client Object model&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Developers writing client applications have been getting confused as to which is to be used when.&lt;/p&gt;
-
-&lt;p&gt;I asked the question on &lt;a href=&quot;http://sharepoint.stackexchange.com&quot;&gt;http://sharepoint.stackexchange.com&lt;/a&gt; and got many replies&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://sharepoint.stackexchange.com/questions/26093/webservices-or-client-object-model&quot;&gt;WebServices or Client object model?&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The most upvoted answer gives the preference to using Client object model over web services whenever possible.&lt;/p&gt;
-
-&lt;p&gt;Recently, the auther of &lt;a href=&quot;http://spservices.codeplex.com/&quot;&gt;SPServices&lt;/a&gt; library - Marc Anderson also wrote an article covering the same topic. You can read the article &lt;a href=&quot;http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://sympmarc.com/2012/04/12/when-to-choose-spservices-vs-the-client-side-object-model-csom/#comment-23489&quot;&gt;When to Choose SPServices vs. the Client Side Object Model (CSOM)&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
