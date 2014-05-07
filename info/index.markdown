@@ -8,8 +8,6 @@ About myself
 ======
 I am a programmer/technology guy. I like building web applications using all the standard technologies like HTML, CSS, JavaScript, JQuery, ASP.NET, and SQL Server. 
 I also know a good variety of programming languages too. .NET C# is my favourite, I know Java very well, and I know Javascript pretty well too.
-I've been experimenting with Backtrack Linux in the last few months, using all the security tools such as Nmap, Wireshark, Metaspoilt, Sqlmap, Kismet, Ettercap etc.
-I am also fairly proficient in using tools such as WinDbg, gdb, Ollydbg and IDA Pro for reverse engineering and debugging.
 For operating systems I have experience in both Linux and Windows, Linux being my current operating system. 
 I also have experience developing applications for Android.
 
