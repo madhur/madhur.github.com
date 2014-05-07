@@ -207,8 +207,9 @@ google_ad_height = 600;
 * There is a <em>BusinessClass</em> class in the assembly which is invoked by the hidden buttons
 * The visible button checks if the user is <em>Admin</em> and hides or shows the other two buttons</p>
 
-<p>Now, our job is to become the Admin :) . That’s the code which is called by the Visible button <strong>Identify me</strong>
-&lt;div class="highlight"&gt;&lt;pre&gt;<code class="csharp"><span class="k">private</span> <span class="k">void</span> <span class="nf">identifyUser</span><span class="p">()</span>
+<p>Now, our job is to become the Admin :) . That’s the code which is called by the Visible button <strong>Identify me</strong></p>
+
+<div class="highlight"><pre><code class="csharp"><span class="k">private</span> <span class="k">void</span> <span class="nf">identifyUser</span><span class="p">()</span>
     <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">IsAdmin</span><span class="p">())</span>
       <span class="p">{</span>
@@ -222,7 +223,7 @@ google_ad_height = 600;
         <span class="k">this</span><span class="p">.</span><span class="n">butAdminHTTP</span><span class="p">.</span><span class="n">Visible</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
         <span class="k">this</span><span class="p">.</span><span class="n">butAdminHTTPS</span><span class="p">.</span><span class="n">Visible</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
       <span class="p">}</span>
-    <span class="p">}</span></code>&lt;/pre&gt;&lt;/div&gt;</p>
+    <span class="p">}</span></code></pre></div>
 
 <p>Clearly, our main interest is in <em>IsAdmin()</em> function which is defined as follows:</p>
 
@@ -245,13 +246,14 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
 
 <p>But since its invalid IP, it will never be returned by system API. So, we must patch the program.</p>
 
-<p>Let’s open the function in <em>ILDASM</em> and look at its disassembly.
-&lt;div class="highlight"&gt;&lt;pre&gt;<code class="text">IL_001c:  ldloc.1
+<p>Let’s open the function in <em>ILDASM</em> and look at its disassembly.</p>
+
+<div class="highlight"><pre><code class="text">IL_001c:  ldloc.1
   IL_001d:  callvirt   instance string [mscorlib]System.Object::ToString()
   IL_0022:  ldstr      &quot;258.54.54.699&quot;
   IL_0027:  callvirt   instance bool [mscorlib]System.String::Equals(string)
   IL_002c:  brfalse.s  IL_0032
-  IL_002e:  ldc.i4.1</code>&lt;/pre&gt;&lt;/div&gt;  </p>
+  IL_002e:  ldc.i4.1</code></pre></div>
 
 <p>There are several ways to do it. I will write down from tedious to easiest
 * Export the classes from Reflector to Visual Studio solution and change the IP address to our actual IP address. But then Why not just NOP out the call itself :). This requires boring effort
@@ -262,8 +264,9 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
 
 <p><img src="/images/ildasm-output.png" alt="" /></p>
 
-<p>If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is 
-&lt;div class="highlight"&gt;&lt;pre&gt;<code class="text">IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031</code>&lt;/pre&gt;&lt;/div&gt;  </p>
+<p>If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is </p>
+
+<div class="highlight"><pre><code class="text">IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031</code></pre></div>
 
 <p>What this instruction means is that if output of <em>IsAdmin()</em> is false, branch to instruction at IL_0031, the instruction which hides the buttons.
 Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue.s</strong>. A quick look at MSDN tells me that its opcode is 2D as opposed to 2C which stands for <strong>brfalse.s</strong>.</p>
