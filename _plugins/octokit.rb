@@ -32,8 +32,9 @@ module Jekyll
 	  puts @text
       @address = "madhur/"+"#{@text}"
 	  
-      cred = YAML.load_file("d:/github.yml")
-      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+      cred = YAML.load_file("d:/github/github.yml")
+
+      client = Octokit::Client.new(:login => cred["username"], :password => cred["password"])
       
 	  repo = client.issues(@address) # grab the data. Can this go in "initialize?"
 	  
@@ -89,8 +90,8 @@ module Jekyll
       @address = "madhur/"+"#{@text}"
 	  
 	   puts "Getting Github Commits via octokit.rb " + @address
-      cred = YAML.load_file("d:/github.yml")
-      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+      cred = YAML.load_file("d:/github/github.yml")
+      client = Octokit::Client.new(:login => cred["username"], :password => cred["password"])
       repo = client.commits(@address, "master")
       out = "<ul>"
       for i in 0 ... [repo.size, 8].min
@@ -126,10 +127,10 @@ module Jekyll
     def render(context)
       @address = "madhur/"+"#{@temp}"
 	   puts "Getting Github Readme via octokit.rb " + @address
-        cred = YAML.load_file("d:/github.yml")
+        cred = YAML.load_file("d:/github/github.yml")
+       
 
-
-      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+      client = Octokit::Client.new(:login => cred["username"], :password => cred["password"])
 
      
 
@@ -151,8 +152,8 @@ module Jekyll
     def render(context)
 		@address = "madhur/"+"#{@temp[0]}"
 
-     cred = YAML.load_file("d:/github.yml")
-      client = Octokit::Client.new(:login => cred[":username"], :password => cred[":password"])
+     cred = YAML.load_file("d:/github/github.yml")
+      client = Octokit::Client.new(:login => cred["username"], :password => cred["password"])
 
 	   puts "Getting Github Contents via octokit.rb " + @address + @temp[1]
        out=client.contents @address, :accept => 'application/vnd.github.html', :path =>  @temp[1]

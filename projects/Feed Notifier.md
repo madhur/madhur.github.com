@@ -1,5 +1,5 @@
 ---
-title: Hermes
+title: Feed notifier
 layout: project-detail
 github: dashclock-feedly-extension
 ---
