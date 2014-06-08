@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Guide to building Git 2.0.0 from sources on Windows"
-excerpt: "Guide to building Git 2.0.0 from sources on Windows"
+title: "Building Git 2.0.0 from sources on Windows"
+excerpt: "Building Git 2.0.0 from sources on Windows"
 disqus_id: /2014/06/08/guidebuildgit2/
 location: New Delhi, India
 time: 9:00 PM
@@ -11,19 +11,16 @@ tags:
 
 
 > Interested in binaries? Git 2.0.0 build can be fetched from my Github repo [https://github.com/madhur/msysgit-2.0.0](https://github.com/madhur/msysgit-2.0.0) 
-> Note that I have not tested it thoroughly myself. If you face any issues, do bring it to my notice but I am in no way responible for it. Use it at your own risk.
+> Note that I have not tested it thoroughly myself. If you face any issues, do bring it to my notice but I am in no way responsible for it. Use it at your own risk.
 
 [Git 2.0.0](https://git.kernel.org/cgit/git/git.git/tree/Documentation/RelNotes/2.0.0.txt) just released few days back. 
 
-However, just like many other popular Linux tools, Windows Community is ignored. There is no official build of Git 2.0.0 for Windows.
-
-As of this writing, [MysysGit for Windows](http://msysgit.github.io/) has latest version 1.9.2 availalbe for download.
+As of this writing, [MsysGit for Windows](http://msysgit.github.io/) has latest version 1.9.2 available for download.
 
 Eager to try out this new version, I decided to build it myself. 
 
 
-
-* Download MysysGit build envrionment for Windows from here - [https://github.com/msysgit/msysgit](https://github.com/msysgit/msysgit)
+* Download MysysGit build environment for Windows from here - [https://github.com/msysgit/msysgit](https://github.com/msysgit/msysgit)
 
 Place it in a directory such as `C:\gitbuild`
 
