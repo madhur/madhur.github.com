@@ -10,27 +10,30 @@ tags:
 ---
 
 
-[Git 2.0.0](https://git.kernel.org/cgit/git/git.git/tree/Documentation/RelNotes/2.0.0.txt) just released few days back.
+> Interested in binaries? Git 2.0.0 build can be fetched from my Github repo [https://github.com/madhur/msysgit-2.0.0](https://github.com/madhur/msysgit-2.0.0) 
+> Note that I have not tested it thoroughly myself. If you face any issues, do bring it to my notice but I am in no way responible for it. Use it at your own risk.
+
+[Git 2.0.0](https://git.kernel.org/cgit/git/git.git/tree/Documentation/RelNotes/2.0.0.txt) just released few days back. 
 
 However, just like many other popular Linux tools, Windows Community is ignored. There is no official build of Git 2.0.0 for Windows.
 
 As of this writing, [MysysGit for Windows](http://msysgit.github.io/) has latest version 1.9.2 availalbe for download.
 
-Eager to try out this new version, I decided to build it myself. I have published the binaries [here]() incase you directly want to grab the 2.0.0 build for Windows.
-Note that I have not tested it thoroughly myself. If you face any issues, do bring it to my notice but I am in no way responible for it. Use it at your own risk.
+Eager to try out this new version, I decided to build it myself. 
 
 
-1. Download MysysGit build envrionment for Windows from here - [https://github.com/msysgit/msysgit](https://github.com/msysgit/msysgit)
+
+* Download MysysGit build envrionment for Windows from here - [https://github.com/msysgit/msysgit](https://github.com/msysgit/msysgit)
 
 Place it in a directory such as `C:\gitbuild`
 
-2. Download official Git 2.0.0 from here - [https://github.com/msysgit/git](https://github.com/msysgit/git)
+* Download Git 2.0.0 sources from here - [https://github.com/msysgit/git](https://github.com/msysgit/git)
 
 Copy this entire source into the `git` directory  in `C:\gitbuild\git`
 
 > Note: Actually, the git repository in the first step has a submodule pointing to the second repository in `C:\gitbuild\git`. If you are familiar with Git          > submodules, you can download via submodule command as well.
 
-3. Execute `msys.bat` from `C:\gitbuild\`. You should be now in bash console as follows:
+* Execute `msys.bat` from `C:\gitbuild\`. You should be now in bash console as follows:
 
 {% highlight text %}
 Welcome to msysGit
@@ -49,11 +52,13 @@ $
 
 > Note: In some envrionments, the build process should automatically begin after executing msys.bat. If it doesn't go to the next step.
 
-4. `cd` to `C:\gitbuild\git` and execute `make` command. The build process should now begin:
+* `cd` to `C:\gitbuild\git` and execute `make` command. The build process should now begin:
 
-C:\gitbuild>msys.bat
+
 
 {% highlight text %}
+C:\gitbuild>msys.bat
+
 -------------------------------------------------------
 Building and Installing Git
 -------------------------------------------------------
@@ -71,16 +76,16 @@ GIT_VERSION = 2.0.0
 
 Once the build is complete, you may exit the bash shell.
 
-5. The build process automatically places the git binaries in `C:\gitbuild\bin`. To confirm you have successfully built, `cd` to `C:\gitbuild\bin` and execute `git.exe`
+* The build process automatically places the git binaries in `C:\gitbuild\bin`. To confirm you have successfully built, `cd` to `C:\gitbuild\bin` and execute `git.exe`
 
 {% highlight text %}
 C:\gitbuild\bin>git --version
 git version 2.0.0
 {% endhighlight %}
 
-5. Congratulations you have just built Git 2.0.0 froms sources. However, there are some quirks and tweaks required to be corrected, which we cover in next steps.
+* Congratulations you have just built Git 2.0.0 from sources. However, there are some quirks and tweaks required to be corrected, which we cover in next steps.
 
-6. `git gui` command throws an error as follows:
+* `git gui` command throws an error as follows:
 
 {% highlight text %}
 git-gui: line 3: exec: wish: not found
@@ -88,22 +93,38 @@ fatal: 'gui' appears to be a git command, but we were not
 able to execute it. Maybe git-gui is broken?
 {% endhighlight %}
 
-The reason of error is because `git gui` depends on `Tcl/Tl 8.5.13` package. I just copied the binaries from my old build and it works fine.
+The reason of error is because `git gui` depends on `Tcl/Tl 8.5.13` package. I just copied the following files and folders from my old build and it works fine.
 
-Following folders are required:
-`git\lib\tcl8`
-`git\lib\tcl8.5`
-`git\lib\tk8.5`
-`git\lib\tclConfig.sh`
-`git\lib\tkConfig.sh`
-`git\bin\wish.exe`
-`git\bin\wish85.exe`
-`git\bin\tcl85.dll`
-`git\bin\tclpip85.dll`
-`git\bin\tclsh.exe`
-`git\bin\tclsh85.exe`
-`git\bin\tk85.exe`
+`git\lib\tcl8`  
+`git\lib\tcl8.5`  
+`git\lib\tk8.5`  
+`git\lib\tclConfig.sh`  
+`git\lib\tkConfig.sh`  
+`git\bin\wish.exe`  
+`git\bin\wish85.exe`  
+`git\bin\tcl85.dll`  
+`git\bin\tclpip85.dll`  
+`git\bin\tclsh.exe`  
+`git\bin\tclsh85.exe`  
+`git\bin\tk85.exe`  
 
-After copying these files, `git gui` works fine.
+After copying these files, `git gui` should work fine.
 
-7. Another quirk
+* At this point, you have working version of Git 2.0.0 and you can remove the sources if you want.
+
+> If you get the error `fatal: unable to access '.....git/': SSL certificate problem: unable to get local issuer certificate` , you may have to put 
+> this line in your .gitconfig. Replace `d` with your drive letter.
+
+{% highlight text %}
+[http]
+	sslCAinfo = d:/gitbuild/mingw/bin/curl-ca-bundle.crt
+{% endhighlight %}
+
+* You can also place your ssh private and public key in the `.ssh` folder in `C:\gitbuild` in order to work with Github
+
+{% highlight text %}
+ssh -T git@github.com
+Warning: Permanently added the RSA host key for IP address 'x.x.x.x' to the list of known hosts.
+Enter passphrase for key '/.ssh/id_rsa':
+Hi madhur! You've successfully authenticated, but GitHub does not provide shell access.
+{% endhighlight %}
