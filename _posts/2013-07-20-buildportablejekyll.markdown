@@ -23,7 +23,7 @@ everything which is required to run Jekyll on Windows:
 * Git 1.9.2
 * Python 2.7.5
 
-You can download the Complete PortableJekyll package [here from my dropbox link](https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d)
+You can download the Complete PortableJekyll package [here from my github repo](https://github.com/madhur/PortableJekyll)
 
 It comes with following pre-installed gems including Jekyll 2.0.1
 

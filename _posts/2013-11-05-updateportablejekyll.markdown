@@ -22,6 +22,6 @@ The portable version contains everything which is required to run Jekyll on Wind
 * Git 1.8.3
 * Python 2.7.5
 
-You can download the complete updated PortableJekyll package [here from my dropbox link](https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d)
+You can download the complete updated PortableJekyll package [here from my github repo](https://github.com/madhur/PortableJekyll)
 
 
