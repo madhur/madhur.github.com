@@ -6,7 +6,7 @@ keywords: C/C++, Windbg, Reverse Engineering, important
 important: yes
 ---
 
-Blog [![Feed icon](/images/feed-icon-14x14.png)][feed]
+Blog 
 =====================
 <span class="low-top quiet large-bottom"><a href="/archives" class="small quiet">Archives</a></span>
 <p/>
@@ -18,11 +18,7 @@ Blog [![Feed icon](/images/feed-icon-14x14.png)][feed]
 <h3 class="datetext" style="float:left">
 Posted on {{ post.date | date_to_string }}
 </h3>
-<span class="tag-list"> 
-{% for tag in post.tags %}
-<a href="/tags/{{ tag | slugize }}/">{{ tag }}</a> 
-{% endfor %}
-</span>
+<div class="tag-list" style="display:inline"> {% for tag in post.tags %}<a href="/tags/{{ tag | slugize }}/">{{ tag }}</a> {% endfor %}</div>
 </header>
 
 

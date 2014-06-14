@@ -25,8 +25,13 @@ Contact
 --------
 Feel free to contact me through any of the below channels or through this [contact form](/contact)
 
+<ul class="contact-icons">
+<li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i><a/></li>
+<li><a href="http://stackoverflow.com/users/507256/madhur-ahuja"><i class="fa fa-stack-overflow fa-3x"></i><a/></li>
+<li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i><a/></li>
+<li><a href="http://twitter.com/#!/madhur25"><i class="fa fa-twitter-square fa-3x"></i><a/></li>
+<li><a href="mailto:ahuja.madhur@gmail.com"><i class="fa fa-inbox fa-3x"></i><a/></li>
+</ul>
 
-[![Pic](/images/linkedin3.png)](http://www.linkedin.com/in/madhurahuja) [![Pic](/images/icon_stackoverflow3.png)](http://stackoverflow.com/users/507256/madhur-ahuja)
-[![Pic](/images/github_32.png)](https://github.com/madhur) [![Pic](/images/icon_twitter.jpg)](http://twitter.com/#!/madhur25)  [![Pic](/images/icon_mail.png)](mailto:ahuja.madhur@gmail.com) 
 
 

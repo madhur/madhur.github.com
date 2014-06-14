@@ -62,12 +62,12 @@ $div.replaceWith($div.html());
 
 
 
-$(document).ready(function() {
-	$(".share").click(function() {
-		$(this).next().slideToggle("normal");
-		$(this).toggleClass("active");
-	}).next().hide();
-});
+// $(document).ready(function() {
+// 	$(".share").click(function() {
+// 		$(this).next().slideToggle("normal");
+// 		$(this).toggleClass("active");
+// 	}).next().hide();
+// });
 
 
 
