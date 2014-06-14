@@ -1,12 +1,23 @@
+var qs = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=');
+        if (p.length != 2) continue;
+        b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    }
+    return b;
+})(window.location.search.substr(1).split('&'));
+
+
+
+
 $(document).ready(function() {
 
-$div = $('div.pocket-btn');
-$div.replaceWith($div.html());
 
-	$("#intro").css("opacity", 0.99999);
 
-	var logoSwf = "/swf/logo.swf";
-
+	
 
 
 	$("tr", "#highlight").mouseover(function() {
@@ -86,7 +97,7 @@ $(document).ready(function() {
 
 
 
-    // $(".active").next().slideToggle("normal");
+    
 
 
 
@@ -111,6 +122,13 @@ $(document).ready(function() {
         $(this).toggleClass("active");
 
     });
+
+
+    var qstring=qs["q"];
+    if(qstring!=null)
+    {
+    	$("#q").val(qstring);
+    }
 	
 	
 
