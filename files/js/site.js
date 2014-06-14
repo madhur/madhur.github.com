@@ -16,7 +16,7 @@ var qs = (function(a) {
 $(document).ready(function() {
 
 
-
+	$('#navigation').slicknav({prependTo:'#primary'});
 	
 
 
