@@ -23,10 +23,12 @@ Posted on {{ post.date | date_to_string }}
 
 
 <div class="c">&nbsp;</div>
+<div class="hidden-xs">
 <p>{{ post.content | strip_html | truncatewords: 75 }}</p>
 <footer>
 <p><a href="{{ post.url }}">Read more...</a></p>
 </footer>
+</div>
 </article>
 {% endfor %}
 
