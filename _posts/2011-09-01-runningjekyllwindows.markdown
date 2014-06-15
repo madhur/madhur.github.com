@@ -10,7 +10,7 @@ tags:
 - Windows
 ---
 
-<div class="info">
+<div class="alert alert-info">
 Update: If you would like to directly download the portable version of Jekyll. See my <a href="/blog/2013/07/20/buildportablejekyll.html">new blog post here</a>
 </div>
 

@@ -37,7 +37,9 @@ module Jekyll
         dir = time.strftime('%Y')
       end
       
-      super site, base, dir, 'index', 'archive.html'
+      destdir="blog/" + dir
+
+      super site, base, destdir, 'index', 'archive.html'
       title = "Archives for "
       
       if day
@@ -72,6 +74,8 @@ module Jekyll
 		
 	 def write_page(site, page)
       page.render(site.layouts, site.site_payload)
+      #destdir=site.dest+"/blog/"
+     # puts destdir
       page.write(site.dest)
       site.pages << page
     end
@@ -95,7 +99,7 @@ module Jekyll
         months.each do |year, m|
           m.each do |month, posts|
             time = Time.new(year, month)
-            result.insert(0, %(<div class='archivemonth'><a href="#{time.strftime('/%Y/%m')}">#{time.strftime('%B %Y')}</a> (#{posts.length})<br /></div>)) # for reverse order
+            result.insert(0, %(<div class='archivemonth'><a href="/blog/#{time.strftime('/%Y/%m')}">#{time.strftime('%B %Y')}</a> (#{posts.length})<br /></div>)) # for reverse order
           end
         end
         

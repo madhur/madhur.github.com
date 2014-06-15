@@ -8,7 +8,7 @@ important: yes
 
 Blog 
 =====================
-<span class="low-top quiet large-bottom"><a href="/archives" class="small quiet">Archives</a></span>
+<span class="low-top quiet large-bottom"><a href="/blog/archives" class="small quiet">Archives</a></span>
 <p/>
 
 {% for post in site.posts limit: 10 %}
@@ -18,7 +18,7 @@ Blog
 <h3 class="datetext" style="float:left">
 Posted on {{ post.date | date_to_string }}
 </h3>
-<div class="tag-list" style="display:inline"> {% for tag in post.tags %}<a href="/tags/{{ tag | slugize }}/">{{ tag }}</a> {% endfor %}</div>
+<div class="tag-list" style="display:inline"> {% for tag in post.tags %}<a href="/blog/tags/{{ tag | slugize }}/">{{ tag }}</a> {% endfor %}</div>
 </header>
 
 
@@ -36,7 +36,7 @@ Posted on {{ post.date | date_to_string }}
 
 
 <p>
-<a href="/archives">Older Posts &rarr;</a>
+<a href="/blog/archives">Older Posts &rarr;</a>
 </p>
 
 

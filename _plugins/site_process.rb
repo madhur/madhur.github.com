@@ -52,7 +52,7 @@ module Jekyll
   class Madhur < Generator
   def generate(site)
 	
-	dir = 'tags'      
+	dir = 'blog/tags'      
     site.tags.keys.each do |tag|	 
 		
 		write_page(site, dir, tag)	 	 
@@ -62,6 +62,7 @@ module Jekyll
   end
 	
 	def write_page(site, dir, tag)
+		
       tagpage=Tag.new(site, site.source, File.join(dir, tag.slugize), tag)
       tagpage.render(site.layouts, site.site_payload)
       tagpage.write(site.dest)

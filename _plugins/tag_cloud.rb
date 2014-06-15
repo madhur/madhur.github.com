@@ -34,7 +34,7 @@ module Jekyll
 
           html << %(
             <span style="font-size: #{weights[tag[:title]].to_i}%">
-              <a href="/tags/#{tag[:slug]}/" title="#{length} post#{"s" if length != 1}">#{tag[:title]}</a>
+              <a href="/blog/tags/#{tag[:slug]}/" title="#{length} post#{"s" if length != 1}">#{tag[:title]}</a>
             </span>
           )
 
