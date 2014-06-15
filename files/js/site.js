@@ -126,7 +126,8 @@ $(document).ready(function() {
 
     var qstring = qs["q"];
     if (qstring != null) {
-        $("#q").val(qstring);
+        $("#q1").val(qstring);
+        $("#q2").val(qstring);
     }
 
 
@@ -145,11 +146,11 @@ function htmlDecode(value) {
 
 function Clickheretoprint() {
     var docprint = window.open("", "", "");
-    var sWinHTML = document.getElementById('container').innerHTML;
+    var sWinHTML = document.getElementById('blog-article').innerHTML;
     var heading = document.getElementsByTagName('h1')[0].innerHTML;
     docprint.document.open();
     docprint.document.write('<html><head><title>' + heading + '</title>');
-    docprint.document.write('<link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />');
+    //   docprint.document.write('<link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />');
     docprint.document.write('<link rel="stylesheet" type="text/css" href="/files/css/print.css">');
     docprint.document.write('</head><body onLoad="self.print()"><center>');
     docprint.document.write(sWinHTML);
