@@ -18,7 +18,7 @@ Blog
 <h3 class="datetext" style="float:left">
 Posted on {{ post.date | date_to_string }}
 </h3>
-<div class="tag-list" style="display:inline"> {% for tag in post.tags %}<a href="/blog/tags/{{ tag | slugize }}/">{{ tag }}</a> {% endfor %}</div>
+<div class="tag-list hidden-xs" style="display:inline"> {% for tag in post.tags %}<a href="/blog/tags/{{ tag | slugize }}/">{{ tag }}</a> {% endfor %}</div>
 </header>
 
 
