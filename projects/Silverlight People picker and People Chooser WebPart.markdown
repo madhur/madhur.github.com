@@ -4,6 +4,6 @@ layout: project-detail
 github: SLControls 
 ---
 
-{% if site.mode != 'dev' %}
+{% if site.generate_projects == 'true' %}
 {% octokit_readme SLControls%}
 {% endif %}

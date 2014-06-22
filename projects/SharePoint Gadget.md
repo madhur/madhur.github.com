@@ -5,7 +5,7 @@ github: SPGadget.gadget
 ---
 
 
-{% if site.mode != 'dev' %}
+{% if site.generate_projects == 'true' %}
 {% octokit_readme SPGadget.gadget%}
 {% endif %}
   

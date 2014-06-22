@@ -4,6 +4,6 @@ layout: project-detail
 github: madhur.github.com 
 ---
 
-{% if site.mode != 'dev' %}
+{% if site.generate_projects == 'true' %}
 {% octokit_readme madhur.github.com%}
 {% endif %}
