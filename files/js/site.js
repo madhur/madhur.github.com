@@ -10,6 +10,13 @@ var qs = (function(a) {
 })(window.location.search.substr(1).split('&'));
 
 
+$(window).scroll(function() {
+    if ($(".navbar").offset().top > 50) {
+        $(".navbar-fixed-top").addClass("top-nav-collapse");
+    } else {
+        $(".navbar-fixed-top").removeClass("top-nav-collapse");
+    }
+});
 
 
 $(document).ready(function() {
@@ -166,6 +173,7 @@ var lastScrollTop = 0;
 var delta = 5;
 var navbarHeight = $('#navigation').outerHeight();
 
+/*
 $(window).scroll(function(event) {
     didScroll = true;
 });
@@ -217,4 +225,4 @@ function findBootstrapEnvironment() {
             return env
         }
     };
-}
+}*/
