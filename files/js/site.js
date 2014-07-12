@@ -19,6 +19,11 @@ $(window).scroll(function() {
 });
 
 
+
+
+
+
+
 $(document).ready(function() {
 
 
@@ -75,22 +80,14 @@ $(document).ready(function() {
     });
 
     $("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox();
-});
 
 
 
 
-// $(document).ready(function() {
-//  $(".share").click(function() {
-//      $(this).next().slideToggle("normal");
-//      $(this).toggleClass("active");
-//  }).next().hide();
-// });
 
 
 
 
-$(document).ready(function() {
 
     $(".accordion").click(function() {
 
@@ -137,6 +134,9 @@ $(document).ready(function() {
         $("#q2").val(qstring);
     }
 
+    $('.carousel').carousel();
+
+
 
 
 });
@@ -167,13 +167,19 @@ function Clickheretoprint() {
 }
 
 
+
+
+
+
+/*
+
 // Hide Header on on scroll down
 var didScroll;
 var lastScrollTop = 0;
 var delta = 5;
 var navbarHeight = $('#navigation').outerHeight();
 
-/*
+
 $(window).scroll(function(event) {
     didScroll = true;
 });

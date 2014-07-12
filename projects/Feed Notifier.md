@@ -1,6 +1,6 @@
 ---
 title: Feed notifier
-layout: project-detail
+layout: project-detail-android
 github: dashclock-feedly-extension
 ---
 
