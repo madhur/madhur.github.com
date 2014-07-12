@@ -13,7 +13,7 @@ img:
 ---
 
 <!--
-{% if site.generate_projects == 'true' %}
+{% if site.generate_projects == true %}
 {% octokit_readme GAnalytics%}
 {% endif %}
 -->
