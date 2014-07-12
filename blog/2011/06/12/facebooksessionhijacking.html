@@ -26,14 +26,17 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
     <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
 
-    
     <script src="/files/js/jquery.js" type="text/javascript"></script>
     <script src="/files/js/jquery.fancybox.pack.js" type="text/javascript"></script>
+    
 
+  
     <script src="/files/js/bootstrap.js"></script>
 
     <!--[if lt IE 9]>
@@ -270,7 +273,7 @@
 
 <p>One of the basic solution implemented by the web sites for this problem is SSL. Almost all of the web sites use SSL during the authentication phase to encrypt the cookie data which is transmitted on the network. However, this is only a partial solution to the problem since most of the clients transmit this cookie data during further HTTP POST and GET requests. This is the reason many  websites such as Gmail, Facebook have an option to turn on SSL for the entire session, because they know that sensitive bytes are being transmitted all the time even if the user has authenticated. Let us see how a user&#39;s security can be compromised if he has not turned on full SSL settings for these web sites such as Facebook. Consider a home LAN network where users are using WiFi hotspots to browse the internet. Its easy to set up a MITM attack on this network by spoofing the ARP. For example, on linux,  it can be done using <a href="http://ettercap.sourceforge.net/">Ettercap</a> or <a href="http://arpspoof.sourceforge.net/">Arpspoof</a></p>
 
-<div class="highlight"><pre><code class="bash"><span class="nb">echo </span>1 &gt; /proc/sys/net/ipv4/ip_forward
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo </span><span class="m">1</span> &gt; /proc/sys/net/ipv4/ip_forward
 arpspoof -t <span class="s2">&quot;target ip(person to own)&quot;</span> <span class="s2">&quot;gateway ip(router)&quot;</span></code></pre></div>
 
 <p>Use any packet sniffer such as <a href="http://www.wireshark.org/">Wireshark</a> to sniff the packets between the target IP and the host <a href="http://www.facebook.com">www.facebook.com</a>. The following is an example of a POST request sniffed from wireshark:</p>
@@ -279,11 +282,11 @@ arpspoof -t <span class="s2">&quot;target ip(person to own)&quot;</span> <span c
 
 <p><img src="/images/Blog/facebook.png" alt="Pic"></p>
 
-<div class="highlight"><pre><code class="bash">Cookie: <span class="nv">datr</span><span class="o">=</span>09bXXXQ2oOgQuUK0yAzK_JU9; <span class="nv">lu</span><span class="o">=</span>wgj9pmpkAsdXXXTp5vthfh2w; <span class="nv">locale</span><span class="o">=</span>en_US; <span class="nv">L</span><span class="o">=</span>2; <span class="nv">act</span><span class="o">=</span>13078123502562F3; <span class="nv">c_user</span><span class="o">=</span>xxxxxx; <span class="nv">sct</span><span class="o">=</span>1123416461; <span class="nv">xs</span><span class="o">=</span>603Afe43db8a71239bd8d7b2a831xxx6241f; <span class="nv">presence</span><span class="o">=</span>EM307818375L26REp_5f123422481F22X3078XXX1367K1H0V0Z21G307818375PEuoFD769839560FDexpF1307818409174EflF_5b_5dEolF-1CCCC; <span class="nv">e</span><span class="o">=</span>n</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">Cookie: <span class="nv">datr</span><span class="o">=</span>09bXXXQ2oOgQuUK0yAzK_JU9<span class="p">;</span> <span class="nv">lu</span><span class="o">=</span>wgj9pmpkAsdXXXTp5vthfh2w<span class="p">;</span> <span class="nv">locale</span><span class="o">=</span>en_US<span class="p">;</span> <span class="nv">L</span><span class="o">=</span>2<span class="p">;</span> <span class="nv">act</span><span class="o">=</span>13078123502562F3<span class="p">;</span> <span class="nv">c_user</span><span class="o">=</span>xxxxxx<span class="p">;</span> <span class="nv">sct</span><span class="o">=</span>1123416461<span class="p">;</span> <span class="nv">xs</span><span class="o">=</span>603Afe43db8a71239bd8d7b2a831xxx6241f<span class="p">;</span> <span class="nv">presence</span><span class="o">=</span>EM307818375L26REp_5f123422481F22X3078XXX1367K1H0V0Z21G307818375PEuoFD769839560FDexpF1307818409174EflF_5b_5dEolF-1CCCC<span class="p">;</span> <span class="nv">e</span><span class="o">=</span>n</code></pre></div>
 
 <p>In my proof of concept, I was just required to copy the <strong>xs</strong> and <strong>c_user</strong> cookies to hijack the target session. <strong>c_user</strong> is the user ID of the user which is not at all a secret. However, <strong>xs</strong> does seems to be the authentication token and which should not be passed around in cleartext. </p>
 
-<div class="highlight"><pre><code class="bash">c_user:xxxxxx
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">c_user:xxxxxx
 xs:603Afe43db8a71239bd8d7b2a831aad6241f</code></pre></div>
 
 <p>Since now we have the cookies and one of it is indeed an authentication cookie. We can plug this in browser manually or using a Chrome extension such as 

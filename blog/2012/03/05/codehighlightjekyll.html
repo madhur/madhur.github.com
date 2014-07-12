@@ -26,14 +26,17 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
     <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
 
-    
     <script src="/files/js/jquery.js" type="text/javascript"></script>
     <script src="/files/js/jquery.fancybox.pack.js" type="text/javascript"></script>
+    
 
+  
     <script src="/files/js/bootstrap.js"></script>
 
     <!--[if lt IE 9]>
@@ -272,19 +275,19 @@ When Jekyll was released, there was no way to use these options since Jekyll enc
 
 <p>However, when I tried to use <strong>hl_lines</strong> option to highlight the lines of code, I faced several issues. Following is the syntax I used</p>
 
-<div class="highlight"><pre><code class="text">highlight html hl_lines=2 4</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">highlight html hl_lines=2 4</code></pre></div>
 
 <p>Running the above piece of code reults in only line 2 being highlighted and not both. So I decided to enclose it with quotation marks</p>
 
-<div class="highlight"><pre><code class="text">highlight html hl_lines=&quot;2 4&quot;</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">highlight html hl_lines=&quot;2 4&quot;</code></pre></div>
 
 <p>The above piece of code gives the error. </p>
 
-<div class="highlight"><pre><code class="text">Invalid flag value -O</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Invalid flag value -O</code></pre></div>
 
 <p>Certainly, there are some things which needs to be fixed. First of all in albino, the validation function has a bug. The value regular express should be allowed quotation marks character so that hl_lines list can be provided enclosed in quotation marks. This is the first problem in <strong>albino.rb</strong> file.</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">validate_shell_args</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">validate_shell_args</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">flag</span> <span class="o">!~</span> <span class="sr">/^[a-z]+$/i</span>
       <span class="k">raise</span> <span class="no">ShellArgumentError</span><span class="p">,</span> <span class="s2">&quot;Flag is invalid: </span><span class="si">#{</span><span class="n">flag</span><span class="o">.</span><span class="n">inspect</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">end</span>
@@ -296,7 +299,7 @@ When Jekyll was released, there was no way to use these options since Jekyll enc
 <p>The second problem is that we can seperate the hl_lines list with spaces since Jekyll uses the space as a delimeter to parse these options. To solve this problem, I pass in the list seperated by commas and then modified the 
 <strong>highlight.rb</strong> file in Jekyll to recombine them into the list. See the updated function below:</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">tag_name</span><span class="p">,</span> <span class="n">markup</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">tag_name</span><span class="p">,</span> <span class="n">markup</span><span class="p">,</span> <span class="n">tokens</span><span class="p">)</span>
       <span class="k">super</span>   
       <span class="k">if</span> <span class="n">markup</span> <span class="o">=~</span> <span class="no">SYNTAX</span>  
         <span class="vi">@lang</span> <span class="o">=</span> <span class="vg">$1</span>

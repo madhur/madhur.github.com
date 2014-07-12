@@ -26,14 +26,17 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
     <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
 
-    
     <script src="/files/js/jquery.js" type="text/javascript"></script>
     <script src="/files/js/jquery.fancybox.pack.js" type="text/javascript"></script>
+    
 
+  
     <script src="/files/js/bootstrap.js"></script>
 
     <!--[if lt IE 9]>
@@ -286,7 +289,7 @@ and use that as a command to assembly and link the program from <a href="http://
 
 <p>Note that all the above tools should be put preferable in the PATH variable for easy access. I do this by creating a simple command script as follows:</p>
 
-<div class="highlight"><pre><code class="text">setx PATH &quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&quot;</code></pre></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">setx PATH &quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&quot;</code></pre></div>
     
 
 <p>I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. </p>
@@ -295,27 +298,27 @@ and use that as a command to assembly and link the program from <a href="http://
 <li>A Win32 Assembly program without the use of resources:</li>
 </ul>
 
-<div class="highlight"><pre><code class="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
+<div class="highlight"><pre><code class="language-makefile" data-lang="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
 <span class="nv">ML</span><span class="o">=</span>ml
 <span class="nv">DEBUG</span> <span class="o">=</span> 1
-<span class="err">!IF</span> <span class="k">$(</span>DEBUG<span class="k">)</span><span class="o">==</span>1
+<span class="err">!IF</span> <span class="k">$(</span><span class="nv">DEBUG</span><span class="k">)</span><span class="err">==1</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
-!ELSE
+<span class="err">!ELSE</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
-!ENDIF
+<span class="err">!ENDIF</span>
 <span class="nv">LDFLAGS</span><span class="o">=</span>
 <span class="nv">SOURCES</span><span class="o">=</span>trans.asm
 <span class="nv">OBJECTS</span><span class="o">=</span><span class="k">$(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="k">)</span>
 <span class="nv">PROJ</span><span class="o">=</span>trans.exe
 
 
-<span class="k">$(</span>PROJ<span class="k">)</span>: <span class="k">$(</span>OBJECTS<span class="k">)</span>
+<span class="nf">$(PROJ)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
     link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB <span class="k">$(</span>OBJECTS<span class="k">)</span>
     
-<span class="k">$(</span>OBJECTS<span class="k">)</span>: <span class="k">$(</span>SOURCES<span class="k">)</span>
+<span class="nf">$(OBJECTS)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">SOURCES</span><span class="k">)</span>
     <span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
     
-clean:
+<span class="nf">clean</span><span class="o">:</span>
     del *.exe
     del *.obj
     del *.lst</code></pre></div>
@@ -325,14 +328,14 @@ clean:
 <li>A win32 Assembly program with the use of resources:</li>
 </ul>
 
-<div class="highlight"><pre><code class="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
+<div class="highlight"><pre><code class="language-makefile" data-lang="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
 <span class="nv">ML</span><span class="o">=</span>ml
 <span class="nv">DEBUG</span> <span class="o">=</span> 1
-<span class="err">!IF</span> <span class="k">$(</span>DEBUG<span class="k">)</span><span class="o">==</span>1
+<span class="err">!IF</span> <span class="k">$(</span><span class="nv">DEBUG</span><span class="k">)</span><span class="err">==1</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
-!ELSE
+<span class="err">!ELSE</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
-!ENDIF
+<span class="err">!ENDIF</span>
 <span class="nv">LDFLAGS</span><span class="o">=</span>
 <span class="nv">SOURCES</span><span class="o">=</span>vaoffset.asm
 <span class="nv">RESOURCES</span><span class="o">=</span>vaoffset.rc
@@ -340,15 +343,15 @@ clean:
 <span class="nv">PROJ</span><span class="o">=</span>vaoffset.exe
 
 
-<span class="k">$(</span>PROJ<span class="k">)</span>: <span class="k">$(</span>OBJECTS<span class="k">)</span>
+<span class="nf">$(PROJ)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
     link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB /LIBPATH:f:<span class="se">\p</span>rojects<span class="se">\p</span>rograms<span class="se">\w</span>insock<span class="se">\n</span>etsend <span class="k">$(</span>OBJECTS<span class="k">)</span>
     
-<span class="k">$(</span>OBJECTS<span class="k">)</span>: <span class="k">$(</span>SOURCES<span class="k">)</span>
+<span class="nf">$(OBJECTS)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">SOURCES</span><span class="k">)</span>
     <span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
     C:<span class="se">\B</span>orland<span class="se">\B</span>CC55<span class="se">\B</span>in<span class="se">\b</span>rcc32.exe vaoffset.rc
     
     
-clean:
+<span class="nf">clean</span><span class="o">:</span>
     del *.exe
     del *.obj
     del *.lst</code></pre></div>
@@ -356,7 +359,7 @@ clean:
 
 <p>Now, Provided <strong>NMAKE</strong> is in your path variable, you can simply set a command in Notepad++ or in your favourite text editor to invoke nmake in current directory.</p>
 
-<div class="highlight"><pre><code class="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake /U
+<div class="highlight"><pre><code class="language-text" data-lang="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake /U
 
 Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.
@@ -368,7 +371,7 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 
 <p>And to clean the output,</p>
 
-<div class="highlight"><pre><code class="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake clean
+<div class="highlight"><pre><code class="language-text" data-lang="text">F:\projects\programs\WIN32ASM\transparent&gt;nmake clean
 
 Microsoft (R) Program Maintenance Utility Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.

@@ -10,6 +10,18 @@ var qs = (function(a) {
 })(window.location.search.substr(1).split('&'));
 
 
+$(window).scroll(function() {
+    if ($(".navbar").offset().top > 50) {
+        $(".navbar-fixed-top").addClass("top-nav-collapse");
+    } else {
+        $(".navbar-fixed-top").removeClass("top-nav-collapse");
+    }
+});
+
+
+
+
+
 
 
 $(document).ready(function() {
@@ -68,22 +80,14 @@ $(document).ready(function() {
     });
 
     $("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox();
-});
 
 
 
 
-// $(document).ready(function() {
-//  $(".share").click(function() {
-//      $(this).next().slideToggle("normal");
-//      $(this).toggleClass("active");
-//  }).next().hide();
-// });
 
 
 
 
-$(document).ready(function() {
 
     $(".accordion").click(function() {
 
@@ -130,6 +134,9 @@ $(document).ready(function() {
         $("#q2").val(qstring);
     }
 
+    $('.carousel').carousel();
+
+
 
 
 });
@@ -160,11 +167,18 @@ function Clickheretoprint() {
 }
 
 
+
+
+
+
+/*
+
 // Hide Header on on scroll down
 var didScroll;
 var lastScrollTop = 0;
 var delta = 5;
 var navbarHeight = $('#navigation').outerHeight();
+
 
 $(window).scroll(function(event) {
     didScroll = true;
@@ -217,4 +231,4 @@ function findBootstrapEnvironment() {
             return env
         }
     };
-}
+}*/
