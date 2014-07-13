@@ -74,12 +74,16 @@ $(document).ready(function() {
     $("a").each(function() {
         if ($(this).has("img").length) {
 
-            $(this).fancybox();
+            $(this).fancybox({
+                padding: 0
+            });
 
         }
     });
 
-    $("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox();
+    $("a[href$='.jpg'],a[href$='.png'],a[href$='.gif']").attr('rel', 'gallery').fancybox({
+        padding: 0
+    });
 
 
 
