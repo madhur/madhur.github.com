@@ -7,9 +7,11 @@ img:
 - https://raw.githubusercontent.com/madhur/SPProjects/gh-pages/screenshots/chart.png
 ---
 
+{% comment %} 
 <!--{% if site.generate_projects == true %}
 {% octokit_contents  SPProjects;OrgChart/Readme.markdown%}
 {% endif %}-->
+{% endcomment %}
 
 [Live Demo with Sample Data](http://www.madhur.co.in/silverdemo/Index.html)
 

@@ -7,11 +7,11 @@ img:
 - /images/picture2.png
 ---
 
-
+{% comment %} 
 <!--{% if site.generate_projects == true %}
 {% octokit_readme SPGadget.gadget%}
 {% endif %}-->
-
+{% endcomment %}
 
 This gadget pulls the data from a SharePoint list and displays nicely onto a desktop. The gadget utilzes following libraries
 

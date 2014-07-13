@@ -10,11 +10,15 @@ img:
 - /images/projects/vocab4.png
 ---
 
+
+{% comment %} 
 <!--
 {% if site.generate_projects == true %}
 {% octokit_readme GAnalytics%}
 {% endif %}
 -->
+{% endcomment %}
+
 
 #Vocab Builder
 Vocab Builder helps you build and revise your vocabulary. Works great for GRE, CAT, CMAT, XAT, SAT, GMAT, etc

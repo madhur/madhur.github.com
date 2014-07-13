@@ -7,9 +7,11 @@ img:
 - /images/mobile.png
 ---
 
+{% comment %} 
 <!--{% if site.generate_projects == true %}
 {% octokit_readme madhur.github.com%}
 {% endif %}-->
+{% endcomment %}
 
 This current site built with [Jekyll](http://jekyllrb.com) is a project in itself. It has come a long way since I started in this 2011.
 

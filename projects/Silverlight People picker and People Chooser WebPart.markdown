@@ -8,10 +8,12 @@ img:
 - https://camo.githubusercontent.com/4ba0f086285facd6d2d5b9d5dff5784aff04cf45/68747470733a2f2f726177322e6769746875622e636f6d2f6d61646875722f534c436f6e74726f6c732f6d61737465722f70656f706c657069636b65722e706e67
 ---
 
+
+{% comment %} 
 <!--{% if site.generate_projects == true %}
 {% octokit_readme SLControls%}
 {% endif %}-->
-
+{% endcomment %}
 
 Whenever you are developing a silverlight solution on SharePoint 2010, one of the basic functionality you will require is the ability to select people from your Active Directory.
 

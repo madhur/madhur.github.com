@@ -12,12 +12,13 @@ img:
 - /images/projects/feed/screen7.png
 ---
 
+{% comment %} 
 <!--
 {% if site.generate_projects == true %}
 {% octokit_readme dashclock-feedly-extension%}
 {% endif %}
 -->
-
+{% endcomment %}
 
 
 #Feed Notifier#

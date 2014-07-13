@@ -12,11 +12,13 @@ img:
 - https://raw.githubusercontent.com/madhur/GAnalytics/gh-pages/screenshots/screen4.png
 ---
 
+{% comment %} 
 <!--
 {% if site.generate_projects == true %}
 {% octokit_readme GAnalytics%}
 {% endif %}
 -->
+{% endcomment %}
 
 ##DashAnalytics for DashClock
 
