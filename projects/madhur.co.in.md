@@ -3,7 +3,9 @@ title: madhur.co.in
 layout: project-detail
 github: madhur.github.com 
 img:
-- /images/desktop.png
+- /images/placeit.png
+- /images/projects_framed.png
+- /images/800_framed.png
 - /images/mobile.png
 ---
 
