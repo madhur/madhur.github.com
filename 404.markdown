@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Oops! The page you were looking for was not found
+js: angular.js
 ---
 
 
@@ -9,4 +10,46 @@ title: Oops! The page you were looking for was not found
 
 ##Oops! The page you were looking for was not found##
 
-Please visit the site using the navigation links above. If you are looking for still cannot be found, please send me a an <a href='mailto:ahuja.madhur@gmail.com'>email</a> with the link or the content you were originally looking for.
+Please try to search the articles below by entering the few keywords in text below. If you are looking for still cannot be found, please send me a an <a href='mailto:ahuja.madhur@gmail.com'>email</a> with the link or the content you were originally looking for.
+
+<script type="text/javascript">
+	var posts=[];
+
+	{% for post in site.posts %}
+		post={title: "{{post.title}}", url: "{{post.url}}" }
+		posts.push(post);
+	{% endfor %}
+
+	var mySite = angular.module('mySite', []);
+
+	mySite.config(function($interpolateProvider) {
+	  $interpolateProvider.startSymbol('//');
+	  $interpolateProvider.endSymbol('//');
+	});
+
+	var myController=function($scope)
+	{
+		$scope.posts=posts;
+	}
+
+	mySite.controller('myControlller', myController);
+
+</script>
+
+
+<div class="clearfix" style="float:clear;" ng-app="mySite" ng-controller="myController">
+
+<div class="form-group">
+	<input style="background:#1c1c1c;border-width:0px;" placeholder="Enter the search term" class="form-control" type="search" ng-model="searchText" />
+</div>
+<p/>
+<br/>
+<ul>
+	<li ng-repeat="post in posts | filter:searchText">
+		
+			<a href="//post.url//" style="pointer:cursor;">//post.title//</a>
+		
+	</li>
+</ul>
+
+</div>
