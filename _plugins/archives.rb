@@ -74,8 +74,7 @@ module Jekyll
 		
 	 def write_page(site, page)
       page.render(site.layouts, site.site_payload)
-      #destdir=site.dest+"/blog/"
-     # puts destdir
+    
       page.write(site.dest)
       site.pages << page
     end
