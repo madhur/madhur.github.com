@@ -3,18 +3,37 @@ title: Projects
 layout: project
 ---
 
-{% for project in site.data.projects %}					
-{% if project.publish == true %}
-<div class="project-title">
-<a href="/projects/{{ project.project }}.html">{{ project.project }}</a>     <span class="tag-project hidden-xs">{{ project.category }}</span>
-<br/>
-</div>
-<div class="project-description hidden-xs">
-{{ project.description }}
-</div>
+<div class="row">
+{% for project in site.data.projects %}		
+{% assign item = project[1] %}
 
-{% endif %}		
+{% for member in item.projects %}		
+
+{% if member.publish == true %}
+
+	<div class="col-md-4 col-xs-12 col-sm-6 col-lg-4">
+	<div class="panel panel-default">
+
+		<div class="project-title panel-title">
+			<h3><a href="/projects/{{ member.project }}.html"> <i class="{{ item.icon }} fa-2x"></i>  {{ member.project }}</a> </h3>    
+	
+		</div>
+		
+			<div class="panel-body">
+				
+				
+				<div class="project-description ">
+				{{ member.description }}
+				</div>
+		</div>
+		
+	</div>
+	</div>
+
+{% endif %}
+
+{% endfor %}
 {% endfor %}
 
-
+</div>
 
