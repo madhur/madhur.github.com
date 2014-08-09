@@ -123,11 +123,17 @@ module.exports = function(grunt)
             {
 
                 files: [
+                   
                     '_includes/*.html',
                     '_layouts/*.html',
                     '_posts/*.markdown',
                     '_config.yml',
-                    '*.markdown'
+                    '**/*.markdown',
+                    '**/*.md',
+                    '_data/*/*.yaml',
+                    '_data/*/*.yml',
+                     '!_site/*.*'
+
                 ],
                 tasks: ['shell:jekyllBuild'],
                 options:
