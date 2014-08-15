@@ -8,6 +8,7 @@ require.config(
         fancybox: 'vendor/jquery.fancybox.pack',
         pace: 'vendor/pace.min',
         falsy: 'vendor/false.min',
+        palnes: 'vendor/planes',
         main:'main'
     },
     shim:
@@ -29,3 +30,18 @@ require(["pace"]);
 
 
 require(["main"]);
+
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth()+1; //January is 0!
+var yyyy = today.getFullYear();
+
+if(dd ==15 && mm == 8)
+{
+    require(["vendor/planes"], function()
+    {
+        doodle.init("/images/plane.png");
+
+    });
+}
+

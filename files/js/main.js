@@ -32,30 +32,7 @@ define(["jquery", "bootstrap", "fancybox"], function($, bootstrap, fancybox)
             }
         });
 
-        // $("tr", "#highlight").mouseover(function()
-        // {
-        //     $(this).addClass("hoverHighlighted");
-        // }).mouseout(function()
-        // {
-        //     $(this).removeClass("hoverHighlighted");
-        // });
-
-        // // sociable
-        // $("img", "#social").fadeTo(10000, 0.4);
-
-        // $("img", "#social").hover(function()
-        // {
-        //     $(this).stop().animate(
-        //     {
-        //         opacity: 1
-        //     }, 1);
-        // }, function()
-        // {
-        //     $(this).stop().animate(
-        //     {
-        //         opacity: 0.4
-        //     }, 400);
-        // });
+     
 
         // Highlight the project left navigation selected item
         var basefile;
