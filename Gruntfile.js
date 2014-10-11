@@ -14,7 +14,8 @@ module.exports = function(grunt)
                     port: 4000,
                     base: './_site/',
                     livereload: true,
-                    open: 'http://localhost:4000'
+                    open: 'http://localhost:4000',
+		    app: '/opt/google/chrome/chrome'
 
                 }
             },
@@ -25,7 +26,8 @@ module.exports = function(grunt)
                     port: 4000,
                     base: './_site/',
                     keepalive: true,
-                    open: 'http://localhost:4000'
+                    open: 'http://localhost:4000',
+		    app: '/opt/google/chrome/chrome'
 
                 }
             }
