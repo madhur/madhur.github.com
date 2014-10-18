@@ -4,13 +4,118 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2014-10-11T07:55:22+05:30</updated>
+ <updated>2014-10-18T23:04:51+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Multiboot: Booting linux from ISO placed in HDD via GRUB</title>
+   <link href="http://madhur.co.in/blog/2014/10/18/linux-multiboot.html"/>
+   <updated>2014-10-18T00:00:00+05:30</updated>
+   <id>id:/blog/2014/10/18/linux-multiboot</id>
+   <content type="html">&lt;p&gt;I am a big fan of Linux and want to frequently try out various distributions such as &lt;a href=&quot;http://www.linuxmint.com/&quot;&gt;Mint&lt;/a&gt;, &lt;a href=&quot;http://www.ubuntu.com/&quot;&gt;Ubuntu&lt;/a&gt;, &lt;a href=&quot;http://www.kali.org/&quot;&gt;Kali&lt;/a&gt; and &lt;a href=&quot;https://www.archlinux.org/&quot;&gt;ArchLinux&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Though my main system is Linux 16, I use ISO placed in my HDD to boot and try these various distributions whenever I like.
+What are the advatages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;No messing up with partitions on HDD&lt;/li&gt;
+&lt;li&gt;No installation required&lt;/li&gt;
+&lt;li&gt;Most major flavours support live booting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Disadvantages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Changes are not persisted&lt;/li&gt;
+&lt;li&gt;Can take some time to initially setup&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I will describe how it can be done with very minimnal conifuration and hassle.&lt;/p&gt;
+
+&lt;p&gt;We are going to setup the multiboot configuration of following OS. They will be booted entirely from ISO placed in HDD &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Gparted Live CD (ISO)&lt;/li&gt;
+&lt;li&gt;Kali Linux (ISO)&lt;/li&gt;
+&lt;li&gt;Linux Mint 17 (ISO)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I assume you are running any Linux distribution with &lt;a href=&quot;http://www.gnu.org/software/grub/&quot;&gt;GRUB&lt;/a&gt; as the bootloader.&lt;/p&gt;
+
+&lt;p&gt;First download the ISO&amp;#39;s for the distributions you want to boot. For this article, I downloaded the above 3 from:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://gparted.org/download.php&quot;&gt;http://gparted.org/download.php&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.kali.org/downloads/&quot;&gt;http://www.kali.org/downloads/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.linuxmint.com/download.php&quot;&gt;http://www.linuxmint.com/download.php&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Place it in any directory in your root partition. In my case I dropped them in  &lt;code&gt;~/isos/&lt;/code&gt; as &lt;code&gt;kali.iso&lt;/code&gt;, &lt;code&gt;mint17.iso&lt;/code&gt; and &lt;code&gt;gparted-live.iso&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, edit your grub configuration to add the custom entries. The file we are looking to edit is &lt;code&gt;/etc/grub.d/40_custom&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is my configuration:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;menuentry &amp;quot;Gparted live&amp;quot; {
+    insmod ntfs
+    insmod iso9660
+
+      set isofile=&amp;quot;/home/madhur/isos/gparted-live.iso&amp;quot;
+      loopback loop (hd0,msdos2)$isofile
+      linux (loop)/live/vmlinuz boot=live config union=aufs noswap noprompt vga=788 ip=frommedia toram=filesystem.squashfs findiso=$isofile nomodeset
+      initrd (loop)/live/initrd.img
+    }
+
+
+menuentry &amp;quot;Mint 17&amp;quot; {
+    insmod ntfs
+    insmod iso9660
+
+      set isofile=&amp;quot;/home/madhur/isos/mint17.iso&amp;quot;
+      loopback loop (hd0,msdos2)$isofile
+      linux (loop)/casper/vmlinuz file=/cdrom/preseed/linuxmint.seed iso-scan/filename=$isofile boot=casper debug --verbose nomodeset
+      initrd (loop)/casper/initrd.lz
+    }
+
+
+
+menuentry &amp;quot;Kali&amp;quot; {
+    insmod ntfs
+    insmod iso9660
+
+      set isofile=&amp;quot;/home/madhur/isos/kali.iso&amp;quot;
+      loopback loop (hd0,msdos2)$isofile
+      linux (loop)/live/vmlinuz boot=live noconfig=sudo username=root hostname=kali findiso=$isofile debug --verbose nomodeset
+      initrd (loop)/live/initrd.img
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Some of the parameters deserve explanation:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;insmod ntfs&lt;/code&gt; and &lt;code&gt;insmod iso9660&lt;/code&gt; load the ntfs and iso kernel modules if they are not loaded&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;debug --verbose&lt;/code&gt; will disable the splash screen and show the textual boot screen while loading. This can be helpful to see if something goes wrong.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nomodeset&lt;/code&gt; will defer loading the Video drivers and will force fallback to BIOS for display. You might not need it. However, it was required in my case as my 
+graphics card (Nvidia GeForce 750 Ti) was not detected.&lt;/li&gt;
+&lt;li&gt; &lt;code&gt;(hd0, msdos2)&lt;/code&gt; this needs to be changed to reflect the disk# and partition# of partition where ISO&amp;#39;s are located. Here &lt;code&gt;hd0&lt;/code&gt; means the first hard disk and &lt;code&gt;msdos2&lt;/code&gt; means second partition. Note that in grub disk numbering  starts from zero while partition numbering starts from 1. Weird.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Once done with all the changes, fire &lt;code&gt;sudo update-grub&lt;/code&gt; to update your &lt;code&gt;grub.cfg&lt;/code&gt; with these changes.&lt;/p&gt;
+
+&lt;h3&gt;Troubleshooting&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Note that you might not just get this right in first go. Things can go wrong and be prepared for it.&lt;/li&gt;
+&lt;li&gt;Take special care of &lt;code&gt;(hd0, msdos2)&lt;/code&gt; to determine your correct configuration. It is not easy as /dev/sda1=(hd0, 1) and /dev/sdb1 = (hd1, 1). In my case /dev/sdc referred to hd0. Had hard time figuring out.&lt;/li&gt;
+&lt;li&gt;While booting from grub, you can press &lt;code&gt;e&lt;/code&gt; to edit the command line on the fly and try out various options wuch as commenting out &lt;code&gt;nomodeset&lt;/code&gt; and different combinations for &lt;code&gt;(hd#, msdos#)&lt;/code&gt;. Once you have figured out the correct option, update the &lt;code&gt;40_custom&lt;/code&gt; and execute &lt;code&gt;update-grub&lt;/code&gt; again.&lt;/li&gt;
+&lt;li&gt;You can also press &lt;code&gt;c&lt;/code&gt; on the grub screen to fall into grub terminal and execute command such as &lt;code&gt;ls (hd0, msdos2) /&lt;/code&gt; to see if that works.&lt;/li&gt;
+&lt;li&gt;Different distros have their specific command line options. Peek into the ISO file to look at &lt;code&gt;grub.cfg&lt;/code&gt; or &lt;code&gt;entries.cfg&lt;/code&gt; to determine the corrent command line boot options.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>An awesome conky configuration</title>
@@ -1403,52 +1508,6 @@ This means, the token we recieve in response &lt;code&gt;/login&lt;/code&gt; cal
 it is sufficient to assume that we need to re-authenticate using the &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt; once the token expires.&lt;/p&gt;
 
 &lt;p&gt;In the part II of this blog post, I am going to share a partial implementation of this API in java using &lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Feedly OAuth 2.0 implementation using Scribe in Java</title>
-   <link href="http://madhur.co.in/blog/2014/04/17/feedlyoauth2flow.html"/>
-   <updated>2014-04-17T00:00:00+05:30</updated>
-   <id>id:/blog/2014/04/17/feedlyoauth2flow</id>
-   <content type="html">&lt;p&gt;Since the Google Reader retirement, &lt;a href=&quot;http://feedly.com&quot;&gt;Feedly&lt;/a&gt; hasb been slowly becoming more and more popular. Recently, Feedly announced their &lt;a href=&quot;http://developer.feedly.com/&quot;&gt;API Model&lt;/a&gt; which 
-allows developers to create apps which integrate with feedly. Applications authenticate users using a feedly OAuth 2.0 interface. In this post, I am going to cover the Feedly OAuth 2.0 authentication flow 
-which can be used in  Mobile/Web apps. I am not going to cover any details into OAuth 2. The official specs of OAuth2 can be read &lt;a href=&quot;http://tools.ietf.org/html/rfc6749&quot;&gt;here&lt;/a&gt; and a nice tutorial &lt;a href=&quot;http://www.codecademy.com/tracks/oauth&quot;&gt;here&lt;/a&gt; on &lt;a href=&quot;http://www.codecademy.com&quot;&gt;Code Academy&lt;/a&gt;. Wikipedia too gives a nice little intro about OAuth 2 given below:&lt;/p&gt;
-
-&lt;p&gt;Quoting from Wikipedia  &lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;OAuth is an open standard for authorization. OAuth provides client applications a &amp;#39;secure delegated access&amp;#39; to server resources on behalf of a resource owner. It specifies a process for resource owners to 
-authorize third-party access to their server resources without sharing their credentials.
-OAuth is a service that is complementary to, and therefore distinct from, OpenID. OAuth is also distinct from OATH, which is a reference architecture for authentication, not a standard.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Since, I am using Java platform, I will be using a nice little OAuth library called &lt;a href=&quot;https://github.com/fernandezpablo85/scribe-java&quot;&gt;Scribe&lt;/a&gt;. It is an open source library hosted on github and is a great resource to learn about OAuth 2.0 flow and specs. Basically, to implement any OAuth 2.0 API, you need to extend a class called &lt;code&gt;DefaultApi20&lt;/code&gt; and provide some of the obvious parameters such as &lt;code&gt;Authorization Url&lt;/code&gt;, &lt;code&gt;Access token URL&lt;/code&gt; and &lt;code&gt;client id&lt;/code&gt; and &lt;code&gt;secret&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The implementation of this class is maintained in &lt;a href=&quot;https://github.com/madhur/scribe-java&quot;&gt;my fork of Scribe repo&lt;/a&gt;. &lt;a href=&quot;https://github.com/madhur/scribe-java/blob/master/src/main/java/org/scribe/builder/api/FeedlyApi20.java&quot;&gt;This&lt;/a&gt; is the direct link to the sources file. Feel free to use it to build awesome feedly Apps.&lt;/p&gt;
-
-&lt;p&gt;I also created a &lt;a href=&quot;https://github.com/madhur/scribe-java/blob/master/src/test/java/org/scribe/examples/Feedly20Example.java&quot;&gt;test Java Program&lt;/a&gt;. And here is the output of running the test:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; Feedly&lt;span class=&quot;s1&quot;&gt;&amp;#39;s OAuth Workflow ===&lt;/span&gt;
-
-&lt;span class=&quot;s1&quot;&gt;Fetching the Authorization URL...&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;Got the Authorization URL!&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;Now go and authorize Scribe here:&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;https://sandbox.feedly.com/v3/auth/auth?client_id=sandbox&amp;amp;redirect_uri=http%3A%2F%2Flocalhost%3A8080&amp;amp;response_type=code&amp;amp;scope=https://cloud.feedly.com/subscriptions&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;And paste the authorization code here&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;&amp;gt;&amp;gt;At2PvX57ImkiOiJiZmRiNDVkMi01MmRiLTRkMWUtOWRhOS01OGM5YWVjYzJjMzUiLCJ1IjoiMTAxMjk2MjUyNDE1MzQ5MDM1NzgwIiwicCI6NiwiYSI6IkZlZWRseSBzYW5kYm94IGNsaWVudCIsInQiOjEzOTc3MTg4NzkwNzJ9&lt;/span&gt;
-
-&lt;span class=&quot;s1&quot;&gt;Trading the Request Token for an Access Token...&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;Got the Access Token!&lt;/span&gt;
-&lt;span class=&quot;s1&quot;&gt;(if your curious it looks like this: Token[AmdDThh7ImEiOiJGZWVkbHkgc2FuZGJveCBjbGllbnQiLCJlIjoxMzk4MzIzNjk1OTUzLCJpIjoiYmZkYjQ1ZDItNTJkYi00ZDFlLTlkYTktNThjOWFlY2MyYzM1IiwicCI6NiwidCI6MSwidiI6InNhbmRib3giLCJ4Ijoic3RhbmRhcmQifQ:sandbox , ] )&lt;/span&gt;
-
-&lt;span class=&quot;s1&quot;&gt;Now we&amp;#39;&lt;/span&gt;re going to access a protected resource...
-Got it! Lets see what we found...
-
-200
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;id&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;bfdb45d2-52db-4d1e-9da9-58c9aecc2c35&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;client&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;Feedly sandbox client&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;wave&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;2014.7&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;ahuja.madhur@gmail.com&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;familyName&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;Ahuja&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;givenName&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;Madhur&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;google&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;101296252415349035780&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;gender&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;male&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;picture&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;https://lh3.googleusercontent.com/-YffmYR2CFxI/AAAAAAAAAAI/AAAAAAAAJCw/SIOxMsWmxYQ/photo.jpg?sz=50&amp;quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&amp;quot;created&amp;quot;&lt;/span&gt;:1392372977783,&lt;span class=&quot;s2&quot;&gt;&amp;quot;windowsLiveConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;wordPressConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;facebookConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;evernoteConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;pocketConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;twitterConnected&amp;quot;&lt;/span&gt;:false,&lt;span class=&quot;s2&quot;&gt;&amp;quot;fullName&amp;quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&amp;quot;Madhur Ahuja&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-Thats it man! Go and build something awesome with Scribe! :&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 </content>
  </entry>
  
