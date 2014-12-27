@@ -4,13 +4,74 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2014-12-15T10:10:20+05:30</updated>
+ <updated>2014-12-27T09:27:27+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Encoding and Decoding Emoji for Cross platform</title>
+   <link href="http://madhur.co.in/blog/2014/12/26/emoji-encoding-decoding.html"/>
+   <updated>2014-12-26T00:00:00+05:30</updated>
+   <id>id:/blog/2014/12/26/emoji-encoding-decoding</id>
+   <content type="html">&lt;p&gt;Recently, I have been working on an Android app which communicates with a web platform. One of the challenges we have been faced with is cross platform emoji solution. There are just too many emoji standards out there. There is no standard as of now although Google have come together to formalize &lt;a href=&quot;http://www.unicode.org/%7Escherer/emoji4unicode/snapshot/full.html&quot;&gt;Emoji Symbols&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;GitHub introduced &lt;a href=&quot;https://github.com/blog/816-emoji&quot;&gt;emoji pngs&lt;/a&gt; and here you see that in action :smile: throughout their application. Campfire &lt;a href=&quot;https://signalvnoise.com/posts/3059-2011-year-end-campfire-feature-blowout&quot;&gt;supports emoji&lt;/a&gt;. Both GitHub, Campfire, and others support a simple set of codes to inject these pngs into an html page. &lt;a href=&quot;http://www.emoji-cheat-sheet.com/&quot;&gt;http://www.emoji-cheat-sheet.com/&lt;/a&gt; has emerged to guide users and has almost formalized how these codes should work.&lt;/p&gt;
+
+&lt;p&gt;Most of the above techniques can be categorized into three basic categories:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Colon:&lt;/strong&gt; The emojis are converted to their colon style strings. This is simple to save in the database since its just a string.
+See the examples: &lt;a href=&quot;http://www.emoji-cheat-sheet.com/&quot;&gt;http://www.emoji-cheat-sheet.com/&lt;/a&gt;. &lt;a href=&quot;https://web.telegram.org/#/im&quot;&gt;Web interface of telegram&lt;/a&gt; uses this technique of rendering and storing emoji. &lt;a href=&quot;https://help.github.com/articles/writing-on-github/&quot;&gt;Github flavored markdown&lt;/a&gt; also uses this.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;UTF-8 Characters:&lt;/strong&gt; Emojis are mapped to their Unicode characters.  The advatage of this method is that some platforms (such as Android, iOS) can render them automatically as emoji unlike colon style encoding which almost always require decoding. On the disadvantage, Saving them in databases require special handling. See &lt;a href=&quot;#db&quot;&gt;note below&lt;/a&gt;.
+A comprehensive list of unicode codes can be obtained from &lt;a href=&quot;http://apps.timwhitlock.info/emoji/tables/unicode&quot;&gt;http://apps.timwhitlock.info/emoji/tables/unicode&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;HTML:&lt;/strong&gt; Emojis are converted to HTML &lt;code&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tags rendering each emoji as an image either from the single image or a sprite. 
+This is the least useful method to adopt as its not cross platform. There is no standardization of Emoji sprite images and hence you will never be sure that target platform has the same emoji images. Though, this solution works perfect for a single isolated website.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Our Solution - &lt;a href=&quot;https://github.com/madhur/angular-emoji-popup&quot;&gt;Github Repo&lt;/a&gt; and &lt;a href=&quot;http://madhur.co.in/angular-emoji-popup&quot;&gt;demo page&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Since we are using AngularJs as our frontend, We have come up with an AngularJs directive and set of filters to handle all of above cases for Emoji. The solution supports encoding and decoding emoji from various formats. For us, We decided to go with storing Emoji as UTF-8 characters for the simple reason that Android can render them natively and hence, no special effort is required to implement this on Android side. Though, it did require tweaking our MySql tables and database to switch from &lt;code&gt;utf8&lt;/code&gt; to &lt;code&gt;utf8mb4&lt;/code&gt;. I will not go into the details of their differences.&lt;/p&gt;
+
+&lt;p&gt;I also realize that this might be a far from perfect solution especially when we plan to introduce support more devices such as iOS and Windows Phone. But, this works for us perfectly and I believe changing it in future will not be difficult.&lt;/p&gt;
+
+&lt;p&gt;Feel free to check out tis project, fork and send me pull requests for any issues or enhancements.&lt;/p&gt;
+
+&lt;p&gt;This solution utilizes snippets and ideas from following awesome open source projects:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/arvida/emoji-cheat-sheet.com&quot;&gt;emoji-cheat-sheet&lt;/a&gt; - Complete reference for emoji in colon style&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/diy/jquery-emojiarea&quot;&gt;jquery-emojiarea&lt;/a&gt; - We wrapped this awesome Jquery plugin in angular directive&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/jamesflorentino/nanoScrollerJS&quot;&gt;nanoScrollerJS&lt;/a&gt; - The above jquery plugin utilzes nanoScroller as its scrollbar&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/iamcal/js-emoji&quot;&gt;js-emoji&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a name=&quot;db&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Using MySQL for storage&lt;/h2&gt;
+
+&lt;p&gt;The following text is taken verbatim from &lt;a href=&quot;https://github.com/iamcal/js-emoji&quot;&gt;https://github.com/iamcal/js-emoji&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Some special care may be needed to store emoji in your database. While some characters (e.g. Cloud, U+2601) are
+within the Basic Multilingual Plane (BMP), others (e.g. Close Umbrella, U+1F302) are not. As such, 
+they require 4 bytes of storage to encode each character. Inside MySQL, this requires switching from &lt;code&gt;utf8&lt;/code&gt; 
+storage to &lt;code&gt;utf8mb4&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;You can modify a database and table using a statement like:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ALTER DATABASE my_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;&lt;/code&gt;
+ &lt;code&gt;ALTER TABLE my_table CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;You will also need to modify your connection character set.&lt;/p&gt;
+
+&lt;p&gt;You don&amp;#39;t need to worry about this if you translate to colon syntax before storage.&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Useful Javascript Design patterns</title>
@@ -1425,97 +1486,6 @@ else result is second operand&lt;/li&gt;
 &lt;p&gt;Grab it &lt;a href=&quot;https://www.dropbox.com/sh/40l6mgbl1ce2kej/lF6ykQxt9d&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Jekyll 2.0.1 comes with exciting new features, documentation of which can be found &lt;a href=&quot;http://jekyllrb.com/news/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Decoding the hidden Wunderlist API (Part II)</title>
-   <link href="http://madhur.co.in/blog/2014/05/02/decodewunderlistapi2.html"/>
-   <updated>2014-05-02T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/02/decodewunderlistapi2</id>
-   <content type="html">&lt;p&gt;In &lt;a href=&quot;/blog/2014/05/02/decodewunderlistapi.html&quot;&gt;part I&lt;/a&gt; we discovered the hidden Wunderlist API. In this post, I am to show partial implementation of this API client in Java using &lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt;.
-The implementation is hosted in my &lt;a href=&quot;https://github.com/madhur/wunder-java&quot;&gt;Git repository&lt;/a&gt;. Feed free to fork, extend or submit appropriate pull requests. I will be glad to accept your contribution.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://square.github.io/retrofit/&quot;&gt;Retrofit&lt;/a&gt; is a java library which turns your REST API into java interfaces. For example, the REST API which we discovered in Part I will be defined as:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WunderAPI&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;@FormUrlEncoded&lt;/span&gt;
-    &lt;span class=&quot;nd&quot;&gt;@POST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;/login&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;LoginResponse&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;login&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Field&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@Field&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;password&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    
-    &lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;Me&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getUserInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    
-    &lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/tasks&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetWunderTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    
-    &lt;span class=&quot;nd&quot;&gt;@POST&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/tasks&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CreateWunderTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;listId&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isStarred&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dueDate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    
-    &lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;quot;/me/lists&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;GetLists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@Header&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;authorization&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Java Classes such as &lt;code&gt;WList&lt;/code&gt;, &lt;code&gt;WTask&lt;/code&gt;  and &lt;code&gt;Me&lt;/code&gt; all map to the JSON response returned by individual REST API. &lt;/p&gt;
-
-&lt;h2&gt;How do I invoke the API?&lt;/h2&gt;
-
-&lt;p&gt;Invoking the API is simple. There is a helper class &lt;code&gt;WunderList&lt;/code&gt; which is basically a singleton and you have get its instance by providing the wunderlist &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt;. Once we have
-the instance we can invoke the corresponding helper methods such as &lt;code&gt;GetLists&lt;/code&gt; and &lt;code&gt;GetTasks&lt;/code&gt;. &lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wlists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GetLists&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WTask&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wunderList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GetTasks&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h2&gt;Contributing&lt;/h2&gt;
-
-&lt;p&gt;I will be glad to accept pull requests to make this API client as complete as possible. Since this is still a very partial implementation, I look forward to the contributions from people who want to build something awesome using Wunderlist API.&lt;/p&gt;
-
-&lt;p&gt;The project is an Eclipse java application. You can either use eclipse or gradle to build it. For example, using gradle use the task &lt;code&gt;mainjar&lt;/code&gt; to build the executable jar&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;D:\Users\madhur\workspace\location\Wunderjava&amp;gt;gradle mainjar
-:mainjar UP-TO-DATE
-
-BUILD SUCCESSFUL
-
-Total time: 3.945 secs
-D:\Users\madhur\workspace\location\Wunderjava&amp;gt;cd build
-
-D:\Users\madhur\workspace\location\Wunderjava\build&amp;gt;cd libs
-
-D:\Users\madhur\workspace\location\Wunderjava\build\libs&amp;gt;java -jar Wunderjava.jar
-Enter the Wunderlist username:
-ahuja.madhur@gmail.com
-Enter the Wunderlist password:
-thisisnottherightpassword
-Name: madhur
-Authorization Toekn: 8758a4a0f983177a427a879a30b144d92bc2f01e
-Press enter to print out the lists
-
-Printing out the lists:
-Private
-Work
-Shopping
-Movies to Watch
-Wishlist
-Places
-Activities
-App ideas
-Healthy foods
-Lunch
-Role models
-Friends
-Kanika session
-Learning
-Blog Articles
-Coconut milk
-Home shpng
-Kwality bazar
-Saturday
-Press enter to print out the tasks&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 </content>
  </entry>
  
