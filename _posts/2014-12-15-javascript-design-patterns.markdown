@@ -37,7 +37,6 @@ var doWork = function(f)
 
 doWork(work);
 
-
 ```
 
 * Function to build modules

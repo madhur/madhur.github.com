@@ -26,7 +26,7 @@ require.config(
     }
 });
 
-require(["pace"]);
+//require(["pace"]);
 
 
 require(["main"]);
@@ -36,7 +36,7 @@ var dd = today.getDate();
 var mm = today.getMonth()+1; //January is 0!
 var yyyy = today.getFullYear();
 
-if(dd ==15 && mm == 8)
+if((dd ==15 && mm == 8) || (dd==26 && mm==1))
 {
     require(["vendor/planes"], function()
     {
@@ -44,4 +44,5 @@ if(dd ==15 && mm == 8)
 
     });
 }
+
 
