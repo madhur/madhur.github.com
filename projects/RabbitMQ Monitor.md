@@ -1,0 +1,41 @@
+---
+title: Feed notifier
+layout: project-detail-android
+github: mq-monitor
+img:
+- /images/projects/mqmonitor/screen1.png
+- /images/projects/mqmonitor/screen2.png
+
+---
+
+{% comment %} 
+<!--
+{% if site.generate_projects == true %}
+{% octokit_readme dashclock-feedly-extension%}
+{% endif %}
+-->
+{% endcomment %}
+
+
+#RabbitMQ Monitor Widget#
+
+[](!https://raw.githubusercontent.com/madhur/dashclock-feedly-extension/develop/res/drawable-xhdpi/ic_launcher.png)
+
+Feed notifier is a simple, highly customizable and an intuitive notifier for your favorite unread articles in Feedly.
+
+
+
+Features:
+
+* Notification per feed or category
+* Dashclock Extension
+* Widget
+
+
+<a href="https://play.google.com/store/apps/details?id=in.co.madhur.dashclockfeedlyextension">
+  <img alt="Get it on Google Play"
+       src="http://developer.android.com/images/brand/en_generic_rgb_wo_45.png" />
+</a>
+
+	 
+Please visit the [Feed Notifier](https://github.com/madhur/dashclock-feedly-extension) github page for more information. Also make sure to log your issues/feature requests to the [Github issue log](https://github.com/madhur/dashclock-feedly-extension/issues?state=open)
