@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Caching http requests with Angular &#8211; Madhur Ahuja</title>
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Caching http requests with Angular" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Projects</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			<div class="timestamp">
+	<time datetime="2015-08-24 00:00:00 +0530" pubdate="pubdate">24 August 2015</time>
+
+	<br>
+	
+</div> 
+
+<div class="actions">
+<ul> 
+								<li><a href="/blog/2015/08/24/angular%20caching.html#disqus_thread" data-disqus-identifier="/2015/08/24/angular-caching/" class="comment">View Comments</a></li> 
+
+<script type="text/javascript">
+
+	var disqus_developer = 0;
+		var disqus_shortname = 'madhur';
+		var disqus_iframe_css = "http://madhur.github.com/css/screen.css";
+			var links = document.getElementsByTagName('a');
+			var query = '?';
+			
+					query += 'url=' + encodeURIComponent(window.location.href) + '&';
+					//alert(query);
+				
+			
+	document.write('<script type="text/javascript" src="http://disqus.com/forums/madhur/get_num_replies.js?url2=' + encodeURIComponent(window.location.url) + '#disqus_thread"></' + 'script>');
+	
+
+</script>
+
+
+						
+								<li><a href="http://feeds.feedburner.com/madhur" class="subscribe">subscribe to this blog</a></li> 
+								
+								<li><a href="javascript:Clickheretoprint()" class="subscribe">print this page</a></li> 								
+								<li><a href="/blog/2015/08/24/angular%20caching.html" class="permalink">permalink</a></li> 
+															</ul> 
+
+</div>
+
+
+<div class="category">
+
+	
+	<div style="text-align:center">
+	<!-- Enable social features -->
+				<!-- Place this tag where you want the +1 button to render -->
+<div class="social">
+	
+<div class="social-icon">
+<div class="g-plusone" data-size="tall"></div>
+</div>
+
+<div class="social-icon">
+<a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+</div>
+
+<div class="social-icon">
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+  lang: en_US
+</script>
+<script type="IN/Share" data-counter="top"></script>
+</div>
+
+<!--
+<div class="social-icon">
+<script id='fbjtdqx'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=madhur_ahuja&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbjtdqx');</script>
+
+</div>
+-->
+
+
+<div class="social-icon">
+<a href="http://bufferapp.com/add" class="buffer-add-button" data-count="vertical" >Buffer</a><script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+</div>
+
+<div class="social-icon">
+<a data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a>
+<script type="text/javascript">!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+	</div>
+
+</div>
+
+
+
+
+
+		</aside>
+
+		<article id="blog-article" class="post col-md-9 clearfix">
+					<header><h1>Caching http requests with Angular</h1></header>
+			 <p>AngularJs provides caching in form of <code>$cacheFactory</code>. <code>$cacheFactory</code> is basically an in memory javascript dictionary.</p>
+
+<p><a href="https://github.com/jmdobry/angular-cache">Angular cache module</a> is a better replacement of <code>$cacheFactory</code>. Angular cache module allows to use SessionStorage or LocalStorage for persistent cache.</p>
+
+<p>One of the advantages of Angular cache is </p>
+
+<blockquote>
+<p>The downside of letting $http handle caching for you is that it caches the responses (in string form) to your requests–not the JavaScript Object parsed from the response body. This means you can&#39;t interact with the data in the cache used by $http. See below for how to handle the caching yourself, which gives you more control and the ability to interact with the cache (use it as a data store).</p>
+</blockquote>
+
+<p>For example, I create a cache called <code>messageCache</code></p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">createCache</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">,</span> <span class="p">{</span>
+                              <span class="nx">deleteOnExpire</span><span class="o">:</span> <span class="s1">&#39;aggressive&#39;</span><span class="p">,</span>
+                              <span class="nx">recycleFreq</span><span class="o">:</span> <span class="mi">60000</span>
+                             <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">messageCache</span> <span class="o">=</span> <span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">);</span>
+</code></pre></div>
+<p>And then use it in one of my service&#39;s http methods:</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">getUserMessagesByCompany</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">companyId</span><span class="p">,</span> <span class="nx">showLoader</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">userMessages</span><span class="p">;</span>
+
+
+    <span class="nx">userMessages</span> <span class="o">=</span> <span class="nx">$http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/api/mobile/chat/getusermessagesbycompany/&#39;</span>
+                   <span class="o">+</span> <span class="nx">userId</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">companyId</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">ignoreLoadingBar</span> <span class="o">:</span> <span class="nx">showLoader</span><span class="p">,</span> <span class="nx">cache</span><span class="o">:</span> <span class="nx">messageCache</span><span class="p">});</span>
+
+
+    <span class="k">return</span> <span class="nx">userMessages</span><span class="p">;</span>
+
+<span class="p">}</span>
+</code></pre></div>
+<p>In this case, <code>messageCache</code> is our cache store and it stores the cache in form of key value pair where keys are simply the Url&#39;s to the get requests.</p>
+
+<p>Now, how do we modify the data cached for a particular request. Its simple if we understand how the cache is stored for a particular key.</p>
+
+<p>The cache value is simple an array of length 4, where the first index contains the response in stringified form. In our case, the response was in the form of this json structure</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="p">{</span>
+    <span class="s2">&quot;userMessages&quot;</span><span class="o">:</span> 
+    <span class="p">[</span>
+            <span class="p">{</span>  <span class="p">},</span> <span class="p">{</span>  <span class="p">}</span> 
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Now suppose we want to insert a new message in this response inside our cache</p>
+<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">insertMessageIntoCache</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">companyId</span><span class="p">,</span> <span class="nx">newMessage</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="s1">&#39;/api/mobile/chat/getusermessagesbycompany/&#39;</span> <span class="o">+</span> <span class="nx">userId</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">companyId</span> <span class="o">+</span><span class="s1">&#39;.json&#39;</span><span class="p">;</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nx">messageCache</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="c1">// Get the response object</span>
+                <span class="kd">var</span> <span class="nx">messagesResponse</span> <span class="o">=</span> <span class="nx">messageCache</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
+
+                <span class="c1">// Get the HTTP response in string form</span>
+                <span class="kd">var</span> <span class="nx">messagesArrayString</span> <span class="o">=</span> <span class="nx">messagesResponse</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+                <span class="c1">// Parse it into JSON</span>
+                <span class="kd">var</span> <span class="nx">messagesArrayJSON</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">messagesArrayString</span><span class="p">);</span>
+
+                <span class="c1">// Insert a new message </span>
+                <span class="nx">messagesArrayJSON</span><span class="p">.</span><span class="nx">userMessages</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="nx">newMessage</span><span class="p">);</span>
+
+                <span class="c1">// Convert the response back into string</span>
+                <span class="nx">messagesResponse</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">messagesArrayJSON</span><span class="p">);</span>
+
+                <span class="c1">// replace the cache key</span>
+                <span class="nx">messageCache</span><span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">messagesResponse</span><span class="p">);</span>
+
+        <span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre></div>
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/angularjs">AngularJs</a> |
+					
+						<a href="/blog/tags/caching">Caching</a> |
+					
+						<a href="/blog/tags/javascript">Javascript</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2015/08/24/angular-caching/';
+  var disqus_title = 'Caching http requests with Angular';
+  var disqus_url = 'http://madhur.co.in/blog/2015/08/24/angular%20caching.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2015 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+</body>
+
+</html>

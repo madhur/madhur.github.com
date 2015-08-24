@@ -4,13 +4,95 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2015-05-19T18:13:53+05:30</updated>
+ <updated>2015-08-24T08:14:31+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Caching http requests with Angular</title>
+   <link href="http://madhur.co.in/blog/2015/08/24/angular%20caching.html"/>
+   <updated>2015-08-24T00:00:00+05:30</updated>
+   <id>id:/blog/2015/08/24/angular caching</id>
+   <content type="html">&lt;p&gt;AngularJs provides caching in form of &lt;code&gt;$cacheFactory&lt;/code&gt;. &lt;code&gt;$cacheFactory&lt;/code&gt; is basically an in memory javascript dictionary.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/jmdobry/angular-cache&quot;&gt;Angular cache module&lt;/a&gt; is a better replacement of &lt;code&gt;$cacheFactory&lt;/code&gt;. Angular cache module allows to use SessionStorage or LocalStorage for persistent cache.&lt;/p&gt;
+
+&lt;p&gt;One of the advantages of Angular cache is &lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The downside of letting $http handle caching for you is that it caches the responses (in string form) to your requests–not the JavaScript Object parsed from the response body. This means you can&amp;#39;t interact with the data in the cache used by $http. See below for how to handle the caching yourself, which gives you more control and the ability to interact with the cache (use it as a data store).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;For example, I create a cache called &lt;code&gt;messageCache&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CacheFactory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;messageCache&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;CacheFactory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;messageCache&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                              &lt;span class=&quot;nx&quot;&gt;deleteOnExpire&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;aggressive&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                              &lt;span class=&quot;nx&quot;&gt;recycleFreq&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;60000&lt;/span&gt;
+                             &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messageCache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CacheFactory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;messageCache&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And then use it in one of my service&amp;#39;s http methods:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getUserMessagesByCompany&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;companyId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;showLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;userMessages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+
+    &lt;span class=&quot;nx&quot;&gt;userMessages&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;$http&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;/api/mobile/chat/getusermessagesbycompany/&amp;#39;&lt;/span&gt;
+                   &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;companyId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;.json&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ignoreLoadingBar&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;showLoader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messageCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;userMessages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In this case, &lt;code&gt;messageCache&lt;/code&gt; is our cache store and it stores the cache in form of key value pair where keys are simply the Url&amp;#39;s to the get requests.&lt;/p&gt;
+
+&lt;p&gt;Now, how do we modify the data cached for a particular request. Its simple if we understand how the cache is stored for a particular key.&lt;/p&gt;
+
+&lt;p&gt;The cache value is simple an array of length 4, where the first index contains the response in stringified form. In our case, the response was in the form of this json structure&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;s2&quot;&gt;&amp;quot;userMessages&amp;quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now suppose we want to insert a new message in this response inside our cache&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;insertMessageIntoCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;companyId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;newMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/api/mobile/chat/getusermessagesbycompany/&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;companyId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;.json&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;messageCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// Get the response object&lt;/span&gt;
+                &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messagesResponse&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messageCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Get the HTTP response in string form&lt;/span&gt;
+                &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messagesArrayString&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messagesResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Parse it into JSON&lt;/span&gt;
+                &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messagesArrayJSON&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;messagesArrayString&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Insert a new message &lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;messagesArrayJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userMessages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;unshift&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;newMessage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// Convert the response back into string&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;messagesResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stringify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;messagesArrayJSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+                &lt;span class=&quot;c1&quot;&gt;// replace the cache key&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;messageCache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;messagesResponse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+ </entry>
  
  <entry>
    <title>Emoji Keyboard and Chat bubbles in Android</title>
@@ -1337,163 +1419,6 @@ Or
 &lt;ul&gt;
 &lt;li&gt;If there is no expression, then the return value is &lt;code&gt;undefined&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;Exception in constructors, return value is &lt;code&gt;this&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Javascript Basics Part I</title>
-   <link href="http://madhur.co.in/blog/2014/05/22/javascriptbasics.html"/>
-   <updated>2014-05-22T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/22/javascriptbasics</id>
-   <content type="html">&lt;p&gt;I was going through many of the Douglas Crockford videos on Javascript and came across many of the oddities in the Javascript language. I was highly impressed by his outspoken admission on some of the features of the languages being &amp;quot;bad&amp;quot;. But at the same time, he highlighted that Javascript is one of the most widely mis-understood programming languages and there are many powerful features which are quite powerful.&lt;/p&gt;
-
-&lt;h2&gt;Value Types (Everything else is objects)##&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Number&lt;/li&gt;
-&lt;li&gt;Strings&lt;/li&gt;
-&lt;li&gt;Booleans&lt;/li&gt;
-&lt;li&gt;Objects&lt;/li&gt;
-&lt;li&gt;null&lt;/li&gt;
-&lt;li&gt;undefined&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Few points about NaN:  &lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;NaN&lt;/code&gt; stands for Not a number&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;NaN&lt;/code&gt; does not equal to anything, including &lt;code&gt;Nan&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Nan&lt;/code&gt; is a number type. &lt;/li&gt;
-&lt;li&gt;&lt;code&gt;type of Nan&lt;/code&gt; is &lt;code&gt;Number&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Number function&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;Number(value)&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Convert a string to a number&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;parseInt function&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;parseInt(value, 10)&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The radix (10) should be required&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Math object&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Math object is modeled on Java&amp;#39;s &lt;code&gt;Math&lt;/code&gt; class&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Strings&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Strings are immutable&lt;/li&gt;
-&lt;li&gt;Similar strings are equal (==). Jave got that wrong&lt;/li&gt;
-&lt;li&gt;Strings literals can use single or double quotes&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;string.length&lt;/code&gt; determines the length of string&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;String function&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;string(value)&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Convert a number to String&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Boolean function&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;Boolean(value)&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;returns &lt;code&gt;true&lt;/code&gt; if the value is truthy&lt;/li&gt;
-&lt;li&gt;returns &lt;code&gt;false&lt;/code&gt; if the value is falsy&lt;/li&gt;
-&lt;li&gt;Similar to &lt;code&gt;!!&lt;/code&gt; operator&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Falsy Values&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;false&lt;/li&gt;
-&lt;li&gt;null&lt;/li&gt;
-&lt;li&gt;undefined&lt;/li&gt;
-&lt;li&gt;&amp;quot;&amp;quot;&lt;/li&gt;
-&lt;li&gt;0&lt;/li&gt;
-&lt;li&gt;Nan&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Truthy Values&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;All other values (including all objects) are truthy including &lt;code&gt;&amp;quot;0&amp;quot;&lt;/code&gt; , &lt;code&gt;&amp;quot;false&amp;quot;&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;code&gt;undefined&lt;/code&gt; is the default value for variables&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Thus, a variable can be defined and also &lt;code&gt;undefined&lt;/code&gt; at the same time :)&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Dynamic objects&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;new Object()&lt;/code&gt; produces an empty container of name/value pairs&lt;/li&gt;
-&lt;li&gt;A name can be any string, a value can be any value except &lt;code&gt;undefined&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;members can be accessed with dot notation or subscript notation&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Loosely typed&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Any variable can recieve or send any type of parameter&lt;/li&gt;
-&lt;li&gt;Language is not untyped&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Reserved words&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Many of hte words are reserved but only handful of them are being used in language&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;== and != operators&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;These operators can do type coercion&lt;/li&gt;
-&lt;li&gt;It is better to use === and !==, which do not do type coercion.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;&amp;amp;&amp;amp; Guard operator (Logical AND)&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;If first operand is truthy
-then result is second operand
-else result is first operand&lt;/li&gt;
-&lt;li&gt;It can be used to avoid null references&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;member&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;It can be written as &lt;code&gt;return a &amp;amp;&amp;amp; a.member;&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;|| Default operator (Logical OR)&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;If first operand is truthy
-then result is first operand
-else result is second operand&lt;/li&gt;
-&lt;li&gt;It can be used to fill in default values.
-&lt;code&gt;var last = input || nr_items;&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </content>
  </entry>
