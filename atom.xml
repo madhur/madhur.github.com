@@ -4,13 +4,126 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2015-08-24T08:14:31+05:30</updated>
+ <updated>2015-09-14T22:44:14+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Angular Chat popup</title>
+   <link href="http://madhur.co.in/blog/2015/09/14/angular-chat-popup.html"/>
+   <updated>2015-09-14T00:00:00+05:30</updated>
+   <id>id:/blog/2015/09/14/angular-chat-popup</id>
+   <content type="html">&lt;p&gt;Recently, I was required to write a popup menu for our chat application. The popup menu looked very similar to ones in &lt;a href=&quot;https://slack.com/&quot;&gt;Slack&lt;/a&gt; and &lt;a href=&quot;http://www.flock.co/&quot;&gt;Flock&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I looked some sample impementations. &lt;a href=&quot;http://www.flock.co/&quot;&gt;Flock&lt;/a&gt; uses &lt;a href=&quot;https://dojotoolkit.org/&quot;&gt;DOJO Toolkit&lt;/a&gt; to power its entire UI and its popup menu is also powered by it.  Our application was already using &lt;a href=&quot;https://angularjs.org/&quot;&gt;AngularJs&lt;/a&gt; as a framework and I did not want to introduce another framework just for the sake of popup menu.&lt;/p&gt;
+
+&lt;p&gt;Looking at slack, it seems to use its own custom implementation. I liked the slack implementation better than the flock one.&lt;/p&gt;
+
+&lt;p&gt;Finally, I decided to write my own directive in angular for this feature. Take a look at this &lt;a href=&quot;https://github.com/madhur/angular-chat-popup&quot;&gt;github repository&lt;/a&gt; for the soure code and how to use it in your own project.&lt;/p&gt;
+
+&lt;h2&gt;How does this work&lt;/h2&gt;
+
+&lt;p&gt;Upon &lt;code&gt;/&lt;/code&gt; character, a popup menu is rendered. Its template is fetched from &lt;code&gt;partials/popupmenu.html&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;h2&gt;How do I configure the popup&lt;/h2&gt;
+
+&lt;p&gt;The input data is fetched from the &lt;code&gt;appsettings.js&lt;/code&gt; file. Currently 3 levels are supported. In actual case, this data may come from a 
+&lt;code&gt;$http&lt;/code&gt; service.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;        &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Macros&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Includes greetings, apologies, goodbyes&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;commands&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Upload image&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Allows to select an image to upload&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;upload_image&amp;quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Redirect&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Redirect user to a different channel&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;redirect_chat&amp;quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Rate card&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Send a rate card to the user&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;rate_card&amp;quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share card&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Send a share card to the user&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;commands&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+
+                     &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;WhatsApp&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share Request&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;share_whatsapp&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+                    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                       &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Facebook&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share Request&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;share_facebook&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+                    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Facebook Messenger&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share Request&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;share_messenger&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+                    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Twitter&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share Request&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;share_twitter&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+                    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Google Plus&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Share Request&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;share_gplus&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+                &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Address card&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;Send a address card to the user&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;action_type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;address_card&amp;quot;&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+
+        &lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Add filtering through keyboard&lt;/li&gt;
+&lt;li&gt;Include scrollbar for long menus&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Caching http requests with Angular</title>
@@ -1302,123 +1415,6 @@ The object produced this way does not have array nature. IUt will inherit array&
 &lt;li&gt;&lt;code&gt;array.splice(number, 1)&lt;/code&gt; Removes the element and renumbers all the following elements&lt;/li&gt;
 &lt;li&gt;Use &lt;code&gt;objects&lt;/code&gt; when names are arbitrary strings&lt;/li&gt;
 &lt;li&gt;Use &lt;code&gt;arrays&lt;/code&gt; when names are sequential integers&lt;/li&gt;
-&lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Javascript Basics Part II</title>
-   <link href="http://madhur.co.in/blog/2014/05/23/javascriptbasics2.html"/>
-   <updated>2014-05-23T00:00:00+05:30</updated>
-   <id>id:/blog/2014/05/23/javascriptbasics2</id>
-   <content type="html">&lt;h2&gt;Statements&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;break&lt;/code&gt; &lt;/li&gt;
-&lt;li&gt;&lt;code&gt;for&lt;/code&gt; &lt;/li&gt;
-&lt;li&gt;&lt;code&gt;switch&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;throw&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;try&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;with&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;For statement&lt;/h3&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hasOwnProperty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;c1&quot;&gt;// within the loop, name is the key of current memeber&lt;/span&gt;
-        &lt;span class=&quot;c1&quot;&gt;// object[name] is the current value&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3&gt;Switch statement&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The switch value can be a string. Not restricted to integer&lt;/li&gt;
-&lt;li&gt;The cast statements can be expressions, not just constants&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Throw statement&lt;/h3&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;reason&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; 
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;exceptionName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;reason&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3&gt;Try statement&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Because we don&amp;#39;t have classes, we just have one &lt;code&gt;catch&lt;/code&gt; clause. There cannot be multiple catch clauses.&lt;/li&gt;
-&lt;li&gt;The javascript implementation can produce these exception names:
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Error&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;EvalError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;RangeError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;SyntaxError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;TypeError&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;URIError&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3&gt;With statement&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Ambiguous and error prone, don&amp;#39;t use it. &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;foo&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Either &lt;code&gt;o.foo = null;&lt;/code&gt; or &lt;code&gt;foo = null;&lt;/code&gt; depending on if foo is a global variable&lt;/p&gt;
-
-&lt;h3&gt;Function statement&lt;/h3&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3&gt;Var statement&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Types are not specified&lt;/li&gt;
-&lt;li&gt;Initial values are optional&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Scope&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Blocks do not have scopes, only function has scopes.&lt;/li&gt;
-&lt;li&gt;Because of laziness while writing the compiler :)&lt;/li&gt;
-&lt;li&gt;This is a mistake in language&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3&gt;Return statement&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;return expression;&lt;/code&gt;
-Or
-&lt;code&gt;return;&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;If there is no expression, then the return value is &lt;code&gt;undefined&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Exception in constructors, return value is &lt;code&gt;this&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </content>
  </entry>
