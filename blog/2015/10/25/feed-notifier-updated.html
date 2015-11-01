@@ -4,9 +4,9 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Caching http requests with Angular &#8211; Madhur Ahuja</title>
+    <title>Feed notifier updated &#8211; </title>
     <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Caching http requests with Angular" />
+    <meta name="description" content=" Feed notifier updated" />
 
     <link rel="start" href="/" />
 
@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
-    
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
@@ -120,7 +118,7 @@
 		<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
 
 			<div class="timestamp">
-	<time datetime="2015-08-24 00:00:00 +0530" pubdate="pubdate">24 August 2015</time>
+	<time datetime="2015-10-25 00:00:00 +0530" pubdate="pubdate">25 October 2015</time>
 
 	<br>
 	
@@ -128,7 +126,7 @@
 
 <div class="actions">
 <ul> 
-								<li><a href="/blog/2015/08/24/angular%20caching.html#disqus_thread" data-disqus-identifier="/2015/08/24/angular-caching/" class="comment">View Comments</a></li> 
+								<li><a href="/blog/2015/10/25/feed-notifier-updated.html#disqus_thread" data-disqus-identifier="/2015/10/25/feed-notifier-updated/" class="comment">View Comments</a></li> 
 
 <script type="text/javascript">
 
@@ -152,7 +150,7 @@
 								<li><a href="http://feeds.feedburner.com/madhur" class="subscribe">subscribe to this blog</a></li> 
 								
 								<li><a href="javascript:Clickheretoprint()" class="subscribe">print this page</a></li> 								
-								<li><a href="/blog/2015/08/24/angular%20caching.html" class="permalink">permalink</a></li> 
+								<li><a href="/blog/2015/10/25/feed-notifier-updated.html" class="permalink">permalink</a></li> 
 															</ul> 
 
 </div>
@@ -227,91 +225,18 @@
 		</aside>
 
 		<article id="blog-article" class="post col-md-9 clearfix">
-					<header><h1>Caching http requests with Angular</h1></header>
-			 <p>AngularJs provides caching in form of <code>$cacheFactory</code>. <code>$cacheFactory</code> is basically an in memory javascript dictionary.</p>
+					<header><h1>Feed notifier updated</h1></header>
+			 <p>After a popular demand, I have updated the <a href="https://play.google.com/store/apps/details?id=in.co.madhur.dashclockfeedlyextension">Feed Notifier</a> application to include sync at reduced intervals or 30 mins and 15 mins.</p>
 
-<p><a href="https://github.com/jmdobry/angular-cache">Angular cache module</a> is a better replacement of <code>$cacheFactory</code>. Angular cache module allows to use SessionStorage or LocalStorage for persistent cache.</p>
+<p>If you have not updated the app yet, head over to Play Store and update the app.</p>
 
-<p>One of the advantages of Angular cache is </p>
-
-<blockquote>
-<p>The downside of letting $http handle caching for you is that it caches the responses (in string form) to your requests–not the JavaScript Object parsed from the response body. This means you can&#39;t interact with the data in the cache used by $http. See below for how to handle the caching yourself, which gives you more control and the ability to interact with the cache (use it as a data store).</p>
-</blockquote>
-
-<p>For example, I create a cache called <code>messageCache</code></p>
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">))</span>
-<span class="p">{</span>
-    <span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">createCache</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">,</span> <span class="p">{</span>
-                              <span class="nx">deleteOnExpire</span><span class="o">:</span> <span class="s1">&#39;aggressive&#39;</span><span class="p">,</span>
-                              <span class="nx">recycleFreq</span><span class="o">:</span> <span class="mi">60000</span>
-                             <span class="p">});</span>
-<span class="p">}</span>
-
-<span class="kd">var</span> <span class="nx">messageCache</span> <span class="o">=</span> <span class="nx">CacheFactory</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;messageCache&#39;</span><span class="p">);</span>
-</code></pre></div>
-<p>And then use it in one of my service&#39;s http methods:</p>
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">getUserMessagesByCompany</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">companyId</span><span class="p">,</span> <span class="nx">showLoader</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">userMessages</span><span class="p">;</span>
-
-
-    <span class="nx">userMessages</span> <span class="o">=</span> <span class="nx">$http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/api/mobile/chat/getusermessagesbycompany/&#39;</span>
-                   <span class="o">+</span> <span class="nx">userId</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">companyId</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">ignoreLoadingBar</span> <span class="o">:</span> <span class="nx">showLoader</span><span class="p">,</span> <span class="nx">cache</span><span class="o">:</span> <span class="nx">messageCache</span><span class="p">});</span>
-
-
-    <span class="k">return</span> <span class="nx">userMessages</span><span class="p">;</span>
-
-<span class="p">}</span>
-</code></pre></div>
-<p>In this case, <code>messageCache</code> is our cache store and it stores the cache in form of key value pair where keys are simply the Url&#39;s to the get requests.</p>
-
-<p>Now, how do we modify the data cached for a particular request. Its simple if we understand how the cache is stored for a particular key.</p>
-
-<p>The cache value is simple an array of length 4, where the first index contains the response in stringified form. In our case, the response was in the form of this json structure</p>
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="p">{</span>
-    <span class="s2">&quot;userMessages&quot;</span><span class="o">:</span> 
-    <span class="p">[</span>
-            <span class="p">{</span>  <span class="p">},</span> <span class="p">{</span>  <span class="p">}</span> 
-    <span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Now suppose we want to insert a new message in this response inside our cache</p>
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">insertMessageIntoCache</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="nx">companyId</span><span class="p">,</span> <span class="nx">newMessage</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="s1">&#39;/api/mobile/chat/getusermessagesbycompany/&#39;</span> <span class="o">+</span> <span class="nx">userId</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">companyId</span> <span class="o">+</span><span class="s1">&#39;.json&#39;</span><span class="p">;</span>
-
-    <span class="k">if</span><span class="p">(</span><span class="nx">messageCache</span><span class="p">)</span>
-        <span class="p">{</span>
-                <span class="c1">// Get the response object</span>
-                <span class="kd">var</span> <span class="nx">messagesResponse</span> <span class="o">=</span> <span class="nx">messageCache</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span>
-
-                <span class="c1">// Get the HTTP response in string form</span>
-                <span class="kd">var</span> <span class="nx">messagesArrayString</span> <span class="o">=</span> <span class="nx">messagesResponse</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
-
-                <span class="c1">// Parse it into JSON</span>
-                <span class="kd">var</span> <span class="nx">messagesArrayJSON</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">messagesArrayString</span><span class="p">);</span>
-
-                <span class="c1">// Insert a new message </span>
-                <span class="nx">messagesArrayJSON</span><span class="p">.</span><span class="nx">userMessages</span><span class="p">.</span><span class="nx">unshift</span><span class="p">(</span><span class="nx">newMessage</span><span class="p">);</span>
-
-                <span class="c1">// Convert the response back into string</span>
-                <span class="nx">messagesResponse</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">messagesArrayJSON</span><span class="p">);</span>
-
-                <span class="c1">// replace the cache key</span>
-                <span class="nx">messageCache</span><span class="p">.</span><span class="nx">put</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">messagesResponse</span><span class="p">);</span>
-
-        <span class="p">}</span>
-
-<span class="p">}</span>
-</code></pre></div>
 			<footer>
 				<div class="blocked tags">
 					<p>
 					
-						<a href="/blog/tags/angularjs">AngularJs</a> |
+						<a href="/blog/tags/programming">Programming</a> |
 					
-						<a href="/blog/tags/caching">Caching</a> |
-					
-						<a href="/blog/tags/javascript">Javascript</a> |
+						<a href="/blog/tags/android">Android</a> |
 					
 					</p>
 				</div>
@@ -334,9 +259,9 @@
 			<script type="text/javascript">
   var disqus_developer = 0; // developer mode is on
   var disqus_shortname = 'madhur';
-  var disqus_identifier = '/2015/08/24/angular-caching/';
-  var disqus_title = 'Caching http requests with Angular';
-  var disqus_url = 'http://madhur.co.in/blog/2015/08/24/angular%20caching.html';
+  var disqus_identifier = '/2015/10/25/feed-notifier-updated/';
+  var disqus_title = 'Feed notifier updated';
+  var disqus_url = 'http://madhur.co.in/blog/2015/10/25/feed-notifier-updated.html';
   (function() {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';

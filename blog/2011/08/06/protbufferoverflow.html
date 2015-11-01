@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Protections against buffer overflow exploits in Linux &#8211; Madhur Ahuja</title>
+    <title>Protections against buffer overflow exploits in Linux &#8211; </title>
     <meta name="author" content="Madhur Ahuja" />
     <meta name="description" content=" Protections against buffer overflow exploits in Linux" />
 
@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
-    
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
@@ -242,15 +240,15 @@ while some of them are part of compiler tools such as gcc, g++. </p>
 
 <p><strong><a href="http://en.wikipedia.org/wiki/Address_space_layout_randomization">Address Space Randomization</a></strong> is a technique in which various parts of executable such as data, stack and code are randomly given start addresses whenever a program starts. This makes difficult for an attacker to guess let&#39;s stay the base of stack in order for him to successfully launch the buffer overflow attack. ASLR can be disabled in linux with the following command</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ sudo echo 0 &gt; /proc/sys/kernel/randomize_va_space</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ sudo echo 0 &gt; /proc/sys/kernel/randomize_va_space</code></pre></figure>
 
 <p>To reneable just echo it with a positive integer, for ex</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ sudo echo 2 &gt; /proc/sys/kernel/randomize_va_space</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ sudo echo 2 &gt; /proc/sys/kernel/randomize_va_space</code></pre></figure>
 
 <p><strong><a href="http://en.wikipedia.org/wiki/Executable_space_protection">Executable Stack Protection </a></strong> is another technique of preventing buffer overflow attacks. As a result of this protection, the stack portion of the memory is marked non executable. To check if the stack is executable or not, run the following command</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ readelf -l &lt;filename&gt;
+<figure class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ readelf -l &lt;filename&gt;
 
 Elf file type is EXEC (Executable file)
 Entry point 0x8048330
@@ -277,23 +275,23 @@ Program Headers:
    04     .dynamic 
    05     .note.ABI-tag .note.gnu.build-id 
    06     
-   07     .ctors .dtors .jcr .dynamic .got</code></pre></div>
+   07     .ctors .dtors .jcr .dynamic .got </code></pre></figure>
 
 <p>The following line , shows that stack is Read Write but not executable</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW 0x4</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW 0x4</code></pre></figure>
 
 <p>In order to make the stack executable, the program needs to be compiled with <strong><em>-z execstack</em></strong> option</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ gcc -ggdb -m32 -z execstack -o buffer1 buffer1.c</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ gcc -ggdb -m32 -z execstack -o buffer1 buffer1.c</code></pre></figure>
 
 <p>In that case, the output of <strong><em>readelf</em></strong> program would be </p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x4</code></pre></figure>
 
 <p><strong><a href="http://en.wikipedia.org/wiki/Stack-smashing_protection">Stack smashing protection</a></strong> refers to compiler generated protection techniques of smash stacking. Refer to wikipedia link to get more details about the techniques involved in this protection. This can be disabled in gcc as follows:</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ gcc -ggdb -m32 -o buffer1 -fno-stack-protector -mpreferred-stack-boundary=4 buffer1.c</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">madhur@bt:~/buffer$ gcc -ggdb -m32 -o buffer1 -fno-stack-protector -mpreferred-stack-boundary=4 buffer1.c</code></pre></figure>
 
 <p><strong>Windows Implementation</strong>
 The /GS switch is a compiler option that will add some code to functionâ€™s prologue and epilogue code in order to prevent successful abuse of typical stack based (string buffer) overflows.</p>

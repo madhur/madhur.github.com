@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>HackingLab Challenge: Disassemble .NET Clients &#8211; Madhur Ahuja</title>
+    <title>HackingLab Challenge: Disassemble .NET Clients &#8211; </title>
     <meta name="author" content="Madhur Ahuja" />
     <meta name="description" content=" HackingLab Challenge: Disassemble .NET Clients" />
 
@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
-    
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
@@ -265,7 +263,7 @@
 
 <p>Now, our job is to become the Admin :) . That&#39;s the code which is called by the Visible button <strong>Identify me</strong></p>
 
-<div class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">private</span> <span class="k">void</span> <span class="nf">identifyUser</span><span class="p">()</span>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"> <span class="k">private</span> <span class="k">void</span> <span class="nf">identifyUser</span><span class="p">()</span>
     <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">IsAdmin</span><span class="p">())</span>
       <span class="p">{</span>
@@ -279,11 +277,11 @@
         <span class="k">this</span><span class="p">.</span><span class="n">butAdminHTTP</span><span class="p">.</span><span class="n">Visible</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
         <span class="k">this</span><span class="p">.</span><span class="n">butAdminHTTPS</span><span class="p">.</span><span class="n">Visible</span> <span class="p">=</span> <span class="k">false</span><span class="p">;</span>
       <span class="p">}</span>
-    <span class="p">}</span></code></pre></div>
+    <span class="p">}</span></code></pre></figure>
 
 <p>Clearly, our main interest is in <em>IsAdmin()</em> function which is defined as follows:</p>
 
-<div class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">private</span> <span class="kt">bool</span> <span class="nf">IsAdmin</span><span class="p">()</span>
+<figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"><span class="k">private</span> <span class="kt">bool</span> <span class="nf">IsAdmin</span><span class="p">()</span>
     <span class="p">{</span>
       <span class="k">foreach</span> <span class="p">(</span><span class="kt">object</span> <span class="n">obj</span> <span class="k">in</span> <span class="n">Dns</span><span class="p">.</span><span class="n">GetHostEntry</span><span class="p">(</span><span class="n">Dns</span><span class="p">.</span><span class="n">GetHostName</span><span class="p">()).</span><span class="n">AddressList</span><span class="p">)</span>
       <span class="p">{</span>
@@ -291,7 +289,7 @@
           <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
       <span class="p">}</span>
       <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
-    <span class="p">}</span></code></pre></div>
+    <span class="p">}</span>    </code></pre></figure>
 
 <p>Hmmm. Very Interesting !!!  Do you understand what is it doing ?</p>
 
@@ -304,12 +302,12 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
 
 <p>Let&#39;s open the function in <em>ILDASM</em> and look at its disassembly.</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">IL_001c:  ldloc.1
+<figure class="highlight"><pre><code class="language-text" data-lang="text">  IL_001c:  ldloc.1
   IL_001d:  callvirt   instance string [mscorlib]System.Object::ToString()
   IL_0022:  ldstr      &quot;258.54.54.699&quot;
   IL_0027:  callvirt   instance bool [mscorlib]System.String::Equals(string)
   IL_002c:  brfalse.s  IL_0032
-  IL_002e:  ldc.i4.1</code></pre></div>
+  IL_002e:  ldc.i4.1</code></pre></figure>
   
 
 <p>There are several ways to do it. I will write down from tedious to easiest</p>
@@ -326,7 +324,7 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
 
 <p>If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is </p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031</code></pre></div>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031</code></pre></figure>
   
 
 <p>What this instruction means is that if output of <em>IsAdmin()</em> is false, branch to instruction at IL_0031, the instruction which hides the buttons.
@@ -334,12 +332,12 @@ Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue
 
 <p>Now, we just need to fire up the favourite hex editor and <strong>change just one byte.</strong> from 2C to 2D.</p>
 
-<div class="highlight"><pre><code class="language-text" data-lang="text">Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+<figure class="highlight"><pre><code class="language-text" data-lang="text">Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
 
 000005A0  02 28 02 00 00 06 02 28 05 00 00 06 2A 1E 02 28  
 000005B0  05 00 00 06 2A 00 00 00 03 30 02 00 5A 00 00 00  
 000005C0  00 00 00 00 02 28 06 00 00 06 2D 29 02 7B 02 00  
-000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00</code></pre></div>
+000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00  </code></pre></figure>
   
 
 <p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let&#39;s save the file and run it again.</p>

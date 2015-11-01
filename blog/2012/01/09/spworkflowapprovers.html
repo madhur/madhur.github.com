@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web Services and Jquery &#8211; Madhur Ahuja</title>
+    <title>Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web Services and Jquery &#8211; </title>
     <meta name="author" content="Madhur Ahuja" />
     <meta name="description" content=" Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web Services and Jquery" />
 
@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
-    
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
     <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
@@ -242,7 +240,7 @@
 <li>First of all, we will retrieve the our specified item from this list and then retrieve the value of this Person or Group field. </li>
 </ul>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">ItemID</span><span class="o">=</span> <span class="nx">getParameterByName</span><span class="p">(</span><span class="s2">&quot;ItemID&quot;</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">ItemID</span><span class="o">=</span> <span class="nx">getParameterByName</span><span class="p">(</span><span class="s2">&quot;ItemID&quot;</span><span class="p">);</span>
 
 <span class="c1">// Construct the CAML Query</span>
 <span class="kd">var</span> <span class="nx">CamlQuery</span> <span class="o">=</span> <span class="s2">&quot;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&#39;ID&#39; /&gt;&lt;Value Type=&#39;Counter&#39;&gt;&quot;</span><span class="o">+</span><span class="nx">ItemID</span><span class="o">+</span><span class="s2">&quot;&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&quot;</span><span class="p">;</span>
@@ -272,7 +270,7 @@
             
         <span class="p">})</span>
     <span class="p">}</span>
-<span class="p">})</span></code></pre></div>
+<span class="p">})</span></code></pre></figure>
 
 <ul>
 <li>When we retrieve the person or group field from the web services, it is returned as <strong>1;#Madhur Ahuja</strong>. Where 1 is the ID of the row in User Information List and <strong>Madhur Ahuja</strong> is the display name.
@@ -281,7 +279,7 @@ To pass it to Approval Workflow, we need the login name.</li>
 
 <p>We will query the <strong>User Information List</strong> to obtain the login name.</p>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// We will just get the DisplayName and ID, but not the Login Name, we will fire another web service to fetch the loginName of the User </span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="c1">// We will just get the DisplayName and ID, but not the Login Name, we will fire another web service to fetch the loginName of the User </span>
 <span class="k">if</span><span class="p">(</span><span class="nx">approverName</span><span class="o">!=</span><span class="kc">null</span><span class="p">)</span>
 <span class="p">{</span>
         
@@ -315,14 +313,14 @@ To pass it to Approval Workflow, we need the login name.</li>
                     <span class="nx">alert</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">responseText</span><span class="p">);</span>
         <span class="p">}</span>
         
-<span class="p">}</span></code></pre></div>
+<span class="p">}</span></code></pre></figure>
 
 <ul>
 <li>We get the login name in the variable <strong>ows_Name</strong>. Now we can fire the Approval workflow passing it the login name.
 Note the <strong>templateId</strong> below, its the GUID of the SharePoint 2010 Approval workflow which is associated with the list. </li>
 </ul>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">$</span><span class="p">().</span><span class="nx">SPServices</span><span class="p">({</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"> <span class="nx">$</span><span class="p">().</span><span class="nx">SPServices</span><span class="p">({</span>
                 <span class="nx">operation</span><span class="o">:</span> <span class="s2">&quot;StartWorkflow&quot;</span><span class="p">,</span>
                 <span class="nx">item</span><span class="o">:</span> <span class="s2">&quot;http://sp.madhurmoss.com/sites/nishantverma/GBSRequest/Lists/Intake%20Requests/&quot;</span> <span class="o">+</span> <span class="nx">ItemID</span> <span class="o">+</span> <span class="s2">&quot;_.000&quot;</span><span class="p">,</span>
                 <span class="nx">templateId</span><span class="o">:</span> <span class="s2">&quot;{10E4D465-A9B6-4146-BD50-E9A78888548D}&quot;</span><span class="p">,</span>
@@ -336,12 +334,13 @@ Note the <strong>templateId</strong> below, its the GUID of the SharePoint 2010 
                         <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">href</span> <span class="o">=</span> <span class="s1">&#39;/sites/nishantverma/GBSRequest&#39;</span><span class="p">;</span>
                     <span class="p">},</span> <span class="mi">5000</span><span class="p">)</span>
                 <span class="p">}</span>
-              <span class="p">});</span></code></pre></div>
+              <span class="p">});</span>
+              </code></pre></figure>
               
 
 <p>Here, the key is the variable <em>assocData</em>, which is nothing but the Association Data of the workflow. In SharePoint 2010 Approval workflow, its the serialized XML of the infopath form. This variable is defnied as the XML string as below:</p>
 
-<div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">assocData</span><span class="o">=</span><span class="s1">&#39;&lt;dfs:myFields xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:dms=&quot;http://schemas.microsoft.com/office/2009/documentManagement/types&quot; xmlns:dfs=&quot;http://schemas.microsoft.com/office/infopath/2003/dataFormSolution&quot; xmlns:q=&quot;http://schemas.microsoft.com/office/infopath/2009/WSSList/queryFields&quot; xmlns:d=&quot;http://schemas.microsoft.com/office/infopath/2009/WSSList/dataFields&quot; xmlns:ma=&quot;http://schemas.microsoft.com/office/2009/metadata/properties/metaAttributes&quot; xmlns:pc=&quot;http://schemas.microsoft.com/office/infopath/2007/PartnerControls&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;&#39;</span><span class="o">+</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript">            <span class="kd">var</span> <span class="nx">assocData</span><span class="o">=</span><span class="s1">&#39;&lt;dfs:myFields xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:dms=&quot;http://schemas.microsoft.com/office/2009/documentManagement/types&quot; xmlns:dfs=&quot;http://schemas.microsoft.com/office/infopath/2003/dataFormSolution&quot; xmlns:q=&quot;http://schemas.microsoft.com/office/infopath/2009/WSSList/queryFields&quot; xmlns:d=&quot;http://schemas.microsoft.com/office/infopath/2009/WSSList/dataFields&quot; xmlns:ma=&quot;http://schemas.microsoft.com/office/2009/metadata/properties/metaAttributes&quot; xmlns:pc=&quot;http://schemas.microsoft.com/office/infopath/2007/PartnerControls&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;&#39;</span><span class="o">+</span>
 <span class="s1">&#39;&lt;dfs:queryFields&gt;&lt;/dfs:queryFields&gt;&#39;</span><span class="o">+</span>
 <span class="s1">&#39;&lt;dfs:dataFields&gt;&#39;</span><span class="o">+</span>
 <span class="s1">&#39;&lt;d:SharePointListItem_RW&gt;&#39;</span><span class="o">+</span>
@@ -372,7 +371,7 @@ Note the <strong>templateId</strong> below, its the GUID of the SharePoint 2010 
 <span class="s1">&#39;&lt;d:EnableContentApproval&gt;false&lt;/d:EnableContentApproval&gt;&#39;</span><span class="o">+</span>
 <span class="s1">&#39;&lt;/d:SharePointListItem_RW&gt;&#39;</span><span class="o">+</span>
 <span class="s1">&#39;&lt;/dfs:dataFields&gt;&#39;</span><span class="o">+</span>
-<span class="s1">&#39;&lt;/dfs:myFields&gt;&#39;</span><span class="p">;</span></code></pre></div>
+<span class="s1">&#39;&lt;/dfs:myFields&gt;&#39;</span><span class="p">;</span></code></pre></figure>
 
 <p>The full code can be downloaded from my <a href="https://gist.github.com/1584225">gist</a> here.       </p>
 
