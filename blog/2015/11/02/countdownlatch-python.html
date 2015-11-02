@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>CountDownLatch in Python using Condition Objects &#8211; </title>
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" CountDownLatch in Python using Condition Objects" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Projects</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			<div class="timestamp">
+	<time datetime="2015-11-02 00:00:00 +0530" pubdate="pubdate">02 November 2015</time>
+
+	<br>
+	
+</div> 
+
+<div class="actions">
+<ul> 
+								<li><a href="/blog/2015/11/02/countdownlatch-python.html#disqus_thread" data-disqus-identifier="/2015/11/02/countdownlatch-python/" class="comment">View Comments</a></li> 
+
+<script type="text/javascript">
+
+	var disqus_developer = 0;
+		var disqus_shortname = 'madhur';
+		var disqus_iframe_css = "http://madhur.github.com/css/screen.css";
+			var links = document.getElementsByTagName('a');
+			var query = '?';
+			
+					query += 'url=' + encodeURIComponent(window.location.href) + '&';
+					//alert(query);
+				
+			
+	document.write('<script type="text/javascript" src="http://disqus.com/forums/madhur/get_num_replies.js?url2=' + encodeURIComponent(window.location.url) + '#disqus_thread"></' + 'script>');
+	
+
+</script>
+
+
+						
+								<li><a href="http://feeds.feedburner.com/madhur" class="subscribe">subscribe to this blog</a></li> 
+								
+								<li><a href="javascript:Clickheretoprint()" class="subscribe">print this page</a></li> 								
+								<li><a href="/blog/2015/11/02/countdownlatch-python.html" class="permalink">permalink</a></li> 
+															</ul> 
+
+</div>
+
+
+<div class="category">
+
+	
+	<div style="text-align:center">
+	<!-- Enable social features -->
+				<!-- Place this tag where you want the +1 button to render -->
+<div class="social">
+	
+<div class="social-icon">
+<div class="g-plusone" data-size="tall"></div>
+</div>
+
+<div class="social-icon">
+<a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+</div>
+
+<div class="social-icon">
+<script src="//platform.linkedin.com/in.js" type="text/javascript">
+  lang: en_US
+</script>
+<script type="IN/Share" data-counter="top"></script>
+</div>
+
+<!--
+<div class="social-icon">
+<script id='fbjtdqx'>(function(i){var f,s=document.getElementById(i);f=document.createElement('iframe');f.src='//api.flattr.com/button/view/?uid=madhur_ahuja&url='+encodeURIComponent(document.URL);f.title='Flattr';f.height=62;f.width=55;f.style.borderWidth=0;s.parentNode.insertBefore(f,s);})('fbjtdqx');</script>
+
+</div>
+-->
+
+
+<div class="social-icon">
+<a href="http://bufferapp.com/add" class="buffer-add-button" data-count="vertical" >Buffer</a><script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+</div>
+
+<div class="social-icon">
+<a data-pocket-label="pocket" data-pocket-count="vertical" class="pocket-btn" data-lang="en"></a>
+<script type="text/javascript">!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script>
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>
+
+	</div>
+
+</div>
+
+
+
+
+
+		</aside>
+
+		<article id="blog-article" class="post col-md-9 clearfix">
+					<header><h1>CountDownLatch in Python using Condition Objects</h1></header>
+			 <p>In Java, there is a very useful construct called <a href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CountDownLatch.html"><code>CountDownLatch</code></a> to solve many multithreaded and asynchronous programming scenarios.</p>
+
+<p>In tech terms it is simply</p>
+
+<blockquote>
+<p>A synchronization aid that allows one or more threads to wait until a set of operations being performed in 
+other threads completes.</p>
+</blockquote>
+
+<p>For example, you might have a third party API call which is asynchronous in nature. Many scenarios require that you call multiple of them and perform an action if all of them succeed OR perform another action even if one of them fails.</p>
+
+<p>In the case below, we are using a popular message library called <a href="https://www.pubnub.com">PubNub</a> to send a message on a channel twice through the <code>publish()</code> method which is an <a href="https://www.pubnub.com/docs/java-se-java/api-reference#publish">async call</a></p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="n">CountDownLatch</span> <span class="n">latch</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">CountDownLatch</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+<span class="kd">final</span> <span class="n">GrantStatus</span> <span class="n">grantStatus</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GrantStatus</span><span class="o">();</span>
+
+        <span class="n">pubnub</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span><span class="n">userChannel</span><span class="o">,</span> <span class="n">msg</span><span class="o">,</span> <span class="k">new</span> <span class="nf">Callback</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">successCallback</span><span class="o">(</span><span class="n">String</span> <span class="n">s</span><span class="o">,</span> <span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// Success case</span>
+                <span class="n">grantStatus</span><span class="o">.</span><span class="na">setGrantStatus1</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+                <span class="n">latch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+            <span class="o">}</span>
+
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">errorCallback</span><span class="o">(</span><span class="n">String</span> <span class="n">channel</span><span class="o">,</span> <span class="n">PubnubError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// Failure case</span>
+                <span class="n">grantStatus</span><span class="o">.</span><span class="na">setGrantStatus1</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+                <span class="n">latch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+        <span class="n">pubnub</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span><span class="n">userChannel</span><span class="o">,</span> <span class="n">msg</span><span class="o">,</span> <span class="k">new</span> <span class="nf">Callback</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">successCallback</span><span class="o">(</span><span class="n">String</span> <span class="n">s</span><span class="o">,</span> <span class="n">Object</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// success case</span>
+                <span class="n">grantStatus</span><span class="o">.</span><span class="na">setGrantStatus2</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+                <span class="n">latch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+
+            <span class="o">}</span>
+
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">errorCallback</span><span class="o">(</span><span class="n">String</span> <span class="n">channel</span><span class="o">,</span> <span class="n">PubnubError</span> <span class="n">error</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// Failure case</span>
+                <span class="n">grantStatus</span><span class="o">.</span><span class="na">setGrantStatus2</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+                <span class="n">latch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+
+            <span class="o">}</span>
+        <span class="o">});</span>
+
+
+        <span class="n">latch</span><span class="o">.</span><span class="na">await</span><span class="o">();</span> <span class="c1">// This is a blocking call. It will block the thread till latch reaches zero</span>
+
+        <span class="k">if</span><span class="o">(</span><span class="n">grantStatus</span><span class="o">.</span><span class="na">getGrantStatus1</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="n">grantStatus</span><span class="o">.</span><span class="na">getGrantStatus2</span><span class="o">())</span> <span class="o">{</span>
+            <span class="c1">// Both calls were success</span>
+        <span class="o">}</span>
+        <span class="k">else</span>
+            <span class="c1">// One or both of the calls failed</span></code></pre></figure>
+
+<p>In the piece of code above, the thread blocks at <code>latch.await()</code> till both the API calls either succeeds or fails. This is preferable since it doesn&#39;t uses <a href="https://en.wikipedia.org/wiki/Spinlock">Spin lock</a> or <a href="https://en.wikipedia.org/wiki/Busy_waiting">Busy waiting</a></p>
+
+<p>I was trying to do a similar thing in Python. Without using any multithreading construct, this is the version I came up with. Pretty lame it is</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">send_notification_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="n">status</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;result&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">prepare_message</span><span class="p">(</span><span class="mi">16182</span> <span class="p">,</span> <span class="mi">16182</span><span class="p">,</span> <span class="s">&#39;Android&#39;</span><span class="p">,</span> <span class="s">&#39;This is a text message&#39;</span><span class="p">)</span>  
+
+    <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+        <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+ 
+    <span class="k">def</span> <span class="nf">_error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+            <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+           
+    <span class="n">pubnub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s">&#39;16182&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mo">001</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;success&#39;</span></code></pre></figure>
+ 
+
+<p>Here without using any threading constucts, we are using a <code>while</code> loop with a <code>sleep</code> which is busy waiting.</p>
+
+<p>How do we make it better? Enter <a href="https://docs.python.org/2/library/threading.html#condition-objects">Condition Objects</a></p>
+
+<p>Using Condition Objects, we can make a very simple version of <code>CountDownLatch</code> as follows:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">threading</span>
+
+<span class="k">class</span> <span class="nc">CountDownLatch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Condition</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">count_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">await</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></code></pre></figure>
+ 
+
+<p>With this construct, we can improve our existing version of code significantly as follows:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">send_notification_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">latch</span> <span class="o">=</span> <span class="n">CountDownLatch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;result&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">prepare_message</span><span class="p">(</span><span class="mi">16182</span> <span class="p">,</span> <span class="mi">16182</span><span class="p">,</span> <span class="s">&#39;Android&#39;</span><span class="p">,</span> <span class="s">&#39;This is a text message&#39;</span><span class="p">)</span>  
+
+    <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+        <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">latch</span><span class="o">.</span><span class="n">count_down</span><span class="p">()</span>
+ 
+    <span class="k">def</span> <span class="nf">_error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+        <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">latch</span><span class="o">.</span><span class="n">count_down</span><span class="p">()</span>
+           
+    <span class="n">pubnub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s">&#39;16182&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
+
+    <span class="n">latch</span><span class="o">.</span><span class="n">await</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">status</span><span class="p">[</span><span class="s">&#39;result&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;success&#39;</span></code></pre></figure>
+ 
+
+<p>The above method doesn&#39;t uses a spinlock or busy waiting</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/programming">Programming</a> |
+					
+						<a href="/blog/tags/python">Python</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2015/11/02/countdownlatch-python/';
+  var disqus_title = 'CountDownLatch in Python using Condition Objects';
+  var disqus_url = 'http://madhur.co.in/blog/2015/11/02/countdownlatch-python.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2015 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+</body>
+
+</html>
