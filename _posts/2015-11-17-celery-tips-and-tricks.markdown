@@ -14,7 +14,7 @@ tags:
 Recently, we implemented the [Celery Task queue](http://docs.celeryproject.org/en/latest/index.html) in our production environment for variety of scheduled and periodic tasks. Just to give few numbers, it processes more than 10 million tasks per day, all of which are external HTTP based calls. During the development phase, we encountered various experiences, some of which have been documented below. In my opinion, Celery seems to be more dominant choice where Python is the primary programming language. However, we integrated it with our J2EE based system with quite ease. Perhaps, it is less a question of celery's ability to interoperate,  rather it is more a question of how much your development team is willing to go outside Java's ecosystem and look for alternatives for systems such as [Jesque](https://github.com/gresrun/jesque)
 
 
-> Celery is a simple, flexible and reliable distributed system to process vast amounts of messages, while providing operations with the    > tools required to maintain such a system.
+> Celery is a simple, flexible and reliable distributed system to process vast amounts of messages, while providing operations with the tools required to maintain such a system.
 
 > It’s a task queue with focus on real-time processing, while also supporting task scheduling.
 
@@ -74,7 +74,7 @@ def divbad_noretry(self):
 	return c
 {% endhighlight %}
 
-	We can blindly put the `except` block with a retry logic, but this is a terrible idea. The tasks will now go into infinite retry loop causing waste of CPU resources unless [back off](https://en.wikipedia.org/wiki/Exponential_backoff) is used
+We can blindly put the `except` block with a retry logic, but this is a terrible idea. The tasks will now go into infinite retry loop causing waste of CPU resources unless [back off](https://en.wikipedia.org/wiki/Exponential_backoff) is used
 
 {% highlight Python %}
 @app.task(default_retry_delay = 5, bind = True, max_retries = None)
@@ -90,7 +90,7 @@ def divbad_retry(self):
 	return c
 {% endhighlight %}
 
-	Another example is a programming mistake, for example:
+Another example is a programming mistake, for example:
 
 {% highlight Python %}
 @app.task(default_retry_delay = 5, bind = True, max_retries = None)
@@ -101,7 +101,7 @@ def codebad_noretry(self):
 	return c	
 {% endhighlight %}
 
-	Here the variable `d` is getting printed without getting defined. The `except` and `retry` logic below is also unnecessary. The better solution is to resolve the programming error.
+Here the variable `d` is getting printed without getting defined. The `except` and `retry` logic below is also unnecessary. The better solution is to resolve the programming error.
 
 {% highlight Python %}
 @app.task(default_retry_delay = 5, bind = True, max_retries = None)
