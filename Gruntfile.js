@@ -179,6 +179,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default', ['connect:server', 'watch']);
     grunt.registerTask('jekyll', ['connect:server1']);
-    grunt.registerTask('testdeploy', ['shell:jekyllBuild', 'uglify:js', 'cssmin', 'nojekyll']);
-    grunt.registerTask('deploy', ['shell:jekyllBuild', 'uglify:js', 'cssmin', 'nojekyll', 'git']);
+    grunt.registerTask('deploy', ['shell:jekyllBuild', 'uglify:js', 'cssmin', 'nojekyll']);
+    grunt.registerTask('pushdeploy', ['shell:jekyllBuild', 'uglify:js', 'cssmin', 'nojekyll', 'git']);
 };
