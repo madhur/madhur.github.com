@@ -4,7 +4,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Using MakeFile with Assembly Programming &#8211; </title>
+    
+        <title>Using MakeFile with Assembly Programming &#8211; Madhur Ahuja</title>
+    
+
     <meta name="author" content="Madhur Ahuja" />
     <meta name="description" content=" Using MakeFile with Assembly Programming" />
 
@@ -21,6 +24,8 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
     <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
@@ -32,7 +37,6 @@
 </head>
 
 <body>
-
 
     <div class="container">
        
@@ -251,7 +255,7 @@ and use that as a command to assembly and link the program from <a href="http://
 
 <p>Note that all the above tools should be put preferable in the PATH variable for easy access. I do this by creating a simple command script as follows:</p>
 
-<figure class="highlight"><pre><code class="language-text" data-lang="text">setx PATH &quot;f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;&quot;</code></pre></figure>
+<figure class="highlight"><pre><code class="language-text" data-lang="text">setx PATH "f:\common tools\git\bin;f:\common tools\python\app;f:\common tools\python\app\scripts;f:\common tools\ruby\bin;f:\masm32\bin;F:\Borland\BCC55\Bin;"</code></pre></figure>
     
 
 <p>I am going to show you some scenarios here on how I am using Makefiles to assemble and link my programs. Note that this is not a tutorial for using makefiles. I assume you have some basic familiarity with it. </p>
@@ -263,27 +267,27 @@ and use that as a command to assembly and link the program from <a href="http://
 <figure class="highlight"><pre><code class="language-makefile" data-lang="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
 <span class="nv">ML</span><span class="o">=</span>ml
 <span class="nv">DEBUG</span> <span class="o">=</span> 1
-<span class="err">!IF</span> <span class="k">$(</span><span class="nv">DEBUG</span><span class="k">)</span><span class="err">==1</span>
+<span class="err">!IF</span> <span class="err">$(DEBUG)==1</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
 <span class="err">!ELSE</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
 <span class="err">!ENDIF</span>
 <span class="nv">LDFLAGS</span><span class="o">=</span>
 <span class="nv">SOURCES</span><span class="o">=</span>trans.asm
-<span class="nv">OBJECTS</span><span class="o">=</span><span class="k">$(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="k">)</span>
+<span class="nv">OBJECTS</span><span class="o">=</span><span class="err">$</span><span class="o">(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="o">)</span>
 <span class="nv">PROJ</span><span class="o">=</span>trans.exe
 
 
-<span class="nf">$(PROJ)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
-    link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB <span class="k">$(</span>OBJECTS<span class="k">)</span>
+<span class="nl">$(PROJ)</span><span class="o">:</span> <span class="nf">$(OBJECTS)</span>
+    link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="nv">$(MASMPATH)</span><span class="se">\L</span>IB <span class="nv">$(OBJECTS)</span>
     
-<span class="nf">$(OBJECTS)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">SOURCES</span><span class="k">)</span>
-    <span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
+<span class="nl">$(OBJECTS)</span><span class="o">:</span> <span class="nf">$(SOURCES)</span>
+    <span class="nv">$(ML)</span> <span class="nv">$(CFLAGS)</span> <span class="nv">$(MASMPATH)</span><span class="se">\i</span>nclude <span class="nv">$(SOURCES)</span> 
     
-<span class="nf">clean</span><span class="o">:</span>
-    del *.exe
-    del *.obj
-    del *.lst</code></pre></figure>
+<span class="nl">clean</span><span class="o">:</span>
+    del <span class="k">*</span>.exe
+    del <span class="k">*</span>.obj
+    <span class="err">del *.lst</span></code></pre></figure>
         
 
 <ul>
@@ -293,7 +297,7 @@ and use that as a command to assembly and link the program from <a href="http://
 <figure class="highlight"><pre><code class="language-makefile" data-lang="makefile"><span class="nv">MASMPATH</span><span class="o">=</span>F:<span class="se">\M</span>ASM32
 <span class="nv">ML</span><span class="o">=</span>ml
 <span class="nv">DEBUG</span> <span class="o">=</span> 1
-<span class="err">!IF</span> <span class="k">$(</span><span class="nv">DEBUG</span><span class="k">)</span><span class="err">==1</span>
+<span class="err">!IF</span> <span class="err">$(DEBUG)==1</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Zd /Zi /Fl /Sn /nologo /I
 <span class="err">!ELSE</span>
 <span class="nv">CFLAGS</span><span class="o">=</span>/c /coff /Fl /Sn /nologo /I
@@ -301,22 +305,22 @@ and use that as a command to assembly and link the program from <a href="http://
 <span class="nv">LDFLAGS</span><span class="o">=</span>
 <span class="nv">SOURCES</span><span class="o">=</span>vaoffset.asm
 <span class="nv">RESOURCES</span><span class="o">=</span>vaoffset.rc
-<span class="nv">OBJECTS</span><span class="o">=</span><span class="k">$(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="k">)</span> vaoffset.res
+<span class="nv">OBJECTS</span><span class="o">=</span><span class="err">$</span><span class="o">(</span>SOURCES:.asm<span class="o">=</span>.obj<span class="o">)</span> vaoffset.res
 <span class="nv">PROJ</span><span class="o">=</span>vaoffset.exe
 
 
-<span class="nf">$(PROJ)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
-    link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\L</span>IB /LIBPATH:f:<span class="se">\p</span>rojects<span class="se">\p</span>rograms<span class="se">\w</span>insock<span class="se">\n</span>etsend <span class="k">$(</span>OBJECTS<span class="k">)</span>
+<span class="nl">$(PROJ)</span><span class="o">:</span> <span class="nf">$(OBJECTS)</span>
+    link /NOLOGO /SUBSYSTEM:WINDOWS /LIBPATH:<span class="nv">$(MASMPATH)</span><span class="se">\L</span>IB /LIBPATH:f:<span class="se">\p</span>rojects<span class="se">\p</span>rograms<span class="se">\w</span>insock<span class="se">\n</span>etsend <span class="nv">$(OBJECTS)</span>
     
-<span class="nf">$(OBJECTS)</span><span class="o">:</span> <span class="k">$(</span><span class="nv">SOURCES</span><span class="k">)</span>
-    <span class="k">$(</span>ML<span class="k">)</span> <span class="k">$(</span>CFLAGS<span class="k">)</span> <span class="k">$(</span>MASMPATH<span class="k">)</span><span class="se">\i</span>nclude <span class="k">$(</span>SOURCES<span class="k">)</span> 
-    C:<span class="se">\B</span>orland<span class="se">\B</span>CC55<span class="se">\B</span>in<span class="se">\b</span>rcc32.exe vaoffset.rc
+<span class="nl">$(OBJECTS)</span><span class="o">:</span> <span class="nf">$(SOURCES)</span>
+    <span class="nv">$(ML)</span> <span class="nv">$(CFLAGS)</span> <span class="nv">$(MASMPATH)</span><span class="se">\i</span>nclude <span class="nv">$(SOURCES)</span> 
+    C:<span class="se">\B</span>orland<span class="se">\B</span>CC55<span class="se">\B</span><span class="k">in</span><span class="se">\b</span>rcc32.exe vaoffset.rc
     
     
-<span class="nf">clean</span><span class="o">:</span>
-    del *.exe
-    del *.obj
-    del *.lst
+<span class="nl">clean</span><span class="o">:</span>
+    del <span class="k">*</span>.exe
+    del <span class="k">*</span>.obj
+    del <span class="k">*</span>.lst
     </code></pre></figure>
             
 

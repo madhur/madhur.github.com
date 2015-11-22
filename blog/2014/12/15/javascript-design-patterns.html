@@ -4,7 +4,10 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Useful Javascript Design patterns &#8211; </title>
+    
+        <title>Useful Javascript Design patterns &#8211; Madhur Ahuja</title>
+    
+
     <meta name="author" content="Madhur Ahuja" />
     <meta name="description" content=" Useful Javascript Design patterns" />
 
@@ -21,6 +24,8 @@
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
     <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
     <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
     
 
@@ -32,7 +37,6 @@
 </head>
 
 <body>
-
 
     <div class="container">
        
@@ -232,86 +236,88 @@
 </ul>
 
 <p>A function can be passed as a pointer and wrapped in a call.</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="kd">var</span> <span class="nx">work</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;working hard&quot;</span><span class="p">);</span>
-<span class="p">}</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var work = function()
+{
+    console.log("working hard");
+}
 
-<span class="kd">var</span> <span class="nx">doWork</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;starting&quot;</span><span class="p">);</span>
+var doWork = function(f)
+{
+    console.log("starting");
 
-    <span class="k">try</span>
-    <span class="p">{</span>
-        <span class="nx">f</span><span class="p">();</span>
-    <span class="p">}</span>
-    <span class="k">catch</span><span class="p">(</span><span class="nx">ex</span><span class="p">)</span>
-    <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">ex</span><span class="p">);</span>
-    <span class="p">}</span>
+    try
+    {
+        f();
+    }
+    catch(ex)
+    {
+        console.log(ex);
+    }
 
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;ending&quot;</span><span class="p">);</span>
-<span class="p">}</span>
+    console.log("ending");
+}
 
-<span class="nx">doWork</span><span class="p">(</span><span class="nx">work</span><span class="p">);</span>
+doWork(work);
+
 </code></pre></div>
 <ul>
 <li>Function to build modules</li>
 </ul>
 
 <p>Functions can be used as objects which has data, methods, private variables.</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">createWorker</span><span class="p">();</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var worker = createWorker();
 
-<span class="nx">worker</span><span class="p">.</span><span class="nx">job1</span><span class="p">();</span>
+worker.job1();
 
-<span class="nx">worker</span><span class="p">.</span><span class="nx">job2</span><span class="p">();</span>
+worker.job2();
 </code></pre></div>
 <p>How do we create something like above ?</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="kd">var</span> <span class="nx">createWorker</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="k">return</span>
-    <span class="p">{</span>
-        <span class="nx">job1</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">);</span>
-        <span class="p">},</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var createWorker = function()
+{
+    return
+    {
+        job1: function()
+        {
+            console.log("task1");
+        },
 
-        <span class="nx">job2</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">);</span>
-        <span class="p">}</span>
+        job2: function()
+        {
+            console.log("task2");
+        }
 
-    <span class="p">};</span>
+    };
 
-<span class="p">}</span>
+}
 </code></pre></div>
 <p>Or, even better</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="kd">var</span> <span class="nx">createWorker</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="c1">// Private variable</span>
-    <span class="kd">var</span> <span class="nx">workCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var createWorker = function()
+{
+    // Private variable
+    var workCount = 0;
 
-    <span class="kd">var</span> <span class="nx">task1</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-    <span class="p">};</span>
+    var task1 = function()
+    {
+        workCount+=1;
+        console.log("task1" + workCount);
+    };
 
-    <span class="kd">var</span> <span class="nx">task2</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-    <span class="p">};</span>
+    var task2 = function()
+    {
+        workCount+=1;
+        console.log("task2" + workCount);
+    };
 
-    <span class="k">return</span>
-    <span class="p">{</span>
-        <span class="nx">job1</span><span class="o">:</span> <span class="nx">task1</span><span class="p">,</span>
-        <span class="nx">job2</span><span class="o">:</span> <span class="nx">task2</span>
-    <span class="p">};</span>
+    return
+    {
+        job1: task1,
+        job2: task2
+    };
 
-<span class="p">};</span>
+};
 
-<span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">createWorker</span><span class="p">();</span>
+var worker = createWorker();
+
 </code></pre></div>
 <ul>
 <li>Eliminating global variables</li>
@@ -326,76 +332,80 @@
 <p>How can we eliminate global variables?</p>
 
 <p>One way is to wrap <code>createWorker</code> inside another function <code>program</code></p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="kd">var</span> <span class="nx">program</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">createWorker</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="c1">// Private variable</span>
-        <span class="kd">var</span> <span class="nx">workCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">
+var program = function()
+{
+    var createWorker = function()
+    {
+        // Private variable
+        var workCount = 0;
 
-        <span class="kd">var</span> <span class="nx">task1</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-        <span class="p">};</span>
+        var task1 = function()
+        {
+            workCount+=1;
+            console.log("task1" + workCount);
+        };
 
-        <span class="kd">var</span> <span class="nx">task2</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-        <span class="p">};</span>
+        var task2 = function()
+        {
+            workCount+=1;
+            console.log("task2" + workCount);
+        };
 
-        <span class="k">return</span>
-        <span class="p">{</span>
-            <span class="nx">job1</span><span class="o">:</span> <span class="nx">task1</span><span class="p">,</span>
-            <span class="nx">job2</span><span class="o">:</span> <span class="nx">task2</span>
-        <span class="p">};</span>
+        return
+        {
+            job1: task1,
+            job2: task2
+        };
 
-    <span class="p">};</span>
+    };
 
-    <span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">createWorker</span><span class="p">();</span>
-    <span class="nx">worker</span><span class="p">.</span><span class="nx">job1</span><span class="p">();</span>
-    <span class="nx">worker</span><span class="p">.</span><span class="nx">job2</span><span class="p">();</span>
+    var worker = createWorker();
+    worker.job1();
+    worker.job2();
 
-<span class="p">}</span>
+}
 
-<span class="nx">program</span><span class="p">();</span>
+program();
+
 </code></pre></div>
 <p>However, we still have one global variable <code>program</code>. How do we get down to zero ?</p>
 
 <p>Introducing <code>IFFE</code>  -  <code>immediately invoked function expression</code></p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript"><span class="p">(</span><span class="kd">function</span><span class="p">()</span>
-<span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">createWorker</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-    <span class="p">{</span>
-        <span class="c1">// Private variable</span>
-        <span class="kd">var</span> <span class="nx">workCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">
+(function()
+{
+    var createWorker = function()
+    {
+        // Private variable
+        var workCount = 0;
 
-        <span class="kd">var</span> <span class="nx">task1</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-        <span class="p">};</span>
+        var task1 = function()
+        {
+            workCount+=1;
+            console.log("task1" + workCount);
+        };
 
-        <span class="kd">var</span> <span class="nx">task2</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span>
-        <span class="p">{</span>
-            <span class="nx">workCount</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span> <span class="o">+</span> <span class="nx">workCount</span><span class="p">);</span>
-        <span class="p">};</span>
+        var task2 = function()
+        {
+            workCount+=1;
+            console.log("task2" + workCount);
+        };
 
-        <span class="k">return</span>
-        <span class="p">{</span>
-            <span class="nx">job1</span><span class="o">:</span> <span class="nx">task1</span><span class="p">,</span>
-            <span class="nx">job2</span><span class="o">:</span> <span class="nx">task2</span>
-        <span class="p">};</span>
+        return
+        {
+            job1: task1,
+            job2: task2
+        };
 
-    <span class="p">};</span>
+    };
 
-    <span class="kd">var</span> <span class="nx">worker</span> <span class="o">=</span> <span class="nx">createWorker</span><span class="p">();</span>
-    <span class="nx">worker</span><span class="p">.</span><span class="nx">job1</span><span class="p">();</span>
-    <span class="nx">worker</span><span class="p">.</span><span class="nx">job2</span><span class="p">();</span>
+    var worker = createWorker();
+    worker.job1();
+    worker.job2();
 
-<span class="p">}());</span>
+}());
+
 </code></pre></div>
 <p>Now, all variables are defined inside <code>iffy</code>. Lot of javascript libraries like Jquery use this design pattern.</p>
 
