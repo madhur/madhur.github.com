@@ -4,13 +4,40 @@
  <title>Madhur's Blog</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2015-11-22T08:24:09+05:30</updated>
+ <updated>2015-11-29T21:57:51+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Flexbox is not supported Android 4.3 and below</title>
+   <link href="http://madhur.co.in/blog/2015/11/29/flexbox-not-supported.html"/>
+   <updated>2015-11-29T00:00:00+05:30</updated>
+   <id>id:/blog/2015/11/29/flexbox-not-supported</id>
+   <content type="html">&lt;p&gt;One of our webview pages had a strange issue in production. We are using an angular component &lt;a href=&quot;https://github.com/rzajac/angularjs-slider&quot;&gt;angularjs-slider&lt;/a&gt; on one of our pages. On some of the devices, the width of this component was way lesser than we had defined in our code (around 90% of the width of page)&lt;/p&gt;
+
+&lt;p&gt;More analysis revealed that the issue occurred on only pre-kitkat devices. The strange thing was that we were using other controls like normal &lt;code&gt;input&lt;/code&gt; and &lt;code&gt;label&lt;/code&gt; but they were not affected. We tried every CSS tweak to solve this issue but no avail.&lt;/p&gt;
+
+&lt;p&gt;And then, I stumbled upon this &lt;a href=&quot;https://github.com/driftyco/ionic/issues/998&quot;&gt;issue&lt;/a&gt;. Turned out that this issue was because of ionic framework. &lt;a href=&quot;http://ionicframework.com/&quot;&gt;Ionic framework&lt;/a&gt; by default uses &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Using_CSS_flexible_boxes&quot;&gt;Flexible Box Layout Module&lt;/a&gt; called as &lt;code&gt;flex&lt;/code&gt; in short. As per &lt;a href=&quot;http://caniuse.com/#feat=flexbox&quot;&gt;this&lt;/a&gt; &lt;code&gt;flex&lt;/code&gt; is only supported on Android 4.4 and above.&lt;/p&gt;
+
+&lt;h3&gt;Solution&lt;/h3&gt;
+
+&lt;p&gt;The solution was just a one line change where we override the &lt;code&gt;display&lt;/code&gt; property to &lt;code&gt;block&lt;/code&gt; instead of &lt;code&gt;flex&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;item range range-item&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+     &lt;span class=&quot;nt&quot;&gt;&amp;lt;rzslider&lt;/span&gt;  &lt;span class=&quot;na&quot;&gt;rz-slider-model=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;data.experience&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-floor=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt;   &lt;span class=&quot;na&quot;&gt;rz-slider-text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; years&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-min-lable=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;1 year&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-max-lable=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10+ years&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-exp-silder-id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;expSlider&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-ceil=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;11&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/rzslider&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;changed to &lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;item range range-item&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;style=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;display:block&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+     &lt;span class=&quot;nt&quot;&gt;&amp;lt;rzslider&lt;/span&gt;  &lt;span class=&quot;na&quot;&gt;rz-slider-model=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;data.experience&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-floor=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt;   &lt;span class=&quot;na&quot;&gt;rz-slider-text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot; years&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-min-lable=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;1 year&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-max-lable=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10+ years&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-exp-silder-id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;expSlider&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rz-slider-ceil=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;11&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/rzslider&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Scaling Celery Task queue</title>
@@ -1266,137 +1293,6 @@ The next Max is: 80
             }
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
- </entry>
- 
- <entry>
-   <title>Building Git 2.0.0 from sources on Windows</title>
-   <link href="http://madhur.co.in/blog/2014/06/08/guidebuildgit2.html"/>
-   <updated>2014-06-08T00:00:00+05:30</updated>
-   <id>id:/blog/2014/06/08/guidebuildgit2</id>
-   <content type="html">&lt;blockquote&gt;
-&lt;p&gt;Interested in binaries? Git 2.0.0 build can be fetched from my Github repo &lt;a href=&quot;https://github.com/madhur/msysgit-2.0.0&quot;&gt;https://github.com/madhur/msysgit-2.0.0&lt;/a&gt; 
-Note that I have not tested it thoroughly myself. If you face any issues, do bring it to my notice but I am in no way responsible for it. Use it at your own risk.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://git.kernel.org/cgit/git/git.git/tree/Documentation/RelNotes/2.0.0.txt&quot;&gt;Git 2.0.0&lt;/a&gt; just released few days back. &lt;/p&gt;
-
-&lt;p&gt;As of this writing, &lt;a href=&quot;http://msysgit.github.io/&quot;&gt;MsysGit for Windows&lt;/a&gt; has latest version 1.9.2 available for download.&lt;/p&gt;
-
-&lt;p&gt;Eager to try out this new version, I decided to build it myself. &lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Download MysysGit build environment for Windows from here - &lt;a href=&quot;https://github.com/msysgit/msysgit&quot;&gt;https://github.com/msysgit/msysgit&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Place it in a directory such as &lt;code&gt;C:\gitbuild&lt;/code&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Download Git 2.0.0 sources from here - &lt;a href=&quot;https://github.com/msysgit/git&quot;&gt;https://github.com/msysgit/git&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Copy this entire source into the &lt;code&gt;git&lt;/code&gt; directory  in &lt;code&gt;C:\gitbuild\git&lt;/code&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Note: Actually, the git repository in the first step has a submodule pointing to the second repository in &lt;code&gt;C:\gitbuild\git&lt;/code&gt;. If you are familiar with Git          &amp;gt; submodules, you can download via submodule command as well.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Execute &lt;code&gt;msys.bat&lt;/code&gt; from &lt;code&gt;C:\gitbuild\&lt;/code&gt;. You should be now in bash console as follows:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Welcome to msysGit
-
-
-Run &#39;git help git&#39; to display the help index.
-Run &#39;git help &amp;lt;command&amp;gt;&#39; to display help for specific commands.
-Run &#39;/share/msysGit/add-shortcut.tcl&#39; to add a shortcut to msysGit.
-
-It appears that you installed msysGit using the full installer.
-To set up the Git repositories, please run /share/msysGit/initialize.sh
-
-madhur@MADHUR-PC /
-$&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Note: In some envrionments, the build process should automatically begin after executing msys.bat. If it doesn&amp;#39;t go to the next step.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;cd&lt;/code&gt; to &lt;code&gt;C:\gitbuild\git&lt;/code&gt; and execute &lt;code&gt;make&lt;/code&gt; command. The build process should now begin:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;C:\gitbuild&amp;gt;msys.bat
-
--------------------------------------------------------
-Building and Installing Git
--------------------------------------------------------
-GIT_VERSION = 2.0.0
-    * new build flags
-    CC credential-store.o
-    * new link flags
-    CC abspath.o
-    CC advice.o
-    CC alias.o
-    CC alloc.o
-    CC archive.o
-    CC archive-tar.o&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Once the build is complete, you may exit the bash shell.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The build process automatically places the git binaries in &lt;code&gt;C:\gitbuild\bin&lt;/code&gt;. To confirm you have successfully built, &lt;code&gt;cd&lt;/code&gt; to &lt;code&gt;C:\gitbuild\bin&lt;/code&gt; and execute &lt;code&gt;git.exe&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;C:\gitbuild\bin&amp;gt;git --version
-git version 2.0.0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Congratulations you have just built Git 2.0.0 from sources. However, there are some quirks and tweaks required to be corrected, which we cover in next steps.&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;code&gt;git gui&lt;/code&gt; command throws an error as follows:&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;git-gui: line 3: exec: wish: not found
-fatal: &#39;gui&#39; appears to be a git command, but we were not
-able to execute it. Maybe git-gui is broken?&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The reason of error is because &lt;code&gt;git gui&lt;/code&gt; depends on &lt;code&gt;Tcl/Tl 8.5.13&lt;/code&gt; package. I just copied the following files and folders from my old build and it works fine.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;git\lib\tcl8&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\lib\tcl8.5&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\lib\tk8.5&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\lib\tclConfig.sh&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\lib\tkConfig.sh&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\wish.exe&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\wish85.exe&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\tcl85.dll&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\tclpip85.dll&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\tclsh.exe&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\tclsh85.exe&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;git\bin\tk85.exe&lt;/code&gt;  &lt;/p&gt;
-
-&lt;p&gt;After copying these files, &lt;code&gt;git gui&lt;/code&gt; should work fine.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;At this point, you have working version of Git 2.0.0 and you can remove the sources if you want.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;If you get the error &lt;code&gt;fatal: unable to access &amp;#39;.....git/&amp;#39;: SSL certificate problem: unable to get local issuer certificate&lt;/code&gt; , you may have to put 
-this line in your .gitconfig. Replace &lt;code&gt;d&lt;/code&gt; with your drive letter.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[http]
-    sslCAinfo = d:/gitbuild/mingw/bin/curl-ca-bundle.crt&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-&lt;li&gt;You can also place your ssh private and public key in the &lt;code&gt;.ssh&lt;/code&gt; folder in &lt;code&gt;C:\gitbuild&lt;/code&gt; in order to work with Github&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;ssh -T git@github.com
-Warning: Permanently added the RSA host key for IP address &#39;x.x.x.x&#39; to the list of known hosts.
-Enter passphrase for key &#39;/.ssh/id_rsa&#39;:
-Hi madhur! You&#39;ve successfully authenticated, but GitHub does not provide shell access.&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-</content>
  </entry>
  
  
