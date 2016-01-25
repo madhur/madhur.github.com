@@ -5,13 +5,14 @@ layout: project
 
 <div class="row">
 {% for project in site.data.projects %}		
+
 {% assign item = project[1] %}
 
 {% for member in item.projects %}		
 
 {% if member.publish == true %}
 
-	<div class="col-md-4 col-xs-12 col-sm-6 col-lg-4">
+ 	<div class="col-md-4 col-xs-12 col-sm-6 col-lg-4">
 	<div class="panel panel-default">
 
 		<div class="project-title panel-title">
@@ -28,7 +29,7 @@ layout: project
 		</div>
 		
 	</div>
-	</div>
+	</div> 
 
 {% endif %}
 
