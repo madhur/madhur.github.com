@@ -56,8 +56,8 @@ Notification system allows you to specify what star level words you want to be s
 A statistics page give percentage of each of starred, half starred and un-starred words.
 
 <a href="https://play.google.com/store/apps/details?id=in.co.madhur.vocabbuilder">
-  <img alt="Get it on Google Play"
-       src="http://developer.android.com/images/brand/en_generic_rgb_wo_45.png" />
+ <img alt="Get it on Google Play"
+       src="/images/Get_it_on_Google_play.svg" />
 </a>
 
 

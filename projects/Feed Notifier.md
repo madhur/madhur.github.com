@@ -38,7 +38,7 @@ Features:
 
 <a href="https://play.google.com/store/apps/details?id=in.co.madhur.dashclockfeedlyextension">
   <img alt="Get it on Google Play"
-       src="http://developer.android.com/images/brand/en_generic_rgb_wo_45.png" />
+       src="/images/Get_it_on_Google_play.svg" />
 </a>
 
 	 
