@@ -4,13 +4,57 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2016-01-05T00:05:45+05:30</updated>
+ <updated>2016-01-26T12:11:06+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>NSImage Caching</title>
+   <link href="http://madhur.co.in/blog/2016/01/25/using-ns-image.html"/>
+   <updated>2016-01-25T00:00:00+05:30</updated>
+   <id>id:/blog/2016/01/25/using-ns-image</id>
+   <content type="html">&lt;p&gt;Recently, I encountered an issue where an &lt;code&gt;NSImage&lt;/code&gt; instance was cached inspite of setting &lt;code&gt;NSImageCacheMode.Never&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Specifically, the issue was:&lt;br&gt;
+I have bunch of images in my assets. What I am trying to do is render the image in status bar of OSX as following:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSImage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;named&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;statusIcon&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;statusItem&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;statusItem&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;menu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;statusMenu&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;and also using it in one of my view which opens:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;&lt;span class=&quot;k&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dayIcon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSImage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;named&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;statusIcon&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The problem is as soon as I set the status bar image, the image in the view also changes, i.e. both the color and the size(changes to 18x18)&lt;/p&gt;
+
+&lt;p&gt;I have tried using &lt;code&gt;icon?.cacheMode = NSImageCacheMode.Never&lt;/code&gt; but there is no effect.&lt;/p&gt;
+
+&lt;h3&gt;Solution&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;[NSImage imageNamed:]&lt;/code&gt; may return an existing cached instance of the image.&lt;/p&gt;
+
+&lt;p&gt;They are not, and that is, indeed, your problem.&lt;/p&gt;
+
+&lt;p&gt;If you want to change the size on the image without affecting anyone else who may be holding a reference, make a copy of it. The copy of the NSImage is lightweight - it doesn&amp;#39;t duplicate the underlying image representations which hold the rendering (bitmap, in the PNG case) data.&lt;/p&gt;
+
+&lt;p&gt;This is the correct code:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-swift&quot; data-lang=&quot;swift&quot;&gt;&lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSImage&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;named&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;statusIcon&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as!&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSImage&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;NSSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;template&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;statusItem&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;icon&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;statusItem&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;menu&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;statusMenu&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Google groups for Developers</title>
@@ -941,111 +985,6 @@ program();
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Now, all variables are defined inside &lt;code&gt;iffy&lt;/code&gt;. Lot of javascript libraries like Jquery use this design pattern.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Multiboot: Booting linux from ISO placed in HDD via GRUB</title>
-   <link href="http://madhur.co.in/blog/2014/10/18/linux-multiboot.html"/>
-   <updated>2014-10-18T00:00:00+05:30</updated>
-   <id>id:/blog/2014/10/18/linux-multiboot</id>
-   <content type="html">&lt;p&gt;I am a big fan of Linux and want to frequently try out various distributions such as &lt;a href=&quot;http://www.linuxmint.com/&quot;&gt;Mint&lt;/a&gt;, &lt;a href=&quot;http://www.ubuntu.com/&quot;&gt;Ubuntu&lt;/a&gt;, &lt;a href=&quot;http://www.kali.org/&quot;&gt;Kali&lt;/a&gt; and &lt;a href=&quot;https://www.archlinux.org/&quot;&gt;ArchLinux&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Though my main system is Linux 16, I use ISO placed in my HDD to boot and try these various distributions whenever I like.
-What are the advatages:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;No messing up with partitions on HDD&lt;/li&gt;
-&lt;li&gt;No installation required&lt;/li&gt;
-&lt;li&gt;Most major flavours support live booting&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Disadvantages:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Changes are not persisted&lt;/li&gt;
-&lt;li&gt;Can take some time to initially setup&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I will describe how it can be done with very minimnal conifuration and hassle.&lt;/p&gt;
-
-&lt;p&gt;We are going to setup the multiboot configuration of following OS. They will be booted entirely from ISO placed in HDD &lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Gparted Live CD (ISO)&lt;/li&gt;
-&lt;li&gt;Kali Linux (ISO)&lt;/li&gt;
-&lt;li&gt;Linux Mint 17 (ISO)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I assume you are running any Linux distribution with &lt;a href=&quot;http://www.gnu.org/software/grub/&quot;&gt;GRUB&lt;/a&gt; as the bootloader.&lt;/p&gt;
-
-&lt;p&gt;First download the ISO&amp;#39;s for the distributions you want to boot. For this article, I downloaded the above 3 from:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://gparted.org/download.php&quot;&gt;http://gparted.org/download.php&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.kali.org/downloads/&quot;&gt;http://www.kali.org/downloads/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.linuxmint.com/download.php&quot;&gt;http://www.linuxmint.com/download.php&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Place it in any directory in your root partition. In my case I dropped them in  &lt;code&gt;~/isos/&lt;/code&gt; as &lt;code&gt;kali.iso&lt;/code&gt;, &lt;code&gt;mint17.iso&lt;/code&gt; and &lt;code&gt;gparted-live.iso&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, edit your grub configuration to add the custom entries. The file we are looking to edit is &lt;code&gt;/etc/grub.d/40_custom&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Here is my configuration:&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;menuentry &quot;Gparted live&quot; {
-    insmod ntfs
-    insmod iso9660
-
-      set isofile=&quot;/home/madhur/isos/gparted-live.iso&quot;
-      loopback loop (hd0,msdos2)$isofile
-      linux (loop)/live/vmlinuz boot=live config union=aufs noswap noprompt vga=788 ip=frommedia toram=filesystem.squashfs findiso=$isofile nomodeset
-      initrd (loop)/live/initrd.img
-    }
-
-
-menuentry &quot;Mint 17&quot; {
-    insmod ntfs
-    insmod iso9660
-
-      set isofile=&quot;/home/madhur/isos/mint17.iso&quot;
-      loopback loop (hd0,msdos2)$isofile
-      linux (loop)/casper/vmlinuz file=/cdrom/preseed/linuxmint.seed iso-scan/filename=$isofile boot=casper debug --verbose nomodeset
-      initrd (loop)/casper/initrd.lz
-    }
-
-
-
-menuentry &quot;Kali&quot; {
-    insmod ntfs
-    insmod iso9660
-
-      set isofile=&quot;/home/madhur/isos/kali.iso&quot;
-      loopback loop (hd0,msdos2)$isofile
-      linux (loop)/live/vmlinuz boot=live noconfig=sudo username=root hostname=kali findiso=$isofile debug --verbose nomodeset
-      initrd (loop)/live/initrd.img
-    }
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Some of the parameters deserve explanation:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;insmod ntfs&lt;/code&gt; and &lt;code&gt;insmod iso9660&lt;/code&gt; load the ntfs and iso kernel modules if they are not loaded&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;debug --verbose&lt;/code&gt; will disable the splash screen and show the textual boot screen while loading. This can be helpful to see if something goes wrong.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;nomodeset&lt;/code&gt; will defer loading the Video drivers and will force fallback to BIOS for display. You might not need it. However, it was required in my case as my 
-graphics card (Nvidia GeForce 750 Ti) was not detected.&lt;/li&gt;
-&lt;li&gt; &lt;code&gt;(hd0, msdos2)&lt;/code&gt; this needs to be changed to reflect the disk# and partition# of partition where ISO&amp;#39;s are located. Here &lt;code&gt;hd0&lt;/code&gt; means the first hard disk and &lt;code&gt;msdos2&lt;/code&gt; means second partition. Note that in grub disk numbering  starts from zero while partition numbering starts from 1. Weird.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Once done with all the changes, fire &lt;code&gt;sudo update-grub&lt;/code&gt; to update your &lt;code&gt;grub.cfg&lt;/code&gt; with these changes.&lt;/p&gt;
-
-&lt;h3&gt;Troubleshooting&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Note that you might not just get this right in first go. Things can go wrong and be prepared for it.&lt;/li&gt;
-&lt;li&gt;Take special care of &lt;code&gt;(hd0, msdos2)&lt;/code&gt; to determine your correct configuration. It is not easy as /dev/sda1=(hd0, 1) and /dev/sdb1 = (hd1, 1). In my case /dev/sdc referred to hd0. Had hard time figuring out.&lt;/li&gt;
-&lt;li&gt;While booting from grub, you can press &lt;code&gt;e&lt;/code&gt; to edit the command line on the fly and try out various options wuch as commenting out &lt;code&gt;nomodeset&lt;/code&gt; and different combinations for &lt;code&gt;(hd#, msdos#)&lt;/code&gt;. Once you have figured out the correct option, update the &lt;code&gt;40_custom&lt;/code&gt; and execute &lt;code&gt;update-grub&lt;/code&gt; again.&lt;/li&gt;
-&lt;li&gt;You can also press &lt;code&gt;c&lt;/code&gt; on the grub screen to fall into grub terminal and execute command such as &lt;code&gt;ls (hd0, msdos2) /&lt;/code&gt; to see if that works.&lt;/li&gt;
-&lt;li&gt;Different distros have their specific command line options. Peek into the ISO file to look at &lt;code&gt;grub.cfg&lt;/code&gt; or &lt;code&gt;entries.cfg&lt;/code&gt; to determine the corrent command line boot options.&lt;/li&gt;
-&lt;/ul&gt;
 </content>
  </entry>
  
