@@ -36,5 +36,13 @@ layout: project
 {% endfor %}
 {% endfor %}
 
+
 </div>
 
+<div class="row">
+<div class="col-md-4 col-xs-12 col-sm-6 col-lg-4">
+
+<a href="/projects/old.html">View some of my legacy projects</a>
+
+</div>
+</div>
