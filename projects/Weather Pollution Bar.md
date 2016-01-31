@@ -14,12 +14,6 @@ A simple weather and pollution shortcut menu for OS X, written purely in [Apple 
 
 [![](/images/appstorebadge.svg)](https://itunes.apple.com/us/app/weather-pollution-bar/id1077958272?ls=1&mt=12)
 
-
-## Installation
-
-1. Download [Weather Pollution Bar](/projects/Weather Pollution Bar.html)
-2. Copy to Applications
-
 ## Credits
 The weather data is obtained from [OpenWeatherMap API](http://openweathermap.org/api)
 The pollution data is obtained from [CPCB](http://cpcb.nic.in/)
