@@ -1,5 +1,5 @@
 ---
-title: Projects
+title: Products
 layout: project
 ---
 
