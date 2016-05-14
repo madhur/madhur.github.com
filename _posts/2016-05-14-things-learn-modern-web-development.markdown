@@ -12,7 +12,7 @@ tags:
 - Web
 ---
 
-Almost 4 years ago, I wrote a blog post called [Future of Web and Mobile: HTML5, CSS3 and Javascript]([Some Link]({% post_url 2012-02-15-futurewebmobile %})), wherein I mentioned emergence of Javascript and explosion of Javascript frameworks such as [Jquery](http://jquery.com/), [Knockout](http://knockoutjs.com/) etc...
+Almost 4 years ago, I wrote a blog post called [Future of Web and Mobile: HTML5, CSS3 and Javascript]({% post_url 2012-02-15-futurewebmobile %}), wherein I mentioned emergence of Javascript and explosion of Javascript frameworks such as [Jquery](http://jquery.com/), [Knockout](http://knockoutjs.com/) etc...
 
 Fast forward to now, I see modern web development again going through a overwhelming change. There is tons of information out there which can be very confusing especially for beginners. The prime reason is there are new frameworks coming up such as [Angular 2](https://angular.io/) and [ReactJs](https://facebook.github.io/react/) which make use of [EcmaScript 6](https://github.com/lukehoban/es6features) features which is yet not fully finalized. And then there are more tools to convert your [ES6](https://github.com/lukehoban/es6features) code to plain old javascript a.k.a [ES5](https://en.wikipedia.org/wiki/ECMAScript)
 
@@ -33,7 +33,7 @@ Note that Babel just not ES6 to ES5 transpiler. It is also JSX to JavaScript tra
 NodeJs is a server side platform which allows you to build your backend in JavaScript language. Why I am mentioning it here? Because, even if you are not interested in bakend development, there is lot of front tooling which depends on NodeJs. It is good to get atleast familar with node and its command line tools.
 
 * [NPM](https://www.npmjs.com/)  
-NPM is the package manager for node. It is just like [pip]() for Python, ruby gems for Ruby and [Maven]() for Java. Learn how to install/remove/upgrade packages and especially [package.json](https://docs.npmjs.com/files/package.json) file structure.
+NPM is the package manager for node. It is just like [pip](https://pypi.python.org/pypi/pip) for Python, [ruby gems](https://rubygems.org/) for Ruby and [Maven](https://maven.apache.org/) for Java. Learn how to install/remove/upgrade packages and especially [package.json](https://docs.npmjs.com/files/package.json) file structure.
 
 * [Grunt](http://gruntjs.com/) and [Gulp](http://gulpjs.com/)   
 These are two most popular task runners available which run on Node platform. Technically, they are packages for npm. They allow you to automate many mundane frontend tasks such as Linting your source files, concatenating, minifying and deploying and much much more .... 
