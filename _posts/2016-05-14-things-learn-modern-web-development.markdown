@@ -35,7 +35,7 @@ NodeJs is a server side platform which allows you to build your backend in JavaS
 * [NPM](https://www.npmjs.com/)  
 NPM is the package manager for node. It is just like [pip](https://pypi.python.org/pypi/pip) for Python, [ruby gems](https://rubygems.org/) for Ruby and [Maven](https://maven.apache.org/) for Java. Learn how to install/remove/upgrade packages and especially [package.json](https://docs.npmjs.com/files/package.json) file structure.
 
-* [Grunt](http://gruntjs.com/) and [Gulp](http://gulpjs.com/)   
+* [Grunt](http://gruntjs.com/) or [Gulp](http://gulpjs.com/)   
 These are two most popular task runners available which run on Node platform. Technically, they are packages for npm. They allow you to automate many mundane frontend tasks such as Linting your source files, concatenating, minifying and deploying and much much more .... 
 
 * [Bower](http://bower.io/)  
@@ -46,8 +46,14 @@ The knowledge of above tools is enough for any basic front end development. I wi
 * [ReactJs](https://facebook.github.io/react/)  
 It is the most popular frontend library to build your views. Note that it is only a V in MVC and hence no comparison should be made with frameworks such as Angular. ReactJs is written in ES6 and can be transpiled to ES5 with Babel. It also uses [JSX](https://jsx.github.io/) which is also transpiled to Javascript using Babel.
 
-* [WebPack](https://webpack.github.io/) and [Browserify](http://browserify.org/)  
+* [WebPack](https://webpack.github.io/) or [Browserify](http://browserify.org/)  
 These are 2 most popular module bundlers. They can take your Js source code, identify right dependencies and emit a single Javascript file which can power your entire application. I prefer Webpack. Have a look at this [WebPack how to](https://github.com/petehunt/webpack-howto)
+
+* [Flux](https://facebook.github.io/flux/) or [Redux](http://redux.js.org/index.html)  
+React components are arranged in a hierarchy. Most of the time, your data model also follows a hierarchy. In these situations Flux doesn’t buy you much. Sometimes, however, your data model is not hierarchical. When your React components start to receive props that feel extraneous, or you have a small number of components starting to get very complex, then you might want to look into Flux.
+
+* [Immutable.js](https://facebook.github.io/immutable-js/)  
+Immutable.js provides a set of data structures that can help to solve certain performance issues when building React apps. It's a great library, and you'll probably use it a lot in your apps moving forward, but it's completely unnecessary until you have an appreciation of the performance implications.
 
 * [Angular 2](https://angular.io/)  
 Angualr 2 is the next version of one of the most popular MVC framework for Javascript. It is completely re-designed and has a steep learning curve. Comes with full support of two way data binding. Careful evalaution need to be made if Angular2 is the right choice for the development. Its not released for production as of writing.

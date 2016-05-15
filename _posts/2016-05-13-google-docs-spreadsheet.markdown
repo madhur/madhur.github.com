@@ -78,6 +78,19 @@ This will print the following output on console:
 {'Col C': '3', 'Col B': '4', 'Col A': '2', 'Col D': '1'}
 {% endhighlight %}
 
+Incase, we are using unicode characters with our file. We can make use of [unicodecsv](https://pypi.python.org/pypi/unicodecsv) module. It is a drop in replacement of the `csv` module.
+
+{% highlight python %}
+import unicodecsv as csv
+reader = csv.reader(
+        urllib2.urlopen(url),
+        encoding='utf-8'
+    )
+
+for row in reader:
+{% endhighlight %}
+
+
 The complete program is given in this [gist](https://gist.github.com/madhur/13ef5a810d495e9c638232263ea49fd5) and as well as below. You just need to replace the `file_id` parameter to start using it. Feel free to fork it :)
 
 <script src="https://gist.github.com/madhur/13ef5a810d495e9c638232263ea49fd5.js"></script>
