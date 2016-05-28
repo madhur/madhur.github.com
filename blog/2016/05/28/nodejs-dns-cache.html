@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    
+        <title>Speeding up Node.js HTTP requests with DNS caching &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Speeding up Node.js HTTP requests with DNS caching" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Speeding up Node.js HTTP requests with DNS caching</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2016-05-28 00:00:00 +0530" pubdate="pubdate">28 May 2016</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+  
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>I recently discovered in one of my projects that results of DNS are not cached by <a href="https://nodejs.org/en/">NodeJs</a>. Caching the results of DNS queries is one of the important things and can dramatically improve the speed and scalability of your application. In our application, we saw the number of HTTP requests jump from 35 to 2500 per seconds which is an almost 100x factor.</p>
+
+<h2>How to cache results of DNS queries</h2>
+
+<p>One way could be to use a caching DNS library for Node such as <a href="https://www.npmjs.com/package/dnscache">DnsCache</a>. Once this module is installed via <code>npm install dnscache</code> , every call to a dns method is first looked into the local cache, in case of cache hit the value from cache is returned, in case of cache miss the original dns call is made and the return value is cached in the local cache.</p>
+
+<p>It is very similar to GOF Proxy design pattern providing a Cache Proxy.</p>
+
+<p>The goal of this module is to cache the most used/most recent dns calls, to avoid the network delay and improve the performance.</p>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">dns</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'dns'</span><span class="p">),</span>
+    <span class="nx">dnscache</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'dnscache'</span><span class="p">)({</span>
+        <span class="s2">"enable"</span> <span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="s2">"ttl"</span> <span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="s2">"cachesize"</span> <span class="p">:</span> <span class="mi">1000</span>
+    <span class="p">});</span>
+    
+    <span class="c1">//to use the cached dns either of dnscache or dns can be called. </span>
+    <span class="c1">//all the methods of dns are wrapped, this one just shows lookup on an example </span>
+    
+    <span class="c1">//will call the wrapped dns </span>
+    <span class="nx">dnscache</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">'www.yahoo.com'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//do something with result </span>
+    <span class="p">});</span>
+    
+    <span class="c1">//will call the wrapped dns </span>
+    <span class="nx">dns</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">'www.google.com'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">//do something with result </span>
+    <span class="p">});</span></code></pre></figure>
+
+<p>Second way is to cache the results of queries at OS level. This is my preferred way as your application does not have to worry about caching as it is done automatically by OS for you. There are many DNS caching resolvers available such as: <a href="https://www.isc.org/downloads/bind/">Bind</a>, <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> and <a href="http://unbound.net/">unbound</a></p>
+
+<h2>How to check if DNS cache is working</h2>
+
+<p>If you are using the DNS caching resolver such as dnsmasq or unbound, the result of DNS query should be very fast i.e. in order of 1 msec or even 0 msec.</p>
+
+<p>For example executing <code>dig facebook.com</code> gives me following output:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">dig facebook.com
+
+; &lt;&lt;&gt;&gt; DiG 9.8.2rc1-RedHat-9.8.2-0.37.rc1.el6_7.7 &lt;&lt;&gt;&gt; facebook.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 6468
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;facebook.com.          IN  A
+
+;; ANSWER SECTION:
+facebook.com.       300 IN  A   69.171.230.68
+
+;; Query time: 375 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1)
+;; WHEN: Sat May 28 10:03:26 2016
+;; MSG SIZE  rcvd: 46</code></pre></figure>
+
+<p>Here the query time of <code>375 msec</code> is what we are interested in. That&#39;s way too high. If your DNS caching resolver is working fine, next time you execute this command, its time should be &lt;=1msec. </p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">dig facebook.com
+
+; &lt;&lt;&gt;&gt; DiG 9.8.2rc1-RedHat-9.8.2-0.37.rc1.el6_7.7 &lt;&lt;&gt;&gt; facebook.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 7997
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;facebook.com.          IN  A
+
+;; ANSWER SECTION:
+facebook.com.       184 IN  A   69.171.230.68
+
+;; Query time: 0 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1)
+;; WHEN: Sat May 28 10:05:22 2016
+;; MSG SIZE  rcvd: 46</code></pre></figure>
+
+<p>In the first case, where in you are using application level caching, DNS request should not be sent at all, i.e. we would have to monitor the DNS traffic and confirm its absence. </p>
+
+<p>We can simply use <a href="http://www.tcpdump.org/">TCPDump</a> for this purpose.</p>
+
+<p><code>tcpdump -s 0 -l -n port 53</code> will give the all DNS traffic. For example in my 
+executing <code>dig facebook.com</code> gives the following traffic:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
+10:03:26.061650 IP 205.147.100.85.53967 &gt; 192.54.112.30.domain: 30692% [1au] A? facebook.com. (41)
+10:03:26.206708 IP 192.54.112.30.domain &gt; 205.147.100.85.53967: 30692- 0/6/5 (649)
+10:03:26.207148 IP 205.147.100.85.53067 &gt; 69.171.255.12.domain: 10866% [1au] A? facebook.com. (41)
+10:03:26.207348 IP 205.147.100.85.35076 &gt; 192.31.80.30.domain: 62038% [1au] NS? facebook.com. (41)
+10:03:26.290949 IP 69.171.255.12.domain &gt; 205.147.100.85.53067: 10866*- 1/2/4 A 69.171.230.68 (169)
+10:03:26.291306 IP 205.147.100.85.35719 &gt; 192.54.112.30.domain: 13554% [1au] DS? facebook.com. (41)
+10:03:26.423309 IP 192.31.80.30.domain &gt; 205.147.100.85.35076: 62038- 0/6/5 (649)
+10:03:26.423732 IP 205.147.100.85.13121 &gt; 69.171.255.12.domain: 14660% [1au] NS? facebook.com. (41)
+10:03:26.424027 IP 205.147.100.85.28055 &gt; 69.171.239.12.domain: 58880% [1au] AAAA? a.ns.facebook.com. (46)
+10:03:26.424211 IP 205.147.100.85.15049 &gt; 69.171.255.12.domain: 29662% [1au] A? b.ns.facebook.com. (46)
+10:03:26.424305 IP 205.147.100.85.33030 &gt; 69.171.255.12.domain: 45018% [1au] AAAA? b.ns.facebook.com. (46)
+10:03:26.424402 IP 205.147.100.85.42614 &gt; 69.171.255.12.domain: 51358% [1au] A? a.ns.facebook.com. (46)
+10:03:26.435590 IP 192.54.112.30.domain &gt; 205.147.100.85.35719: 13554*- 0/6/1 (762)
+10:03:26.512147 IP 69.171.255.12.domain &gt; 205.147.100.85.13121: 14660*- 2/0/4 NS a.ns.facebook.com., NS b.ns.facebook.com. (153)
+10:03:26.513377 IP 69.171.255.12.domain &gt; 205.147.100.85.33030: 45018*- 1/2/3 AAAA 2a03:2880:ffff:c:face:b00c:0:35 (153)
+10:03:26.513398 IP 69.171.255.12.domain &gt; 205.147.100.85.15049: 29662*- 1/2/3 A 69.171.255.12 (153)
+10:03:26.520676 IP 69.171.239.12.domain &gt; 205.147.100.85.28055: 58880*- 1/2/3 AAAA 2a03:2880:fffe:c:face:b00c:0:35 (153)
+10:03:26.525315 IP 69.171.255.12.domain &gt; 205.147.100.85.42614: 51358*- 1/2/3 A 69.171.239.12 (153)</code></pre></figure>
+
+<p>In case of successful caching, no traffic should be observed from the application.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/nodejs">NodeJs</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2016/05/28/nodejs-dns-cache/';
+  var disqus_title = 'Speeding up Node.js HTTP requests with DNS caching';
+  var disqus_url = 'http://madhur.co.in/blog/2016/05/28/nodejs-dns-cache.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2016 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+</body>
+
+</html>
