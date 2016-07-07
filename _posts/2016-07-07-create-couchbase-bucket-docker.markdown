@@ -42,7 +42,9 @@ CMD ["/opt/couchbase/configure-node.sh"]
 {% endhighlight %}
 
 
-We use the following script to configure the node:
+We use the following script to configure the node.
+
+All the files are given in this [github repo](https://github.com/madhur/couchbase-docker)
 
 {% highlight shell %}
 set -m
