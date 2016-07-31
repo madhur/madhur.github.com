@@ -17,7 +17,9 @@ I also [code](/projects) and continue to do so whenever I get time.
 
 Work
 -----
-I previously worked as Consultant at Microsoft. I keep a technical blog _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ on Microsoft technologies. 
+I previously worked as Consultant at Microsoft. I previously worked a lot on Microsoft technologies and had a technical blog on them:
+*  _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ 
+*  [Even older version](http://madhurahuja.blogspot.in/) 
 
 
 
