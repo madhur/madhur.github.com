@@ -2,10 +2,7 @@
 layout: null
 ---
 
-//{% if page.url.endsWith('/') %}
-//{% endif %}
-
-var cacheName = 'madhur-cache-v1';
+var cacheName = 'madhur-cache-v2';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
