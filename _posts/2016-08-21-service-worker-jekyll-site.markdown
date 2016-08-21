@@ -88,3 +88,7 @@ In current implementation, the service worker will always return the response fr
 * Fastest
 
 These and many other such patterns are documented in [offline cookbook](https://jakearchibald.com/2014/offline-cookbook/) 
+
+These patterns can be easy implemented using [sw-toolbox](https://github.com/GoogleChrome/sw-toolbox)
+
+
