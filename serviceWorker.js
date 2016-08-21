@@ -1,6 +1,4 @@
-//
-
-var cacheName = 'madhur-cache-v1';
+var cacheName = 'madhur-cache-v2';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -467,6 +465,11 @@ var filesToCache = [
     
     	
             '/blog/tags/nginx/',
+        
+        
+    
+    	
+            '/blog/tags/service-worker/',
         
         
     
@@ -1010,9 +1013,21 @@ var filesToCache = [
         
         
     
+    	
+            '/blog/2016/08/',
+        
+        
+    
+    	
+            '/blog/2016/08/21/',
+        
+        
+    
 
 	// Blog posts
     
+    	'/blog/2016/08/21/service-worker-jekyll-site.html',
+	
     	'/blog/2016/07/31/nginx-cache-authenticated-requests.html',
 	
     	'/blog/2016/07/07/create-couchbase-bucket-docker.html',
