@@ -19,7 +19,7 @@ Recently, we implemented the [Celery Task queue](http://docs.celeryproject.org/e
 > It’s a task queue with focus on real-time processing, while also supporting task scheduling.
 
 
-1.  Use [RabbitMQ](https://www.rabbitmq.com/) as the broker instead of Redis, Mysql or anything else 
+1.  Use [RabbitMQ](https://www.rabbitmq.com/) as the broker instead of Redis, Mysql or anything else
 
     Rabbit's queues reside in memory and will therefore be much faster than implementing this in a database.
 
@@ -48,7 +48,7 @@ Recently, we implemented the [Celery Task queue](http://docs.celeryproject.org/e
 
 5.  [`CELERY_TASK_SERIALIZER='json'`](http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers)
 
-	Using JSON as the serializer enables easy debugging as you can inspect stored messages in the AMQP broker easily. However, it comes with the disadvantage of being around 34% larger than an encoding which supports native binary types. 
+	Using JSON as the serializer enables easy debugging as you can inspect stored messages in the AMQP broker easily. However, it comes with the disadvantage of being around 34% larger than an encoding which supports native binary types.
 
 6.  Logically separate queues for your tasks
 
@@ -60,7 +60,14 @@ Recently, we implemented the [Celery Task queue](http://docs.celeryproject.org/e
 
 	[http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html](http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html)
 
-8.  Intelligently anticipate errors / exceptions and retry only where it makes sense 
+8.  Use -Ofair to make sure the tasks are distributed evenly. (it comes with an overhead of coordination but the results
+    are more predictable if tasks takes different amount of time to execute.)
+
+9.  Use –maxtasksperchild argument to tell celery to use a particular worker for only n number of tasks, if you think there is even a slight possibility of memory leak. Celery can kill a worker and re-spawn a new one to make sure memory is released and it does not hamper the systems performance.
+
+10. Use a global timeout to make sure your workers does not get stuck. You can set soft and hard timeout and even notify the task to wrap up or log stuff before it is killed by celery using the soft timeout option.
+
+11.  Intelligently anticipate errors / exceptions and retry only where it makes sense 
 
 	I have seen developers blindly putting `try` `except` block with a `retry` statement and then showing off that how `safe` their code is from failures. This is not a good idea. For example, consider the simple task below, which fails because of division by zero in some case (where random no. zero is generated)
 
@@ -98,7 +105,7 @@ def codebad_noretry(self):
 	a = 2
 	b = 0
 	print d
-	return c	
+	return c
 {% endhighlight %}
 
 Here the variable `d` is getting printed without getting defined. The `except` and `retry` logic below is also unnecessary. The better solution is to resolve the programming error.
@@ -115,4 +122,3 @@ def codebad_retry(self):
 		raise self.retry()
 	return c
 {% endhighlight %}
-

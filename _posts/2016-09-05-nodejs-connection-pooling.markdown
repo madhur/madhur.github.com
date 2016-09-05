@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Speeding up Node.js with connection pooling"
-excerpt: "Speeding up Node.js with connection pooling"
+title: "Effect of connection pooling on node.js performance"
+excerpt: "Effect of connection pooling on node.js performance"
 disqus_id: /2016/09/05/nodejs-connection-pooling/
 tags:
 - Node.js
@@ -26,7 +26,7 @@ function callback(){
 }
 
 function hitQuery(callback) {
-    var user_query = "select count(*) from helpchat.user u, helpchat.user_access_code uac, helpchat.user_location_info uli   where u.id = uac.user_android_id and u.id = uli.user_id"
+    var user_query = "select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id"
 
 
     connection.query(user_query, function(err, rows, fields) {
@@ -140,9 +140,11 @@ var pool = mysql.createPool({
 });
 {% endhighlight %}
 
+And change our function to use the connection pool: 
+
 {% highlight javascript %}
 function hitQuery(callback) {
-    var user_query = "select count(*) from helpchat.user u, helpchat.user_access_code uac, helpchat.user_location_info uli   where u.id = uac.user_android_id and u.id = uli.user_id"
+    var user_query = "select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id"
 
     pool.getConnection(function(err, connection) {
         if (err) {
