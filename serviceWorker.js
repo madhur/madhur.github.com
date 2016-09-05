@@ -2,17 +2,17 @@
 layout: null
 ---
 
-var cacheName = 'madhur-cache-v2';
+var cacheName = 'madhur-cache-v3';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
     {% for page in site.html_pages %}
     	{% if page.url contains 'projects' or page.url contains '404'   %}
-            
+
         {% else %}
             '{{ page.url }}',
         {% endif %}
-        
+
     {% endfor %}
 
 	// Blog posts

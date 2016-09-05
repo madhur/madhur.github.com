@@ -8,22 +8,23 @@ section: Home
 Intro
 =======
 
-Hi there, I'm Madhur, a web developer/designer, programmer, and technology enthusiast in general. At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
+Hi there, I'm Madhur, a web developer, programmer, and technology enthusiast in general. At this site I'd like to present you some information on several topics of my interest. These are self written programs and self written texts.
 
 
- 
+
 I also [code](/projects) and continue to do so whenever I get time.
 
 
 Work
 -----
 I previously worked as Consultant at Microsoft. I previously worked a lot on Microsoft technologies and had a technical blog on them:
-*  _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_ 
-*  [Even older version](http://madhurahuja.blogspot.in/) 
+*  _[Code Articles Discussion on Microsoft Technologies](http://blogs.msdn.com/mahuja)_
+*  [First blog](http://madhurahuja.blogspot.in/)
 
 
+  
 
-Contact 
+Contact
 --------
 Feel free to contact me through any of the below channels or through this [contact form](/contact)
 
@@ -34,6 +35,3 @@ Feel free to contact me through any of the below channels or through this [conta
 <li><a href="http://twitter.com/#!/madhur25"><i class="fa fa-twitter-square fa-3x"></i><a/></li>
 <li><a href="mailto:ahuja.madhur@gmail.com"><i class="fa fa-inbox fa-3x"></i><a/></li>
 </ul>
-
-
-
