@@ -1,1031 +1,1060 @@
-var cacheName = 'madhur-cache-v2';
+var cacheName = 'madhur-cache-v3';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
             '/blog/archives/',
         
-        
+
     
     	
             '/results/',
         
-        
+
     
     	
             '/blog/',
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
             '/papers/',
         
-        
+
     
     	
             '/info/',
         
-        
+
     
     	
             '/code/',
         
-        
+
     
     	
             '/contact/',
         
-        
+
     
     	
             '/',
         
-        
+
     
     	
             '/work/',
         
-        
+
     
     	
             '/donate/',
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
-            
+
         
-        
+
     
     	
             '/blog/tags/reverse-engineering/',
         
-        
+
     
     	
             '/blog/tags/chrome/',
         
-        
+
     
     	
             '/blog/tags/github/',
         
-        
+
     
     	
             '/blog/tags/code/',
         
-        
+
     
     	
             '/blog/tags/jekyll/',
         
-        
+
     
     	
             '/blog/tags/facebook/',
         
-        
+
     
     	
             '/blog/tags/session-sidejacking/',
         
-        
+
     
     	
             '/blog/tags/security/',
         
-        
+
     
     	
             '/blog/tags/hacking/',
         
-        
+
     
     	
             '/blog/tags/exploits/',
         
-        
+
     
     	
             '/blog/tags/burnout/',
         
-        
+
     
     	
             '/blog/tags/health/',
         
-        
+
     
     	
             '/blog/tags/windows/',
         
-        
+
     
     	
             '/blog/tags/pass-the-hash/',
         
-        
+
     
     	
             '/blog/tags/aoe/',
         
-        
+
     
     	
             '/blog/tags/sharepoint/',
         
-        
+
     
     	
             '/blog/tags/webparts/',
         
-        
+
     
     	
             '/blog/tags/programming/',
         
-        
+
     
     	
             '/blog/tags/disassembling/',
         
-        
+
     
     	
             '/blog/tags/-net/',
         
-        
+
     
     	
             '/blog/tags/nmap/',
         
-        
+
     
     	
             '/blog/tags/privilege-escalation/',
         
-        
+
     
     	
             '/blog/tags/silverlight/',
         
-        
+
     
     	
             '/blog/tags/sharepoint-2010/',
         
-        
+
     
     	
             '/blog/tags/jquery/',
         
-        
+
     
     	
             '/blog/tags/css/',
         
-        
+
     
     	
             '/blog/tags/assembly/',
         
-        
+
     
     	
             '/blog/tags/masm/',
         
-        
+
     
     	
             '/blog/tags/html5/',
         
-        
+
     
     	
             '/blog/tags/css3/',
         
-        
+
     
     	
             '/blog/tags/javascript/',
         
-        
+
     
     	
             '/blog/tags/ie/',
         
-        
+
     
     	
             '/blog/tags/microsoft/',
         
-        
+
     
     	
             '/blog/tags/git/',
         
-        
+
     
     	
             '/blog/tags/internt-explorer/',
         
-        
+
     
     	
             '/blog/tags/corel-draw/',
         
-        
+
     
     	
             '/blog/tags/android/',
         
-        
+
     
     	
             '/blog/tags/client-object-model/',
         
-        
+
     
     	
             '/blog/tags/feedly/',
         
-        
+
     
     	
             '/blog/tags/oauth2/',
         
-        
+
     
     	
             '/blog/tags/wunderlist/',
         
-        
+
     
     	
             '/blog/tags/api/',
         
-        
+
     
     	
             '/blog/tags/rest/',
         
-        
+
     
     	
             '/blog/tags/algorithms/',
         
-        
+
     
     	
             '/blog/tags/java/',
         
-        
+
     
     	
             '/blog/tags/linux/',
         
-        
+
     
     	
             '/blog/tags/angularjs/',
         
-        
+
     
     	
             '/blog/tags/emoji/',
         
-        
+
     
     	
             '/blog/tags/chat/',
         
-        
+
     
     	
             '/blog/tags/caching/',
         
-        
+
     
     	
             '/blog/tags/threading/',
         
-        
+
     
     	
             '/blog/tags/python/',
         
-        
+
     
     	
             '/blog/tags/celery/',
         
-        
+
     
     	
             '/blog/tags/webview/',
         
-        
+
     
     	
             '/blog/tags/ionic/',
         
-        
+
     
     	
             '/blog/tags/osx/',
         
-        
+
     
     	
             '/blog/tags/swift/',
         
-        
+
     
     	
             '/blog/tags/cocoa/',
         
-        
+
     
     	
             '/blog/tags/general/',
         
-        
+
     
     	
             '/blog/tags/es6/',
         
-        
+
     
     	
             '/blog/tags/react/',
         
-        
+
     
     	
             '/blog/tags/web/',
         
-        
+
     
     	
             '/blog/tags/nodejs/',
         
-        
+
     
     	
             '/blog/tags/couchbase/',
         
-        
+
     
     	
             '/blog/tags/docker/',
         
-        
+
     
     	
             '/blog/tags/nginx/',
         
-        
+
     
     	
             '/blog/tags/service-worker/',
         
+
+    
+    	
+            '/blog/tags/lint/',
         
+
+    
+    	
+            '/blog/tags/node-js/',
+        
+
     
     	
             '/blog/2011/',
         
-        
+
     
     	
             '/blog/2011/06/',
         
-        
+
     
     	
             '/blog/2011/06/03/',
         
-        
+
     
     	
             '/blog/2011/06/11/',
         
-        
+
     
     	
             '/blog/2011/06/12/',
         
-        
+
     
     	
             '/blog/2011/06/22/',
         
-        
+
     
     	
             '/blog/2011/07/',
         
-        
+
     
     	
             '/blog/2011/07/25/',
         
-        
+
     
     	
             '/blog/2011/07/26/',
         
-        
+
     
     	
             '/blog/2011/08/',
         
-        
+
     
     	
             '/blog/2011/08/04/',
         
-        
+
     
     	
             '/blog/2011/08/06/',
         
-        
+
     
     	
             '/blog/2011/08/12/',
         
-        
+
     
     	
             '/blog/2011/08/13/',
         
-        
+
     
     	
             '/blog/2011/08/16/',
         
-        
+
     
     	
             '/blog/2011/09/',
         
-        
+
     
     	
             '/blog/2011/09/01/',
         
-        
+
     
     	
             '/blog/2011/09/06/',
         
-        
+
     
     	
             '/blog/2011/09/09/',
         
-        
+
     
     	
             '/blog/2011/09/10/',
         
-        
+
     
     	
             '/blog/2011/09/18/',
         
-        
+
     
     	
             '/blog/2011/09/23/',
         
-        
+
     
     	
             '/blog/2011/12/',
         
-        
+
     
     	
             '/blog/2011/12/29/',
         
-        
+
     
     	
             '/blog/2012/',
         
-        
+
     
     	
             '/blog/2012/01/',
         
-        
+
     
     	
             '/blog/2012/01/09/',
         
-        
+
     
     	
             '/blog/2012/02/',
         
-        
+
     
     	
             '/blog/2012/02/02/',
         
-        
+
     
     	
             '/blog/2012/02/08/',
         
-        
+
     
     	
             '/blog/2012/02/15/',
         
-        
+
     
     	
             '/blog/2012/02/20/',
         
-        
+
     
     	
             '/blog/2012/02/26/',
         
-        
+
     
     	
             '/blog/2012/03/',
         
-        
+
     
     	
             '/blog/2012/03/01/',
         
-        
+
     
     	
             '/blog/2012/03/05/',
         
-        
+
     
     	
             '/blog/2012/03/27/',
         
-        
+
     
     	
             '/blog/2012/04/',
         
-        
+
     
     	
             '/blog/2012/04/15/',
         
-        
+
     
     	
             '/blog/2012/05/',
         
-        
+
     
     	
             '/blog/2012/05/05/',
         
-        
+
     
     	
             '/blog/2013/',
         
-        
+
     
     	
             '/blog/2013/06/',
         
-        
+
     
     	
             '/blog/2013/06/02/',
         
-        
+
     
     	
             '/blog/2013/07/',
         
-        
+
     
     	
             '/blog/2013/07/20/',
         
-        
+
     
     	
             '/blog/2013/11/',
         
-        
+
     
     	
             '/blog/2013/11/05/',
         
-        
+
     
     	
             '/blog/2014/',
         
-        
+
     
     	
             '/blog/2014/01/',
         
-        
+
     
     	
             '/blog/2014/01/10/',
         
-        
+
     
     	
             '/blog/2014/01/29/',
         
-        
+
     
     	
             '/blog/2014/04/',
         
-        
+
     
     	
             '/blog/2014/04/09/',
         
-        
+
     
     	
             '/blog/2014/04/17/',
         
-        
+
     
     	
             '/blog/2014/05/',
         
-        
+
     
     	
             '/blog/2014/05/02/',
         
-        
+
     
     	
             '/blog/2014/05/07/',
         
-        
+
     
     	
             '/blog/2014/05/22/',
         
-        
+
     
     	
             '/blog/2014/05/23/',
         
-        
+
     
     	
             '/blog/2014/05/24/',
         
-        
+
     
     	
             '/blog/2014/05/25/',
         
-        
+
     
     	
             '/blog/2014/05/26/',
         
-        
+
     
     	
             '/blog/2014/06/',
         
-        
+
     
     	
             '/blog/2014/06/04/',
         
-        
+
     
     	
             '/blog/2014/06/08/',
         
-        
+
     
     	
             '/blog/2014/07/',
         
-        
+
     
     	
             '/blog/2014/07/28/',
         
-        
+
     
     	
             '/blog/2014/07/29/',
         
-        
+
     
     	
             '/blog/2014/10/',
         
-        
+
     
     	
             '/blog/2014/10/10/',
         
-        
+
     
     	
             '/blog/2014/10/18/',
         
-        
+
     
     	
             '/blog/2014/12/',
         
-        
+
     
     	
             '/blog/2014/12/15/',
         
-        
+
     
     	
             '/blog/2014/12/26/',
         
-        
+
     
     	
             '/blog/2015/',
         
-        
+
     
     	
             '/blog/2015/03/',
         
-        
+
     
     	
             '/blog/2015/03/06/',
         
-        
+
     
     	
             '/blog/2015/08/',
         
-        
+
     
     	
             '/blog/2015/08/24/',
         
-        
+
     
     	
             '/blog/2015/09/',
         
-        
+
     
     	
             '/blog/2015/09/14/',
         
-        
+
     
     	
             '/blog/2015/10/',
         
-        
+
     
     	
             '/blog/2015/10/18/',
         
-        
+
     
     	
             '/blog/2015/10/25/',
         
-        
+
     
     	
             '/blog/2015/11/',
         
-        
+
     
     	
             '/blog/2015/11/02/',
         
-        
+
     
     	
             '/blog/2015/11/17/',
         
-        
+
     
     	
             '/blog/2015/11/29/',
         
-        
+
     
     	
             '/blog/2015/12/',
         
-        
+
     
     	
             '/blog/2015/12/06/',
         
-        
+
     
     	
             '/blog/2015/12/14/',
         
-        
+
     
     	
             '/blog/2015/12/27/',
         
-        
+
     
     	
             '/blog/2016/',
         
-        
+
     
     	
             '/blog/2016/01/',
         
-        
+
     
     	
             '/blog/2016/01/03/',
         
-        
+
     
     	
             '/blog/2016/01/25/',
         
-        
+
     
     	
             '/blog/2016/04/',
         
-        
+
     
     	
             '/blog/2016/04/08/',
         
-        
+
     
     	
             '/blog/2016/04/09/',
         
-        
+
     
     	
             '/blog/2016/04/25/',
         
-        
+
     
     	
             '/blog/2016/05/',
         
-        
+
     
     	
             '/blog/2016/05/13/',
         
-        
+
     
     	
             '/blog/2016/05/14/',
         
-        
+
     
     	
             '/blog/2016/05/28/',
         
-        
+
     
     	
             '/blog/2016/07/',
         
-        
+
     
     	
             '/blog/2016/07/07/',
         
-        
+
     
     	
             '/blog/2016/07/31/',
         
-        
+
     
     	
             '/blog/2016/08/',
         
-        
+
     
     	
             '/blog/2016/08/21/',
         
+
+    
+    	
+            '/blog/2016/09/',
         
+
+    
+    	
+            '/blog/2016/09/04/',
+        
+
+    
+    	
+            '/blog/2016/09/05/',
+        
+
     
 
 	// Blog posts
     
+    	'/blog/2016/09/05/nodejs-connection-pooling.html',
+	
+    	'/blog/2016/09/04/code-linting-tools.html',
+	
     	'/blog/2016/08/21/service-worker-jekyll-site.html',
 	
     	'/blog/2016/07/31/nginx-cache-authenticated-requests.html',

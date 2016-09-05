@@ -205,7 +205,7 @@
 </blockquote>
 
 <ol>
-<li><p>Use <a href="https://www.rabbitmq.com/">RabbitMQ</a> as the broker instead of Redis, Mysql or anything else </p>
+<li><p>Use <a href="https://www.rabbitmq.com/">RabbitMQ</a> as the broker instead of Redis, Mysql or anything else</p>
 
 <p>Rabbit&#39;s queues reside in memory and will therefore be much faster than implementing this in a database.</p>
 
@@ -234,7 +234,7 @@ Also, see <a href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing
 <p>This also requires that the tasks can be restarted from middle without any side effects. This might require using transactions if the task is involved in db operations.</p></li>
 <li><p><a href="http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers"><code>CELERY_TASK_SERIALIZER=&#39;json&#39;</code></a></p>
 
-<p>Using JSON as the serializer enables easy debugging as you can inspect stored messages in the AMQP broker easily. However, it comes with the disadvantage of being around 34% larger than an encoding which supports native binary types. </p></li>
+<p>Using JSON as the serializer enables easy debugging as you can inspect stored messages in the AMQP broker easily. However, it comes with the disadvantage of being around 34% larger than an encoding which supports native binary types.</p></li>
 <li><p>Logically separate queues for your tasks</p>
 
 <p>By default celery will create just one queue <code>celery</code> for all your tasks. This is undesirable when you are especially targeting for scale. Logically separating your tasks into queues will allow you to separately dedicate different number of workers for each queue.</p>
@@ -243,6 +243,10 @@ Also, see <a href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing
 <li><p>Run Celery beat scheduler as a separate service than running it with worker. This is documented on celery page:</p>
 
 <p><a href="http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html">http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html</a></p></li>
+<li><p>Use -Ofair to make sure the tasks are distributed evenly. (it comes with an overhead of coordination but the results
+are more predictable if tasks takes different amount of time to execute.)</p></li>
+<li><p>Use –maxtasksperchild argument to tell celery to use a particular worker for only n number of tasks, if you think there is even a slight possibility of memory leak. Celery can kill a worker and re-spawn a new one to make sure memory is released and it does not hamper the systems performance.</p></li>
+<li><p>Use a global timeout to make sure your workers does not get stuck. You can set soft and hard timeout and even notify the task to wrap up or log stuff before it is killed by celery using the soft timeout option.</p></li>
 <li><p>Intelligently anticipate errors / exceptions and retry only where it makes sense </p>
 
 <p>I have seen developers blindly putting <code>try</code> <code>except</code> block with a <code>retry</code> statement and then showing off that how <code>safe</code> their code is from failures. This is not a good idea. For example, consider the simple task below, which fails because of division by zero in some case (where random no. zero is generated)</p></li>
@@ -277,7 +281,7 @@ Also, see <a href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing
     <span class="n">a</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">print</span> <span class="n">d</span>
-    <span class="k">return</span> <span class="n">c</span>  </code></pre></figure>
+    <span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
 <p>Here the variable <code>d</code> is getting printed without getting defined. The <code>except</code> and <code>retry</code> logic below is also unnecessary. The better solution is to resolve the programming error.</p>
 
