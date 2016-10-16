@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Learnings from moving from MBR to GPT, triple booting and random stuff"
-excerpt: "Learnings from moving from MBR to GPT, triple booting and random stuff"
+title: "Learnings from moving from MBR to GPT, multi-booting and random stuff"
+excerpt: "Learnings from moving from MBR to GPT, multi-booting and random stuff"
 disqus_id: /2016/09/05/learning-moving-mbr-gpt-uefi/
 tags:
 - Linux
