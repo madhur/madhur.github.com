@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v4';
+var cacheName = 'madhur-cache-v5';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
