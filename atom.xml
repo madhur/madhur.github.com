@@ -4,13 +4,49 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2016-09-05T09:58:46+05:30</updated>
+ <updated>2016-10-16T17:36:28+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Learnings from moving from MBR to GPT, triple booting and random stuff</title>
+   <link href="http://madhur.co.in/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html"/>
+   <updated>2016-10-16T00:00:00+05:30</updated>
+   <id>id:/blog/2016/10/16/learning-moving-mbr-gpt-uefi</id>
+   <content type="html">&lt;p&gt;This weekend, I converted all my 3 disks (2 HDD and 1 SSD) from a &lt;a href=&quot;https://en.wikipedia.org/wiki/Master_boot_record&quot;&gt;MBR&lt;/a&gt; based partition table to the newer one &lt;a href=&quot;https://en.wikipedia.org/wiki/GUID_Partition_Table&quot;&gt;GPT&lt;/a&gt;. This was some work as I had to ensure that all my existing OSes ( &lt;a href=&quot;https://www.debian.org/&quot;&gt;Debian 8&lt;/a&gt;, &lt;a href=&quot;https://www.kali.org/&quot;&gt;Kali&lt;/a&gt; and &lt;a href=&quot;https://www.microsoft.com/en-in/software-download/windows10ISO&quot;&gt;Windows 10&lt;/a&gt; ) run smoothlessly. &lt;/p&gt;
+
+&lt;p&gt;I am sharing some of the lessons and solutions to problem I faced:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Make sure you backup all importand data and have bootable ISO&amp;#39;s (USB or CDs) of Operating Systems you want up and running. I cannot stress this enough. While working with disk partition tables, things go wrong very easily and you will have an unbootable system very soon. This will be especially true if you are a tinkerer and like going deep into things. Having bootable USB drives will save you a lot of time. Use tools like &lt;a href=&quot;https://unetbootin.github.io/&quot;&gt;unetbootin&lt;/a&gt; or familiarize your self with &lt;a href=&quot;https://en.wikipedia.org/wiki/Dd_(Unix)&quot;&gt;dd command&lt;/a&gt; to create this yourself.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Read about UEFI. This is a very new standard with confusing information all over the internet. In a nutshell, it is nothing more than a partition with code &lt;code&gt;ef00&lt;/code&gt;, but it is also a standard and a firmware.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Some of these readings would help:&lt;br&gt;
+&lt;a href=&quot;https://en.wikipedia.org/wiki/EFI_system_partition&quot;&gt;https://en.wikipedia.org/wiki/EFI_system_partition&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;https://wiki.archlinux.org/index.php/EFI_System_Partition&quot;&gt;https://wiki.archlinux.org/index.php/EFI_System_Partition&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;https://msdn.microsoft.com/en-us/windows/hardware/commercialize/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions&quot;&gt;https://msdn.microsoft.com/en-us/windows/hardware/commercialize/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;http://superuser.com/questions/520068/efi-partition-vs-boot-partition&quot;&gt;http://superuser.com/questions/520068/efi-partition-vs-boot-partition&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;https://wiki.debian.org/UEFI&quot;&gt;https://wiki.debian.org/UEFI&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;First make sure your &lt;a href=&quot;https://en.wikipedia.org/wiki/BIOS&quot;&gt;BIOS&lt;/a&gt; supports &lt;a href=&quot;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&quot;&gt;UEFI&lt;/a&gt;. Most of the new BIOS do it but there are some quirks and each BIOS manufacturer is different. For example, in my case HDD boot order does not work for UEFI boot. I had to switch the SATA cables in my HDD to make sure &lt;a href=&quot;https://en.wikipedia.org/wiki/GNU_GRUB&quot;&gt;GRUB&lt;/a&gt; is my primary bootloader. Also, when you enable UEFI in BIOS, you will get double entries for eash UEFI Boot enabled disk. (one for UEFI boot and other for normal boot). Don&amp;#39;t be alarmed by it, its normal.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;You will need to do actual conversion of partition tables first. For this, best utility is combination of &lt;a href=&quot;http://www.rodsbooks.com/gdisk/&quot;&gt;gdisk&lt;/a&gt; and &lt;a href=&quot;http://gparted.org/&quot;&gt;gparted&lt;/a&gt; works best. Make sure you spend some time going through their commands. I created &lt;a href=&quot;http://gparted.org/livecd.php&quot;&gt;gparted live CD&lt;/a&gt; Do not do this conversion in Windows. &lt;a href=&quot;http://askubuntu.com/questions/84501/how-can-i-change-convert-a-ubuntu-mbr-drive-to-a-gpt-and-make-ubuntu-boot-from&quot;&gt;How can I change/convert a Ubuntu MBR drive to a GPT, and make Ubuntu boot from EFI?&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you are using Windows, familiarize with &lt;a href=&quot;https://technet.microsoft.com/en-us/library/cc709667(v=ws.10).aspx&quot;&gt;bcdedit&lt;/a&gt; . It is a command line tool to work with Windows boot entries. I would not advise using tools like &lt;a href=&quot;http://neosmart.net/EasyBCD/c&quot;&gt;EasyBCD&lt;/a&gt; etc as they are too buggy.
+For linux, make sure you know &lt;a href=&quot;http://man7.org/linux/man-pages/man8/mount.8.html&quot;&gt;mount&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/Chroot&quot;&gt;chroot&lt;/a&gt; very well, these commands are very handy and it saves a lot of time if you them in advance than looking up internet everytime.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;It is also good to determine when your OS is booted up in UEFI mode vs legacy mode. For linux, this command works: &lt;code&gt;cat /sys/firmware/efi&lt;/code&gt; , If this folder exists, the system is booted in UEFI mode. &lt;a href=&quot;http://askubuntu.com/questions/162564/how-can-i-tell-if-my-system-was-booted-as-efi-uefi-or-bios&quot;&gt;How can I tell if my system was booted as EFI/UEFI or BIOS?&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For linux GRUB, you will need to install &lt;code&gt;grub-efi-amd64&lt;/code&gt; or &lt;code&gt;grub-efi&lt;/code&gt;. Also remember to run &lt;code&gt;update-grub&lt;/code&gt; after conversion. You might be also required to install the bootloader again using &lt;code&gt;grub install /dev/sdX&lt;/code&gt; depending upon the situation. &lt;a href=&quot;http://superuser.com/questions/376470/how-to-reinstall-grub2-efi&quot;&gt;How to reinstall GRUB2 EFI?&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you are running debian based system, this article is gold &lt;a href=&quot;http://www.getreu.net/public/downloads/doc/legacy2UEFIboot/Transform-Debian_7_wheezy-from_legacy_to_UEFI_boot_mode.html#_boot_a_live_system&quot;&gt;Switch Debian 7 wheezy from legacy to UEFI boot mode&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;More references:&lt;br&gt;
+&lt;a href=&quot;http://www.rodsbooks.com/gdisk/whatsgpt.html&quot;&gt;What&amp;#39;s a GPT?&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;http://www.rodsbooks.com/gdisk/booting.html&quot;&gt;Booting from GPT&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;http://www.rodsbooks.com/gdisk/advice.html&quot;&gt;Partitioning Advice&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;http://askubuntu.com/questions/235567/windows-8-removes-grub-as-default-boot-manager&quot;&gt;Windows 8 removes Grub as default boot manager&lt;/a&gt;&lt;br&gt;
+&lt;a href=&quot;http://www.rodsbooks.com/gdisk/walkthrough.html&quot;&gt;A gdisk Walkthrough&lt;/a&gt;  &lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Effect of connection pooling on node.js performance</title>
@@ -1052,19 +1088,6 @@ I have bunch of images in my assets. What I am trying to do is render the image 
 &lt;li&gt;&lt;h3&gt;&lt;a href=&quot;https://groups.google.com/forum/#!forum/stomp-spec&quot;&gt;Stomp&lt;/a&gt;&lt;/h3&gt;&lt;/li&gt;
 &lt;li&gt;&lt;h3&gt;&lt;a href=&quot;https://groups.google.com/forum/#!forum/mongodb-user&quot;&gt;MongoDb User&lt;/a&gt;&lt;/h3&gt;&lt;/li&gt;
 &lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Managing Programmers By Douglas Crockford</title>
-   <link href="http://madhur.co.in/blog/2015/12/27/managing-programmers.html"/>
-   <updated>2015-12-27T00:00:00+05:30</updated>
-   <id>id:/blog/2015/12/27/managing-programmers</id>
-   <content type="html">&lt;p&gt;Just stumbled upon this great video by &lt;a href=&quot;https://en.wikipedia.org/wiki/Douglas_Crockford&quot;&gt;Douglas Crockford&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Must watch for anyone programming or/and managing programmers.&lt;/p&gt;
-
-&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/NPlMcUxFOlY&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
 </content>
  </entry>
  

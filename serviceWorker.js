@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v3';
+var cacheName = 'madhur-cache-v4';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -480,6 +480,26 @@ var filesToCache = [
     
     	
             '/blog/tags/node-js/',
+        
+
+    
+    	
+            '/blog/tags/os/',
+        
+
+    
+    	
+            '/blog/tags/uefi/',
+        
+
+    
+    	
+            '/blog/tags/mbr/',
+        
+
+    
+    	
+            '/blog/tags/gpt/',
         
 
     
@@ -1048,9 +1068,21 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2016/10/',
+        
+
+    
+    	
+            '/blog/2016/10/16/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html',
+	
     	'/blog/2016/09/05/nodejs-connection-pooling.html',
 	
     	'/blog/2016/09/04/code-linting-tools.html',

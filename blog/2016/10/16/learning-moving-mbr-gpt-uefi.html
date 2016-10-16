@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    
+        <title>Learnings from moving from MBR to GPT, triple booting and random stuff &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Learnings from moving from MBR to GPT, triple booting and random stuff" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Learnings from moving from MBR to GPT, triple booting and random stuff</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2016-10-16 00:00:00 +0530" pubdate="pubdate">16 October 2016</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+  
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>This weekend, I converted all my 3 disks (2 HDD and 1 SSD) from a <a href="https://en.wikipedia.org/wiki/Master_boot_record">MBR</a> based partition table to the newer one <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table">GPT</a>. This was some work as I had to ensure that all my existing OSes ( <a href="https://www.debian.org/">Debian 8</a>, <a href="https://www.kali.org/">Kali</a> and <a href="https://www.microsoft.com/en-in/software-download/windows10ISO">Windows 10</a> ) run smoothlessly. </p>
+
+<p>I am sharing some of the lessons and solutions to problem I faced:</p>
+
+<ul>
+<li><p>Make sure you backup all importand data and have bootable ISO&#39;s (USB or CDs) of Operating Systems you want up and running. I cannot stress this enough. While working with disk partition tables, things go wrong very easily and you will have an unbootable system very soon. This will be especially true if you are a tinkerer and like going deep into things. Having bootable USB drives will save you a lot of time. Use tools like <a href="https://unetbootin.github.io/">unetbootin</a> or familiarize your self with <a href="https://en.wikipedia.org/wiki/Dd_(Unix)">dd command</a> to create this yourself.</p></li>
+<li><p>Read about UEFI. This is a very new standard with confusing information all over the internet. In a nutshell, it is nothing more than a partition with code <code>ef00</code>, but it is also a standard and a firmware.</p></li>
+<li><p>Some of these readings would help:<br>
+<a href="https://en.wikipedia.org/wiki/EFI_system_partition">https://en.wikipedia.org/wiki/EFI_system_partition</a><br>
+<a href="https://wiki.archlinux.org/index.php/EFI_System_Partition">https://wiki.archlinux.org/index.php/EFI_System_Partition</a><br>
+<a href="https://msdn.microsoft.com/en-us/windows/hardware/commercialize/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions">https://msdn.microsoft.com/en-us/windows/hardware/commercialize/manufacture/desktop/configure-uefigpt-based-hard-drive-partitions</a><br>
+<a href="http://superuser.com/questions/520068/efi-partition-vs-boot-partition">http://superuser.com/questions/520068/efi-partition-vs-boot-partition</a><br>
+<a href="https://wiki.debian.org/UEFI">https://wiki.debian.org/UEFI</a></p></li>
+<li><p>First make sure your <a href="https://en.wikipedia.org/wiki/BIOS">BIOS</a> supports <a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface">UEFI</a>. Most of the new BIOS do it but there are some quirks and each BIOS manufacturer is different. For example, in my case HDD boot order does not work for UEFI boot. I had to switch the SATA cables in my HDD to make sure <a href="https://en.wikipedia.org/wiki/GNU_GRUB">GRUB</a> is my primary bootloader. Also, when you enable UEFI in BIOS, you will get double entries for eash UEFI Boot enabled disk. (one for UEFI boot and other for normal boot). Don&#39;t be alarmed by it, its normal.</p></li>
+<li><p>You will need to do actual conversion of partition tables first. For this, best utility is combination of <a href="http://www.rodsbooks.com/gdisk/">gdisk</a> and <a href="http://gparted.org/">gparted</a> works best. Make sure you spend some time going through their commands. I created <a href="http://gparted.org/livecd.php">gparted live CD</a> Do not do this conversion in Windows. <a href="http://askubuntu.com/questions/84501/how-can-i-change-convert-a-ubuntu-mbr-drive-to-a-gpt-and-make-ubuntu-boot-from">How can I change/convert a Ubuntu MBR drive to a GPT, and make Ubuntu boot from EFI?</a></p></li>
+<li><p>If you are using Windows, familiarize with <a href="https://technet.microsoft.com/en-us/library/cc709667(v=ws.10).aspx">bcdedit</a> . It is a command line tool to work with Windows boot entries. I would not advise using tools like <a href="http://neosmart.net/EasyBCD/c">EasyBCD</a> etc as they are too buggy.
+For linux, make sure you know <a href="http://man7.org/linux/man-pages/man8/mount.8.html">mount</a> and <a href="https://en.wikipedia.org/wiki/Chroot">chroot</a> very well, these commands are very handy and it saves a lot of time if you them in advance than looking up internet everytime.</p></li>
+<li><p>It is also good to determine when your OS is booted up in UEFI mode vs legacy mode. For linux, this command works: <code>cat /sys/firmware/efi</code> , If this folder exists, the system is booted in UEFI mode. <a href="http://askubuntu.com/questions/162564/how-can-i-tell-if-my-system-was-booted-as-efi-uefi-or-bios">How can I tell if my system was booted as EFI/UEFI or BIOS?</a></p></li>
+<li><p>For linux GRUB, you will need to install <code>grub-efi-amd64</code> or <code>grub-efi</code>. Also remember to run <code>update-grub</code> after conversion. You might be also required to install the bootloader again using <code>grub install /dev/sdX</code> depending upon the situation. <a href="http://superuser.com/questions/376470/how-to-reinstall-grub2-efi">How to reinstall GRUB2 EFI?</a></p></li>
+<li><p>If you are running debian based system, this article is gold <a href="http://www.getreu.net/public/downloads/doc/legacy2UEFIboot/Transform-Debian_7_wheezy-from_legacy_to_UEFI_boot_mode.html#_boot_a_live_system">Switch Debian 7 wheezy from legacy to UEFI boot mode</a></p></li>
+</ul>
+
+<p>More references:<br>
+<a href="http://www.rodsbooks.com/gdisk/whatsgpt.html">What&#39;s a GPT?</a><br>
+<a href="http://www.rodsbooks.com/gdisk/booting.html">Booting from GPT</a><br>
+<a href="http://www.rodsbooks.com/gdisk/advice.html">Partitioning Advice</a><br>
+<a href="http://askubuntu.com/questions/235567/windows-8-removes-grub-as-default-boot-manager">Windows 8 removes Grub as default boot manager</a><br>
+<a href="http://www.rodsbooks.com/gdisk/walkthrough.html">A gdisk Walkthrough</a>  </p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/Linux">Linux</a> |
+					
+						<a href="/blog/tags/OS">OS</a> |
+					
+						<a href="/blog/tags/UEFI">UEFI</a> |
+					
+						<a href="/blog/tags/MBR">MBR</a> |
+					
+						<a href="/blog/tags/GPT">GPT</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2016/09/05/learning-moving-mbr-gpt-uefi/';
+  var disqus_title = 'Learnings from moving from MBR to GPT, triple booting and random stuff';
+  var disqus_url = 'http://madhur.co.in/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2016 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+    <!-- serviceWorker.html -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+        if (!reg.installing) return;
+        console.log("[*] ServiceWorker is installing...");
+
+        var worker = reg.installing;
+        worker.addEventListener('statechange', function() {
+            if (worker.state == 'redundant') {
+                console.log('[*] Install failed');
+            }
+            if (worker.state == 'installed') {
+                console.log('[*] Install successful!');
+            }
+        });
+    });
+}
+
+</script>
+
+</body>
+
+</html>
