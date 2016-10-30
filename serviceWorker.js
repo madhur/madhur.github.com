@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v5';
+var cacheName = 'madhur-cache-v6';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -500,6 +500,11 @@ var filesToCache = [
     
     	
             '/blog/tags/gpt/',
+        
+
+    
+    	
+            '/blog/tags/ssl/',
         
 
     
@@ -1078,9 +1083,16 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2016/10/30/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2016/10/30/debugging-ssl-issues-java.html',
+	
     	'/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html',
 	
     	'/blog/2016/09/05/nodejs-connection-pooling.html',
