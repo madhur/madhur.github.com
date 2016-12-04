@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v6';
+var cacheName = 'madhur-cache-v7';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -505,6 +505,11 @@ var filesToCache = [
     
     	
             '/blog/tags/ssl/',
+        
+
+    
+    	
+            '/blog/tags/sentry/',
         
 
     
@@ -1088,9 +1093,23 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2016/12/',
+        
+
+    
+    	
+            '/blog/2016/12/04/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2016/12/04/integrating-sentry-node.html',
+	
+    	'/blog/2016/12/04/handling-couchbase-node.html',
+	
     	'/blog/2016/10/30/debugging-ssl-issues-java.html',
 	
     	'/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html',
