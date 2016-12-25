@@ -8,7 +8,7 @@ tags:
 - Caching
 ---
 
-If you have worked with Nginx cache, one must know [`proxy_cache_lock`](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock) directive.
+If you have worked with Nginx cache, one must know and understand [`proxy_cache_lock`](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock) and [`proxy_cache_use_stale`](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_use_stale) directives.
 
 To configure simply Nginx caching, we basically add these 2 lines in our configuration block:
 
