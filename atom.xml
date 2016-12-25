@@ -4,13 +4,94 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2016-12-04T12:25:24+05:30</updated>
+ <updated>2016-12-25T11:47:54+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx</title>
+   <link href="http://madhur.co.in/blog/2016/12/25/proxy-cache-lock-nginx.html"/>
+   <updated>2016-12-25T00:00:00+05:30</updated>
+   <id>id:/blog/2016/12/25/proxy-cache-lock-nginx</id>
+   <content type="html">&lt;p&gt;If you have worked with Nginx cache, one must know &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock&quot;&gt;&lt;code&gt;proxy_cache_lock&lt;/code&gt;&lt;/a&gt; directive.&lt;/p&gt;
+
+&lt;p&gt;To configure simply Nginx caching, we basically add these 2 lines in our configuration block:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;proxy_ignore_headers X-Accel-Expires Expires Cache-Control;
+proxy_cache_valid any 30s;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This will ignore any of the cache related headers from upstream and keep the cache valid for 30 seconds. This means that a request will only go out to upstream every 30 seconds. But it won&amp;#39;t be one request: it&amp;#39;s very possible that multiple requests will be made when multiple people request the same stale cache. To solve this problem, we add two more configuration directives:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;proxy_cache_lock on; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;proxy_cache_use_stale updating;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Using these two extra configuration directives, Nginx will send only one request to upstream every 30 secs while still responding quickly with stale data.&lt;/p&gt;
+
+&lt;p&gt;An important point to consider here is that default value of &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_use_stale&quot;&gt;&lt;code&gt;proxy_cache_use_stale&lt;/code&gt;&lt;/a&gt; is &lt;code&gt;off&lt;/code&gt;. That means, if you have set, &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock&quot;&gt;&lt;code&gt;proxy_cache_lock&lt;/code&gt;&lt;/a&gt; to &lt;code&gt;on&lt;/code&gt;, all the requests which will arrive at Ngix while the cache is being updated will &amp;quot;essentially wait&amp;quot;. During heavy traffic, this can considerably slowdown the performance and response times of the requests.&lt;/p&gt;
+
+&lt;p&gt;Quoting from NGINX docs:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;When enabled, only one request at a time will be allowed to populate a new cache element identified according to the proxy_cache_key directive by     passing a request to a proxied server. Other requests of the same cache  element will either wait for a response to appear in the cache or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Thus, it is very important to consider the scenarios in which &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock&quot;&gt;&lt;code&gt;proxy_cache_lock&lt;/code&gt;&lt;/a&gt; is being used. If it is not possible to serve the stale data to the client, it becomes even more important to configure the &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock_timeout&quot;&gt;&lt;code&gt;proxy_cache_lock_timeout&lt;/code&gt;&lt;/a&gt; value, otherwise performance can be severely degraded during heavy traffic. The default value of &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock_timeout&quot;&gt;&lt;code&gt;proxy_cache_lock_timeout&lt;/code&gt;&lt;/a&gt; is 5 seconds which is quite high.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Improving performance using Batch APIs</title>
+   <link href="http://madhur.co.in/blog/2016/12/25/batch-api-framework-nodejs.html"/>
+   <updated>2016-12-25T00:00:00+05:30</updated>
+   <id>id:/blog/2016/12/25/batch-api-framework-nodejs</id>
+   <content type="html">&lt;p&gt;Recently, there is lot of focus on dividing a complex application into small microservices communicating over REST. In most of the cases, REST is implemented over HTTP protocol. All this is great, but HTTP protocol adds lot of communciation overhead. There is a Request header, response headers which adds to considerable bytes in payload. Apart from that, you need to take care of things like &lt;code&gt;keepalive&lt;/code&gt; to eliminate TCP connection time overhead.&lt;/p&gt;
+
+&lt;p&gt;The keepalive does work well for microservices, but it certainly doesn&amp;#39;t work well for let&amp;#39;s say &amp;quot;mobile REST client applications&amp;quot;, where changing network conditions and cell tower will not allow for keep alives. Establishing an HTTP connection, especially when using secure sockets (HTTPS), will result in a handshake being performed between the mobile client and the server. These handshakes will occur N times when N requests are being sent, and your app will incur the associated extra cost of network traffic and battery consumption.&lt;/p&gt;
+
+&lt;p&gt;To mitigate these issues, it is generally advisable to batch HTTP requests whenever possible and send them over a persistent HTTP connection.&lt;/p&gt;
+
+&lt;p&gt;We implemented a very simple Batch API framework in Node.js. It is very looosed based on Facebook&amp;#39;s Graph API documentation, specifically &lt;a href=&quot;https://developers.facebook.com/docs/graph-api/making-multiple-requests&quot;&gt;Graph API, Making Batch Requests&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The request format is very simple, you just specify the end points and the type of requests they are (GET, POST, PUT DELETE, HEAD) etc. For example,&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;  
+   &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;relative_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/me&quot;&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;relative_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;me/friends?limit=50&quot;&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+   &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;POST&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/notification&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;body&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;s2&quot;&gt;&quot;title&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;hi there&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s2&quot;&gt;&quot;body&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;hi there as well&quot;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For each operation, the response includes a status code, header information, and the body. These are equivalent to the response you could expect from each operation if performed as raw requests.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;code&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; 
+      &lt;span class=&quot;s2&quot;&gt;&quot;body&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;{\&quot;id\&quot;:\&quot;…\&quot;}&quot;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;code&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;s2&quot;&gt;&quot;body&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;{\&quot;data\&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;…&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;One could have also included &lt;code&gt;headers&lt;/code&gt; in the output if required, but I believe it adds unnecessary overhead in the payload.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Integrate node.js logging with Sentry</title>
@@ -1311,110 +1392,6 @@ Read on the links. I have little idea about these as of now.&lt;/p&gt;&lt;/li&gt
 &lt;p&gt;Using this knowledge, we are able to send notifications which contain all special characters:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/notif2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Making AngularJs play nice with Social sharing</title>
-   <link href="http://madhur.co.in/blog/2016/04/09/making-angular-play-nice-with-social-sharing.html"/>
-   <updated>2016-04-09T00:00:00+05:30</updated>
-   <id>id:/blog/2016/04/09/making-angular-play-nice-with-social-sharing</id>
-   <content type="html">&lt;p&gt;Recently, We were designing a mobile web view for the news article shared on the app. I simply choose AngularJs for the ease of use and flexibility it provies.&lt;/p&gt;
-
-&lt;p&gt;However, after complete implementation. When someone tried to share the story on Facebook, we saw this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/angular1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;This happens because of social media sites like &lt;a href=&quot;&quot;&gt;Facebook&lt;/a&gt; do not evalaute Javascript while fetching the meta tags. In our case, the meta tags were defined like this:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;title&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ng-bind=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;title&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:title&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ data.caption }}&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:image&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ data.xImage}}&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:description&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ data.caption }}&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;We were relying on Angular&amp;#39;s interpolation to evaluate the meta tags which didn&amp;#39;t work since AngularJs is entirely executed on client side. This caused facebook to show raw values i.e. 
-``&lt;/p&gt;
-
-&lt;p&gt;To solve this problem, we moved the meta tags evaluation to server side. Since we were using Java stack along with Spring, it was easy to do so. We made sure that our HTML markup was filtered through JSP tags. It was as easy as adding these directives on top of page:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;%@ page isELIgnored=&quot;false&quot; %&amp;gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=ISO-8859-1&quot;
-         pageEncoding=&quot;ISO-8859-1&quot;%&amp;gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;%@ taglib uri=&quot;http://java.sun.com/jsp/jstl/core&quot; prefix=&quot;c&quot; %&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Now with JSTL tags in place, we replaced the meta tags with JPS tags:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;title&amp;gt;&amp;lt;c:out&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;${title}&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/c:out&amp;gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
- &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;viewport&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
- &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:title&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;c:out value=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/c:out&amp;gt;&lt;/span&gt;&quot; /&amp;gt;
- &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:image&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;c:out value=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/c:out&amp;gt;&lt;/span&gt;&quot; /&amp;gt;
- &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;property=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;og:description&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&amp;lt;c:out value=&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/c:out&amp;gt;&lt;/span&gt;&quot; /&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Before returning the JSP page through an API call, we evaluated these meta tags on the server side itself:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@RequestMapping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/view/{newsId}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;method&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RequestMethod&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GET&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getNews&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HttpServletRequest&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nd&quot;&gt;@PathVariable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;newsId&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;slug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ModelMap&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HttpServletResponse&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-
-        &lt;span class=&quot;n&quot;&gt;NewsArticlesV2&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newsArticlesV2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newsServiceV2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getByExternalId&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-        &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newsArticlesV2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getArticleTitle&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newsArticlesV2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getNewsContent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-        &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newsArticlesV2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getImage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setContentType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text/html&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;mv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addAttribute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;title&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;mv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addAttribute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;image&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;mv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addAttribute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;description&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;mv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addAttribute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;slug&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;slug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;debug&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;request&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;webforms/news&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;And the result becomes:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/angular2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Understanding free output in Linux</title>
-   <link href="http://madhur.co.in/blog/2016/04/08/understanding-free-output.html"/>
-   <updated>2016-04-08T00:00:00+05:30</updated>
-   <id>id:/blog/2016/04/08/understanding-free-output</id>
-   <content type="html">&lt;p&gt;If you are managing Linux machines daily like me, its important to understnad the output of &lt;code&gt;free&lt;/code&gt; command, which shows the free system memory.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[root@localhost vagrant]# free
-              total        used        free      shared  buff/cache   available
-Mem:        5824332     2292284     1155732      132980     2376316     3087844
-Swap:        839676       18172      821504
-[root@localhost vagrant]#&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;code&gt;free -g&lt;/code&gt; is much more helpful instead&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[root@localhost vagrant]# free -g
-              total        used        free      shared  buff/cache   available
-Mem:              5           2           1           0           2           2
-Swap:             0           0           0
-[root@localhost vagrant]#&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Some flavours of linux might output in this format:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;             total       used       free     shared    buffers     cached
-Mem:            62         46         16          0          0         10
--/+ buffers/cache:         35         27
-Swap:            0          0          0
------------------------------&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;ul&gt;
-&lt;li&gt;total - Your total, physical (assuming no virtualization) memory&lt;/li&gt;
-&lt;li&gt;used - How much of that is currently used (by anything)&lt;/li&gt;
-&lt;li&gt;free - How much of that is completely free (not used at all)&lt;/li&gt;
-&lt;li&gt;shared - (never anything there, ignore that column)&lt;/li&gt;
-&lt;li&gt;buffers - Memory used by kernel buffers&lt;/li&gt;
-&lt;li&gt;cached - Memory used for cache&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Essentially, the figures which we should be focussing on is &lt;code&gt;-/+ buffers/cache&lt;/code&gt; which excludes the used buffer.&lt;/p&gt;
 </content>
  </entry>
  
