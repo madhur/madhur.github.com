@@ -4,7 +4,7 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2016-12-25T11:47:54+05:30</updated>
+ <updated>2017-01-31T08:55:42+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -13,11 +13,103 @@
  
  
  <entry>
+   <title>Tuning Linux servers for scalability</title>
+   <link href="http://madhur.co.in/blog/2017/01/30/tuning-linux-servers-scalability.html"/>
+   <updated>2017-01-30T00:00:00+05:30</updated>
+   <id>id:/blog/2017/01/30/tuning-linux-servers-scalability</id>
+   <content type="html">&lt;p&gt;Focus on performance and scalablity is one of my primary personal and professional goal when working with tech products.&lt;/p&gt;
+
+&lt;p&gt;The server can be any Linux based server such as &lt;a href=&quot;https://www.centos.org/&quot;&gt;CentOS&lt;/a&gt; or &lt;a href=&quot;https://www.debian.org/&quot;&gt;Debian&lt;/a&gt; derivative such as &lt;a href=&quot;https://www.ubuntu.com/&quot;&gt;Ubuntu&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this post, I will outline my learnings on scaling the Linux server. Scaling here implies many things such as &lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Being able to open many files at once. Here files can be generally applied to concept such as open ports, threads etc and not necessary physical files&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Being able to handle many concurrent network connections&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Knowing Linux OS and related concepts such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Iptables&quot;&gt;Iptables&lt;/a&gt; is a pre-requisite.&lt;/p&gt;
+
+&lt;h2&gt;Open files&lt;/h2&gt;
+
+&lt;p&gt;We need to keep our file limit high for any linux production server. Check the current value using &lt;code&gt;ulimit -a&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;We can configure this limit using &lt;code&gt;/etc/security/limits.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;* hard nofile 300000
+* soft nofile 300000
+
+tomcat hard nofile 300000
+tomcat soft nofile 300000&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Note that we can also specify per user limit as shown above (special limits for tomcat user)&lt;/p&gt;
+
+&lt;p&gt;The file descriptor limit for a running process can be seen in the following file under Max open files.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;$ cat /proc/&amp;lt;pid&amp;gt;/limits
+
+Max open files            30000&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2&gt;Ephemeral Ports&lt;/h2&gt;
+
+&lt;p&gt;Increase the number of ephemeal ports availabl to your application. The default value is &lt;code&gt;32768 - 61000&lt;/code&gt;. &lt;/p&gt;
+
+&lt;h2&gt;TIME_WAIT state&lt;/h2&gt;
+
+&lt;p&gt;TCP connections go through lot of states, last of them is &lt;code&gt;TIME_WAIT&lt;/code&gt; state.
+The default &lt;code&gt;TIME_WAIT&lt;/code&gt; timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.&lt;/p&gt;
+
+&lt;p&gt;These parameters can be tuned using these settings in &lt;code&gt;/etc/sysctl.conf&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;net.ipv4.ip_local_port_range = 18000    65535
+net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2&gt;Connection Tracking&lt;/h2&gt;
+
+&lt;p&gt;The next parameter we looked at was Connection Tracking. This is a side effect of using &lt;code&gt;iptables&lt;/code&gt;. Since &lt;code&gt;iptables&lt;/code&gt; needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.&lt;/p&gt;
+
+&lt;p&gt;You can see the current size of this table using &lt;code&gt;sysctl net.netfilter.nf_conntrack_count&lt;/code&gt; and its limit using &lt;code&gt;sysctl net.nf_conntrack_max&lt;/code&gt;. If count crosses max, your linux system will stop accepting new TCP connections and you’ll never know about this. The only indication that this has happened is a single line hidden somewhere in &lt;code&gt;/var/log/syslog&lt;/code&gt; saying that you’re out of connection tracking entries. One line, once, when it first happens.&lt;/p&gt;
+
+&lt;p&gt;A better indication is if count is always very close to max. You might think, “Hey, we’ve set max exactly right.”, but you’d be wrong.&lt;/p&gt;
+
+&lt;p&gt;What you need to do (or at least that’s what you first think) is to increase max.&lt;/p&gt;
+
+&lt;p&gt;Keep in mind though, that the larger this value, the more RAM the kernel will use to keep track of these entries. RAM that could be used by your application.&lt;/p&gt;
+
+&lt;p&gt;We started down this path, increasing net.nf_conntrack_max, but soon we were just pushing it up every day. Connections that were getting in there were never getting out.&lt;/p&gt;
+
+&lt;h2&gt;Maximum number of pending connections on a socket&lt;/h2&gt;
+
+&lt;p&gt;During some of our initial load testing, we ran into a strange problem where we were unable to open more than approximately 128 concurrent connections at once.&lt;/p&gt;
+
+&lt;p&gt;After some investigation, we learned about the following kernel parameter.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;net.core.somaxconn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This kernel parameter is the size of the backlog of TCP connections waiting to be accepted by the application. If a connection indication arrives when the queue is full, the connection is refused. The default value for this parameters is 128 on most modern operating systems.&lt;/p&gt;
+
+&lt;p&gt;Bumping up this limit in &lt;code&gt;/etc/sysctl.conf&lt;/code&gt; helped us get rid of the “connection refused” issues on our Linux machines.&lt;/p&gt;
+
+&lt;h2&gt;JVM thread count&lt;/h2&gt;
+
+&lt;p&gt;A few hours after we allowed a significant percentage of production traffic to hit our server for the first time, we were alerted to the fact that the load balancer was unable to connect to a few of our machines. On further investigation, we saw the following all over our server logs.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;java.lang.OutOfMemoryError: unable to create new native thread&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If you hit the JVM thread limit, chances are that there is a thread leak in your code that needs to be fixed. However, if you find that all your threads are actually doing useful work, is there a way to tweak the system to let you create more threads and accept more connections?&lt;/p&gt;
+
+&lt;p&gt;The answer, as always, is fun. It’s interesting to discuss how available memory limits the number of threads that can be created on a JVM. The stack size of a thread determines the memory available for static memory allocation. Thus, the absolute theoretical maximum number of threads is a process’s user address space divided by the thread stack size. However, the reality is that the JVM also uses memory for dynamic allocation on the heap. With a few quick tests with a small Java process, we could verify that as more memory is allocated for the heap, less is available for the stack. Thus, the limit on the number of threads decreases with increasing heap size.&lt;/p&gt;
+
+&lt;p&gt;To summarize, you can increase the thread count limit by decreasing the stack size per thread &lt;code&gt;(-Xss)&lt;/code&gt; or by decreasing the memory allocated to the heap &lt;code&gt;(-Xms, -Xmx).&lt;/code&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx</title>
    <link href="http://madhur.co.in/blog/2016/12/25/proxy-cache-lock-nginx.html"/>
    <updated>2016-12-25T00:00:00+05:30</updated>
    <id>id:/blog/2016/12/25/proxy-cache-lock-nginx</id>
-   <content type="html">&lt;p&gt;If you have worked with Nginx cache, one must know &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock&quot;&gt;&lt;code&gt;proxy_cache_lock&lt;/code&gt;&lt;/a&gt; directive.&lt;/p&gt;
+   <content type="html">&lt;p&gt;If you have worked with Nginx cache, one must know and understand &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock&quot;&gt;&lt;code&gt;proxy_cache_lock&lt;/code&gt;&lt;/a&gt; and &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_use_stale&quot;&gt;&lt;code&gt;proxy_cache_use_stale&lt;/code&gt;&lt;/a&gt; directives.&lt;/p&gt;
 
 &lt;p&gt;To configure simply Nginx caching, we basically add these 2 lines in our configuration block:&lt;/p&gt;
 
@@ -55,18 +147,18 @@ proxy_cache_valid any 30s;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;To mitigate these issues, it is generally advisable to batch HTTP requests whenever possible and send them over a persistent HTTP connection.&lt;/p&gt;
 
-&lt;p&gt;We implemented a very simple Batch API framework in Node.js. It is very looosed based on Facebook&amp;#39;s Graph API documentation, specifically &lt;a href=&quot;https://developers.facebook.com/docs/graph-api/making-multiple-requests&quot;&gt;Graph API, Making Batch Requests&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We implemented a very simple Batch API framework in Node.js. It is very looosely based on Facebook&amp;#39;s Graph API documentation, specifically &lt;a href=&quot;https://developers.facebook.com/docs/graph-api/making-multiple-requests&quot;&gt;Graph API, Making Batch Requests&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;The request format is very simple, you just specify the end points and the type of requests they are (GET, POST, PUT DELETE, HEAD) etc. For example,&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;  
    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  
-        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s2&quot;&gt;&quot;relative_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/me&quot;&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/me&quot;&lt;/span&gt;
    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  
-        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s2&quot;&gt;&quot;relative_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;me/friends?limit=50&quot;&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;GET&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;path&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/me/friends?limit=50&quot;&lt;/span&gt;
    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
         &lt;span class=&quot;s2&quot;&gt;&quot;method&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;POST&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
@@ -90,6 +182,72 @@ proxy_cache_valid any 30s;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;One could have also included &lt;code&gt;headers&lt;/code&gt; in the output if required, but I believe it adds unnecessary overhead in the payload.&lt;/p&gt;
+
+&lt;h3&gt;Handling errors&lt;/h3&gt;
+
+&lt;p&gt;Its possible that one of the requested operations may throw an error.  In this scenario, the batch API throws a similar response to the standard Graph API, but encapsulated in the batch response syntax:&lt;/p&gt;
+
+&lt;p&gt;Other requests within the batch should still complete successfully and will be returned, as normal, with a 200 status code.&lt;/p&gt;
+
+&lt;h3&gt;Implementation&lt;/h3&gt;
+
+&lt;p&gt;The batch API framework is implemented in Node.js using &lt;a href=&quot;https://github.com/caolan/async&quot;&gt;async&lt;/a&gt; and &lt;a href=&quot;https://github.com/request/request&quot;&gt;request&lt;/a&gt; module. &lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;performBatch&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;headers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getHeaders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;responses&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEachOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;items&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+           &lt;span class=&quot;nx&quot;&gt;performRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+               &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                   &lt;span class=&quot;nx&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+               &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+               &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                   &lt;span class=&quot;nx&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;statusCode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+               &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+               &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+           &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keysrt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'o'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;responses&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The &lt;a href=&quot;http://caolan.github.io/async/docs.html#eachOf&quot;&gt;&lt;code&gt;eachOf&lt;/code&gt;&lt;/a&gt; function of &lt;a href=&quot;http://caolan.github.io/async/docs.html#&quot;&gt;async&lt;/a&gt; is used to send the HTTP request for each item in array in parallel. Note, that since this function calls HTTP request for each item in parallel, there is no guarantee that the  functions will complete in order. Hence, the &lt;code&gt;index&lt;/code&gt; is used to keep track of order and pushed with each response.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;performRequest&lt;/code&gt; is a simple function which makes an HTTP request according to the parameters and returns the response in a callback. In case of any error, it simply returns &lt;code&gt;error&lt;/code&gt; parameter as &lt;code&gt;true&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;performRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;self_host&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;timeout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;item&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once all the responses are received, they are sorted according to the &lt;code&gt;index&lt;/code&gt; key using the below function.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keysrt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~~&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~~&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </content>
  </entry>
  
@@ -1312,86 +1470,6 @@ Read on the links. I have little idea about these as of now.&lt;/p&gt;&lt;/li&gt
 &lt;p&gt;The complete program is given in this &lt;a href=&quot;https://gist.github.com/madhur/13ef5a810d495e9c638232263ea49fd5&quot;&gt;gist&lt;/a&gt; and as well as below. You just need to replace the &lt;code&gt;file_id&lt;/code&gt; parameter to start using it. Feel free to fork it :)&lt;/p&gt;
 
 &lt;script src=&quot;https://gist.github.com/madhur/13ef5a810d495e9c638232263ea49fd5.js&quot;&gt;&lt;/script&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Handling special characters in Python 2</title>
-   <link href="http://madhur.co.in/blog/2016/04/25/handling-special-characters-python.html"/>
-   <updated>2016-04-25T00:00:00+05:30</updated>
-   <id>id:/blog/2016/04/25/handling-special-characters-python</id>
-   <content type="html">&lt;p&gt;Recently, we implemented a method in Python to send push notifications to users.&lt;/p&gt;
-
-&lt;p&gt;In some of the cases, the notification was being received like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/notif1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;This was due to specially encoded UTF-8 characters, which we were not handling in Python.&lt;/p&gt;
-
-&lt;p&gt;Typically, whenever your Python source encounters a UTF-8 character, you get the following:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;SyntaxError: Non-ASCII character in file on line&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;For example, try out this program:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'India’s escalating water crisis'&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Here we have a UTF-8 chracter &lt;code&gt;’&lt;/code&gt; in the string. Running this program will result in :&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;SyntaxError: Non-ASCII character &amp;#39;\xe2&amp;#39; in file pychar.py on line 3, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;As the error suggests, the first step is to declare encoding on top of file:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;# encoding: utf-8&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Hence,the program becomes:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# encoding: utf-8&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'India’s escalating water crisis'&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Now, the program will happily print out the string in the output.&lt;/p&gt;
-
-&lt;p&gt;Apart from that,  it is also helpful to know that in python, these utf8 characters can be represented in both encoded and decoded forms.&lt;/p&gt;
-
-&lt;p&gt;For example, if I slightly modify my program as:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# encoding: utf-8&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;json&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'India’s escalating water crisis'&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'unicode_escape'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dumps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The output becomes,&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;Indiaâs escalating water crisis&lt;/code&gt;
-&lt;code&gt;&amp;quot;India\u00e2\u0080\u0099s escalating water crisis&amp;quot;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Here the characters have been represented in escaped forms. This is good for internal representation , but not something you want when you want to transfer the text for push notification to mobile devices or web pages.&lt;/p&gt;
-
-&lt;p&gt;In case, you want to completely strip out the special characters:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# encoding: utf-8&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;json&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'India’s escalating water crisis'&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;d&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'unicode_escape'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ascii'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ignore'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The output is:
-&lt;code&gt;Indias escalating water crisis&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Notice in the output above, the apostophe character has been trimmed.&lt;/p&gt;
-
-&lt;p&gt;Using this knowledge, we are able to send notifications which contain all special characters:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/notif2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 </content>
  </entry>
  

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    
+        <title>Tuning Linux servers for scalability &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Tuning Linux servers for scalability" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Tuning Linux servers for scalability</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2017-01-30 00:00:00 +0530" pubdate="pubdate">30 January 2017</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+  
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>Focus on performance and scalablity is one of my primary personal and professional goal when working with tech products.</p>
+
+<p>The server can be any Linux based server such as <a href="https://www.centos.org/">CentOS</a> or <a href="https://www.debian.org/">Debian</a> derivative such as <a href="https://www.ubuntu.com/">Ubuntu</a>.</p>
+
+<p>In this post, I will outline my learnings on scaling the Linux server. Scaling here implies many things such as </p>
+
+<ul>
+<li><p>Being able to open many files at once. Here files can be generally applied to concept such as open ports, threads etc and not necessary physical files</p></li>
+<li><p>Being able to handle many concurrent network connections</p></li>
+</ul>
+
+<p>Knowing Linux OS and related concepts such as <a href="https://en.wikipedia.org/wiki/Iptables">Iptables</a> is a pre-requisite.</p>
+
+<h2>Open files</h2>
+
+<p>We need to keep our file limit high for any linux production server. Check the current value using <code>ulimit -a</code></p>
+
+<p>We can configure this limit using <code>/etc/security/limits.conf</code></p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">* hard nofile 300000
+* soft nofile 300000
+
+tomcat hard nofile 300000
+tomcat soft nofile 300000</code></pre></figure>
+
+<p>Note that we can also specify per user limit as shown above (special limits for tomcat user)</p>
+
+<p>The file descriptor limit for a running process can be seen in the following file under Max open files.</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ cat /proc/&lt;pid&gt;/limits
+
+Max open files            30000</code></pre></figure>
+
+<h2>Ephemeral Ports</h2>
+
+<p>Increase the number of ephemeal ports availabl to your application. The default value is <code>32768 - 61000</code>. </p>
+
+<h2>TIME_WAIT state</h2>
+
+<p>TCP connections go through lot of states, last of them is <code>TIME_WAIT</code> state.
+The default <code>TIME_WAIT</code> timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.</p>
+
+<p>These parameters can be tuned using these settings in <code>/etc/sysctl.conf</code></p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">net.ipv4.ip_local_port_range = 18000    65535
+net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1</code></pre></figure>
+
+<h2>Connection Tracking</h2>
+
+<p>The next parameter we looked at was Connection Tracking. This is a side effect of using <code>iptables</code>. Since <code>iptables</code> needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.</p>
+
+<p>You can see the current size of this table using <code>sysctl net.netfilter.nf_conntrack_count</code> and its limit using <code>sysctl net.nf_conntrack_max</code>. If count crosses max, your linux system will stop accepting new TCP connections and you’ll never know about this. The only indication that this has happened is a single line hidden somewhere in <code>/var/log/syslog</code> saying that you’re out of connection tracking entries. One line, once, when it first happens.</p>
+
+<p>A better indication is if count is always very close to max. You might think, “Hey, we’ve set max exactly right.”, but you’d be wrong.</p>
+
+<p>What you need to do (or at least that’s what you first think) is to increase max.</p>
+
+<p>Keep in mind though, that the larger this value, the more RAM the kernel will use to keep track of these entries. RAM that could be used by your application.</p>
+
+<p>We started down this path, increasing net.nf_conntrack_max, but soon we were just pushing it up every day. Connections that were getting in there were never getting out.</p>
+
+<h2>Maximum number of pending connections on a socket</h2>
+
+<p>During some of our initial load testing, we ran into a strange problem where we were unable to open more than approximately 128 concurrent connections at once.</p>
+
+<p>After some investigation, we learned about the following kernel parameter.</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">net.core.somaxconn</code></pre></figure>
+
+<p>This kernel parameter is the size of the backlog of TCP connections waiting to be accepted by the application. If a connection indication arrives when the queue is full, the connection is refused. The default value for this parameters is 128 on most modern operating systems.</p>
+
+<p>Bumping up this limit in <code>/etc/sysctl.conf</code> helped us get rid of the “connection refused” issues on our Linux machines.</p>
+
+<h2>JVM thread count</h2>
+
+<p>A few hours after we allowed a significant percentage of production traffic to hit our server for the first time, we were alerted to the fact that the load balancer was unable to connect to a few of our machines. On further investigation, we saw the following all over our server logs.</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">java.lang.OutOfMemoryError: unable to create new native thread</code></pre></figure>
+
+<p>If you hit the JVM thread limit, chances are that there is a thread leak in your code that needs to be fixed. However, if you find that all your threads are actually doing useful work, is there a way to tweak the system to let you create more threads and accept more connections?</p>
+
+<p>The answer, as always, is fun. It’s interesting to discuss how available memory limits the number of threads that can be created on a JVM. The stack size of a thread determines the memory available for static memory allocation. Thus, the absolute theoretical maximum number of threads is a process’s user address space divided by the thread stack size. However, the reality is that the JVM also uses memory for dynamic allocation on the heap. With a few quick tests with a small Java process, we could verify that as more memory is allocated for the heap, less is available for the stack. Thus, the limit on the number of threads decreases with increasing heap size.</p>
+
+<p>To summarize, you can increase the thread count limit by decreasing the stack size per thread <code>(-Xss)</code> or by decreasing the memory allocated to the heap <code>(-Xms, -Xmx).</code></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/linux">Linux</a> |
+					
+						<a href="/blog/tags/scalability">Scalability</a> |
+					
+						<a href="/blog/tags/tcp-ip">TCP/IP</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2017/01/30/tuning-linux-servers-scalability/';
+  var disqus_title = 'Tuning Linux servers for scalability';
+  var disqus_url = 'http://madhur.co.in/blog/2017/01/30/tuning-linux-servers-scalability.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2017 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+    <!-- serviceWorker.html -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+        if (!reg.installing) return;
+        console.log("[*] ServiceWorker is installing...");
+
+        var worker = reg.installing;
+        worker.addEventListener('statechange', function() {
+            if (worker.state == 'redundant') {
+                console.log('[*] Install failed');
+            }
+            if (worker.state == 'installed') {
+                console.log('[*] Install successful!');
+            }
+        });
+    });
+}
+
+</script>
+
+</body>
+
+</html>

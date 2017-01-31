@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v8';
+var cacheName = 'madhur-cache-v9';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -515,6 +515,16 @@ var filesToCache = [
     
     	
             '/blog/tags/performance/',
+        
+
+    
+    	
+            '/blog/tags/scalability/',
+        
+
+    
+    	
+            '/blog/tags/tcpip/',
         
 
     
@@ -1113,9 +1123,26 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/',
+        
+
+    
+    	
+            '/blog/2017/01/',
+        
+
+    
+    	
+            '/blog/2017/01/30/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/01/30/tuning-linux-servers-scalability.html',
+	
     	'/blog/2016/12/25/proxy-cache-lock-nginx.html',
 	
     	'/blog/2016/12/25/batch-api-framework-nodejs.html',
