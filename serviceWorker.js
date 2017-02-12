@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v9';
+var cacheName = 'madhur-cache-v10';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -1138,9 +1138,21 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/02/',
+        
+
+    
+    	
+            '/blog/2017/02/12/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/02/12/git-bulk-clone.html',
+	
     	'/blog/2017/01/30/tuning-linux-servers-scalability.html',
 	
     	'/blog/2016/12/25/proxy-cache-lock-nginx.html',
