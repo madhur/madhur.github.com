@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v10';
+var cacheName = 'madhur-cache-v11';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -525,6 +525,11 @@ var filesToCache = [
     
     	
             '/blog/tags/tcpip/',
+        
+
+    
+    	
+            '/blog/tags/tcpdump/',
         
 
     
@@ -1148,9 +1153,16 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/02/18/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/02/18/useful-tcpdump-netcat-usages.html',
+	
     	'/blog/2017/02/12/git-bulk-clone.html',
 	
     	'/blog/2017/01/30/tuning-linux-servers-scalability.html',
