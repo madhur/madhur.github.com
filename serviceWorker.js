@@ -534,6 +534,16 @@ var filesToCache = [
 
     
     	
+            '/blog/tags/angular/',
+        
+
+    
+    	
+            '/blog/tags/typescript/',
+        
+
+    
+    	
             '/blog/2011/',
         
 
@@ -1158,9 +1168,21 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/03/',
+        
+
+    
+    	
+            '/blog/2017/03/26/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/03/26/angular-confirmation-dialog.html',
+	
     	'/blog/2017/02/18/useful-tcpdump-netcat-usages.html',
 	
     	'/blog/2017/02/12/git-bulk-clone.html',
