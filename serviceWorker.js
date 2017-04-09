@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v12';
+var cacheName = 'madhur-cache-v13';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -540,6 +540,16 @@ var filesToCache = [
     
     	
             '/blog/tags/typescript/',
+        
+
+    
+    	
+            '/blog/tags/curator/',
+        
+
+    
+    	
+            '/blog/tags/elasticsearch/',
         
 
     
@@ -1178,9 +1188,21 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/04/',
+        
+
+    
+    	
+            '/blog/2017/04/09/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/04/09/usingcuratordeleteelasticindex.html',
+	
     	'/blog/2017/03/26/angular-confirmation-dialog.html',
 	
     	'/blog/2017/02/18/useful-tcpdump-netcat-usages.html',

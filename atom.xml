@@ -4,13 +4,122 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2017-03-26T23:23:27+05:30</updated>
+ <updated>2017-04-09T17:36:17+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Using curator to delete older elasticsearch indices</title>
+   <link href="http://madhur.co.in/blog/2017/04/09/usingcuratordeleteelasticindex.html"/>
+   <updated>2017-04-09T00:00:00+05:30</updated>
+   <id>id:/blog/2017/04/09/usingcuratordeleteelasticindex</id>
+   <content type="html">&lt;p&gt;We use &lt;a href=&quot;https://www.elastic.co/webinars/introduction-elk-stack&quot;&gt;ELK stack&lt;/a&gt; heavily in our production systems for log aggregation and monitoring.&lt;/p&gt;
+
+&lt;p&gt;Our daily log size generated is aroudn 100GB. Since, we do not intend to keep the log files in ELK for more than a month, it becomes important that we delete those indices to free up disk space.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, &lt;a href=&quot;https://www.elastic.co/products/logstash&quot;&gt;Logstash&lt;/a&gt; creates a new index every day by default.&lt;/p&gt;
+
+&lt;p&gt;Thus, we can ask &lt;a href=&quot;https://github.com/elastic/curator&quot;&gt;Curator&lt;/a&gt; to simply delete the indices x days old and which follow a particular naming pattern.&lt;/p&gt;
+
+&lt;h3&gt;Installing Curator&lt;/h3&gt;
+
+&lt;p&gt;Simple use &lt;code&gt;pip install elasticsearch-curator&lt;/code&gt; to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.&lt;/p&gt;
+
+&lt;h3&gt;Configuring Curator&lt;/h3&gt;
+
+&lt;p&gt;Create a file &lt;code&gt;curator.yml&lt;/code&gt; with following contents.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;127.0.0.1&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;9200&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;url_prefix&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;use_ssl&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;certificate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;client_cert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;client_key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;ssl_no_validate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;http_auth&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;timeout&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;30&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;master_only&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;loglevel&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;INFO&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;logfile&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;logformat&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;default&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;blacklist&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;elasticsearch'&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;urllib3'&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now, we need to define an action. i.e. What will curator do.  There are many actions to choose from. Check the &lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html&quot;&gt;documentation&lt;/a&gt; for more information&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Alias&lt;/li&gt;
+&lt;li&gt;Allocation&lt;/li&gt;
+&lt;li&gt;Close&lt;/li&gt;
+&lt;li&gt;Cluster Routing&lt;/li&gt;
+&lt;li&gt;Create Index&lt;/li&gt;
+&lt;li&gt;Delete Indices&lt;/li&gt;
+&lt;li&gt;Delete Snapshots&lt;/li&gt;
+&lt;li&gt;Open&lt;/li&gt;
+&lt;li&gt;forceMerge&lt;/li&gt;
+&lt;li&gt;Replicas&lt;/li&gt;
+&lt;li&gt;Restore&lt;/li&gt;
+&lt;li&gt;Snapshot&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For this dicussion, we will use &lt;code&gt;Delete Indices&lt;/code&gt; as the action, since this is what we want to do.&lt;/p&gt;
+
+&lt;p&gt;Below is the sample action file &lt;code&gt;delete_indices.yml&lt;/code&gt; , which will delete the logstash indices which are older than 10 days.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;delete_indices&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;&amp;gt;-&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;Delete indices older than 45 days (based on index name), for logstash-&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;prefixed indices. Ignore the error if the filter does not result in an&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;actionable list of indices (ignore_empty_list) and exit cleanly.&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;options:&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;ignore_empty_list: True&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;timeout_override:&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;continue_if_exception: False&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;disable_action: False&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;filters:&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;- filtertype: pattern&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;kind: prefix&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;value: logstash-&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;exclude:&lt;/span&gt;
+    &lt;span class=&quot;no&quot;&gt;- filtertype: age&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;source: name&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;direction: older&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;timestring: '%Y.%m.%d'&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;unit: days&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;unit_count: 10&lt;/span&gt;
+      &lt;span class=&quot;no&quot;&gt;exclude:&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To run this action, simple use the command &lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;curator ./delete_index.yml --config ./curator.yml --dry-run
+2017-04-09 17:27:46,075 INFO      Preparing Action ID: 1, &quot;delete_indices&quot;
+2017-04-09 17:27:46,080 INFO      Trying Action ID: 1, &quot;delete_indices&quot;: Delete indices older than 45 days (based on index name), for logstash- prefixed indices. Ignore the error if the filter does not result in an actionable list of indices (ignore_empty_list) and exit cleanly.
+2017-04-09 17:27:46,538 INFO      DRY-RUN MODE.  No changes will be made.
+2017-04-09 17:27:46,538 INFO      (CLOSED) indices may be shown that may not be acted on by action &quot;delete_indices&quot;.
+2017-04-09 17:27:46,538 INFO      Action ID: 1, &quot;delete_indices&quot; completed.
+2017-04-09 17:27:46,538 INFO      Job completed.&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The &lt;code&gt;--dry-run&lt;/code&gt; mode will not actually delete the index. It can be used to test the output of the action.&lt;/p&gt;
+
+&lt;p&gt;If you want to schedule it in a cron, you can do so using &lt;code&gt;crontab -e&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;00 8 * * * root curator /path/delete_index.yml --config /path/curator.yml &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The above configuration will cleanup the indices older than 10 days everyday at 8 AM.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Angular2 Confirmation Dialog component</title>
@@ -1336,91 +1445,6 @@ server {
 &lt;p&gt;To verify this, you can print out the key field in the response headers using&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;add_header X-Cache-Key  $http_x_auth_token$request_uri;&lt;/code&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Create a couchbase bucket during build of the container</title>
-   <link href="http://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html"/>
-   <updated>2016-07-07T00:00:00+05:30</updated>
-   <id>id:/blog/2016/07/07/create-couchbase-bucket-docker</id>
-   <content type="html">&lt;p&gt;We are using docker to automate the develop environments through &lt;a href=&quot;https://docs.docker.com/compose/&quot;&gt;docker compose&lt;/a&gt;. We use couchbase heavily in our applications. One problem we faced is that if you boot up the &lt;a href=&quot;https://hub.docker.com/r/couchbase/server/&quot;&gt;docker image of couchbase&lt;/a&gt;, you will have to manually perform the setup process, create buckets and so on.  Performing all of these steps manually and everytime is time consuming and not at all ideal.&lt;/p&gt;
-
-&lt;p&gt;I will show you how we solved this problem and automated these steps through &lt;a href=&quot;https://docs.docker.com/engine/reference/builder/&quot;&gt;Dockerfile&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The key thing here is that Couchbase exposes a set of &lt;a href=&quot;http://docs.couchbase.com/admin/admin/rest-intro.html&quot;&gt;services&lt;/a&gt; to perform each of the operation which can be invoked just after the server start.&lt;/p&gt;
-
-&lt;p&gt;We are using &lt;code&gt;docker-compose&lt;/code&gt; and hence our &lt;code&gt;docker-compose.yml&lt;/code&gt; is as follows:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;2'&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;couchbase&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;couchbase/&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8091:8091&lt;/span&gt;
-     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8092:8092&lt;/span&gt; 
-     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8093:8093&lt;/span&gt; 
-     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;11210:11210&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Through &lt;code&gt;build: couchbase/&lt;/code&gt;, I am pointing to a couchbase directory which contains our &lt;code&gt;Dockerfile&lt;/code&gt; and a script &lt;code&gt;configure-node.sh&lt;/code&gt; which invokes the REST API endpoints of couchbase.&lt;/p&gt;
-
-&lt;p&gt;Here is the very simplistic &lt;code&gt;Dockerfile&lt;/code&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;FROM couchbase:community-3.1.3
-
-COPY configure-node.sh /opt/couchbase
-
-CMD [&quot;/opt/couchbase/configure-node.sh&quot;]&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;We use the following script to configure the node.&lt;/p&gt;
-
-&lt;p&gt;All the files are given in this &lt;a href=&quot;https://github.com/madhur/couchbase-docker&quot;&gt;github repo&lt;/a&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; -m
-
-/entrypoint.sh couchbase-server &amp;amp;
-
-sleep 60
-
-&lt;span class=&quot;c&quot;&gt;# Setup index and memory quota&lt;/span&gt;
-curl -v -X POST http://127.0.0.1:8091/pools/default -d &lt;span class=&quot;nv&quot;&gt;memoryQuota&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;300 -d &lt;span class=&quot;nv&quot;&gt;indexMemoryQuota&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;300
-
-&lt;span class=&quot;c&quot;&gt;# Setup services&lt;/span&gt;
-curl -v http://127.0.0.1:8091/node/controller/setupServices -d &lt;span class=&quot;nv&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;kv%2Cn1ql%2Cindex
-
-&lt;span class=&quot;c&quot;&gt;# Setup credentials&lt;/span&gt;
-curl -v http://127.0.0.1:8091/settings/web -d &lt;span class=&quot;nv&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8091 -d &lt;span class=&quot;nv&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Administrator -d &lt;span class=&quot;nv&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;password
-
-&lt;span class=&quot;c&quot;&gt;# Load travel-sample bucket&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#curl -v -u Administrator:password -X POST http://127.0.0.1:8091/sampleBuckets/install -d '[&quot;travel-sample&quot;]'&lt;/span&gt;
-curl -X POST -u Administrator:password -d &lt;span class=&quot;nv&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;default -d &lt;span class=&quot;nv&quot;&gt;ramQuotaMB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;100 -d &lt;span class=&quot;nv&quot;&gt;authType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;none -d &lt;span class=&quot;nv&quot;&gt;replicaNumber&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2 -d &lt;span class=&quot;nv&quot;&gt;proxyPort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11215 http://127.0.0.1:8091/pools/default/buckets
-
-
-curl -X POST -u Administrator:password -d &lt;span class=&quot;nv&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;feed -d &lt;span class=&quot;nv&quot;&gt;ramQuotaMB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;100 -d &lt;span class=&quot;nv&quot;&gt;authType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;none -d &lt;span class=&quot;nv&quot;&gt;replicaNumber&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2 -d &lt;span class=&quot;nv&quot;&gt;proxyPort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;11215 http://127.0.0.1:8091/pools/default/buckets
-
-
-&lt;span class=&quot;c&quot;&gt;# Setup Memory Optimized Indexes&lt;/span&gt;
-curl -i -u Administrator:password -X POST http://127.0.0.1:8091/settings/indexes -d &lt;span class=&quot;s1&quot;&gt;'storageMode=memory_optimized'&lt;/span&gt;
-
-&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Type: &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$TYPE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, Master: &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$COUCHBASE_MASTER&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$TYPE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;worker&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;then
-  &lt;/span&gt;sleep 15
-  &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;IP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;hostname -I&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
-  couchbase-cli server-add --cluster&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$COUCHBASE_MASTER&lt;/span&gt;:8091 --user Administrator --password password --server-add&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$IP&lt;/span&gt;
-  &lt;span class=&quot;c&quot;&gt;# TODO: Hack with the cuts, use jq may be better.&lt;/span&gt;
-  &lt;span class=&quot;c&quot;&gt;#KNOWN_NODES=`curl -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/addNode \&lt;/span&gt;
-  &lt;span class=&quot;c&quot;&gt;#  -d hostname=$IP -d user=Administrator -d password=password -d services=kv,n1ql,index | cut -d: -f2 | cut -d\&quot; -f 2 | sed -e   's/@/%40/g'`&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$AUTO_REBALANCE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;true&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;then
-    &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Auto Rebalance: &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$AUTO_REBALANCE&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-    sleep 10
-    couchbase-cli rebalance -c &lt;span class=&quot;nv&quot;&gt;$COUCHBASE_MASTER&lt;/span&gt;:8091 -u Administrator -p password --server-add&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$IP&lt;/span&gt;
-    &lt;span class=&quot;c&quot;&gt;#curl -v -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/rebalance --data &quot;knownNodes=$KNOWN_NODES&amp;amp;ejectedNodes=&quot;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;;
-&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;;
-
-&lt;span class=&quot;nb&quot;&gt;fg &lt;/span&gt;1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </content>
  </entry>
  

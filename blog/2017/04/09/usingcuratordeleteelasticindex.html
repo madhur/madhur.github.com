@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    
+        <title>Using curator to delete older elasticsearch indices &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Using curator to delete older elasticsearch indices" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
+    
+    
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" />
+    
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+
+     
+   
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+       
+            <header id="header" class="row">
+
+                <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+            </header>
+       
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Using curator to delete older elasticsearch indices</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2017-04-09 00:00:00 +0530" pubdate="pubdate">09 April 2017</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+				<div class="social-icon col-md-2 col-sm-2">
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"></script>
+				</div>
+
+	
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>We use <a href="https://www.elastic.co/webinars/introduction-elk-stack">ELK stack</a> heavily in our production systems for log aggregation and monitoring.</p>
+
+<p>Our daily log size generated is aroudn 100GB. Since, we do not intend to keep the log files in ELK for more than a month, it becomes important that we delete those indices to free up disk space.</p>
+
+<p>Fortunately, <a href="https://www.elastic.co/products/logstash">Logstash</a> creates a new index every day by default.</p>
+
+<p>Thus, we can ask <a href="https://github.com/elastic/curator">Curator</a> to simply delete the indices x days old and which follow a particular naming pattern.</p>
+
+<h3>Installing Curator</h3>
+
+<p>Simple use <code>pip install elasticsearch-curator</code> to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.</p>
+
+<h3>Configuring Curator</h3>
+
+<p>Create a file <code>curator.yml</code> with following contents.</p>
+
+<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="na">client</span><span class="pi">:</span>
+  <span class="na">hosts</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">127.0.0.1</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="s">9200</span>
+  <span class="na">url_prefix</span><span class="pi">:</span>
+  <span class="na">use_ssl</span><span class="pi">:</span> <span class="s">False</span>
+  <span class="na">certificate</span><span class="pi">:</span>
+  <span class="na">client_cert</span><span class="pi">:</span>
+  <span class="na">client_key</span><span class="pi">:</span>
+  <span class="na">ssl_no_validate</span><span class="pi">:</span> <span class="s">False</span>
+  <span class="na">http_auth</span><span class="pi">:</span>
+  <span class="na">timeout</span><span class="pi">:</span> <span class="s">30</span>
+  <span class="na">master_only</span><span class="pi">:</span> <span class="s">False</span>
+
+<span class="na">logging</span><span class="pi">:</span>
+  <span class="na">loglevel</span><span class="pi">:</span> <span class="s">INFO</span>
+  <span class="na">logfile</span><span class="pi">:</span>
+  <span class="na">logformat</span><span class="pi">:</span> <span class="s">default</span>
+  <span class="na">blacklist</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">elasticsearch'</span><span class="pi">,</span> <span class="s1">'</span><span class="s">urllib3'</span><span class="pi">]</span></code></pre></figure>
+
+<p>Now, we need to define an action. i.e. What will curator do.  There are many actions to choose from. Check the <a href="https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html">documentation</a> for more information</p>
+
+<ul>
+<li>Alias</li>
+<li>Allocation</li>
+<li>Close</li>
+<li>Cluster Routing</li>
+<li>Create Index</li>
+<li>Delete Indices</li>
+<li>Delete Snapshots</li>
+<li>Open</li>
+<li>forceMerge</li>
+<li>Replicas</li>
+<li>Restore</li>
+<li>Snapshot</li>
+</ul>
+
+<p>For this dicussion, we will use <code>Delete Indices</code> as the action, since this is what we want to do.</p>
+
+<p>Below is the sample action file <code>delete_indices.yml</code> , which will delete the logstash indices which are older than 10 days.</p>
+
+<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
+<span class="na">actions</span><span class="pi">:</span>
+  <span class="na">1</span><span class="pi">:</span>
+    <span class="na">action</span><span class="pi">:</span> <span class="s">delete_indices</span>
+    <span class="na">description</span><span class="pi">:</span> <span class="pi">&gt;-</span>
+      <span class="no">Delete indices older than 45 days (based on index name), for logstash-</span>
+      <span class="no">prefixed indices. Ignore the error if the filter does not result in an</span>
+      <span class="no">actionable list of indices (ignore_empty_list) and exit cleanly.</span>
+    <span class="no">options:</span>
+      <span class="no">ignore_empty_list: True</span>
+      <span class="no">timeout_override:</span>
+      <span class="no">continue_if_exception: False</span>
+      <span class="no">disable_action: False</span>
+    <span class="no">filters:</span>
+    <span class="no">- filtertype: pattern</span>
+      <span class="no">kind: prefix</span>
+      <span class="no">value: logstash-</span>
+      <span class="no">exclude:</span>
+    <span class="no">- filtertype: age</span>
+      <span class="no">source: name</span>
+      <span class="no">direction: older</span>
+      <span class="no">timestring: '%Y.%m.%d'</span>
+      <span class="no">unit: days</span>
+      <span class="no">unit_count: 10</span>
+      <span class="no">exclude:</span></code></pre></figure>
+
+<p>To run this action, simple use the command </p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">curator ./delete_index.yml --config ./curator.yml --dry-run
+2017-04-09 17:27:46,075 INFO      Preparing Action ID: 1, "delete_indices"
+2017-04-09 17:27:46,080 INFO      Trying Action ID: 1, "delete_indices": Delete indices older than 45 days (based on index name), for logstash- prefixed indices. Ignore the error if the filter does not result in an actionable list of indices (ignore_empty_list) and exit cleanly.
+2017-04-09 17:27:46,538 INFO      DRY-RUN MODE.  No changes will be made.
+2017-04-09 17:27:46,538 INFO      (CLOSED) indices may be shown that may not be acted on by action "delete_indices".
+2017-04-09 17:27:46,538 INFO      Action ID: 1, "delete_indices" completed.
+2017-04-09 17:27:46,538 INFO      Job completed.</code></pre></figure>
+
+<p>The <code>--dry-run</code> mode will not actually delete the index. It can be used to test the output of the action.</p>
+
+<p>If you want to schedule it in a cron, you can do so using <code>crontab -e</code></p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">00 8 * * * root curator /path/delete_index.yml --config /path/curator.yml </code></pre></figure>
+
+<p>The above configuration will cleanup the indices older than 10 days everyday at 8 AM.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/curator">Curator</a> |
+					
+						<a href="/blog/tags/elasticsearch">Elasticsearch</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2017/04/09/using-curator-delete-elasticsearch-indices/';
+  var disqus_title = 'Using curator to delete older elasticsearch indices';
+  var disqus_url = 'http://madhur.co.in/blog/2017/04/09/usingcuratordeleteelasticindex.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2017 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>
+
+    
+        <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+    
+
+    <!-- serviceWorker.html -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+        if (!reg.installing) return;
+        console.log("[*] ServiceWorker is installing...");
+
+        var worker = reg.installing;
+        worker.addEventListener('statechange', function() {
+            if (worker.state == 'redundant') {
+                console.log('[*] Install failed');
+            }
+            if (worker.state == 'installed') {
+                console.log('[*] Install successful!');
+            }
+        });
+    });
+}
+
+</script>
+
+</body>
+
+</html>
