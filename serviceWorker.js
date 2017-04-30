@@ -2,7 +2,7 @@
 layout: null
 ---
 
-var cacheName = 'madhur-cache-v13';
+var cacheName = 'madhur-cache-v14';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
