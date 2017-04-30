@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v13';
+var cacheName = 'madhur-cache-v14';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -550,6 +550,11 @@ var filesToCache = [
     
     	
             '/blog/tags/elasticsearch/',
+        
+
+    
+    	
+            '/blog/tags/elk/',
         
 
     
@@ -1198,9 +1203,16 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2017/04/30/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2017/04/30/view-exceptions-in-elk.html',
+	
     	'/blog/2017/04/09/usingcuratordeleteelasticindex.html',
 	
     	'/blog/2017/03/26/angular-confirmation-dialog.html',
@@ -1542,6 +1554,8 @@ var filesToCache = [
         
               '/files/js/vendor/planes.js',
 		
+	
+        
 	
         
 	

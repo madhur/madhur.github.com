@@ -4,13 +4,85 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2017-04-09T17:36:17+05:30</updated>
+ <updated>2017-04-30T21:34:27+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Handling stack traces in Elasticsearch Logstash Kibana (ELK)</title>
+   <link href="http://madhur.co.in/blog/2017/04/30/view-exceptions-in-elk.html"/>
+   <updated>2017-04-30T00:00:00+05:30</updated>
+   <id>id:/blog/2017/04/30/view-exceptions-in-elk</id>
+   <content type="html">&lt;p&gt;I use &lt;a href=&quot;https://www.elastic.co/webinars/introduction-elk-stack&quot;&gt;Elasticsearch Logstash Kibana (ELK)&lt;/a&gt; stack for visualizing lot of things like Nginx logs, HaProxy logs etc.&lt;/p&gt;
+
+&lt;p&gt;I also ingest application logs into the ELK. One thing I have been looking to do is visualization of errors happening into the system. Surely, Nginx and Haproxy logs can give you visualization of 500 status codes but there are many cases where the status code is 2xx but the internal error in the system is logged.&lt;/p&gt;
+
+&lt;p&gt;Our most of the microservices are written in Java / Python / Node.js and so I am only concentrating on those. A typical java exception stack trace when logged looks like this:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Exception in thread &quot;main&quot; java.lang.NullPointerException
+        at com.example.myproject.Book.getTitle(Book.java:16)
+        at com.example.myproject.Author.getBookTitles(Author.java:25)
+        at com.example.myproject.Bootstrap.main(Bootstrap.java:14)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Normally, this will be ingested line by line in ELK stack, which breaks the entire message.&lt;/p&gt;
+
+&lt;p&gt;For entire stack trace to be ingested as a single message, we need to configure the &lt;code&gt;multiline&lt;/code&gt; plugin either in &lt;a href=&quot;https://www.elastic.co/products/logstash&quot;&gt;Logstash&lt;/a&gt; or &lt;a href=&quot;https://www.elastic.co/products/beats/filebeat&quot;&gt;Filebeat&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I prefer to do this configuration in filebeat, here is how my typical configuration looks like:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;na&quot;&gt;filebeat&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;tail_files&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;prospectors&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;paths&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/log/example.log&lt;/span&gt;     
+      &lt;span class=&quot;na&quot;&gt;input_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;log&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;document_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;log&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;multiline.pattern&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;^[[:space:]]'&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;multiline.negate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;false&lt;/span&gt;
+      &lt;span class=&quot;s&quot;&gt;multiline.match&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;after&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;registry_file&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/lib/filebeat/registry&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;logstash&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;logstash_server&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;worker&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;4&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;bulk_max_size &lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8192&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;shipper&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/log/filebeat&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;rotateeverybytes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10485760&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# = 10MB&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;level&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;info&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The lines below in the configuration configures the multiline processing. i.e. If a line starts with series of spaces (as in the case of stack trace), it should be considered as a part of previous line.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;multiline.pattern: '^[[:space:]]'
+multiline.negate: false
+multiline.match: after&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once, we configure the multiline, here is how our messages should look like:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/stacktrace.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;The next step is to parse this exception stacktrace and extract useful information like Exception class etc.&lt;/p&gt;
+
+&lt;p&gt;For this, we can use built in logstash parser &lt;code&gt;JAVASTACKTRACEPART&lt;/code&gt;&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;grok {
+                     match =&amp;gt; { &quot;message&quot; =&amp;gt;[
+                                               &quot;%{JAVASTACKTRACEPART}&quot;
+                                             ]
+                                }
+
+              }&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This will extract various useful fields like line no, class and method name from the exception stack trace.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Using curator to delete older elasticsearch indices</title>
@@ -1384,67 +1456,6 @@ JSLint is the oldest of the four. Douglas Crockford created it in 2002 to enforc
 &lt;p&gt;These and many other such patterns are documented in &lt;a href=&quot;https://jakearchibald.com/2014/offline-cookbook/&quot;&gt;offline cookbook&lt;/a&gt; &lt;/p&gt;
 
 &lt;p&gt;These patterns can be easy implemented using &lt;a href=&quot;https://github.com/GoogleChrome/sw-toolbox&quot;&gt;sw-toolbox&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Caching authenticated requests using NGINX</title>
-   <link href="http://madhur.co.in/blog/2016/07/31/nginx-cache-authenticated-requests.html"/>
-   <updated>2016-07-31T00:00:00+05:30</updated>
-   <id>id:/blog/2016/07/31/nginx-cache-authenticated-requests</id>
-   <content type="html">&lt;p&gt;To handle the ever increasing load, one of my requirements was to cache the authenticated REST API&amp;#39;s for faster processing and decrease the load on backend servers (&lt;a href=&quot;http://tomcat.apache.org/&quot;&gt;Tomcat&lt;/a&gt; in this case).&lt;/p&gt;
-
-&lt;p&gt;We use &lt;a href=&quot;http://stackoverflow.com/questions/1592534/what-is-token-based-authentication&quot;&gt;Token based authentication&lt;/a&gt; for our REST API&amp;#39;s. That means our REST API&amp;#39;s are esentially &lt;a href=&quot;http://www.tutorialspoint.com/restful/restful_statelessness.htm&quot;&gt;stateless&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;We use a simple encrypted token passed in a header field, say &lt;code&gt;X-AUTH-TOKEN&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, we have various API&amp;#39;s such as user profile, addresses which return data based on this token passed and I don&amp;#39;t want them to hit our backend servers everytime. Neither I am looking for unnecesarily storing this simply retrieved data in our &lt;a href=&quot;http://redis.io/&quot;&gt;Redis&lt;/a&gt; servers. &lt;/p&gt;
-
-&lt;p&gt;Instead, we can use NGINX to cache these requests. We have a very simple architecture where NGINX acts as a reverse proxy for Tomcat servers.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/tt.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;Here, every request is intercepted by NGINX and appropriate requests are passed back to Tomcat server. This is done using &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass&quot;&gt;&lt;code&gt;proxy_pass&lt;/code&gt;&lt;/a&gt; directive of NGINX.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;location /name/ {
-    proxy_pass http://127.0.0.1/remote/;
-}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;We can ask NGINX to cache the request using just two directives: &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&amp;amp;_ga=1.103655616.1528258479.1469009926#proxy_cache_path&quot;&gt;&lt;code&gt;proxy_cache_path&lt;/code&gt;&lt;/a&gt; and &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&amp;amp;_ga=1.103655616.1528258479.1469009926#proxy_cache&quot;&gt;&lt;code&gt;proxy_cache&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;proxy_cache_path /path/to/cache levels=1:2 keys_zone=my_cache:10m max_size=10g inactive=60m 
-use_temp_path=off;
-
-
-server {
-...
-    location / {
-        proxy_cache my_cache;
-        proxy_pass http://my_upstream;
-    }
-}&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This sets up the basic caching in NGINX as described &lt;a href=&quot;https://www.nginx.com/blog/nginx-caching-guide/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Now comes the fun part, how do we cache the authenticated requests. The key is to understand the What Cache Key Does NGINX use?&lt;/p&gt;
-
-&lt;p&gt;The default keys that NGINX generates is MD5 hash of the following NGINX variables: &lt;code&gt;$scheme$proxy_host$request_uri&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;For this sample configuration, the cache key for 
-&lt;code&gt;http://www.example.org/profile&lt;/code&gt; is calculated as 
-&lt;code&gt;md5(“http://my_upstream:80/profile”)&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;However, for token based authentiated requests, the cached response of &lt;code&gt;http://www.example.org/profile&lt;/code&gt; will not be differentiated for different users, because the response is generated based on the &lt;code&gt;X-AUTH-TOKEN&lt;/code&gt; field coming in the HTTP headers.&lt;/p&gt;
-
-&lt;p&gt;To solve for this, we simply add the token field as part of &lt;a href=&quot;http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_key&quot;&gt;&lt;code&gt;proxy_cache_key&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;proxy_cache_key &amp;quot;$http_x_auth_token$request_uri&amp;quot;;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;This will ensure that a new cache copy is created for each request having different &lt;code&gt;X-AUTH-TOKEN&lt;/code&gt; in its header field.&lt;/p&gt;
-
-&lt;p&gt;To verify this, you can print out the key field in the response headers using&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;add_header X-Cache-Key  $http_x_auth_token$request_uri;&lt;/code&gt;&lt;/p&gt;
 </content>
  </entry>
  
