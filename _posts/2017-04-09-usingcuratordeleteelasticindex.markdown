@@ -8,6 +8,8 @@ tags:
 - Elasticsearch
 ---
 
+Tech Tip : Monitor virtual servers, carry on your scripting work by accessing your essential emulators and tools all at a centralized platform with hosted windows virtual desktop from <a title=Microsoft&nbsp;Virtual&nbsp;Desktop href=https://www.clouddesktoponline.com/>CloudDesktopOnline</a>. Visit <a title=Apps4Rent&nbsp;-&nbsp;Hosting&nbsp;Provider href=http://www.apps4rent.com/>Apps4Rent.com</a> to know more about cloud products suitable for you.
+
 We use [ELK stack](https://www.elastic.co/webinars/introduction-elk-stack) heavily in our production systems for log aggregation and monitoring.
 
 Our daily log size generated is aroudn 100GB. Since, we do not intend to keep the log files in ELK for more than a month, it becomes important that we delete those indices to free up disk space.
