@@ -79,27 +79,7 @@ var filesToCache = [
 
     
     	
-            '/results/',
-        
-
-    
-    	
             '/blog/',
-        
-
-    
-    	
-
-        
-
-    
-    	
-            '/papers/',
-        
-
-    
-    	
-            '/info/',
         
 
     
@@ -114,7 +94,27 @@ var filesToCache = [
 
     
     	
-            '/',
+            '/donate/',
+        
+
+    
+    	
+            '/info/',
+        
+
+    
+    	
+            '/papers/',
+        
+
+    
+    	
+
+        
+
+    
+    	
+            '/results/',
         
 
     
@@ -124,7 +124,7 @@ var filesToCache = [
 
     
     	
-            '/donate/',
+            '/',
         
 
     
@@ -1500,6 +1500,58 @@ var filesToCache = [
         
 	
         
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
+	
+        
               '/files/js/app.js',
 		
 	
@@ -1554,6 +1606,8 @@ var filesToCache = [
         
               '/files/js/vendor/planes.js',
 		
+	
+        
 	
         
 	

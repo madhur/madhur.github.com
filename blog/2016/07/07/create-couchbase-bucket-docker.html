@@ -233,49 +233,49 @@ CMD ["/opt/couchbase/configure-node.sh"]</code></pre></figure>
 
 <p>All the files are given in this <a href="https://github.com/madhur/couchbase-docker">github repo</a></p>
 
-<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="nb">set</span> -m
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="nb">set</span> <span class="nt">-m</span>
 
 /entrypoint.sh couchbase-server &amp;
 
-sleep 60
+<span class="nb">sleep </span>60
 
 <span class="c"># Setup index and memory quota</span>
-curl -v -X POST http://127.0.0.1:8091/pools/default -d <span class="nv">memoryQuota</span><span class="o">=</span>300 -d <span class="nv">indexMemoryQuota</span><span class="o">=</span>300
+curl <span class="nt">-v</span> <span class="nt">-X</span> POST http://127.0.0.1:8091/pools/default <span class="nt">-d</span> <span class="nv">memoryQuota</span><span class="o">=</span>300 <span class="nt">-d</span> <span class="nv">indexMemoryQuota</span><span class="o">=</span>300
 
 <span class="c"># Setup services</span>
-curl -v http://127.0.0.1:8091/node/controller/setupServices -d <span class="nv">services</span><span class="o">=</span>kv%2Cn1ql%2Cindex
+curl <span class="nt">-v</span> http://127.0.0.1:8091/node/controller/setupServices <span class="nt">-d</span> <span class="nv">services</span><span class="o">=</span>kv%2Cn1ql%2Cindex
 
 <span class="c"># Setup credentials</span>
-curl -v http://127.0.0.1:8091/settings/web -d <span class="nv">port</span><span class="o">=</span>8091 -d <span class="nv">username</span><span class="o">=</span>Administrator -d <span class="nv">password</span><span class="o">=</span>password
+curl <span class="nt">-v</span> http://127.0.0.1:8091/settings/web <span class="nt">-d</span> <span class="nv">port</span><span class="o">=</span>8091 <span class="nt">-d</span> <span class="nv">username</span><span class="o">=</span>Administrator <span class="nt">-d</span> <span class="nv">password</span><span class="o">=</span>password
 
 <span class="c"># Load travel-sample bucket</span>
 <span class="c">#curl -v -u Administrator:password -X POST http://127.0.0.1:8091/sampleBuckets/install -d '["travel-sample"]'</span>
-curl -X POST -u Administrator:password -d <span class="nv">name</span><span class="o">=</span>default -d <span class="nv">ramQuotaMB</span><span class="o">=</span>100 -d <span class="nv">authType</span><span class="o">=</span>none -d <span class="nv">replicaNumber</span><span class="o">=</span>2 -d <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
+curl <span class="nt">-X</span> POST <span class="nt">-u</span> Administrator:password <span class="nt">-d</span> <span class="nv">name</span><span class="o">=</span>default <span class="nt">-d</span> <span class="nv">ramQuotaMB</span><span class="o">=</span>100 <span class="nt">-d</span> <span class="nv">authType</span><span class="o">=</span>none <span class="nt">-d</span> <span class="nv">replicaNumber</span><span class="o">=</span>2 <span class="nt">-d</span> <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
 
 
-curl -X POST -u Administrator:password -d <span class="nv">name</span><span class="o">=</span>feed -d <span class="nv">ramQuotaMB</span><span class="o">=</span>100 -d <span class="nv">authType</span><span class="o">=</span>none -d <span class="nv">replicaNumber</span><span class="o">=</span>2 -d <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
+curl <span class="nt">-X</span> POST <span class="nt">-u</span> Administrator:password <span class="nt">-d</span> <span class="nv">name</span><span class="o">=</span>feed <span class="nt">-d</span> <span class="nv">ramQuotaMB</span><span class="o">=</span>100 <span class="nt">-d</span> <span class="nv">authType</span><span class="o">=</span>none <span class="nt">-d</span> <span class="nv">replicaNumber</span><span class="o">=</span>2 <span class="nt">-d</span> <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
 
 
 <span class="c"># Setup Memory Optimized Indexes</span>
-curl -i -u Administrator:password -X POST http://127.0.0.1:8091/settings/indexes -d <span class="s1">'storageMode=memory_optimized'</span>
+curl <span class="nt">-i</span> <span class="nt">-u</span> Administrator:password <span class="nt">-X</span> POST http://127.0.0.1:8091/settings/indexes <span class="nt">-d</span> <span class="s1">'storageMode=memory_optimized'</span>
 
 <span class="nb">echo</span> <span class="s2">"Type: </span><span class="nv">$TYPE</span><span class="s2">, Master: </span><span class="nv">$COUCHBASE_MASTER</span><span class="s2">"</span>
 
-<span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TYPE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"worker"</span> <span class="o">]</span>; <span class="k">then
-  </span>sleep 15
-  <span class="nb">set </span><span class="nv">IP</span><span class="o">=</span><span class="sb">`</span>hostname -I<span class="sb">`</span>
-  couchbase-cli server-add --cluster<span class="o">=</span><span class="nv">$COUCHBASE_MASTER</span>:8091 --user Administrator --password password --server-add<span class="o">=</span><span class="nv">$IP</span>
+<span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TYPE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"worker"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
+  </span><span class="nb">sleep </span>15
+  <span class="nb">set </span><span class="nv">IP</span><span class="o">=</span><span class="sb">`</span><span class="nb">hostname</span> <span class="nt">-I</span><span class="sb">`</span>
+  couchbase-cli server-add <span class="nt">--cluster</span><span class="o">=</span><span class="nv">$COUCHBASE_MASTER</span>:8091 <span class="nt">--user</span> Administrator <span class="nt">--password</span> password <span class="nt">--server-add</span><span class="o">=</span><span class="nv">$IP</span>
   <span class="c"># TODO: Hack with the cuts, use jq may be better.</span>
   <span class="c">#KNOWN_NODES=`curl -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/addNode \</span>
   <span class="c">#  -d hostname=$IP -d user=Administrator -d password=password -d services=kv,n1ql,index | cut -d: -f2 | cut -d\" -f 2 | sed -e   's/@/%40/g'`</span>
 
-  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$AUTO_REBALANCE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"true"</span> <span class="o">]</span>; <span class="k">then
+  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$AUTO_REBALANCE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"true"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
     </span><span class="nb">echo</span> <span class="s2">"Auto Rebalance: </span><span class="nv">$AUTO_REBALANCE</span><span class="s2">"</span>
-    sleep 10
-    couchbase-cli rebalance -c <span class="nv">$COUCHBASE_MASTER</span>:8091 -u Administrator -p password --server-add<span class="o">=</span><span class="nv">$IP</span>
+    <span class="nb">sleep </span>10
+    couchbase-cli rebalance <span class="nt">-c</span> <span class="nv">$COUCHBASE_MASTER</span>:8091 <span class="nt">-u</span> Administrator <span class="nt">-p</span> password <span class="nt">--server-add</span><span class="o">=</span><span class="nv">$IP</span>
     <span class="c">#curl -v -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/rebalance --data "knownNodes=$KNOWN_NODES&amp;ejectedNodes="</span>
-  <span class="k">fi</span>;
-<span class="k">fi</span>;
+  <span class="k">fi</span><span class="p">;</span>
+<span class="k">fi</span><span class="p">;</span>
 
 <span class="nb">fg </span>1</code></pre></figure>
 
@@ -362,7 +362,7 @@ curl -i -u Administrator:password -X POST http://127.0.0.1:8091/settings/indexes
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2017 Madhur Ahuja
+                &copy; 2011-2018 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by
