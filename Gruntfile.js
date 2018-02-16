@@ -88,7 +88,7 @@ module.exports = function(grunt) {
             less: {
                 // Using less to render styles.
                 // Watch for the *.less file sonly
-                files: ['files/css/*.less'],
+                files: ['files/css/*.less', '*'],
                 tasks: ['less', 'lessCopy']
             },
 
