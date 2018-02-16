@@ -1,4 +1,4 @@
-var cacheName = 'madhur-cache-v14';
+var cacheName = 'madhur-cache-v15';
 var filesToCache = [
     // Stylesheets
     // Pages and assets
@@ -555,6 +555,11 @@ var filesToCache = [
     
     	
             '/blog/tags/elk/',
+        
+
+    
+    	
+            '/blog/tags/poem/',
         
 
     
@@ -1208,9 +1213,26 @@ var filesToCache = [
         
 
     
+    	
+            '/blog/2018/',
+        
+
+    
+    	
+            '/blog/2018/02/',
+        
+
+    
+    	
+            '/blog/2018/02/16/',
+        
+
+    
 
 	// Blog posts
     
+    	'/blog/2018/02/16/poem-doraha.html',
+	
     	'/blog/2017/04/30/view-exceptions-in-elk.html',
 	
     	'/blog/2017/04/09/usingcuratordeleteelasticindex.html',
