@@ -9,7 +9,7 @@ tags:
 
 Back after a short break. Sharing a poem below by Javed Akhtar. He penned it down for his daughter Zoya. 
 
-It was shared to my by one of the few persons I admire.
+It was shared to me by one of the few persons I admire.
 
 <pre style="font-size:16px">
 ये जीवन इक राह नहीं
