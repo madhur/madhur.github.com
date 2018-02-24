@@ -3,11 +3,10 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    {% if layout.top %}
-        <title>{{ page.title }} &#8211; {{ layout.top }}</title>
+    <meta charset="utf-8" /> {% if layout.top %}
+    <title>{{ page.title }} &#8211; {{ layout.top }}</title>
     {% else %}
-        <title>{{ page.title }} &#8211; {{ page.top }}</title>
+    <title>{{ page.title }} &#8211; {{ page.top }}</title>
     {% endif %}
 
     <meta name="author" content="Madhur Ahuja" />{% if page.description %}
@@ -27,31 +26,25 @@
     <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
     <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
 
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" />
-    
-    {% for css in layout.css %}
-    <link rel="stylesheet" type="text/css" href="/files/css/{{ css }}" />
-    {% endfor %}
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> {% for css in layout.css %}
+    <link rel="stylesheet" type="text/css" href="/files/css/{{ css }}" /> {% endfor %}
 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css">
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> {% if page.js %}
+    <script src="/files/js/vendor/{{ page.js }}" type="text/javascript"></script> {% endif %}
 
-     {% if page.js %}
-        <script src="/files/js/vendor/{{ page.js }}" type="text/javascript"></script>
-    {% endif %}
-   
     <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
 </head>
 
 <body>
 
     <div class="container">
-       
-            <header id="header" class="row">
 
-                {% include header.html %}
+        <header id="header" class="row">
 
-            </header>
-       
+            {% include header.html %}
+
+        </header>
+
         <div id="content" class="row">
 
             {{ content }}
@@ -66,7 +59,9 @@
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by
-                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>, <a href="http://github.com/">Github</a> and <a href="http://disqus.com">Disqus</a>.
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
             </p>
 
             <div class="c">&nbsp;</div>
@@ -77,14 +72,19 @@
 
     </div>
 
-    <script data-main="/files/js/app" src="/files/js/require.js"></script>
-
-    {% if site.mode == 'prod' %}
-        {% include google_analytics.html %}
-    {% endif %}
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> {% if site.mode == 'prod' %} {% include google_analytics.html %} {% endif %}
 
     <!-- serviceWorker.html -->
-<script>
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
 // if ('serviceWorker' in navigator) {
 //     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
 //         if (!reg.installing) return;
@@ -102,7 +102,7 @@
 //     });
 // }
 
-</script>
+    </script>
 
 </body>
 
