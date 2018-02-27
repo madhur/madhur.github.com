@@ -1,13 +1,13 @@
 ---
 layout: blog-post
-title: "Poem - Doraha"
-excerpt: "Poem - Doraha"
+title: "Doraha"
+excerpt: "Doraha"
 disqus_id: /2018/02/16/poem-doraha/
 tags:
 - Poem
 ---
 
-Back after a short break. Sharing a poem below by Javed Akhtar. He penned it down for his daughter Zoya. 
+Back after a short break. Sharing a piece of poetry below by Javed Akhtar. He penned it down for his daughter Zoya. 
 
 It was shared to me by one of the few persons I admire.
 
