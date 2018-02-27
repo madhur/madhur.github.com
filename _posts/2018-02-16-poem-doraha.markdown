@@ -4,7 +4,7 @@ title: "Doraha"
 excerpt: "Doraha"
 disqus_id: /2018/02/16/poem-doraha/
 tags:
-- Poem
+- Poetry
 ---
 
 Back after a short break. Sharing a piece of poetry below by Javed Akhtar. He penned it down for his daughter Zoya. 
