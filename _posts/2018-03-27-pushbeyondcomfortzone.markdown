@@ -10,7 +10,7 @@ tags:
 Few days ago, I watched [Whiplash](http://www.imdb.com/title/tt2582802/) which was recommended to me by someone. What an amazing movie with a lot of wisdom.
 
 One of the amazing conversation from the movie: 
-> Andrew: But is there a line? You know, maybe you go too far, and you discourage the next Charlie > Parker from ever becoming Charlie Parker?   
+> Andrew: But is there a line? You know, maybe you go too far, and you discourage the next Charlie Parker from ever becoming Charlie Parker?   
 > Terence Fletcher: No, man, no. Because the next Charlie Parker would never be discouraged.
 
 > Terence Fletcher: There are no two words in the English language more harmful than "good job".
