@@ -28,3 +28,12 @@ Do managers consciously push even more to uncover the next Sachin, Charlie Parke
 What's the conclusion? If you strive to become next Sachin in your field, no big / medium size organization can help you do that. You are better off finding a mentor like Fletcher who would push you way beyond your comfort zone. 
 
 PS: Some people might not like the methodology of Fletcher to eke out the best performance. It might not work for all performers. I believe the point is not that. The point is that extraordinary performance requires extraordinary practice and methods. If you go via what is  "standard" OR "average" OR what most people or organizations do, you would end up having average results.  Extraordinary results in any field requires enduring pain, whichever method it comes through. [No pain, no gain](https://en.wikipedia.org/wiki/No_pain,_no_gain)
+
+Update: I recieved a comment:
+
+> Why would you need an organization or a mentor to "push" you somewhere? You can just do it yourself, if you want it. An organization can, however, give you more responsibility or more of a chance to prove yourself, all you have to do is ask.
+
+> The first step towards performing above average is to stop thinking of yourself as this passive child that someone needs to guide all the time.
+
+I agree. It is not always possible that someone would be always to guide all the time. It might be possible in fields like sports where there is a coach usually to guide but this is not possible in all the fields.
+In other fields, it is upto individual.
