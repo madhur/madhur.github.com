@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Ramifications of a mediocre Tech Co-founder"
-excerpt: "Ramifications of a mediocre Tech Co-founder"
+title: "Ramifications of a mediocre founders"
+excerpt: "Ramifications of a mediocre founders"
 disqus_id: /2018/04/01/ramifications-mediocre-tech-cofounder/
 tags:
 - Technology
