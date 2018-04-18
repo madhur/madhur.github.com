@@ -5,6 +5,7 @@ excerpt: "Quality or Quantity"
 disqus_id: /2018/02/24/quality-quantity/
 tags:
 - Work
+- Thoughts
 ---
 
  Quality always trumps quantity. Lot of companies have embraced the idea of `move fast and break things` which was pioneered by facebook.  But it is important to realize that does not automatically means reduction in quality in favor of speed. Quality is different to different people. For a guy interested in UX, he will be interested in how efficient the user experience is. For someone interested in performance, he will measure quality on the bases of speed of operations in software. Hence, for someone who is owning the quality of deliverable produced (be it CTO, CPO or whatever), it is important to establish the baseline of quality. Good companies which follow move fast and break things methodology make sure that their employees produce software which maintain the quality above that defined baseline.

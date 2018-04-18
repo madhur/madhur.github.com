@@ -5,6 +5,7 @@ excerpt: "Push beyond comfort zone"
 disqus_id: /2018/03/27/push-beyond-comfort-zone/
 tags:
 - Whiplash
+- Thoughts
 ---
 
 Few days ago, I watched [Whiplash](http://www.imdb.com/title/tt2582802/) which was recommended to me by someone. What an amazing movie with a lot of wisdom.
