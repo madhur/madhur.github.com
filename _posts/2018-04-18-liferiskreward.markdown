@@ -21,8 +21,10 @@ Moving away from sports, What about enterpreneurs who run companies? What's thei
 
 [Elon Musk gets personal about his 'terrible lows' and 'unrelenting stress'](https://www.marketwatch.com/story/elon-musk-admits-to-unrelenting-stress-says-he-may-be-bipolar-2017-07-31)
 
-![Pic](/images/elon_quote.png)
+<img src="/images/elon_quote.png" />   
+<p/>
 
+  
 Not just that, 90% of startups end up in failure, that means earning potential during that period is lost for an enterpreneur.
 
 So, the next time you are thinking of achieving great success without paying any price or taking any big risk. You can very well stop right there. 
