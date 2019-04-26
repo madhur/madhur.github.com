@@ -1,4 +1,11 @@
-## Privacy Policy
+---
+layout: default
+title: Privacy Policy
+section: Info
+top: Weather Pollution Bar
+---
+
+## Privacy Policy - Weather Pollution Bar
 
 Madhur Ahuja built the Weather Pollution Bar app as an Open Source app. This SERVICE is provided by Madhur Ahuja at no cost and is intended for use as is.
 
