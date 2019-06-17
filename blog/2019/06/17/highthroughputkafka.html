@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Considerations for high throughput kafka producer &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Considerations for high throughput kafka producer" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Considerations for high throughput kafka producer</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2019-06-17 00:00:00 +0530" pubdate="pubdate">17 June 2019</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+				<div class="social-icon col-md-2 col-sm-2">
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"></script>
+				</div>
+
+	
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>I have been recently working on lot of high throughput kafka producers. Our application publishes close to 3 million kafka publishes per day. (which is still low compared to what kafka can handle)</p>
+
+<p>There are some of the learnings along the way in maintaining such kafka producers:</p>
+
+<ul>
+<li>Choose the number of partitions wisely: The number of partitions determine how much consumers can scale. Number of partitions is degree of parallelism in kafka. Kafka gives a single partition&#39;s data to single thread.</li>
+</ul>
+
+<p>Our general thumb rule is to have partitions equal to number of consumer servers. For example, if we have cluster of 20 servers consuming from kafka topic, each server will be consuming from single partition so 20 partitions.</p>
+
+<p>There are many other factors to be considered <a href="https://www.confluent.io/blog/how-choose-number-topics-partitions-kafka-cluster">as explained here</a></p>
+
+<ul>
+<li><p>Decide a consistent key while publishing - Messages published with the same key will be published to a single partition. A partition is logic unit of ordering of messages. So if ordering of messages is important to you, you should choose a consistent key for those messages. </p></li>
+<li><p>Use power of asynchronous - Kafka producer is by default asynchronous unless you use a blocking call explicitly. That means that kafka publish can fail and your code would have moved past the publish method already. Kafka producer provides a callback once the server has executed the publish instruction. In this callback, the user can check for failure and retry the option or send to a dead letter queue etc. Kafka producer itself retries for 3 times but I believe that is too less and not enough for data critical applications.</p></li>
+</ul>
+
+<p>Below is the sample snippet of such producer</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Autowired</span>
+<span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"createKafkaSslProducerOrder"</span><span class="o">)</span>
+<span class="n">Producer</span> <span class="n">kafkaSslProducer</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">publish</span><span class="o">(</span><span class="n">String</span> <span class="n">messageKey</span><span class="o">,</span> <span class="n">String</span> <span class="n">payload</span><span class="o">,</span> <span class="n">String</span> <span class="n">topic</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+
+        <span class="n">ProducerRecord</span> <span class="n">record</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ProducerRecord</span><span class="o">&lt;&gt;(</span><span class="n">topic</span><span class="o">,</span> <span class="n">messageKey</span><span class="o">,</span> <span class="n">payload</span><span class="o">);</span>
+
+        <span class="n">kafkaSslProducer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">record</span><span class="o">,</span> <span class="o">(</span><span class="n">metadata</span><span class="o">,</span> <span class="n">exception</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">exception</span><span class="o">).</span><span class="na">isPresent</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc={} and exception={}"</span><span class="o">,</span>
+                        <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span> <span class="s">"KafkaProducer"</span><span class="o">,</span>
+                                <span class="s">"Error posting message to kafka topic: "</span> <span class="o">+</span> <span class="n">topic</span><span class="o">,</span>
+                                <span class="n">exception</span><span class="o">.</span><span class="na">getMessage</span><span class="o">()</span> <span class="o">});</span>
+                <span class="c1">// Send for re-processing</span>
+            <span class="o">}</span>
+
+        <span class="o">});</span>
+
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc=Error posting message to SSL kafka: {}, stackTrace={} "</span><span class="o">,</span> <span class="n">LOG_OP_INFO</span><span class="o">,</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">ex</span><span class="o">);</span>
+        <span class="c1">// Re-throw the exception so that status can be recorded in the database.</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></figure>
+
+<ul>
+<li><p>In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.</p></li>
+<li><p>Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message. </p></li>
+</ul>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/java">Java</a> |
+					
+						<a href="/blog/tags/kafka">Kafka</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2019/06/17/considerations-high-throughput-kafka-producer/';
+  var disqus_title = 'Considerations for high throughput kafka producer';
+  var disqus_url = 'http://madhur.co.in/blog/2019/06/17/highthroughputkafka.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+<script type="text/javascript">
+    
+    var disqus_shortname = 'madhur'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2019 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

@@ -4,13 +4,72 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2019-06-15T09:48:41+05:30</updated>
+ <updated>2019-06-17T22:54:12+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Considerations for high throughput kafka producer</title>
+   <link href="http://madhur.co.in/blog/2019/06/17/highthroughputkafka.html"/>
+   <updated>2019-06-17T00:00:00+05:30</updated>
+   <id>id:/blog/2019/06/17/highthroughputkafka</id>
+   <content type="html">&lt;p&gt;I have been recently working on lot of high throughput kafka producers. Our application publishes close to 3 million kafka publishes per day. (which is still low compared to what kafka can handle)&lt;/p&gt;
+
+&lt;p&gt;There are some of the learnings along the way in maintaining such kafka producers:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Choose the number of partitions wisely: The number of partitions determine how much consumers can scale. Number of partitions is degree of parallelism in kafka. Kafka gives a single partition&amp;#39;s data to single thread.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Our general thumb rule is to have partitions equal to number of consumer servers. For example, if we have cluster of 20 servers consuming from kafka topic, each server will be consuming from single partition so 20 partitions.&lt;/p&gt;
+
+&lt;p&gt;There are many other factors to be considered &lt;a href=&quot;https://www.confluent.io/blog/how-choose-number-topics-partitions-kafka-cluster&quot;&gt;as explained here&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Decide a consistent key while publishing - Messages published with the same key will be published to a single partition. A partition is logic unit of ordering of messages. So if ordering of messages is important to you, you should choose a consistent key for those messages. &lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Use power of asynchronous - Kafka producer is by default asynchronous unless you use a blocking call explicitly. That means that kafka publish can fail and your code would have moved past the publish method already. Kafka producer provides a callback once the server has executed the publish instruction. In this callback, the user can check for failure and retry the option or send to a dead letter queue etc. Kafka producer itself retries for 3 times but I believe that is too less and not enough for data critical applications.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Below is the sample snippet of such producer&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-java&quot; data-lang=&quot;java&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@Autowired&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Qualifier&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;createKafkaSslProducerOrder&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Producer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kafkaSslProducer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageKey&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;ProducerRecord&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;record&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ProducerRecord&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;topic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageKey&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;kafkaSslProducer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;record&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;metadata&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Optional&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;ofNullable&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isPresent&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;op={}, status=KO, desc={} and exception={}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                        &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;KafkaProducer&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                                &lt;span class=&quot;s&quot;&gt;&quot;Error posting message to kafka topic: &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topic&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                                &lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+                &lt;span class=&quot;c1&quot;&gt;// Send for re-processing&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;op={}, status=KO, desc=Error posting message to SSL kafka: {}, stackTrace={} &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;LOG_OP_INFO&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// Re-throw the exception so that status can be recorded in the database.&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message. &lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Lessons from History</title>
@@ -801,98 +860,6 @@ data &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; json.loads&lt;span class=&qu
     print repo[&lt;span class=&quot;s1&quot;&gt;'full_name'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
     p &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; subprocess.Popen&lt;span class=&quot;o&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;git&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;clone&quot;&lt;/span&gt;, repo[&lt;span class=&quot;s1&quot;&gt;'clone_url'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]]&lt;/span&gt;, &lt;span class=&quot;nv&quot;&gt;cwd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;CLONE_DIR&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;  
     p.wait&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Tuning Linux servers for scalability</title>
-   <link href="http://madhur.co.in/blog/2017/01/30/tuning-linux-servers-scalability.html"/>
-   <updated>2017-01-30T00:00:00+05:30</updated>
-   <id>id:/blog/2017/01/30/tuning-linux-servers-scalability</id>
-   <content type="html">&lt;p&gt;Focus on performance and scalablity is one of my primary personal and professional goal when working with tech products.&lt;/p&gt;
-
-&lt;p&gt;The server can be any Linux based server such as &lt;a href=&quot;https://www.centos.org/&quot;&gt;CentOS&lt;/a&gt; or &lt;a href=&quot;https://www.debian.org/&quot;&gt;Debian&lt;/a&gt; derivative such as &lt;a href=&quot;https://www.ubuntu.com/&quot;&gt;Ubuntu&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;In this post, I will outline my learnings on scaling the Linux server. Scaling here implies many things such as &lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Being able to open many files at once. Here files can be generally applied to concept such as open ports, threads etc and not necessary physical files&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Being able to handle many concurrent network connections&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Knowing Linux OS and related concepts such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Iptables&quot;&gt;Iptables&lt;/a&gt; is a pre-requisite.&lt;/p&gt;
-
-&lt;h2&gt;Open files&lt;/h2&gt;
-
-&lt;p&gt;We need to keep our file limit high for any linux production server. Check the current value using &lt;code&gt;ulimit -a&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;We can configure this limit using &lt;code&gt;/etc/security/limits.conf&lt;/code&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;* hard nofile 300000
-* soft nofile 300000
-
-tomcat hard nofile 300000
-tomcat soft nofile 300000&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Note that we can also specify per user limit as shown above (special limits for tomcat user)&lt;/p&gt;
-
-&lt;p&gt;The file descriptor limit for a running process can be seen in the following file under Max open files.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;$ cat /proc/&amp;lt;pid&amp;gt;/limits
-
-Max open files            30000&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2&gt;Ephemeral Ports&lt;/h2&gt;
-
-&lt;p&gt;Increase the number of ephemeal ports availabl to your application. The default value is &lt;code&gt;32768 - 61000&lt;/code&gt;. &lt;/p&gt;
-
-&lt;h2&gt;TIME_WAIT state&lt;/h2&gt;
-
-&lt;p&gt;TCP connections go through lot of states, last of them is &lt;code&gt;TIME_WAIT&lt;/code&gt; state.
-The default &lt;code&gt;TIME_WAIT&lt;/code&gt; timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.&lt;/p&gt;
-
-&lt;p&gt;These parameters can be tuned using these settings in &lt;code&gt;/etc/sysctl.conf&lt;/code&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;net.ipv4.ip_local_port_range = 18000    65535
-net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2&gt;Connection Tracking&lt;/h2&gt;
-
-&lt;p&gt;The next parameter we looked at was Connection Tracking. This is a side effect of using &lt;code&gt;iptables&lt;/code&gt;. Since &lt;code&gt;iptables&lt;/code&gt; needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.&lt;/p&gt;
-
-&lt;p&gt;You can see the current size of this table using &lt;code&gt;sysctl net.netfilter.nf_conntrack_count&lt;/code&gt; and its limit using &lt;code&gt;sysctl net.nf_conntrack_max&lt;/code&gt;. If count crosses max, your linux system will stop accepting new TCP connections and you’ll never know about this. The only indication that this has happened is a single line hidden somewhere in &lt;code&gt;/var/log/syslog&lt;/code&gt; saying that you’re out of connection tracking entries. One line, once, when it first happens.&lt;/p&gt;
-
-&lt;p&gt;A better indication is if count is always very close to max. You might think, “Hey, we’ve set max exactly right.”, but you’d be wrong.&lt;/p&gt;
-
-&lt;p&gt;What you need to do (or at least that’s what you first think) is to increase max.&lt;/p&gt;
-
-&lt;p&gt;Keep in mind though, that the larger this value, the more RAM the kernel will use to keep track of these entries. RAM that could be used by your application.&lt;/p&gt;
-
-&lt;p&gt;We started down this path, increasing net.nf_conntrack_max, but soon we were just pushing it up every day. Connections that were getting in there were never getting out.&lt;/p&gt;
-
-&lt;h2&gt;Maximum number of pending connections on a socket&lt;/h2&gt;
-
-&lt;p&gt;During some of our initial load testing, we ran into a strange problem where we were unable to open more than approximately 128 concurrent connections at once.&lt;/p&gt;
-
-&lt;p&gt;After some investigation, we learned about the following kernel parameter.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;net.core.somaxconn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This kernel parameter is the size of the backlog of TCP connections waiting to be accepted by the application. If a connection indication arrives when the queue is full, the connection is refused. The default value for this parameters is 128 on most modern operating systems.&lt;/p&gt;
-
-&lt;p&gt;Bumping up this limit in &lt;code&gt;/etc/sysctl.conf&lt;/code&gt; helped us get rid of the “connection refused” issues on our Linux machines.&lt;/p&gt;
-
-&lt;h2&gt;JVM thread count&lt;/h2&gt;
-
-&lt;p&gt;A few hours after we allowed a significant percentage of production traffic to hit our server for the first time, we were alerted to the fact that the load balancer was unable to connect to a few of our machines. On further investigation, we saw the following all over our server logs.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;java.lang.OutOfMemoryError: unable to create new native thread&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;If you hit the JVM thread limit, chances are that there is a thread leak in your code that needs to be fixed. However, if you find that all your threads are actually doing useful work, is there a way to tweak the system to let you create more threads and accept more connections?&lt;/p&gt;
-
-&lt;p&gt;The answer, as always, is fun. It’s interesting to discuss how available memory limits the number of threads that can be created on a JVM. The stack size of a thread determines the memory available for static memory allocation. Thus, the absolute theoretical maximum number of threads is a process’s user address space divided by the thread stack size. However, the reality is that the JVM also uses memory for dynamic allocation on the heap. With a few quick tests with a small Java process, we could verify that as more memory is allocated for the heap, less is available for the stack. Thus, the limit on the number of threads decreases with increasing heap size.&lt;/p&gt;
-
-&lt;p&gt;To summarize, you can increase the thread count limit by decreasing the stack size per thread &lt;code&gt;(-Xss)&lt;/code&gt; or by decreasing the memory allocated to the heap &lt;code&gt;(-Xms, -Xmx).&lt;/code&gt;&lt;/p&gt;
 </content>
  </entry>
  
