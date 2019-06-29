@@ -25,7 +25,7 @@ There are many other factors to be considered [as explained here](https://www.co
 
 Below is the sample snippet of such producer
 
-{% highlight java %}
+```java
 @Autowired
 @Qualifier("createKafkaSslProducerOrder")
 Producer kafkaSslProducer;
@@ -53,7 +53,7 @@ public void publish(String messageKey, String payload, String topic) {
         // Re-throw the exception so that status can be recorded in the database.
     }
 }
-{% endhighlight %}
+```
 
 
 * In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.
