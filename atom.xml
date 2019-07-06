@@ -4,13 +4,34 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2019-07-02T07:37:20+05:30</updated>
+ <updated>2019-07-06T08:50:14+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Parallelism and ordering</title>
+   <link href="http://madhur.co.in/blog/2019/07/04/parallelism-ordering.html"/>
+   <updated>2019-07-04T00:00:00+05:30</updated>
+   <id>id:/blog/2019/07/04/parallelism-ordering</id>
+   <content type="html">&lt;p&gt;One of the disadvantages of microservice event based architectures is that there is lot of parallel processing of a single entity across multiple modules.
+There are many cases we want the parallelism but at the same time, want the messages to be processed in ordered manner.&lt;/p&gt;
+
+&lt;p&gt;There are several design pattern to solve this problem:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Kafka solves this through &lt;a href=&quot;http://kafka.apache.org/090/documentation.html&quot;&gt;partitions&lt;/a&gt;. A topic can be split into partitions. Messages are gauranteed to be in order within a single partition. You can have multiple consumers consuming from each partition separately providing for scalability and ordering. This design assumes that each consumer is single threaded and processing the messages one after other. In practical, scenarios this is usually not the case.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;One of the solution is to use SEDA queue. &lt;a href=&quot;https://camel.apache.org/&quot;&gt;Camel&lt;/a&gt; has a dedicated page on &lt;a href=&quot;https://camel.apache.org/parallel-processing-and-ordering.html&quot;&gt;Parallelism and ordering&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There is whitepaper titles &lt;a href=&quot;https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf&quot;&gt;A Scalable Architecture for Ordered Parallelism&lt;/a&gt;
+I havn&amp;#39;t gone thorugh it yet.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Are there other methods to handle the ordering while processing the messages in prallel?&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Setting up Java project for monitoring</title>
@@ -948,50 +969,6 @@ soon wrap it into a npm module. Any feedbacks?&lt;/p&gt;
         &lt;span class=&quot;nt&quot;&gt;&amp;lt;button&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;button&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;md-raised-button&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;od-button od-ripple action-button&quot;&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;click&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;)=&quot;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;dialogRef&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;close&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Useful tcpdump usages</title>
-   <link href="http://madhur.co.in/blog/2017/02/18/useful-tcpdump-netcat-usages.html"/>
-   <updated>2017-02-18T00:00:00+05:30</updated>
-   <id>id:/blog/2017/02/18/useful-tcpdump-netcat-usages</id>
-   <content type="html">&lt;p&gt;&lt;a href=&quot;http://www.tcpdump.org/tcpdump_man.html&quot;&gt;Tcpdump&lt;/a&gt; and &lt;a href=&quot;http://nc110.sourceforge.net/&quot;&gt;Netcat&lt;/a&gt; are one of the most useful utilities for Linux network debugging.&lt;/p&gt;
-
-&lt;p&gt;Some of the examples where I have found &lt;code&gt;tcpdump&lt;/code&gt;  to be extremely useful are given below. In the next post, I will cover netcat.&lt;/p&gt;
-
-&lt;h3&gt;Look for traffic based on IP address&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump host 1.2.3.4&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture based on protocol&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump udp&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture based on interface&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump -i eth1&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture filter based on certain port&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump port 80&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture filter based on source port or destination port&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump src port 80
-tcpdump dst port 80&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture based on port range&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump portrange 80-90&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture display in ASCII&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump -A -i eth0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h3&gt;Capture to a file&lt;/h3&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;tcpdump -w 08232010.pcap -i eth0&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 </content>
  </entry>
  
