@@ -17,4 +17,6 @@ There are several design pattern to solve this problem:
 * One of the solution is to use SEDA queue. [Camel](https://camel.apache.org/) has a dedicated page on [Parallelism and ordering](https://camel.apache.org/parallel-processing-and-ordering.html)
 
 * There is whitepaper titles [A Scalable Architecture for Ordered Parallelism](https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf)
-  I havn't gone thorugh ityet.
+  I havn't gone thorugh it yet.
+
+  Are there other methods to handle the ordering while processing the messages in prallel?
