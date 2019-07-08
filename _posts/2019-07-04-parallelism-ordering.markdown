@@ -19,4 +19,4 @@ There are several design pattern to solve this problem:
 * There is whitepaper titles [A Scalable Architecture for Ordered Parallelism](https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf)
   I havn't gone thorugh it yet.
 
-  Are there other methods to handle the ordering while processing the messages in prallel?
+  Are there other methods to handle the ordering while processing the messages in parallel?
