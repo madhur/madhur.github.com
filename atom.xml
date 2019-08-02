@@ -4,13 +4,75 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2019-07-14T09:10:20+05:30</updated>
+ <updated>2019-08-02T23:41:24+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Deadlocks in Optimistic locking</title>
+   <link href="http://madhur.co.in/blog/2019/08/02/deadlocks-optimistic-locking.html"/>
+   <updated>2019-08-02T00:00:00+05:30</updated>
+   <id>id:/blog/2019/08/02/deadlocks-optimistic-locking</id>
+   <content type="html">&lt;p&gt;Recently, our application has been generating lot of deadlocks in Oracle database. The application uses &lt;a href=&quot;https://en.wikipedia.org/wiki/Optimistic_concurrency_control&quot;&gt;Optimistic concurrency control&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;Error: ORA-00060: deadlock detected while waiting for resource&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;In an optimistic concurrency control, transactions use data resources without acquiring locks on the resources. Before committing, each transaction verifies that no other transaction has modified the data it has read. If the check reveals conflicting modifications, the committing transaction rolls back and can be restarted.&lt;/p&gt;
+
+&lt;p&gt;Which begs the questions, why should there be a deadlock at all in optimistic concurrency control?&lt;/p&gt;
+
+&lt;p&gt;The keypoint to understand here first is that Optimistic locking is not a feature provided by DBMS engine. Databases just provide mechanism to initiate transactions, rollbacks, versioning and locks. Ultiamtely, it is upto the application to implement eithe optimisitc locking or pessimistic locking.&lt;/p&gt;
+
+&lt;p&gt;An example of implementing optimistic locking is as follows:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_line1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addressTable&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;some key&amp;gt;&amp;gt;`&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;When you are about to do the update, you use the version in your update and throw an error if the row changed:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt; &lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addressTable&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;SET&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_line1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new address line 1&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new city&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new state&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;n&quot;&gt;zip&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new zip&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+ &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;some key&amp;gt;&amp;gt;`&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;version you read initially&amp;gt;&amp;gt;`&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SQL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ROWCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;THEN&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;RAISE_APPLICATION_ERROR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;20001&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Oops, the row has changed since you read it.'&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;END&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;However, it is possible for a deadlock to occur in oracle, because of the way transactions are implemented in database engines. &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span class=&quot;k&quot;&gt;BEGIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;-- in one connection&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;COMMIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;BEGIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;-- in another connection, at the &quot;exact same time&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;COMMIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This is the classic example of a deadlock &lt;/p&gt;
+
+&lt;p&gt;After a few seconds, Oracle will detect the deadlock and pick one of the sessions and ‘rollback’ the statement. This is where we see our first misunderstanding about deadlocks.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Oracle does not kill the session.&lt;/li&gt;
+&lt;li&gt;Oracle does not kill the transaction.&lt;/li&gt;
+&lt;li&gt;Oracle only kills the statement.&lt;/li&gt;
+&lt;li&gt;Oracle does rollback the failing statement, but Oracle does not rollback the entire transaction that the failing statement is part of. (Correction by Mark Bobak.)
+PMON (Process Monitor) does not clear out the locks.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;It is the responsibility of the session that detects the “ORA-00060 deadlock detected while waiting for resource” error to trap and handle the error by issuing a rollback (or a commit) command. Only once this has been done will the other session be able to continue.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Concurrency in Python</title>
@@ -825,117 +887,6 @@ multiline.match: after&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
               }&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;This will extract various useful fields like line no, class and method name from the exception stack trace.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Using curator to delete older elasticsearch indices</title>
-   <link href="http://madhur.co.in/blog/2017/04/09/usingcuratordeleteelasticindex.html"/>
-   <updated>2017-04-09T00:00:00+05:30</updated>
-   <id>id:/blog/2017/04/09/usingcuratordeleteelasticindex</id>
-   <content type="html">&lt;p&gt;Tech Tip : Monitor virtual servers, carry on your scripting work by accessing your essential emulators and tools all at a centralized platform with hosted windows virtual desktop from &lt;a title=Microsoft&amp;nbsp;Virtual&amp;nbsp;Desktop href=https://www.clouddesktoponline.com/&gt;CloudDesktopOnline&lt;/a&gt;. Visit &lt;a title=Apps4Rent&amp;nbsp;-&amp;nbsp;Hosting&amp;nbsp;Provider href=http://www.apps4rent.com/&gt;Apps4Rent.com&lt;/a&gt; to know more about cloud products suitable for you.&lt;/p&gt;
-
-&lt;p&gt;We use &lt;a href=&quot;https://www.elastic.co/webinars/introduction-elk-stack&quot;&gt;ELK stack&lt;/a&gt; heavily in our production systems for log aggregation and monitoring.&lt;/p&gt;
-
-&lt;p&gt;Our daily log size generated is aroudn 100GB. Since, we do not intend to keep the log files in ELK for more than a month, it becomes important that we delete those indices to free up disk space.&lt;/p&gt;
-
-&lt;p&gt;Fortunately, &lt;a href=&quot;https://www.elastic.co/products/logstash&quot;&gt;Logstash&lt;/a&gt; creates a new index every day by default.&lt;/p&gt;
-
-&lt;p&gt;Thus, we can ask &lt;a href=&quot;https://github.com/elastic/curator&quot;&gt;Curator&lt;/a&gt; to simply delete the indices x days old and which follow a particular naming pattern.&lt;/p&gt;
-
-&lt;h3&gt;Installing Curator&lt;/h3&gt;
-
-&lt;p&gt;Simple use &lt;code&gt;pip install elasticsearch-curator&lt;/code&gt; to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.&lt;/p&gt;
-
-&lt;h3&gt;Configuring Curator&lt;/h3&gt;
-
-&lt;p&gt;Create a file &lt;code&gt;curator.yml&lt;/code&gt; with following contents.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;127.0.0.1&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;9200&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;url_prefix&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;use_ssl&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;certificate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;client_cert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;client_key&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;ssl_no_validate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;http_auth&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;timeout&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;30&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;master_only&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;False&lt;/span&gt;
-
-&lt;span class=&quot;na&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;loglevel&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;INFO&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;logfile&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;logformat&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;default&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;blacklist&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;elasticsearch'&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;urllib3'&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Now, we need to define an action. i.e. What will curator do.  There are many actions to choose from. Check the &lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html&quot;&gt;documentation&lt;/a&gt; for more information&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Alias&lt;/li&gt;
-&lt;li&gt;Allocation&lt;/li&gt;
-&lt;li&gt;Close&lt;/li&gt;
-&lt;li&gt;Cluster Routing&lt;/li&gt;
-&lt;li&gt;Create Index&lt;/li&gt;
-&lt;li&gt;Delete Indices&lt;/li&gt;
-&lt;li&gt;Delete Snapshots&lt;/li&gt;
-&lt;li&gt;Open&lt;/li&gt;
-&lt;li&gt;forceMerge&lt;/li&gt;
-&lt;li&gt;Replicas&lt;/li&gt;
-&lt;li&gt;Restore&lt;/li&gt;
-&lt;li&gt;Snapshot&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;For this dicussion, we will use &lt;code&gt;Delete Indices&lt;/code&gt; as the action, since this is what we want to do.&lt;/p&gt;
-
-&lt;p&gt;Below is the sample action file &lt;code&gt;delete_indices.yml&lt;/code&gt; , which will delete the logstash indices which are older than 10 days.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;delete_indices&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;&amp;gt;-&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;Delete indices older than 45 days (based on index name), for logstash-&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;prefixed indices. Ignore the error if the filter does not result in an&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;actionable list of indices (ignore_empty_list) and exit cleanly.&lt;/span&gt;
-    &lt;span class=&quot;no&quot;&gt;options:&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;ignore_empty_list: True&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;timeout_override:&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;continue_if_exception: False&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;disable_action: False&lt;/span&gt;
-    &lt;span class=&quot;no&quot;&gt;filters:&lt;/span&gt;
-    &lt;span class=&quot;no&quot;&gt;- filtertype: pattern&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;kind: prefix&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;value: logstash-&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;exclude:&lt;/span&gt;
-    &lt;span class=&quot;no&quot;&gt;- filtertype: age&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;source: name&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;direction: older&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;timestring: '%Y.%m.%d'&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;unit: days&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;unit_count: 10&lt;/span&gt;
-      &lt;span class=&quot;no&quot;&gt;exclude:&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;To run this action, simple use the command &lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;curator ./delete_index.yml --config ./curator.yml --dry-run
-2017-04-09 17:27:46,075 INFO      Preparing Action ID: 1, &quot;delete_indices&quot;
-2017-04-09 17:27:46,080 INFO      Trying Action ID: 1, &quot;delete_indices&quot;: Delete indices older than 45 days (based on index name), for logstash- prefixed indices. Ignore the error if the filter does not result in an actionable list of indices (ignore_empty_list) and exit cleanly.
-2017-04-09 17:27:46,538 INFO      DRY-RUN MODE.  No changes will be made.
-2017-04-09 17:27:46,538 INFO      (CLOSED) indices may be shown that may not be acted on by action &quot;delete_indices&quot;.
-2017-04-09 17:27:46,538 INFO      Action ID: 1, &quot;delete_indices&quot; completed.
-2017-04-09 17:27:46,538 INFO      Job completed.&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The &lt;code&gt;--dry-run&lt;/code&gt; mode will not actually delete the index. It can be used to test the output of the action.&lt;/p&gt;
-
-&lt;p&gt;If you want to schedule it in a cron, you can do so using &lt;code&gt;crontab -e&lt;/code&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;00 8 * * * root curator /path/delete_index.yml --config /path/curator.yml &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The above configuration will cleanup the indices older than 10 days everyday at 8 AM.&lt;/p&gt;
 </content>
  </entry>
  
