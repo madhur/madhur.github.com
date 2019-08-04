@@ -4,13 +4,62 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2019-08-02T23:41:24+05:30</updated>
+ <updated>2019-08-04T08:09:22+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Meaning of atleast once, atmost once and exactly once delivery</title>
+   <link href="http://madhur.co.in/blog/2019/08/04/atleast-once-atmost-once-exactly-once.html"/>
+   <updated>2019-08-04T00:00:00+05:30</updated>
+   <id>id:/blog/2019/08/04/atleast-once-atmost-once-exactly-once</id>
+   <content type="html">&lt;p&gt;Ever since I have started working with Kafka, I have came across these terms very frequently, Atleast once, Atmost once and Exactly Once. &lt;/p&gt;
+
+&lt;p&gt;As an engineer, It is very important to understand these concepts.&lt;/p&gt;
+
+&lt;h2&gt;At-most once Configuration&lt;/h2&gt;
+
+&lt;p&gt;As the name suggests, At-most-once means the message will be delivered atmost once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically commiting the last offset used.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Set &lt;code&gt;enable.auto.commit&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Set &lt;code&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
+&lt;li&gt;Since &lt;code&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Note that it is also possible to have at-lest-once scenario with the same configuration. Let&amp;#39;s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.&lt;/p&gt;
+
+&lt;p&gt;Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.&lt;/p&gt;
+
+&lt;h2&gt;At-least once configuration&lt;/h2&gt;
+
+&lt;p&gt;At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Set &lt;code&gt;enable.auto.commit&lt;/code&gt; to &lt;code&gt;false&lt;/code&gt; OR&lt;/li&gt;
+&lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;#39;s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.&lt;/p&gt;
+
+&lt;h2&gt;Exactly-once configuraition&lt;/h2&gt;
+
+&lt;p&gt;Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.&lt;/p&gt;
+
+&lt;p&gt;In this case offset needs to be manually managed.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Set &lt;code&gt;enable.auto.commit&lt;/code&gt; to &lt;code&gt;false&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Do not make call to &lt;code&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Implement a &lt;code&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
+&lt;li&gt;While processing the messages, get hold of the offset of each message.  Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Deadlocks in Optimistic locking</title>
@@ -815,78 +864,6 @@ In other fields, it is upto individual.&lt;/p&gt;
 तुमको अब तक 
 क्यूं अपनी पहचान नहीं है
 &lt;/pre&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Handling stack traces in Elasticsearch Logstash Kibana (ELK)</title>
-   <link href="http://madhur.co.in/blog/2017/04/30/view-exceptions-in-elk.html"/>
-   <updated>2017-04-30T00:00:00+05:30</updated>
-   <id>id:/blog/2017/04/30/view-exceptions-in-elk</id>
-   <content type="html">&lt;p&gt;I use &lt;a href=&quot;https://www.elastic.co/webinars/introduction-elk-stack&quot;&gt;Elasticsearch Logstash Kibana (ELK)&lt;/a&gt; stack for visualizing lot of things like Nginx logs, HaProxy logs etc.&lt;/p&gt;
-
-&lt;p&gt;I also ingest application logs into the ELK. One thing I have been looking to do is visualization of errors happening into the system. Surely, Nginx and Haproxy logs can give you visualization of 500 status codes but there are many cases where the status code is 2xx but the internal error in the system is logged.&lt;/p&gt;
-
-&lt;p&gt;Our most of the microservices are written in Java / Python / Node.js and so I am only concentrating on those. A typical java exception stack trace when logged looks like this:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Exception in thread &quot;main&quot; java.lang.NullPointerException
-        at com.example.myproject.Book.getTitle(Book.java:16)
-        at com.example.myproject.Author.getBookTitles(Author.java:25)
-        at com.example.myproject.Bootstrap.main(Bootstrap.java:14)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Normally, this will be ingested line by line in ELK stack, which breaks the entire message.&lt;/p&gt;
-
-&lt;p&gt;For entire stack trace to be ingested as a single message, we need to configure the &lt;code&gt;multiline&lt;/code&gt; plugin either in &lt;a href=&quot;https://www.elastic.co/products/logstash&quot;&gt;Logstash&lt;/a&gt; or &lt;a href=&quot;https://www.elastic.co/products/beats/filebeat&quot;&gt;Filebeat&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I prefer to do this configuration in filebeat, here is how my typical configuration looks like:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span class=&quot;na&quot;&gt;filebeat&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;tail_files&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;prospectors&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-   &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;paths&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/log/example.log&lt;/span&gt;     
-      &lt;span class=&quot;na&quot;&gt;input_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;log&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;document_type&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;log&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;multiline.pattern&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;^[[:space:]]'&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;multiline.negate&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;false&lt;/span&gt;
-      &lt;span class=&quot;s&quot;&gt;multiline.match&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;after&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;registry_file&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/lib/filebeat/registry&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;logstash&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;hosts&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;logstash_server&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;]&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;worker&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;4&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;bulk_max_size &lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8192&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;shipper&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;logging&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/log/filebeat&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;rotateeverybytes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10485760&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# = 10MB&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;level&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;info&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;The lines below in the configuration configures the multiline processing. i.e. If a line starts with series of spaces (as in the case of stack trace), it should be considered as a part of previous line.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;multiline.pattern: '^[[:space:]]'
-multiline.negate: false
-multiline.match: after&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Once, we configure the multiline, here is how our messages should look like:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/stacktrace.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-
-&lt;p&gt;The next step is to parse this exception stacktrace and extract useful information like Exception class etc.&lt;/p&gt;
-
-&lt;p&gt;For this, we can use built in logstash parser &lt;code&gt;JAVASTACKTRACEPART&lt;/code&gt;&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;grok {
-                     match =&amp;gt; { &quot;message&quot; =&amp;gt;[
-                                               &quot;%{JAVASTACKTRACEPART}&quot;
-                                             ]
-                                }
-
-              }&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;This will extract various useful fields like line no, class and method name from the exception stack trace.&lt;/p&gt;
 </content>
  </entry>
  
