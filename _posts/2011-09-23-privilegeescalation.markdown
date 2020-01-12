@@ -149,7 +149,7 @@ namespace Google.MakeAdmin.Exploit
 }
 {% endhighlight %}
 
-##Exploiting the Service running with LocalSystem Account##
+## Exploiting the Service running with LocalSystem Account ##
 
 1. Compile the file to generate a new service executable named **GoogleUpdate.exe** and replace it with the original file stored at the location **C:\Program Files\Google\GoogleUpdate.exe**
 2. Restart the service. This will cause our exploit code to be executed and a new user will be created in the system with Administrator privileges. In my example, user will have login name *superboy* and password *pass@word1*.
