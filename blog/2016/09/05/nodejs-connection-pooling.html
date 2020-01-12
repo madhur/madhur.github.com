@@ -206,21 +206,21 @@
 <p>I have this simple function which makes a call to database.</p>
 
 <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">callback</span><span class="p">(){</span>
-    <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
+	<span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
 <span class="p">}</span>
 
 <span class="kd">function</span> <span class="nx">hitQuery</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">user_query</span> <span class="o">=</span> <span class="s2">"select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id"</span>
+    <span class="kd">var</span> <span class="nx">user_query</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id</span><span class="dl">"</span>
 
 
     <span class="nx">connection</span><span class="p">.</span><span class="nx">query</span><span class="p">(</span><span class="nx">user_query</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">rows</span><span class="p">,</span> <span class="nx">fields</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="nx">rows</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"No device token found for user: "</span> <span class="o">+</span> <span class="mi">16182</span><span class="p">);</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">No device token found for user: </span><span class="dl">"</span> <span class="o">+</span> <span class="mi">16182</span><span class="p">);</span>
             <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="kd">var</span> <span class="nx">deviceToken</span> <span class="o">=</span> <span class="nx">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">'device_token'</span><span class="p">];</span>
+            <span class="kd">var</span> <span class="nx">deviceToken</span> <span class="o">=</span> <span class="nx">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="dl">'</span><span class="s1">device_token</span><span class="dl">'</span><span class="p">];</span>
             <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
         <span class="p">}</span>
     <span class="p">});</span>
@@ -232,9 +232,9 @@
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest.js
 
-real    0m1.756s
-user    0m0.159s
-sys     0m0.017s</code></pre></figure>
+real	0m1.756s
+user	0m0.159s
+sys	    0m0.017s</code></pre></figure>
 
 <p>Lets, now run multiple of such queries in series first. I slightly change my program to this version:</p>
 
@@ -261,9 +261,9 @@ sys     0m0.017s</code></pre></figure>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest.js
 
-real    0m8.579s
-user    0m0.178s
-sys     0m0.019s</code></pre></figure>
+real	0m8.579s
+user	0m0.178s
+sys	    0m0.019s</code></pre></figure>
 
 <p>Lets make this to parallel now, common sense says that the wall clock time should be much faster in case of parallel.</p>
 
@@ -290,32 +290,32 @@ sys     0m0.019s</code></pre></figure>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest.js
 
-real    0m8.168s
-user    0m0.165s
-sys     0m0.018s</code></pre></figure>
+real	0m8.168s
+user	0m0.165s
+sys	    0m0.018s</code></pre></figure>
 
-<p>I still get the almost same wall time clock. If you closely observe the time output, the bulk of the time is not even spent in our program. Bulk of the time is actually spent in waiting to get the connection back from mysql, since we are re-using the single connection again and again. Thus, there is literally no performance gain inspite of making the calls in &quot;parallel&quot;</p>
+<p>I still get the almost same wall time clock. If you closely observe the time output, the bulk of the time is not even spent in our program. Bulk of the time is actually spent in waiting to get the connection back from mysql, since we are re-using the single connection again and again. Thus, there is literally no performance gain inspite of making the calls in “parallel”</p>
 
 <p>To fix this, I am going to change the program to use a connection pool. I am creating a simple pool as follows:</p>
 
 <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">pool</span> <span class="o">=</span> <span class="nx">mysql</span><span class="p">.</span><span class="nx">createPool</span><span class="p">({</span>
     <span class="na">connectionLimit</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="c1">//important</span>
-    <span class="na">host</span><span class="p">:</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
-    <span class="na">user</span><span class="p">:</span> <span class="s1">'***'</span><span class="p">,</span>
-    <span class="na">password</span><span class="p">:</span> <span class="s1">'***'</span><span class="p">,</span>
-    <span class="na">database</span><span class="p">:</span> <span class="s1">'user'</span><span class="p">,</span>
+    <span class="na">host</span><span class="p">:</span> <span class="dl">'</span><span class="s1">127.0.0.1</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">user</span><span class="p">:</span> <span class="dl">'</span><span class="s1">***</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">password</span><span class="p">:</span> <span class="dl">'</span><span class="s1">***</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">database</span><span class="p">:</span> <span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">,</span>
     <span class="na">debug</span><span class="p">:</span> <span class="kc">false</span>
 <span class="p">});</span></code></pre></figure>
 
-<p>And change our function to use the connection pool: </p>
+<p>And change our function to use the connection pool:</p>
 
 <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">function</span> <span class="nx">hitQuery</span><span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">user_query</span> <span class="o">=</span> <span class="s2">"select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id"</span>
+    <span class="kd">var</span> <span class="nx">user_query</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">select count(*) from user u, access_code uac, user_location_info uli   where u.id = uac.user_id and u.id = uli.user_id</span><span class="dl">"</span>
 
     <span class="nx">pool</span><span class="p">.</span><span class="nx">getConnection</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">connection</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">connection</span><span class="p">.</span><span class="nx">release</span><span class="p">();</span>
-            <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span> <span class="s2">"code"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"Error in connection database"</span> <span class="p">});</span>
+            <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span> <span class="dl">"</span><span class="s2">code</span><span class="dl">"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span> <span class="dl">"</span><span class="s2">status</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Error in connection database</span><span class="dl">"</span> <span class="p">});</span>
             <span class="k">return</span><span class="p">;</span>
         <span class="p">}</span>
 
@@ -323,7 +323,7 @@ sys     0m0.018s</code></pre></figure>
             <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">throw</span> <span class="nx">err</span><span class="p">;</span>
 
             <span class="k">if</span> <span class="p">(</span><span class="nx">rows</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"No device token found for user: "</span> <span class="o">+</span> <span class="mi">16182</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">No device token found for user: </span><span class="dl">"</span> <span class="o">+</span> <span class="mi">16182</span><span class="p">);</span>
                 <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">);</span>
             <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
                 <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
@@ -338,29 +338,29 @@ sys     0m0.018s</code></pre></figure>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest1.js
 
-real    0m1.763s
-user    0m0.163s
-sys     0m0.020s</code></pre></figure>
+real	0m1.763s
+user	0m0.163s
+sys	    0m0.020s</code></pre></figure>
 
-<p>Not much has changed, we got <code>1.756</code> while using without connection pooling. The benefit of connection pooling is only when we run multiple requests together. So now, lets execute in series of 5 queries as done earlier.</p>
+<p>Not much has changed, we got <code class="highlighter-rouge">1.756</code> while using without connection pooling. The benefit of connection pooling is only when we run multiple requests together. So now, lets execute in series of 5 queries as done earlier.</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest1.js
 
-real    0m8.192s
-user    0m0.182s
-sys     0m0.019s</code></pre></figure>
+real	0m8.192s
+user	0m0.182s
+sys	    0m0.019s</code></pre></figure>
 
 <p>Again, no real benefit. What is happening here is that <a href="http://caolan.github.io/async/docs.html#.series">the second query is executed only after the first query is executed</a>. Hence, this time is perfectly fine. Its just that bulk of time is wasted.</p>
 
-<p>Let&#39;s move this to 5 parallel queries.</p>
+<p>Let’s move this to 5 parallel queries.</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">$ time node paralleltest1.js
 
-real    0m2.311s
-user    0m0.175s
-sys     0m0.019s</code></pre></figure>
+real	0m2.311s
+user	0m0.175s
+sys	    0m0.019s</code></pre></figure>
 
-<p>This time we have brought it down to <code>2.311 seconds</code> from <code>8.168 seconds</code> which was the time it took to execute without having a connection pool.</p>
+<p>This time we have brought it down to <code class="highlighter-rouge">2.311 seconds</code> from <code class="highlighter-rouge">8.168 seconds</code> which was the time it took to execute without having a connection pool.</p>
 
 			<footer>
 				<div class="blocked tags">
@@ -445,7 +445,7 @@ sys     0m0.019s</code></pre></figure>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

@@ -197,14 +197,14 @@
 
 			 <p>I have been exploring on the best ways to consume from Kafka topic in Java. There are several ways:</p>
 
-<p>1 The simplest way is using <code>KafkaListener</code></p>
+<p>1 The simplest way is using <code class="highlighter-rouge">KafkaListener</code></p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Slf4j</span>
 <span class="nd">@Component</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">ExampleConsumer</span> <span class="o">{</span>
 
     <span class="nd">@KafkaListener</span><span class="o">(</span><span class="n">id</span> <span class="o">=</span> <span class="s">"fooGroup"</span><span class="o">,</span> <span class="n">topics</span> <span class="o">=</span> <span class="s">"Topic2"</span><span class="o">)</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">listen</span><span class="o">(</span><span class="n">String</span> <span class="n">in</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">listen</span><span class="o">(</span><span class="nc">String</span> <span class="n">in</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Received: "</span> <span class="o">+</span> <span class="n">in</span><span class="o">);</span>
         <span class="k">if</span> <span class="o">(</span><span class="n">in</span><span class="o">.</span><span class="na">startsWith</span><span class="o">(</span><span class="s">"foo"</span><span class="o">))</span> <span class="o">{</span>
             <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">"failed"</span><span class="o">);</span>
@@ -215,17 +215,17 @@
 <p>2 The second way is to use <a href="https://camel.apache.org/">Apache Camel</a> . Using Apache camel is useful if you have lot of filtering logic to be applied on incoming messages and also output the processed messages onto another topic or stream.</p>
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Component</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CamelListener</span> <span class="kd">extends</span> <span class="n">RouteBuilder</span> <span class="o">{</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CamelListener</span> <span class="kd">extends</span> <span class="nc">RouteBuilder</span> <span class="o">{</span>
 
     <span class="nd">@Autowired</span>
-    <span class="kd">private</span> <span class="n">KafkaConsumerProperties</span> <span class="n">kafkaConsumerProperties</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">KafkaConsumerProperties</span> <span class="n">kafkaConsumerProperties</span><span class="o">;</span>
 
     <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
         <span class="n">from</span><span class="o">(</span><span class="n">kafkaConsumerProperties</span><span class="o">.</span><span class="na">kafkaUri</span><span class="o">()).</span><span class="na">process</span><span class="o">(</span><span class="n">exchange</span> <span class="o">-&gt;</span> <span class="o">{</span>
 
-            <span class="n">String</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">exchange</span><span class="o">.</span><span class="na">getIn</span><span class="o">().</span><span class="na">getBody</span><span class="o">(</span><span class="n">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Camel consumer: "</span> <span class="o">+</span> <span class="n">payload</span><span class="o">);</span>
+            <span class="nc">String</span> <span class="n">payload</span> <span class="o">=</span> <span class="n">exchange</span><span class="o">.</span><span class="na">getIn</span><span class="o">().</span><span class="na">getBody</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Camel consumer: "</span> <span class="o">+</span> <span class="n">payload</span><span class="o">);</span>
         <span class="o">}).</span><span class="na">end</span><span class="o">();</span>
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
@@ -237,26 +237,26 @@
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">KafkaStreamConsumer</span> <span class="o">{</span>
 
     <span class="nd">@Autowired</span>
-    <span class="kd">private</span> <span class="n">KafkaConsumerProperties</span> <span class="n">kafkaConsumerProperties</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">KafkaConsumerProperties</span> <span class="n">kafkaConsumerProperties</span><span class="o">;</span>
 
     <span class="nd">@Autowired</span>
-    <span class="kd">private</span> <span class="n">KafkaOrderFeedProcessor</span> <span class="n">kafkaOrderFeedProcessor</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">KafkaOrderFeedProcessor</span> <span class="n">kafkaOrderFeedProcessor</span><span class="o">;</span>
 
-    <span class="kd">private</span> <span class="n">String</span> <span class="n">topic</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">topic</span><span class="o">;</span>
 
     <span class="nd">@PostConstruct</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">processKafkaConsumer</span><span class="o">()</span> <span class="o">{</span>
-        <span class="n">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="n">kafkaConsumerProperties</span><span class="o">.</span><span class="na">getConsumerProperties</span><span class="o">();</span>
-        <span class="n">KafkaStreams</span> <span class="n">kafkaStreams</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="nc">Properties</span> <span class="n">properties</span> <span class="o">=</span> <span class="n">kafkaConsumerProperties</span><span class="o">.</span><span class="na">getConsumerProperties</span><span class="o">();</span>
+        <span class="nc">KafkaStreams</span> <span class="n">kafkaStreams</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
         <span class="k">try</span> <span class="o">{</span>
-            <span class="n">StreamsBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StreamsBuilder</span><span class="o">();</span>
-            <span class="n">KStream</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">kStream</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="n">topic</span><span class="o">);</span>
-            <span class="n">kStream</span><span class="o">.</span><span class="na">process</span><span class="o">(</span><span class="n">kafkaOrderFeedProcessor</span><span class="o">,</span> <span class="k">new</span> <span class="n">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
-            <span class="n">kafkaStreams</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaStreams</span><span class="o">(</span><span class="n">builder</span><span class="o">.</span><span class="na">build</span><span class="o">(),</span> <span class="n">properties</span><span class="o">);</span>
+            <span class="nc">StreamsBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StreamsBuilder</span><span class="o">();</span>
+            <span class="nc">KStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">kStream</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="na">stream</span><span class="o">(</span><span class="n">topic</span><span class="o">);</span>
+            <span class="n">kStream</span><span class="o">.</span><span class="na">process</span><span class="o">(</span><span class="n">kafkaOrderFeedProcessor</span><span class="o">,</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
+            <span class="n">kafkaStreams</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">KafkaStreams</span><span class="o">(</span><span class="n">builder</span><span class="o">.</span><span class="na">build</span><span class="o">(),</span> <span class="n">properties</span><span class="o">);</span>
             <span class="n">kafkaStreams</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
             <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"op={}, status=OK, desc={}"</span><span class="o">,</span> <span class="s">"KafkaConsumer"</span><span class="o">,</span> <span class="s">"kafka consumer stream  started successfully"</span><span class="o">);</span>
-        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">var9</span><span class="o">)</span> <span class="o">{</span>
-            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc={} and exception={}"</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]{</span><span class="s">"KafkaConsumer"</span><span class="o">,</span> <span class="s">"exception while starting kafka consumer stream"</span><span class="o">,</span> <span class="n">var9</span><span class="o">.</span><span class="na">getMessage</span><span class="o">()});</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">var9</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc={} and exception={}"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Object</span><span class="o">[]{</span><span class="s">"KafkaConsumer"</span><span class="o">,</span> <span class="s">"exception while starting kafka consumer stream"</span><span class="o">,</span> <span class="n">var9</span><span class="o">.</span><span class="na">getMessage</span><span class="o">()});</span>
             <span class="k">if</span> <span class="o">(</span><span class="n">kafkaStreams</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
                 <span class="n">kafkaStreams</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
             <span class="o">}</span>
@@ -265,17 +265,17 @@
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
 
-<p>There are various advantages of using Kafka&#39;s Streams API.</p>
+<p>There are various advantages of using Kafka’s Streams API.</p>
 
-<p>Kafka&#39;s Streams API (<a href="https://kafka.apache.org/documentation/streams/">https://kafka.apache.org/documentation/streams/</a>) is built on top of Kafka&#39;s producer and consumer clients. It&#39;s significantly more powerful and also more expressive than the Kafka consumer client. Here are some of the features of the Kafka Streams API:</p>
+<p>Kafka’s Streams API (https://kafka.apache.org/documentation/streams/) is built on top of Kafka’s producer and consumer clients. It’s significantly more powerful and also more expressive than the Kafka consumer client. Here are some of the features of the Kafka Streams API:</p>
 
 <ul>
-<li>supports exactly-once processing semantics (Kafka versions 0.11+)</li>
-<li>supports fault-tolerant stateful processing including streaming joins, aggregations, and windowing</li>
-<li>supports event-time processing as well as processing based on processing-time and ingestion-time
-has first-class support for both streams and tables, which is where stream processing meets databases; in practice, most stream processing applications need both streams AND tables for implementing their respective use cases, so if a stream processing technology lacks either of the two abstractions (say, no support for tables) you are either stuck or must manually implement this functionality yourself (good luck with that...)</li>
-<li>supports interactive queries to expose the latest processing results to other applications and services)</li>
-<li>more expressive: it ships with (1) a functional programming style DSL with operations such as map, filter, reduce as well as (2) an imperative style Processor API for e.g. doing complex event processing (CEP), and (3) you can even combine the DSL and the Processor API.</li>
+  <li>supports exactly-once processing semantics (Kafka versions 0.11+)</li>
+  <li>supports fault-tolerant stateful processing including streaming joins, aggregations, and windowing</li>
+  <li>supports event-time processing as well as processing based on processing-time and ingestion-time
+has first-class support for both streams and tables, which is where stream processing meets databases; in practice, most stream processing applications need both streams AND tables for implementing their respective use cases, so if a stream processing technology lacks either of the two abstractions (say, no support for tables) you are either stuck or must manually implement this functionality yourself (good luck with that…)</li>
+  <li>supports interactive queries to expose the latest processing results to other applications and services)</li>
+  <li>more expressive: it ships with (1) a functional programming style DSL with operations such as map, filter, reduce as well as (2) an imperative style Processor API for e.g. doing complex event processing (CEP), and (3) you can even combine the DSL and the Processor API.</li>
 </ul>
 
 			<footer>
@@ -361,7 +361,7 @@ has first-class support for both streams and tables, which is where stream proce
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

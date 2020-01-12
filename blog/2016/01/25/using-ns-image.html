@@ -195,12 +195,12 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>Recently, I encountered an issue where an <code>NSImage</code> instance was cached inspite of setting <code>NSImageCacheMode.Never</code></p>
+			 <p>Recently, I encountered an issue where an <code class="highlighter-rouge">NSImage</code> instance was cached inspite of setting <code class="highlighter-rouge">NSImageCacheMode.Never</code></p>
 
-<p>Specifically, the issue was:<br>
+<p>Specifically, the issue was:<br />
 I have bunch of images in my assets. What I am trying to do is render the image in status bar of OSX as following:</p>
 
-<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="nv">icon</span> <span class="o">=</span> <span class="nf">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="nv">icon</span> <span class="o">=</span> <span class="kt">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span>
 <span class="n">icon</span><span class="p">?</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="kt">NSSize</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">width</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span> <span class="nv">height</span><span class="p">:</span> <span class="mi">18</span><span class="p">)</span>
 
 <span class="n">icon</span><span class="p">?</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">true</span>
@@ -209,28 +209,29 @@ I have bunch of images in my assets. What I am trying to do is render the image 
 
 <p>and also using it in one of my view which opens:</p>
 
-<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">self</span><span class="o">.</span><span class="n">dayIcon</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="nf">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">self</span><span class="o">.</span><span class="n">dayIcon</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="kt">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span></code></pre></figure>
 
 <p>The problem is as soon as I set the status bar image, the image in the view also changes, i.e. both the color and the size(changes to 18x18)</p>
 
-<p>I have tried using <code>icon?.cacheMode = NSImageCacheMode.Never</code> but there is no effect.</p>
+<p>I have tried using <code class="highlighter-rouge">icon?.cacheMode = NSImageCacheMode.Never</code> but there is no effect.</p>
 
-<h3>Solution</h3>
+<h3 id="solution">Solution</h3>
 
-<p><code>[NSImage imageNamed:]</code> may return an existing cached instance of the image.</p>
+<p><code class="highlighter-rouge">[NSImage imageNamed:]</code> may return an existing cached instance of the image.</p>
 
 <p>They are not, and that is, indeed, your problem.</p>
 
-<p>If you want to change the size on the image without affecting anyone else who may be holding a reference, make a copy of it. The copy of the NSImage is lightweight - it doesn&#39;t duplicate the underlying image representations which hold the rendering (bitmap, in the PNG case) data.</p>
+<p>If you want to change the size on the image without affecting anyone else who may be holding a reference, make a copy of it. The copy of the NSImage is lightweight - it doesn’t duplicate the underlying image representations which hold the rendering (bitmap, in the PNG case) data.</p>
 
 <p>This is the correct code:</p>
 
-<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="nv">icon</span> <span class="o">=</span> <span class="nf">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span><span class="o">.</span><span class="nf">copy</span><span class="p">()</span> <span class="k">as!</span> <span class="kt">NSImage</span>
+<figure class="highlight"><pre><code class="language-swift" data-lang="swift"><span class="k">let</span> <span class="nv">icon</span> <span class="o">=</span> <span class="kt">NSImage</span><span class="p">(</span><span class="nv">named</span><span class="p">:</span> <span class="s">"statusIcon"</span><span class="p">)</span><span class="o">.</span><span class="nf">copy</span><span class="p">()</span> <span class="k">as!</span> <span class="kt">NSImage</span>
 <span class="n">icon</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="kt">NSSize</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">width</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span> <span class="nv">height</span><span class="p">:</span> <span class="mi">18</span><span class="p">)</span>
 
 <span class="n">icon</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="kc">true</span>
 <span class="n">statusItem</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">icon</span>
 <span class="n">statusItem</span><span class="o">.</span><span class="n">menu</span> <span class="o">=</span> <span class="n">statusMenu</span></code></pre></figure>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -317,7 +318,7 @@ I have bunch of images in my assets. What I am trying to do is render the image 
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

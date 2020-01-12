@@ -199,7 +199,7 @@
 
 <p>For introduction, Service workers enable rich offline experiences, periodic background syncs and push notifications.</p>
 
-<p>For start, I have just implemented offline caching of JS/CSS/HTML files so that the site can be browsed even when offline. </p>
+<p>For start, I have just implemented offline caching of JS/CSS/HTML files so that the site can be browsed even when offline.</p>
 
 <p>Here is the simplest definition of a service worker which generates the Url of pages so that they can be cached</p>
 
@@ -208,36 +208,36 @@
 <span class="o">---</span>
 
 
-<span class="kd">var</span> <span class="nx">cacheName</span> <span class="o">=</span> <span class="s1">'madhur-cache-v1'</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">cacheName</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">madhur-cache-v1</span><span class="dl">'</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">filesToCache</span> <span class="o">=</span> <span class="p">[</span>
     <span class="c1">// Stylesheets</span>
     <span class="c1">// Pages and assets</span>
     <span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="nx">page</span> <span class="k">in</span> <span class="nx">site</span><span class="p">.</span><span class="nx">html_pages</span> <span class="o">%</span><span class="p">}</span>
-        <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="nx">page</span><span class="p">.</span><span class="nx">url</span> <span class="nx">contains</span> <span class="s1">'projects'</span> <span class="nx">or</span> <span class="nx">page</span><span class="p">.</span><span class="nx">url</span> <span class="nx">contains</span> <span class="s1">'404'</span>   <span class="o">%</span><span class="p">}</span>
+        <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="nx">page</span><span class="p">.</span><span class="nx">url</span> <span class="nx">contains</span> <span class="dl">'</span><span class="s1">projects</span><span class="dl">'</span> <span class="nx">or</span> <span class="nx">page</span><span class="p">.</span><span class="nx">url</span> <span class="nx">contains</span> <span class="dl">'</span><span class="s1">404</span><span class="dl">'</span>   <span class="o">%</span><span class="p">}</span>
             
         <span class="p">{</span><span class="o">%</span> <span class="k">else</span> <span class="o">%</span><span class="p">}</span>
-            <span class="s1">'{{ page.url }}'</span><span class="p">,</span>
+            <span class="dl">'</span><span class="s1">{{ page.url }}</span><span class="dl">'</span><span class="p">,</span>
         <span class="p">{</span><span class="o">%</span> <span class="nx">endif</span> <span class="o">%</span><span class="p">}</span>
         
     <span class="p">{</span><span class="o">%</span> <span class="nx">endfor</span> <span class="o">%</span><span class="p">}</span>
 
     <span class="c1">// Blog posts</span>
     <span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="nx">post</span> <span class="k">in</span> <span class="nx">site</span><span class="p">.</span><span class="nx">posts</span> <span class="o">%</span><span class="p">}</span>
-        <span class="s1">'{{ post.url }}'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">{{ post.url }}</span><span class="dl">'</span><span class="p">,</span>
     <span class="p">{</span><span class="o">%</span> <span class="nx">endfor</span> <span class="o">%</span><span class="p">}</span>
 
     <span class="c1">// JS files, Portfolio assets and main video</span>
     <span class="c1">// (!) This will throw a Liquid error. Read below.</span>
     <span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="nx">file</span> <span class="k">in</span> <span class="nx">site</span><span class="p">.</span><span class="nx">static_files</span> <span class="o">%</span><span class="p">}</span>
-        <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="nx">file</span><span class="p">.</span><span class="nx">extname</span> <span class="o">==</span> <span class="s1">'.js'</span> <span class="nx">or</span> <span class="nx">file</span><span class="p">.</span><span class="nx">path</span> <span class="nx">contains</span> <span class="s1">'/portfolio/screenshots'</span> <span class="nx">or</span> <span class="nx">file</span><span class="p">.</span><span class="nx">path</span> <span class="nx">contains</span> <span class="s1">'/portfolio/thumbnails'</span> <span class="o">%</span><span class="p">}</span>
-              <span class="s1">'{{ file.path }}'</span><span class="p">,</span>
+        <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="nx">file</span><span class="p">.</span><span class="nx">extname</span> <span class="o">==</span> <span class="dl">'</span><span class="s1">.js</span><span class="dl">'</span> <span class="nx">or</span> <span class="nx">file</span><span class="p">.</span><span class="nx">path</span> <span class="nx">contains</span> <span class="dl">'</span><span class="s1">/portfolio/screenshots</span><span class="dl">'</span> <span class="nx">or</span> <span class="nx">file</span><span class="p">.</span><span class="nx">path</span> <span class="nx">contains</span> <span class="dl">'</span><span class="s1">/portfolio/thumbnails</span><span class="dl">'</span> <span class="o">%</span><span class="p">}</span>
+              <span class="dl">'</span><span class="s1">{{ file.path }}</span><span class="dl">'</span><span class="p">,</span>
         <span class="p">{</span><span class="o">%</span> <span class="nx">endif</span> <span class="o">%</span><span class="p">}</span>
     <span class="p">{</span><span class="o">%</span> <span class="nx">endfor</span> <span class="o">%</span><span class="p">}</span>
 <span class="p">];</span>
 
 
 <span class="c1">// serviceWorker.js</span>
-<span class="nb">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'install'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+<span class="nb">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">install</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">event</span><span class="p">.</span><span class="nx">waitUntil</span><span class="p">(</span>
         <span class="nx">caches</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="nx">cacheName</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">cache</span><span class="p">)</span> <span class="p">{</span>
             <span class="k">return</span> <span class="nx">cache</span><span class="p">.</span><span class="nx">addAll</span><span class="p">(</span><span class="nx">filesToCache</span><span class="p">);</span>
@@ -245,16 +245,16 @@
     <span class="p">);</span>
 <span class="p">});</span>
 
-<span class="nb">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'fetch'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+<span class="nb">self</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">fetch</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">event</span><span class="p">.</span><span class="nx">respondWith</span><span class="p">(</span>
         <span class="nx">caches</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">)</span>
             <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
                 <span class="k">if</span> <span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'[*] Serving cached: '</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">[*] Serving cached: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
                     <span class="k">return</span> <span class="nx">response</span><span class="p">;</span>
                 <span class="p">}</span>
 
-                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'[*] Fetching: '</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">[*] Fetching: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
                 <span class="k">return</span> <span class="nx">fetch</span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">request</span><span class="p">);</span>
             <span class="p">}</span>
         <span class="p">)</span>
@@ -266,16 +266,17 @@
 <p>In current implementation, the service worker will always return the response from the cache if one exists. However, there are lot of strategies which can be implemented for example:</p>
 
 <ul>
-<li>Cache Only</li>
-<li>Network only</li>
-<li>Cache First</li>
-<li>Network First</li>
-<li>Fastest</li>
+  <li>Cache Only</li>
+  <li>Network only</li>
+  <li>Cache First</li>
+  <li>Network First</li>
+  <li>Fastest</li>
 </ul>
 
-<p>These and many other such patterns are documented in <a href="https://jakearchibald.com/2014/offline-cookbook/">offline cookbook</a> </p>
+<p>These and many other such patterns are documented in <a href="https://jakearchibald.com/2014/offline-cookbook/">offline cookbook</a></p>
 
 <p>These patterns can be easy implemented using <a href="https://github.com/GoogleChrome/sw-toolbox">sw-toolbox</a></p>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -360,7 +361,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

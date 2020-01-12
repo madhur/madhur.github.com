@@ -196,182 +196,193 @@
 
 
 			 <ul>
-<li>Functions as asbstractions</li>
+  <li>Functions as asbstractions</li>
 </ul>
 
 <p>A function can be passed as a pointer and wrapped in a call.</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var work = function()
+
+<pre><code class="language-Javascript">var work = function()
 {
-    console.log("working hard");
+	console.log("working hard");
 }
 
 var doWork = function(f)
 {
-    console.log("starting");
+	console.log("starting");
+	
+	try
+	{
+		f();
+	}
+	catch(ex)
+	{
+		console.log(ex);
+	}
 
-    try
-    {
-        f();
-    }
-    catch(ex)
-    {
-        console.log(ex);
-    }
-
-    console.log("ending");
+	console.log("ending");
 }
 
 doWork(work);
 
-</code></pre></div>
+</code></pre>
+
 <ul>
-<li>Function to build modules</li>
+  <li>Function to build modules</li>
 </ul>
 
 <p>Functions can be used as objects which has data, methods, private variables.</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var worker = createWorker();
+
+<pre><code class="language-Javascript">var worker = createWorker();
 
 worker.job1();
 
 worker.job2();
-</code></pre></div>
+</code></pre>
 <p>How do we create something like above ?</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var createWorker = function()
+
+<pre><code class="language-Javascript">var createWorker = function()
 {
-    return
-    {
-        job1: function()
-        {
-            console.log("task1");
-        },
+	return
+	{
+		job1: function()
+		{
+			console.log("task1");
+		},
 
-        job2: function()
-        {
-            console.log("task2");
-        }
+		job2: function()
+		{
+			console.log("task2");
+		}
 
-    };
+	};
 
 }
-</code></pre></div>
+</code></pre>
+
 <p>Or, even better</p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">var createWorker = function()
+
+<pre><code class="language-Javascript">var createWorker = function()
 {
-    // Private variable
-    var workCount = 0;
+	// Private variable
+	var workCount = 0;
 
-    var task1 = function()
-    {
-        workCount+=1;
-        console.log("task1" + workCount);
-    };
+	var task1 = function()
+	{
+		workCount+=1;
+		console.log("task1" + workCount);
+	};
 
-    var task2 = function()
-    {
-        workCount+=1;
-        console.log("task2" + workCount);
-    };
+	var task2 = function()
+	{
+		workCount+=1;
+		console.log("task2" + workCount);
+	};
 
-    return
-    {
-        job1: task1,
-        job2: task2
-    };
+	return
+	{
+		job1: task1,
+		job2: task2
+	};
 
 };
 
 var worker = createWorker();
 
-</code></pre></div>
+</code></pre>
+
 <ul>
-<li>Eliminating global variables</li>
+  <li>Eliminating global variables</li>
 </ul>
 
-<p>One drawback of above patterns is that we are creating global variables. For ex, <code>createWorker</code> is a variable in global space.</p>
+<p>One drawback of above patterns is that we are creating global variables. For ex, <code class="highlighter-rouge">createWorker</code> is a variable in global space.</p>
 
-<p><code>createWorker</code> creates scopes and variables such as <code>workCount, task1, task2</code> are only visible inside it.</p>
+<p><code class="highlighter-rouge">createWorker</code> creates scopes and variables such as <code class="highlighter-rouge">workCount, task1, task2</code> are only visible inside it.</p>
 
 <p>In Javascript, global variables are evil. Its very easy to override global variable defined by somebody else.</p>
 
 <p>How can we eliminate global variables?</p>
 
-<p>One way is to wrap <code>createWorker</code> inside another function <code>program</code></p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">
+<p>One way is to wrap <code class="highlighter-rouge">createWorker</code> inside another function <code class="highlighter-rouge">program</code></p>
+
+<pre><code class="language-Javascript">
 var program = function()
 {
-    var createWorker = function()
-    {
-        // Private variable
-        var workCount = 0;
+	var createWorker = function()
+	{
+		// Private variable
+		var workCount = 0;
 
-        var task1 = function()
-        {
-            workCount+=1;
-            console.log("task1" + workCount);
-        };
+		var task1 = function()
+		{
+			workCount+=1;
+			console.log("task1" + workCount);
+		};
 
-        var task2 = function()
-        {
-            workCount+=1;
-            console.log("task2" + workCount);
-        };
+		var task2 = function()
+		{
+			workCount+=1;
+			console.log("task2" + workCount);
+		};
 
-        return
-        {
-            job1: task1,
-            job2: task2
-        };
+		return
+		{
+			job1: task1,
+			job2: task2
+		};
 
-    };
+	};
 
-    var worker = createWorker();
-    worker.job1();
-    worker.job2();
+	var worker = createWorker();
+	worker.job1();
+	worker.job2();
 
 }
 
 program();
 
-</code></pre></div>
-<p>However, we still have one global variable <code>program</code>. How do we get down to zero ?</p>
+</code></pre>
 
-<p>Introducing <code>IFFE</code>  -  <code>immediately invoked function expression</code></p>
-<div class="highlight"><pre><code class="language-Javascript" data-lang="Javascript">
+<p>However, we still have one global variable <code class="highlighter-rouge">program</code>. How do we get down to zero ?</p>
+
+<p>Introducing <code class="highlighter-rouge">IFFE</code>  -  <code class="highlighter-rouge">immediately invoked function expression</code></p>
+
+<pre><code class="language-Javascript">
 (function()
 {
-    var createWorker = function()
-    {
-        // Private variable
-        var workCount = 0;
+	var createWorker = function()
+	{
+		// Private variable
+		var workCount = 0;
 
-        var task1 = function()
-        {
-            workCount+=1;
-            console.log("task1" + workCount);
-        };
+		var task1 = function()
+		{
+			workCount+=1;
+			console.log("task1" + workCount);
+		};
 
-        var task2 = function()
-        {
-            workCount+=1;
-            console.log("task2" + workCount);
-        };
+		var task2 = function()
+		{
+			workCount+=1;
+			console.log("task2" + workCount);
+		};
 
-        return
-        {
-            job1: task1,
-            job2: task2
-        };
+		return
+		{
+			job1: task1,
+			job2: task2
+		};
 
-    };
+	};
 
-    var worker = createWorker();
-    worker.job1();
-    worker.job2();
+	var worker = createWorker();
+	worker.job1();
+	worker.job2();
 
 }());
 
-</code></pre></div>
-<p>Now, all variables are defined inside <code>iffy</code>. Lot of javascript libraries like Jquery use this design pattern.</p>
+</code></pre>
+
+<p>Now, all variables are defined inside <code class="highlighter-rouge">iffy</code>. Lot of javascript libraries like Jquery use this design pattern.</p>
 
 			<footer>
 				<div class="blocked tags">
@@ -454,7 +465,7 @@ program();
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

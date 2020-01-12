@@ -197,40 +197,37 @@
 
 			 <p>Compass Security has come up with a hacking challenge on their <a href="https://www.hacking-lab.com/sh/LAE04Jf">site</a>. The challenge consist of an .NET client having some hidden functionality which needs to be uncovered by the user. I decided to give it a try.</p>
 
-<h2>Requirements</h2>
-
+<h2 id="requirements">Requirements</h2>
 <ul>
-<li>Download  <a href="http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe">Application: DotNetFatClientHacking.exe</a></li>
+  <li>Download  <a href="http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe">Application: DotNetFatClientHacking.exe</a></li>
 </ul>
 
-<h2>Tools used in the trade</h2>
-
+<h2 id="tools-used-in-the-trade">Tools used in the trade</h2>
 <ul>
-<li><a href="http://www.reflector.net/">Reflector</a> or now better <a href="http://www.jetbrains.com/decompiler/">DotPeek</a></li>
-<li>ILDasm</li>
-<li>Hex Editor</li>
-<li>MSDN</li>
+  <li><a href="http://www.reflector.net/">Reflector</a> or now better <a href="http://www.jetbrains.com/decompiler/">DotPeek</a></li>
+  <li>ILDasm</li>
+  <li>Hex Editor</li>
+  <li>MSDN</li>
 </ul>
 
-<h2>Solution</h2>
+<h2 id="solution">Solution</h2>
 
-<p>Let&#39;s run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.</p>
+<p>Let’s run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.</p>
 
-<p><img src="/images/netapp.png" alt=""></p>
+<p><img src="/images/netapp.png" alt="" /></p>
 
-<p>Let&#39;s open the assembly in Reflector and see what it&#39;s doing. </p>
+<p>Let’s open the assembly in Reflector and see what it’s doing.</p>
 
-<p><img src="/images/reflector.png" alt=""></p>
+<p><img src="/images/reflector.png" alt="" /></p>
 
 <p>From the reflector, I could figure out the following</p>
-
 <ul>
-<li>The form has got actually 3 buttons, 2 are hidden</li>
-<li>There is a <em>BusinessClass</em> class in the assembly which is invoked by the hidden buttons</li>
-<li>The visible button checks if the user is <em>Admin</em> and hides or shows the other two buttons</li>
+  <li>The form has got actually 3 buttons, 2 are hidden</li>
+  <li>There is a <em>BusinessClass</em> class in the assembly which is invoked by the hidden buttons</li>
+  <li>The visible button checks if the user is <em>Admin</em> and hides or shows the other two buttons</li>
 </ul>
 
-<p>Now, our job is to become the Admin :) . That&#39;s the code which is called by the Visible button <strong>Identify me</strong></p>
+<p>Now, our job is to become the Admin :) . That’s the code which is called by the Visible button <strong>Identify me</strong></p>
 
 <figure class="highlight"><pre><code class="language-csharp" data-lang="csharp"> <span class="k">private</span> <span class="k">void</span> <span class="nf">identifyUser</span><span class="p">()</span>
     <span class="p">{</span>
@@ -258,9 +255,9 @@
           <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
       <span class="p">}</span>
       <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
-    <span class="p">}</span>    </code></pre></figure>
+    <span class="p">}</span>	</code></pre></figure>
 
-<p>Hmmm. Very Interesting !!!  Do you understand what is it doing ?</p>
+<p>Hmmm. Very Interesting !!!	Do you understand what is it doing ?</p>
 
 <p>It basically retrieving the host name of our computer and based on that hostname getting all the IP addresses assigned to the network interfaces present in the system.
 If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
@@ -269,7 +266,7 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
 
 <p>But since its invalid IP, it will never be returned by system API. So, we must patch the program.</p>
 
-<p>Let&#39;s open the function in <em>ILDASM</em> and look at its disassembly.</p>
+<p>Let’s open the function in <em>ILDASM</em> and look at its disassembly.</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">  IL_001c:  ldloc.1
   IL_001d:  callvirt   instance string [mscorlib]System.Object::ToString()
@@ -277,24 +274,21 @@ If any of its IP address matches <em>258.54.54.699</em>, I am the Admin :).</p>
   IL_0027:  callvirt   instance bool [mscorlib]System.String::Equals(string)
   IL_002c:  brfalse.s  IL_0032
   IL_002e:  ldc.i4.1</code></pre></figure>
-  
 
 <p>There are several ways to do it. I will write down from tedious to easiest</p>
-
 <ul>
-<li>Export the classes from Reflector to Visual Studio solution and change the IP address to our actual IP address. But then Why not just NOP out the call itself :). This requires boring effort</li>
-<li>Use the ILASM or any other utility to change the instruction at <em>ldstr      &quot;258.54.54.699&quot;</em> to <em>ldstr actual ip</em>. Even this requires some effort</li>
-<li>Easiest Way: Actually we can just take advantage of if-else branch reversal.</li>
+  <li>Export the classes from Reflector to Visual Studio solution and change the IP address to our actual IP address. But then Why not just NOP out the call itself :). This requires boring effort</li>
+  <li>Use the ILASM or any other utility to change the instruction at <em>ldstr      “258.54.54.699”</em> to <em>ldstr actual ip</em>. Even this requires some effort</li>
+  <li>Easiest Way: Actually we can just take advantage of if-else branch reversal.</li>
 </ul>
 
-<p>Let&#39;s take a look at disassembly of <em>identifyuser()</em> function</p>
+<p>Let’s take a look at disassembly of <em>identifyuser()</em> function</p>
 
-<p><img src="/images/ildasm-output.png" alt=""></p>
+<p><img src="/images/ildasm-output.png" alt="" /></p>
 
-<p>If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is </p>
+<p>If you closely look at the disassembly above,  the instruction at IL_0006 is doing all the magic which is</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">  IL_0006:  /* 2C   | 29               */ brfalse.s  IL_0031</code></pre></figure>
-  
 
 <p>What this instruction means is that if output of <em>IsAdmin()</em> is false, branch to instruction at IL_0031, the instruction which hides the buttons.
 Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue.s</strong>. A quick look at MSDN tells me that its opcode is 2D as opposed to 2C which stands for <strong>brfalse.s</strong>.</p>
@@ -307,11 +301,10 @@ Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue
 000005B0  05 00 00 06 2A 00 00 00 03 30 02 00 5A 00 00 00  
 000005C0  00 00 00 00 02 28 06 00 00 06 2D 29 02 7B 02 00  
 000005D0  00 04 72 F5 00 00 70 6F 1E 00 00 0A 02 7B 04 00  </code></pre></figure>
-  
 
-<p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let&#39;s save the file and run it again.</p>
+<p>Our target lies at offset 5CA which I have already flipped from 2C to 2D as shown above. Let’s save the file and run it again.</p>
 
-<p><img src="/images/cracked.png" alt=""></p>
+<p><img src="/images/cracked.png" alt="" /></p>
 
 <p>Voilla !!! The Administrative buttons are visible and clicking them invokes the Business functions which fetch some HTML output over the internet :)</p>
 
@@ -400,7 +393,7 @@ Now, we can just change this instruction to reverse, i.e. make it <strong>brtrue
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

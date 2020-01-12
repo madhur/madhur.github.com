@@ -200,7 +200,7 @@
 <p>There are some of the learnings along the way in maintaining such kafka producers:</p>
 
 <ul>
-<li>Choose the number of partitions wisely: The number of partitions determine how much consumers can scale. Number of partitions is degree of parallelism in kafka. Kafka gives a single partition&#39;s data to single thread.</li>
+  <li>Choose the number of partitions wisely: The number of partitions determine how much consumers can scale. Number of partitions is degree of parallelism in kafka. Kafka gives a single partition’s data to single thread.</li>
 </ul>
 
 <p>Our general thumb rule is to have partitions equal to number of consumer servers. For example, if we have cluster of 20 servers consuming from kafka topic, each server will be consuming from single partition so 20 partitions.</p>
@@ -208,26 +208,31 @@
 <p>There are many other factors to be considered <a href="https://www.confluent.io/blog/how-choose-number-topics-partitions-kafka-cluster">as explained here</a></p>
 
 <ul>
-<li><p>Decide a consistent key while publishing - Messages published with the same key will be published to a single partition. A partition is logic unit of ordering of messages. So if ordering of messages is important to you, you should choose a consistent key for those messages. </p></li>
-<li><p>Use power of asynchronous - Kafka producer is by default asynchronous unless you use a blocking call explicitly. That means that kafka publish can fail and your code would have moved past the publish method already. Kafka producer provides a callback once the server has executed the publish instruction. In this callback, the user can check for failure and retry the option or send to a dead letter queue etc. Kafka producer itself retries for 3 times but I believe that is too less and not enough for data critical applications.</p></li>
+  <li>
+    <p>Decide a consistent key while publishing - Messages published with the same key will be published to a single partition. A partition is logic unit of ordering of messages. So if ordering of messages is important to you, you should choose a consistent key for those messages.</p>
+  </li>
+  <li>
+    <p>Use power of asynchronous - Kafka producer is by default asynchronous unless you use a blocking call explicitly. That means that kafka publish can fail and your code would have moved past the publish method already. Kafka producer provides a callback once the server has executed the publish instruction. In this callback, the user can check for failure and retry the option or send to a dead letter queue etc. Kafka producer itself retries for 3 times but I believe that is too less and not enough for data critical applications.</p>
+  </li>
 </ul>
 
 <p>Below is the sample snippet of such producer</p>
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Autowired</span>
-<span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"createKafkaSslProducerOrder"</span><span class="o">)</span>
-<span class="n">Producer</span> <span class="n">kafkaSslProducer</span><span class="o">;</span>
 
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">publish</span><span class="o">(</span><span class="n">String</span> <span class="n">messageKey</span><span class="o">,</span> <span class="n">String</span> <span class="n">payload</span><span class="o">,</span> <span class="n">String</span> <span class="n">topic</span><span class="o">)</span> <span class="o">{</span>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Autowired</span>
+<span class="nd">@Qualifier</span><span class="o">(</span><span class="s">"createKafkaSslProducerOrder"</span><span class="o">)</span>
+<span class="nc">Producer</span> <span class="n">kafkaSslProducer</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">publish</span><span class="o">(</span><span class="nc">String</span> <span class="n">messageKey</span><span class="o">,</span> <span class="nc">String</span> <span class="n">payload</span><span class="o">,</span> <span class="nc">String</span> <span class="n">topic</span><span class="o">)</span> <span class="o">{</span>
 
     <span class="k">try</span> <span class="o">{</span>
 
-        <span class="n">ProducerRecord</span> <span class="n">record</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ProducerRecord</span><span class="o">&lt;&gt;(</span><span class="n">topic</span><span class="o">,</span> <span class="n">messageKey</span><span class="o">,</span> <span class="n">payload</span><span class="o">);</span>
+        <span class="nc">ProducerRecord</span> <span class="n">record</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ProducerRecord</span><span class="o">&lt;&gt;(</span><span class="n">topic</span><span class="o">,</span> <span class="n">messageKey</span><span class="o">,</span> <span class="n">payload</span><span class="o">);</span>
 
         <span class="n">kafkaSslProducer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">record</span><span class="o">,</span> <span class="o">(</span><span class="n">metadata</span><span class="o">,</span> <span class="n">exception</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
 
-            <span class="k">if</span> <span class="o">(</span><span class="n">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">exception</span><span class="o">).</span><span class="na">isPresent</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="nc">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">exception</span><span class="o">).</span><span class="na">isPresent</span><span class="o">())</span> <span class="o">{</span>
                 <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc={} and exception={}"</span><span class="o">,</span>
-                        <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span> <span class="s">"KafkaProducer"</span><span class="o">,</span>
+                        <span class="k">new</span> <span class="nc">Object</span><span class="o">[]</span> <span class="o">{</span> <span class="s">"KafkaProducer"</span><span class="o">,</span>
                                 <span class="s">"Error posting message to kafka topic: "</span> <span class="o">+</span> <span class="n">topic</span><span class="o">,</span>
                                 <span class="n">exception</span><span class="o">.</span><span class="na">getMessage</span><span class="o">()</span> <span class="o">});</span>
                 <span class="c1">// Send for re-processing</span>
@@ -235,15 +240,20 @@
 
         <span class="o">});</span>
 
-    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc=Error posting message to SSL kafka: {}, stackTrace={} "</span><span class="o">,</span> <span class="n">LOG_OP_INFO</span><span class="o">,</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">ex</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"op={}, status=KO, desc=Error posting message to SSL kafka: {}, stackTrace={} "</span><span class="o">,</span> <span class="no">LOG_OP_INFO</span><span class="o">,</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">ex</span><span class="o">);</span>
         <span class="c1">// Re-throw the exception so that status can be recorded in the database.</span>
     <span class="o">}</span>
 <span class="o">}</span>
-</code></pre></div>
+</code></pre></div></div>
+
 <ul>
-<li><p>In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.</p></li>
-<li><p>Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message. </p></li>
+  <li>
+    <p>In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.</p>
+  </li>
+  <li>
+    <p>Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message.</p>
+  </li>
 </ul>
 
 			<footer>
@@ -329,7 +339,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

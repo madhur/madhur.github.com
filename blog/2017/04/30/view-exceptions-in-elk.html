@@ -208,7 +208,7 @@
 
 <p>Normally, this will be ingested line by line in ELK stack, which breaks the entire message.</p>
 
-<p>For entire stack trace to be ingested as a single message, we need to configure the <code>multiline</code> plugin either in <a href="https://www.elastic.co/products/logstash">Logstash</a> or <a href="https://www.elastic.co/products/beats/filebeat">Filebeat</a>.</p>
+<p>For entire stack trace to be ingested as a single message, we need to configure the <code class="highlighter-rouge">multiline</code> plugin either in <a href="https://www.elastic.co/products/logstash">Logstash</a> or <a href="https://www.elastic.co/products/beats/filebeat">Filebeat</a>.</p>
 
 <p>I prefer to do this configuration in filebeat, here is how my typical configuration looks like:</p>
 
@@ -227,13 +227,13 @@
 <span class="na">output</span><span class="pi">:</span>
   <span class="na">logstash</span><span class="pi">:</span>
     <span class="na">hosts</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="nv"> </span><span class="s">logstash_server</span><span class="nv"> </span><span class="s">"</span><span class="pi">]</span>
-    <span class="na">worker</span><span class="pi">:</span> <span class="s">4</span>
-    <span class="na">bulk_max_size </span><span class="pi">:</span> <span class="s">8192</span>
+    <span class="na">worker</span><span class="pi">:</span> <span class="m">4</span>
+    <span class="na">bulk_max_size </span><span class="pi">:</span> <span class="m">8192</span>
 <span class="na">shipper</span><span class="pi">:</span>
 <span class="na">logging</span><span class="pi">:</span>
   <span class="na">files</span><span class="pi">:</span>
     <span class="na">path</span><span class="pi">:</span> <span class="s">/var/log/filebeat</span>
-    <span class="na">rotateeverybytes</span><span class="pi">:</span> <span class="s">10485760</span> <span class="c1"># = 10MB</span>
+    <span class="na">rotateeverybytes</span><span class="pi">:</span> <span class="m">10485760</span> <span class="c1"># = 10MB</span>
   <span class="na">level</span><span class="pi">:</span> <span class="s">info</span></code></pre></figure>
 
 <p>The lines below in the configuration configures the multiline processing. i.e. If a line starts with series of spaces (as in the case of stack trace), it should be considered as a part of previous line.</p>
@@ -244,11 +244,11 @@ multiline.match: after</code></pre></figure>
 
 <p>Once, we configure the multiline, here is how our messages should look like:</p>
 
-<p><img src="/images/stacktrace.png" alt=""></p>
+<p><img src="/images/stacktrace.png" alt="" /></p>
 
 <p>The next step is to parse this exception stacktrace and extract useful information like Exception class etc.</p>
 
-<p>For this, we can use built in logstash parser <code>JAVASTACKTRACEPART</code></p>
+<p>For this, we can use built in logstash parser <code class="highlighter-rouge">JAVASTACKTRACEPART</code></p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">grok {
                      match =&gt; { "message" =&gt;[
@@ -341,7 +341,7 @@ multiline.match: after</code></pre></figure>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

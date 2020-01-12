@@ -198,41 +198,41 @@
 			 <p>Recently, I was working on a silverlight solution and came across an issue where People WebService returned me the duplicate results for the people who are already 
 part of the site collection. This issue can occur if SharePoint is using claim based authentication model.</p>
 
-<p>On close inspection I found that the returned duplicate results were having different login names. For example if one result was <code>ads\john</code> then the other one was <code>i:0#.w|ads\john</code>.</p>
+<p>On close inspection I found that the returned duplicate results were having different login names. For example if one result was <code class="highlighter-rouge">ads\john</code> then the other one was <code class="highlighter-rouge">i:0#.w|ads\john</code>.</p>
 
 <p>It is easy to remove such duplicates if you are programming against server side directly with the following API code:</p>
 
 <figure class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">private</span> <span class="kt">string</span> <span class="nf">GetLoginName</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">)</span>
 <span class="p">{</span>
-     <span class="kt">var</span> <span class="n">manager</span> <span class="p">=</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="n">Local</span><span class="p">;</span>
-     <span class="k">if</span> <span class="p">(</span><span class="n">manager</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
-     <span class="p">{</span>
-         <span class="k">return</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="nf">IsEncodedClaim</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">?</span> <span class="n">manager</span><span class="p">.</span><span class="nf">DecodeClaim</span><span class="p">(</span><span class="n">name</span><span class="p">).</span><span class="n">Value</span> <span class="p">:</span> <span class="n">name</span><span class="p">;</span>
-     <span class="p">}</span>
-     <span class="k">return</span> <span class="n">name</span><span class="p">;</span>
+	 <span class="kt">var</span> <span class="n">manager</span> <span class="p">=</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="n">Local</span><span class="p">;</span>
+	 <span class="k">if</span> <span class="p">(</span><span class="n">manager</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+	 <span class="p">{</span>
+		 <span class="k">return</span> <span class="n">SPClaimProviderManager</span><span class="p">.</span><span class="nf">IsEncodedClaim</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">?</span> <span class="n">manager</span><span class="p">.</span><span class="nf">DecodeClaim</span><span class="p">(</span><span class="n">name</span><span class="p">).</span><span class="n">Value</span> <span class="p">:</span> <span class="n">name</span><span class="p">;</span>
+	 <span class="p">}</span>
+	 <span class="k">return</span> <span class="n">name</span><span class="p">;</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>However, if you are programming against Client object model, you do not have luxury of calling such API&#39;s. For those scenarios , I wrote a small function which will take the Claim encoded login name and return the pure Windows login name.</p>
+<p>However, if you are programming against Client object model, you do not have luxury of calling such API’s. For those scenarios , I wrote a small function which will take the Claim encoded login name and return the pure Windows login name.</p>
 
 <figure class="highlight"><pre><code class="language-c#" data-lang="c#"><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">checkClaimsUser</span><span class="p">(</span><span class="n">String</span> <span class="n">userName</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="kt">string</span> <span class="n">decodedName</span><span class="p">;</span>
+	<span class="kt">string</span> <span class="n">decodedName</span><span class="p">;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">userName</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="s">"|"</span><span class="p">))</span>
-    <span class="p">{</span>
-        <span class="kt">string</span><span class="p">[]</span> <span class="n">splitUserName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="k">new</span> <span class="n">Char</span><span class="p">[]</span> <span class="p">{</span> <span class="sc">'|'</span> <span class="p">},</span> <span class="n">StringSplitOptions</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">splitUserName</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
-            <span class="n">decodedName</span> <span class="p">=</span> <span class="n">splitUserName</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
-        <span class="k">else</span>
-            <span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">else</span>
-    <span class="p">{</span>
-        <span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
-    <span class="p">}</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">userName</span><span class="p">.</span><span class="nf">Contains</span><span class="p">(</span><span class="s">"|"</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="kt">string</span><span class="p">[]</span> <span class="n">splitUserName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">.</span><span class="nf">Split</span><span class="p">(</span><span class="k">new</span> <span class="n">Char</span><span class="p">[]</span> <span class="p">{</span> <span class="sc">'|'</span> <span class="p">},</span> <span class="n">StringSplitOptions</span><span class="p">.</span><span class="n">None</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">splitUserName</span><span class="p">.</span><span class="n">Length</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">)</span>
+			<span class="n">decodedName</span> <span class="p">=</span> <span class="n">splitUserName</span><span class="p">[</span><span class="m">1</span><span class="p">];</span>
+		<span class="k">else</span>
+			<span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">else</span>
+	<span class="p">{</span>
+		<span class="n">decodedName</span> <span class="p">=</span> <span class="n">userName</span><span class="p">;</span>
+	<span class="p">}</span>
 
 
-    <span class="k">return</span> <span class="n">decodedName</span><span class="p">.</span><span class="nf">ToLower</span><span class="p">();</span>
+	<span class="k">return</span> <span class="n">decodedName</span><span class="p">.</span><span class="nf">ToLower</span><span class="p">();</span>
 
 <span class="p">}</span></code></pre></figure>
 
@@ -319,7 +319,7 @@ part of the site collection. This issue can occur if SharePoint is using claim b
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

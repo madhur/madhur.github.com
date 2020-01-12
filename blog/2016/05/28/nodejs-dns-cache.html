@@ -197,41 +197,41 @@
 
 			 <p>I recently discovered in one of my projects that results of DNS are not cached by <a href="https://nodejs.org/en/">NodeJs</a>. Caching the results of DNS queries is one of the important things and can dramatically improve the speed and scalability of your application. In our application, we saw the number of HTTP requests jump from 35 to 2500 per seconds which is an almost 100x factor.</p>
 
-<h2>How to cache results of DNS queries</h2>
+<h2 id="how-to-cache-results-of-dns-queries">How to cache results of DNS queries</h2>
 
-<p>One way could be to use a caching DNS library for Node such as <a href="https://www.npmjs.com/package/dnscache">DnsCache</a>. Once this module is installed via <code>npm install dnscache</code> , every call to a dns method is first looked into the local cache, in case of cache hit the value from cache is returned, in case of cache miss the original dns call is made and the return value is cached in the local cache.</p>
+<p>One way could be to use a caching DNS library for Node such as <a href="https://www.npmjs.com/package/dnscache">DnsCache</a>. Once this module is installed via <code class="highlighter-rouge">npm install dnscache</code> , every call to a dns method is first looked into the local cache, in case of cache hit the value from cache is returned, in case of cache miss the original dns call is made and the return value is cached in the local cache.</p>
 
 <p>It is very similar to GOF Proxy design pattern providing a Cache Proxy.</p>
 
 <p>The goal of this module is to cache the most used/most recent dns calls, to avoid the network delay and improve the performance.</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">dns</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'dns'</span><span class="p">),</span>
-    <span class="nx">dnscache</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'dnscache'</span><span class="p">)({</span>
-        <span class="s2">"enable"</span> <span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="s2">"ttl"</span> <span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
-        <span class="s2">"cachesize"</span> <span class="p">:</span> <span class="mi">1000</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">dns</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">dns</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">dnscache</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">dnscache</span><span class="dl">'</span><span class="p">)({</span>
+        <span class="dl">"</span><span class="s2">enable</span><span class="dl">"</span> <span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">ttl</span><span class="dl">"</span> <span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">cachesize</span><span class="dl">"</span> <span class="p">:</span> <span class="mi">1000</span>
     <span class="p">});</span>
     
     <span class="c1">//to use the cached dns either of dnscache or dns can be called. </span>
     <span class="c1">//all the methods of dns are wrapped, this one just shows lookup on an example </span>
     
     <span class="c1">//will call the wrapped dns </span>
-    <span class="nx">dnscache</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">'www.yahoo.com'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">dnscache</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="dl">'</span><span class="s1">www.yahoo.com</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">//do something with result </span>
     <span class="p">});</span>
     
     <span class="c1">//will call the wrapped dns </span>
-    <span class="nx">dns</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="s1">'www.google.com'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">dns</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="dl">'</span><span class="s1">www.google.com</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">//do something with result </span>
     <span class="p">});</span></code></pre></figure>
 
 <p>Second way is to cache the results of queries at OS level. This is my preferred way as your application does not have to worry about caching as it is done automatically by OS for you. There are many DNS caching resolvers available such as: <a href="https://www.isc.org/downloads/bind/">Bind</a>, <a href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> and <a href="http://unbound.net/">unbound</a></p>
 
-<h2>How to check if DNS cache is working</h2>
+<h2 id="how-to-check-if-dns-cache-is-working">How to check if DNS cache is working</h2>
 
 <p>If you are using the DNS caching resolver such as dnsmasq or unbound, the result of DNS query should be very fast i.e. in order of 1 msec or even 0 msec.</p>
 
-<p>For example executing <code>dig facebook.com</code> gives me following output:</p>
+<p>For example executing <code class="highlighter-rouge">dig facebook.com</code> gives me following output:</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">dig facebook.com
 
@@ -252,7 +252,7 @@ facebook.com.       300 IN  A   69.171.230.68
 ;; WHEN: Sat May 28 10:03:26 2016
 ;; MSG SIZE  rcvd: 46</code></pre></figure>
 
-<p>Here the query time of <code>375 msec</code> is what we are interested in. That&#39;s way too high. If your DNS caching resolver is working fine, next time you execute this command, its time should be &lt;=1msec. </p>
+<p>Here the query time of <code class="highlighter-rouge">375 msec</code> is what we are interested in. That’s way too high. If your DNS caching resolver is working fine, next time you execute this command, its time should be &lt;=1msec.</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">dig facebook.com
 
@@ -273,12 +273,12 @@ facebook.com.       184 IN  A   69.171.230.68
 ;; WHEN: Sat May 28 10:05:22 2016
 ;; MSG SIZE  rcvd: 46</code></pre></figure>
 
-<p>In the first case, where in you are using application level caching, DNS request should not be sent at all, i.e. we would have to monitor the DNS traffic and confirm its absence. </p>
+<p>In the first case, where in you are using application level caching, DNS request should not be sent at all, i.e. we would have to monitor the DNS traffic and confirm its absence.</p>
 
 <p>We can simply use <a href="http://www.tcpdump.org/">TCPDump</a> for this purpose.</p>
 
-<p><code>tcpdump -s 0 -l -n port 53</code> will give the all DNS traffic. For example in my 
-executing <code>dig facebook.com</code> gives the following traffic:</p>
+<p><code class="highlighter-rouge">tcpdump -s 0 -l -n port 53</code> will give the all DNS traffic. For example in my 
+executing <code class="highlighter-rouge">dig facebook.com</code> gives the following traffic:</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
@@ -384,7 +384,7 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 65535 bytes
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

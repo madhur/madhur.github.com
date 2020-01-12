@@ -195,7 +195,7 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>Tech Tip : Monitor virtual servers, carry on your scripting work by accessing your essential emulators and tools all at a centralized platform with hosted windows virtual desktop from <a title=Microsoft&nbsp;Virtual&nbsp;Desktop href=https://www.clouddesktoponline.com/>CloudDesktopOnline</a>. Visit <a title=Apps4Rent&nbsp;-&nbsp;Hosting&nbsp;Provider href=http://www.apps4rent.com/>Apps4Rent.com</a> to know more about cloud products suitable for you.</p>
+			 <p>Tech Tip : Monitor virtual servers, carry on your scripting work by accessing your essential emulators and tools all at a centralized platform with hosted windows virtual desktop from &lt;a title=Microsoft Virtual Desktop href=https://www.clouddesktoponline.com/&gt;CloudDesktopOnline&lt;/a&gt;. Visit &lt;a title=Apps4Rent - Hosting Provider href=http://www.apps4rent.com/&gt;Apps4Rent.com&lt;/a&gt; to know more about cloud products suitable for you.</p>
 
 <p>We use <a href="https://www.elastic.co/webinars/introduction-elk-stack">ELK stack</a> heavily in our production systems for log aggregation and monitoring.</p>
 
@@ -205,19 +205,17 @@
 
 <p>Thus, we can ask <a href="https://github.com/elastic/curator">Curator</a> to simply delete the indices x days old and which follow a particular naming pattern.</p>
 
-<h3>Installing Curator</h3>
+<h3 id="installing-curator">Installing Curator</h3>
+<p>Simple use <code class="highlighter-rouge">pip install elasticsearch-curator</code> to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.</p>
 
-<p>Simple use <code>pip install elasticsearch-curator</code> to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.</p>
-
-<h3>Configuring Curator</h3>
-
-<p>Create a file <code>curator.yml</code> with following contents.</p>
+<h3 id="configuring-curator">Configuring Curator</h3>
+<p>Create a file <code class="highlighter-rouge">curator.yml</code> with following contents.</p>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
 <span class="na">client</span><span class="pi">:</span>
   <span class="na">hosts</span><span class="pi">:</span>
     <span class="pi">-</span> <span class="s">127.0.0.1</span>
-  <span class="na">port</span><span class="pi">:</span> <span class="s">9200</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">9200</span>
   <span class="na">url_prefix</span><span class="pi">:</span>
   <span class="na">use_ssl</span><span class="pi">:</span> <span class="s">False</span>
   <span class="na">certificate</span><span class="pi">:</span>
@@ -225,7 +223,7 @@
   <span class="na">client_key</span><span class="pi">:</span>
   <span class="na">ssl_no_validate</span><span class="pi">:</span> <span class="s">False</span>
   <span class="na">http_auth</span><span class="pi">:</span>
-  <span class="na">timeout</span><span class="pi">:</span> <span class="s">30</span>
+  <span class="na">timeout</span><span class="pi">:</span> <span class="m">30</span>
   <span class="na">master_only</span><span class="pi">:</span> <span class="s">False</span>
 
 <span class="na">logging</span><span class="pi">:</span>
@@ -237,51 +235,51 @@
 <p>Now, we need to define an action. i.e. What will curator do.  There are many actions to choose from. Check the <a href="https://www.elastic.co/guide/en/elasticsearch/client/curator/current/actions.html">documentation</a> for more information</p>
 
 <ul>
-<li>Alias</li>
-<li>Allocation</li>
-<li>Close</li>
-<li>Cluster Routing</li>
-<li>Create Index</li>
-<li>Delete Indices</li>
-<li>Delete Snapshots</li>
-<li>Open</li>
-<li>forceMerge</li>
-<li>Replicas</li>
-<li>Restore</li>
-<li>Snapshot</li>
+  <li>Alias</li>
+  <li>Allocation</li>
+  <li>Close</li>
+  <li>Cluster Routing</li>
+  <li>Create Index</li>
+  <li>Delete Indices</li>
+  <li>Delete Snapshots</li>
+  <li>Open</li>
+  <li>forceMerge</li>
+  <li>Replicas</li>
+  <li>Restore</li>
+  <li>Snapshot</li>
 </ul>
 
-<p>For this dicussion, we will use <code>Delete Indices</code> as the action, since this is what we want to do.</p>
+<p>For this dicussion, we will use <code class="highlighter-rouge">Delete Indices</code> as the action, since this is what we want to do.</p>
 
-<p>Below is the sample action file <code>delete_indices.yml</code> , which will delete the logstash indices which are older than 10 days.</p>
+<p>Below is the sample action file <code class="highlighter-rouge">delete_indices.yml</code> , which will delete the logstash indices which are older than 10 days.</p>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="nn">---</span>
 <span class="na">actions</span><span class="pi">:</span>
   <span class="na">1</span><span class="pi">:</span>
     <span class="na">action</span><span class="pi">:</span> <span class="s">delete_indices</span>
     <span class="na">description</span><span class="pi">:</span> <span class="pi">&gt;-</span>
-      <span class="no">Delete indices older than 45 days (based on index name), for logstash-</span>
-      <span class="no">prefixed indices. Ignore the error if the filter does not result in an</span>
-      <span class="no">actionable list of indices (ignore_empty_list) and exit cleanly.</span>
-    <span class="no">options:</span>
-      <span class="no">ignore_empty_list: True</span>
-      <span class="no">timeout_override:</span>
-      <span class="no">continue_if_exception: False</span>
-      <span class="no">disable_action: False</span>
-    <span class="no">filters:</span>
-    <span class="no">- filtertype: pattern</span>
-      <span class="no">kind: prefix</span>
-      <span class="no">value: logstash-</span>
-      <span class="no">exclude:</span>
-    <span class="no">- filtertype: age</span>
-      <span class="no">source: name</span>
-      <span class="no">direction: older</span>
-      <span class="no">timestring: '%Y.%m.%d'</span>
-      <span class="no">unit: days</span>
-      <span class="no">unit_count: 10</span>
-      <span class="no">exclude:</span></code></pre></figure>
+      <span class="s">Delete indices older than 45 days (based on index name), for logstash-</span>
+      <span class="s">prefixed indices. Ignore the error if the filter does not result in an</span>
+      <span class="s">actionable list of indices (ignore_empty_list) and exit cleanly.</span>
+    <span class="na">options</span><span class="pi">:</span>
+      <span class="na">ignore_empty_list</span><span class="pi">:</span> <span class="s">True</span>
+      <span class="na">timeout_override</span><span class="pi">:</span>
+      <span class="na">continue_if_exception</span><span class="pi">:</span> <span class="s">False</span>
+      <span class="na">disable_action</span><span class="pi">:</span> <span class="s">False</span>
+    <span class="na">filters</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">filtertype</span><span class="pi">:</span> <span class="s">pattern</span>
+      <span class="na">kind</span><span class="pi">:</span> <span class="s">prefix</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">logstash-</span>
+      <span class="na">exclude</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">filtertype</span><span class="pi">:</span> <span class="s">age</span>
+      <span class="na">source</span><span class="pi">:</span> <span class="s">name</span>
+      <span class="na">direction</span><span class="pi">:</span> <span class="s">older</span>
+      <span class="na">timestring</span><span class="pi">:</span> <span class="s1">'</span><span class="s">%Y.%m.%d'</span>
+      <span class="na">unit</span><span class="pi">:</span> <span class="s">days</span>
+      <span class="na">unit_count</span><span class="pi">:</span> <span class="m">10</span>
+      <span class="na">exclude</span><span class="pi">:</span></code></pre></figure>
 
-<p>To run this action, simple use the command </p>
+<p>To run this action, simple use the command</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">curator ./delete_index.yml --config ./curator.yml --dry-run
 2017-04-09 17:27:46,075 INFO      Preparing Action ID: 1, "delete_indices"
@@ -291,9 +289,9 @@
 2017-04-09 17:27:46,538 INFO      Action ID: 1, "delete_indices" completed.
 2017-04-09 17:27:46,538 INFO      Job completed.</code></pre></figure>
 
-<p>The <code>--dry-run</code> mode will not actually delete the index. It can be used to test the output of the action.</p>
+<p>The <code class="highlighter-rouge">--dry-run</code> mode will not actually delete the index. It can be used to test the output of the action.</p>
 
-<p>If you want to schedule it in a cron, you can do so using <code>crontab -e</code></p>
+<p>If you want to schedule it in a cron, you can do so using <code class="highlighter-rouge">crontab -e</code></p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">00 8 * * * root curator /path/delete_index.yml --config /path/curator.yml </code></pre></figure>
 
@@ -382,7 +380,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

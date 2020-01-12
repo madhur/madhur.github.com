@@ -195,25 +195,25 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>To handle the ever increasing load, one of my requirements was to cache the authenticated REST API&#39;s for faster processing and decrease the load on backend servers (<a href="http://tomcat.apache.org/">Tomcat</a> in this case).</p>
+			 <p>To handle the ever increasing load, one of my requirements was to cache the authenticated REST API’s for faster processing and decrease the load on backend servers (<a href="http://tomcat.apache.org/">Tomcat</a> in this case).</p>
 
-<p>We use <a href="http://stackoverflow.com/questions/1592534/what-is-token-based-authentication">Token based authentication</a> for our REST API&#39;s. That means our REST API&#39;s are esentially <a href="http://www.tutorialspoint.com/restful/restful_statelessness.htm">stateless</a></p>
+<p>We use <a href="http://stackoverflow.com/questions/1592534/what-is-token-based-authentication">Token based authentication</a> for our REST API’s. That means our REST API’s are esentially <a href="http://www.tutorialspoint.com/restful/restful_statelessness.htm">stateless</a></p>
 
-<p>We use a simple encrypted token passed in a header field, say <code>X-AUTH-TOKEN</code></p>
+<p>We use a simple encrypted token passed in a header field, say <code class="highlighter-rouge">X-AUTH-TOKEN</code></p>
 
-<p>Now, we have various API&#39;s such as user profile, addresses which return data based on this token passed and I don&#39;t want them to hit our backend servers everytime. Neither I am looking for unnecesarily storing this simply retrieved data in our <a href="http://redis.io/">Redis</a> servers. </p>
+<p>Now, we have various API’s such as user profile, addresses which return data based on this token passed and I don’t want them to hit our backend servers everytime. Neither I am looking for unnecesarily storing this simply retrieved data in our <a href="http://redis.io/">Redis</a> servers.</p>
 
 <p>Instead, we can use NGINX to cache these requests. We have a very simple architecture where NGINX acts as a reverse proxy for Tomcat servers.</p>
 
-<p><img src="/images/Blog/tt.png" alt=""></p>
+<p><img src="/images/Blog/tt.png" alt="" /></p>
 
-<p>Here, every request is intercepted by NGINX and appropriate requests are passed back to Tomcat server. This is done using <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass"><code>proxy_pass</code></a> directive of NGINX.</p>
+<p>Here, every request is intercepted by NGINX and appropriate requests are passed back to Tomcat server. This is done using <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass"><code class="highlighter-rouge">proxy_pass</code></a> directive of NGINX.</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">location /name/ {
     proxy_pass http://127.0.0.1/remote/;
 }</code></pre></figure>
 
-<p>We can ask NGINX to cache the request using just two directives: <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&_ga=1.103655616.1528258479.1469009926#proxy_cache_path"><code>proxy_cache_path</code></a> and <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&_ga=1.103655616.1528258479.1469009926#proxy_cache"><code>proxy_cache</code></a></p>
+<p>We can ask NGINX to cache the request using just two directives: <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&amp;_ga=1.103655616.1528258479.1469009926#proxy_cache_path"><code class="highlighter-rouge">proxy_cache_path</code></a> and <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html?&amp;_ga=1.103655616.1528258479.1469009926#proxy_cache"><code class="highlighter-rouge">proxy_cache</code></a></p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">proxy_cache_path /path/to/cache levels=1:2 keys_zone=my_cache:10m max_size=10g inactive=60m 
 use_temp_path=off;
@@ -231,23 +231,24 @@ server {
 
 <p>Now comes the fun part, how do we cache the authenticated requests. The key is to understand the What Cache Key Does NGINX use?</p>
 
-<p>The default keys that NGINX generates is MD5 hash of the following NGINX variables: <code>$scheme$proxy_host$request_uri</code></p>
+<p>The default keys that NGINX generates is MD5 hash of the following NGINX variables: <code class="highlighter-rouge">$scheme$proxy_host$request_uri</code></p>
 
 <p>For this sample configuration, the cache key for 
-<code>http://www.example.org/profile</code> is calculated as 
-<code>md5(“http://my_upstream:80/profile”)</code></p>
+<code class="highlighter-rouge">http://www.example.org/profile</code> is calculated as 
+<code class="highlighter-rouge">md5(“http://my_upstream:80/profile”)</code></p>
 
-<p>However, for token based authentiated requests, the cached response of <code>http://www.example.org/profile</code> will not be differentiated for different users, because the response is generated based on the <code>X-AUTH-TOKEN</code> field coming in the HTTP headers.</p>
+<p>However, for token based authentiated requests, the cached response of <code class="highlighter-rouge">http://www.example.org/profile</code> will not be differentiated for different users, because the response is generated based on the <code class="highlighter-rouge">X-AUTH-TOKEN</code> field coming in the HTTP headers.</p>
 
-<p>To solve for this, we simply add the token field as part of <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_key"><code>proxy_cache_key</code></a></p>
+<p>To solve for this, we simply add the token field as part of <a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_key"><code class="highlighter-rouge">proxy_cache_key</code></a></p>
 
-<p><code>proxy_cache_key &quot;$http_x_auth_token$request_uri&quot;;</code></p>
+<p><code class="highlighter-rouge">proxy_cache_key "$http_x_auth_token$request_uri";</code></p>
 
-<p>This will ensure that a new cache copy is created for each request having different <code>X-AUTH-TOKEN</code> in its header field.</p>
+<p>This will ensure that a new cache copy is created for each request having different <code class="highlighter-rouge">X-AUTH-TOKEN</code> in its header field.</p>
 
 <p>To verify this, you can print out the key field in the response headers using</p>
 
-<p><code>add_header X-Cache-Key  $http_x_auth_token$request_uri;</code></p>
+<p><code class="highlighter-rouge">add_header X-Cache-Key  $http_x_auth_token$request_uri;</code></p>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -332,7 +333,7 @@ server {
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

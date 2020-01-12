@@ -198,71 +198,74 @@
 			 <p>In any distributed system, one of the primary probem statement every engineer faces is the id generation for an entity. In this post, we are going to look at the id generation strategies at a very high level. I wanted to have a quick reference or a cheat sheet to lookup for a problem like this:</p>
 
 <p>Design considerations</p>
-
 <ul>
-<li>Shold the ids be sortable?</li>
-<li>The system should introduce as few new ‘moving parts’ as possible </li>
-<li><p>Should the id be generated at server or database?</p></li>
-<li><p>Let your database handle it
-This is usually the best strategy. Because your database engine will handle any collisions etc. For MySQL, it can be autoincrement number. The con of an autoincrement number is it is susceptible to attacks. You do not want your autoincrement ids to be exposed to public in the form of Order number etc. They also don&#39;t work with sharded databases.</p></li>
+  <li>Shold the ids be sortable?</li>
+  <li>The system should introduce as few new ‘moving parts’ as possible</li>
+  <li>
+    <p>Should the id be generated at server or database?</p>
+  </li>
+  <li>Let your database handle it
+This is usually the best strategy. Because your database engine will handle any collisions etc. For MySQL, it can be autoincrement number. The con of an autoincrement number is it is susceptible to attacks. You do not want your autoincrement ids to be exposed to public in the form of Order number etc. They also don’t work with sharded databases.</li>
 </ul>
 
 <p>In case you are using, Java with Hibernate JPA, it can be configured as follows:</p>
 
-<h2>Identity</h2>
+<h2 id="identity">Identity</h2>
 
 <p>The GenerationType.IDENTITY is the easiest to use but not the best one from a performance point of view. It relies on an auto-incremented database column and lets the database generate a new value with each insert operation. From a database point of view, this is very efficient because the auto-increment columns are highly optimized, and it doesn’t require any additional statements.</p>
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Id</span>
-<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">IDENTITY</span><span class="o">)</span>
-<span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="o">,</span> <span class="n">updatable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">nullable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span>
-<span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
-</code></pre></div>
-<h2>Sequence</h2>
 
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Id</span>
+<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="nc">GenerationType</span><span class="o">.</span><span class="na">IDENTITY</span><span class="o">)</span>
+<span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="o">,</span> <span class="n">updatable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">nullable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span>
+<span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h2 id="sequence">Sequence</h2>
 <p>The GenerationType.SEQUENCE is my preferred way to generate primary key values and uses a database sequence to generate unique values.</p>
 
-<p>It requires additional select statements to get the next value from a database sequence. But this has no performance impact for most applications. </p>
+<p>It requires additional select statements to get the next value from a database sequence. But this has no performance impact for most applications.</p>
 
 <ul>
-<li>Note that custom sequences are not supported by MySQL.</li>
+  <li>Note that custom sequences are not supported by MySQL.</li>
 </ul>
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Id</span>
-<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">SEQUENCE</span><span class="o">)</span>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Id</span>
+<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="nc">GenerationType</span><span class="o">.</span><span class="na">SEQUENCE</span><span class="o">)</span>
 <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="o">,</span> <span class="n">updatable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">nullable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span>
-<span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
-</code></pre></div>
-<h2>Table</h2>
+<span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+</code></pre></div></div>
+<h2 id="table">Table</h2>
 
 <p>The GenerationType.TABLE gets only rarely used nowadays. It simulates a sequence by storing and updating its current value in a database table which requires the use of pessimistic locks which put all transactions into a sequential order. This slows down your application, and you should, therefore, prefer the GenerationType.SEQUENCE, if your database supports sequences, which most popular databases do.</p>
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Id</span>
-<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">GenerationType</span><span class="o">.</span><span class="na">TABLE</span><span class="o">)</span>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Id</span>
+<span class="nd">@GeneratedValue</span><span class="o">(</span><span class="n">strategy</span> <span class="o">=</span> <span class="nc">GenerationType</span><span class="o">.</span><span class="na">TABLE</span><span class="o">)</span>
 <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">"id"</span><span class="o">,</span> <span class="n">updatable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">nullable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span>
-<span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
-</code></pre></div>
-<h2>UUID</h2>
+<span class="kd">private</span> <span class="nc">Long</span> <span class="n">id</span><span class="o">;</span>
+</code></pre></div></div>
+
+<h2 id="uuid">UUID</h2>
 
 <p>UUIDs are 128-bit hexadecimal numbers that are globally unique. The chances of the same UUID getting generated twice is negligible.</p>
 
 <p>The problem with UUIDs is that they are very big in size and don’t index well. When your dataset increases, the index size increases as well and the query performance takes a hit.</p>
 
 <ul>
-<li>If you use a timestamp as the first component of the ID, the IDs remain time-sortable</li>
+  <li>If you use a timestamp as the first component of the ID, the IDs remain time-sortable</li>
 </ul>
 
-<h2>Another component like twitter snowflake</h2>
+<h2 id="another-component-like-twitter-snowflake">Another component like twitter snowflake</h2>
 
 <p><a href="https://github.com/twitter-archive/snowflake/tree/snowflake-2010">Twitter snowflake</a> is a dedicated component just for generating ids. I am not sure if its good to have this a new component in your infrastructure.</p>
 
-<h2>Conclusion</h2>
-
+<h2 id="conclusion">Conclusion</h2>
 <ul>
-<li>MySQL does not support custom sequences. So if you are using mysql and want to avoid auto-increment ids, your only bet is server side.</li>
-<li>UUID has performance impact on indexing</li>
-<li>Auto-increment keys are not possible in sharded databases</li>
+  <li>MySQL does not support custom sequences. So if you are using mysql and want to avoid auto-increment ids, your only bet is server side.</li>
+  <li>UUID has performance impact on indexing</li>
+  <li>Auto-increment keys are not possible in sharded databases</li>
 </ul>
 
-<h3>References</h3>
-
+<h3 id="references">References</h3>
 <p><a href="https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c">Sharding &amp; IDs at Instagram</a></p>
 
 			<footer>
@@ -346,7 +349,7 @@ This is usually the best strategy. Because your database engine will handle any 
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

@@ -195,7 +195,7 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>In any Java application deployed to monitoring, it is important to have proper monitoring / alerting infrastructure setup. </p>
+			 <p>In any Java application deployed to monitoring, it is important to have proper monitoring / alerting infrastructure setup.</p>
 
 <p>Apart from the infrastrucutre monitoring, it is essential to setup JVM metrics as well as application monitoring.</p>
 
@@ -210,9 +210,15 @@
 <p>The most popular types of metrics are:</p>
 
 <ul>
-<li><p>Meters - A meter measures the rate of events over time. Also called as requests per second or TPS(transactions per second). Meters also track 1-, 5- and 15- minute moving averages, also called <code>m1_rate</code> , <code>m5_rate</code> and <code>m15_rate</code>. Meters have <code>mark</code> method to indicate the event.</p></li>
-<li><p>Counters - A counter is used to keep track of counts. For example pending jobs and total requests. Total requests etc is usually a useless parameter but tools like graphite / influxdb can provide derivate function over the counters which can give us the additional functionality of meters using counters.</p></li>
-<li><p>Timer - A timer measures both the rate a particular piece of code is called and as well as the distribution of its duration. Usually if you are using timer, you don&#39;t need meter or counter, since those functionalities are implemented by timer as well. A good practice is to have timer for your normal execution and counter/meter for exception scenarios, so that you can visualize no. of errors or rate of errors. A timer also provides, percentile times using variables <code>p50</code>, <code>p75</code>, <code>p95</code>, <code>p98</code>, <code>p99</code> and standard deviation.</p></li>
+  <li>
+    <p>Meters - A meter measures the rate of events over time. Also called as requests per second or TPS(transactions per second). Meters also track 1-, 5- and 15- minute moving averages, also called <code class="highlighter-rouge">m1_rate</code> , <code class="highlighter-rouge">m5_rate</code> and <code class="highlighter-rouge">m15_rate</code>. Meters have <code class="highlighter-rouge">mark</code> method to indicate the event.</p>
+  </li>
+  <li>
+    <p>Counters - A counter is used to keep track of counts. For example pending jobs and total requests. Total requests etc is usually a useless parameter but tools like graphite / influxdb can provide derivate function over the counters which can give us the additional functionality of meters using counters.</p>
+  </li>
+  <li>
+    <p>Timer - A timer measures both the rate a particular piece of code is called and as well as the distribution of its duration. Usually if you are using timer, you don’t need meter or counter, since those functionalities are implemented by timer as well. A good practice is to have timer for your normal execution and counter/meter for exception scenarios, so that you can visualize no. of errors or rate of errors. A timer also provides, percentile times using variables <code class="highlighter-rouge">p50</code>, <code class="highlighter-rouge">p75</code>, <code class="highlighter-rouge">p95</code>, <code class="highlighter-rouge">p98</code>, <code class="highlighter-rouge">p99</code> and standard deviation.</p>
+  </li>
 </ul>
 
 <p>When using <a href="https://spring.io/">Spring framework</a>, <a href="https://github.com/ryantenney/metrics-spring">Spring metrics</a> provides tight integration with <a href="">Dropwizard metrics</a></p>
@@ -220,7 +226,8 @@
 <p>Its important to note that <a href="http://metrics.ryantenney.com/">metrics-spring</a>  is a different library from <a href="https://docs.spring.io/spring-metrics/docs/current/public/prometheus">Spring metrics</a> , which is part of Spring framework itself.</p>
 
 <p>The below code demonstrates a simple way to bootstrap spring application for monitoring using <a href="https://metrics.dropwizard.io/4.0.0/">Dropwizard metrics</a> and <a href="http://metrics.ryantenney.com/">metrics-spring</a></p>
-<div class="highlight"><pre><code class="language-groovy" data-lang="groovy"><span class="n">buildscript</span> <span class="o">{</span>
+
+<div class="language-groovy highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">buildscript</span> <span class="o">{</span>
     <span class="n">ext</span> <span class="o">{</span>
     <span class="o">}</span>
     <span class="n">repositories</span> <span class="o">{</span>
@@ -252,7 +259,9 @@
     <span class="n">compile</span> <span class="nl">group:</span> <span class="s1">'com.codahale.metrics'</span><span class="o">,</span> <span class="nl">name:</span> <span class="s1">'metrics-jvm'</span><span class="o">,</span> <span class="nl">version:</span> <span class="s1">'3.0.2'</span>
     <span class="n">testCompile</span> <span class="nl">group:</span> <span class="s1">'junit'</span><span class="o">,</span> <span class="nl">name:</span> <span class="s1">'junit'</span><span class="o">,</span> <span class="nl">version:</span> <span class="s1">'4.12'</span>
 <span class="o">}</span>
-</code></pre></div><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">app</span><span class="o">;</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="n">app</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">com.codahale.metrics.ConsoleReporter</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.codahale.metrics.Counter</span><span class="o">;</span>
@@ -274,14 +283,14 @@
 <span class="kn">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">;</span>
 
 <span class="nd">@Component</span>
-<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">MetricsConfig</span> <span class="kd">extends</span> <span class="n">MetricsConfigurerAdapter</span><span class="o">{</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">MetricsConfig</span> <span class="kd">extends</span> <span class="nc">MetricsConfigurerAdapter</span><span class="o">{</span>
 
-    <span class="kd">private</span> <span class="kd">final</span> <span class="n">MetricRegistry</span> <span class="n">metrics</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MetricRegistry</span><span class="o">();</span>
-    <span class="n">Meter</span> <span class="n">publishMeter</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="na">meter</span><span class="o">(</span><span class="s">"publish.meter"</span><span class="o">);</span>
-    <span class="n">Counter</span> <span class="n">publishCounter</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="na">counter</span><span class="o">(</span><span class="s">"publish.counter"</span><span class="o">);</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">MetricRegistry</span> <span class="n">metrics</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MetricRegistry</span><span class="o">();</span>
+    <span class="nc">Meter</span> <span class="n">publishMeter</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="na">meter</span><span class="o">(</span><span class="s">"publish.meter"</span><span class="o">);</span>
+    <span class="nc">Counter</span> <span class="n">publishCounter</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="na">counter</span><span class="o">(</span><span class="s">"publish.counter"</span><span class="o">);</span>
 
     <span class="nd">@Value</span><span class="o">(</span><span class="s">"${graphite.host}"</span><span class="o">)</span>
-    <span class="kd">private</span> <span class="n">String</span> <span class="n">graphiteHost</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">graphiteHost</span><span class="o">;</span>
 
     <span class="nd">@Value</span><span class="o">(</span><span class="s">"${graphite.port}"</span><span class="o">)</span>
     <span class="kd">private</span> <span class="kt">int</span> <span class="n">graphitePort</span><span class="o">;</span>
@@ -289,71 +298,72 @@
     <span class="nd">@Value</span><span class="o">(</span><span class="s">"${graphite.amount.of.time.between.polls}"</span><span class="o">)</span>
     <span class="kd">private</span> <span class="kt">long</span> <span class="n">graphiteAmountOfTimeBetweenPolls</span><span class="o">;</span>
 
-    <span class="kd">private</span> <span class="n">String</span> <span class="n">graphitePrefix</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">graphitePrefix</span><span class="o">;</span>
 
     <span class="nd">@PostConstruct</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
-        <span class="n">ConsoleReporter</span> <span class="n">reporter</span> <span class="o">=</span> <span class="n">ConsoleReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metrics</span><span class="o">)</span>
-                <span class="o">.</span><span class="na">convertRatesTo</span><span class="o">(</span><span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
-                <span class="o">.</span><span class="na">convertDurationsTo</span><span class="o">(</span><span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">)</span>
+        <span class="nc">ConsoleReporter</span> <span class="n">reporter</span> <span class="o">=</span> <span class="nc">ConsoleReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metrics</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">convertRatesTo</span><span class="o">(</span><span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">convertDurationsTo</span><span class="o">(</span><span class="nc">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">)</span>
                 <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-        <span class="n">reporter</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
+        <span class="n">reporter</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
 
     <span class="o">}</span>
 
     <span class="kd">abstract</span> <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">();</span>
 
-    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">(</span><span class="n">String</span> <span class="n">graphitePrefix</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">(</span><span class="nc">String</span> <span class="n">graphitePrefix</span><span class="o">)</span> <span class="o">{</span>
         <span class="k">this</span><span class="o">.</span><span class="na">graphitePrefix</span> <span class="o">=</span> <span class="n">graphitePrefix</span><span class="o">;</span>
         <span class="n">configureReporters</span><span class="o">(</span><span class="n">metrics</span><span class="o">);</span>
     <span class="o">}</span>
 
 
     <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">(</span><span class="n">MetricRegistry</span> <span class="n">metricRegistry</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">registerReporter</span><span class="o">(</span><span class="n">JmxReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metricRegistry</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">(</span><span class="nc">MetricRegistry</span> <span class="n">metricRegistry</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">registerReporter</span><span class="o">(</span><span class="nc">JmxReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metricRegistry</span><span class="o">)</span>
                 <span class="o">.</span><span class="na">build</span><span class="o">()).</span><span class="na">start</span><span class="o">();</span>
-        <span class="n">GraphiteReporter</span> <span class="n">graphiteReporter</span> <span class="o">=</span>
+        <span class="nc">GraphiteReporter</span> <span class="n">graphiteReporter</span> <span class="o">=</span>
                 <span class="n">getGraphiteReporterBuilder</span><span class="o">(</span><span class="n">metricRegistry</span><span class="o">)</span>
                         <span class="o">.</span><span class="na">build</span><span class="o">(</span><span class="n">getGraphite</span><span class="o">());</span>
         <span class="n">registerReporter</span><span class="o">(</span><span class="n">graphiteReporter</span><span class="o">);</span>
         <span class="n">graphiteReporter</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="n">graphiteAmountOfTimeBetweenPolls</span><span class="o">,</span>
-                <span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">);</span>
+                <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">);</span>
     <span class="o">}</span>
 
-    <span class="kd">private</span> <span class="n">GraphiteReporter</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">getGraphiteReporterBuilder</span><span class="o">(</span><span class="n">MetricRegistry</span>
+    <span class="kd">private</span> <span class="nc">GraphiteReporter</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">getGraphiteReporterBuilder</span><span class="o">(</span><span class="nc">MetricRegistry</span>
                                                        <span class="n">metricRegistry</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"gc"</span><span class="o">,</span> <span class="k">new</span> <span class="n">GarbageCollectorMetricSet</span><span class="o">());</span>
-        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"memory"</span><span class="o">,</span> <span class="k">new</span> <span class="n">MemoryUsageGaugeSet</span><span class="o">());</span>
-        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"threads"</span><span class="o">,</span> <span class="k">new</span> <span class="n">ThreadStatesGaugeSet</span><span class="o">());</span>
-        <span class="k">return</span> <span class="n">GraphiteReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metricRegistry</span><span class="o">)</span>
-                <span class="o">.</span><span class="na">convertRatesTo</span><span class="o">(</span><span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
-                <span class="o">.</span><span class="na">convertDurationsTo</span><span class="o">(</span><span class="n">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">)</span>
-                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">MetricFilter</span><span class="o">.</span><span class="na">ALL</span><span class="o">)</span>
+        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"gc"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">GarbageCollectorMetricSet</span><span class="o">());</span>
+        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"memory"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">MemoryUsageGaugeSet</span><span class="o">());</span>
+        <span class="n">metricRegistry</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="s">"threads"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">ThreadStatesGaugeSet</span><span class="o">());</span>
+        <span class="k">return</span> <span class="nc">GraphiteReporter</span><span class="o">.</span><span class="na">forRegistry</span><span class="o">(</span><span class="n">metricRegistry</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">convertRatesTo</span><span class="o">(</span><span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">convertDurationsTo</span><span class="o">(</span><span class="nc">TimeUnit</span><span class="o">.</span><span class="na">MILLISECONDS</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">MetricFilter</span><span class="o">.</span><span class="na">ALL</span><span class="o">)</span>
                 <span class="o">.</span><span class="na">prefixedWith</span><span class="o">(</span><span class="n">graphitePrefix</span><span class="o">);</span>
     <span class="o">}</span>
 
-    <span class="kd">private</span> <span class="n">Graphite</span> <span class="nf">getGraphite</span><span class="o">()</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="k">new</span> <span class="nf">Graphite</span><span class="o">(</span><span class="k">new</span> <span class="n">InetSocketAddress</span><span class="o">(</span><span class="n">graphiteHost</span><span class="o">,</span>
+    <span class="kd">private</span> <span class="nc">Graphite</span> <span class="nf">getGraphite</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Graphite</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="n">graphiteHost</span><span class="o">,</span>
                 <span class="n">graphitePort</span><span class="o">));</span>
     <span class="o">}</span>
 <span class="o">}</span>
-</code></pre></div><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">app</span><span class="o">;</span>
+</code></pre></div></div>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="n">app</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">org.springframework.stereotype.Component</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">javax.annotation.PostConstruct</span><span class="o">;</span>
 
 <span class="nd">@Component</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProdMetricsConfig</span> <span class="kd">extends</span> <span class="n">MetricsConfig</span> <span class="o">{</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ProdMetricsConfig</span> <span class="kd">extends</span> <span class="nc">MetricsConfig</span> <span class="o">{</span>
 
-    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">GRAPHITE_PREFIX</span> <span class="o">=</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">GRAPHITE_PREFIX</span> <span class="o">=</span>
             <span class="s">"collectd/graphite-monitoring-example/production"</span><span class="o">;</span>
 
 
     <span class="nd">@Override</span>
     <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">configureReporters</span><span class="o">()</span> <span class="o">{</span>
-        <span class="n">configureReporters</span><span class="o">(</span><span class="n">GRAPHITE_PREFIX</span><span class="o">);</span>
+        <span class="n">configureReporters</span><span class="o">(</span><span class="no">GRAPHITE_PREFIX</span><span class="o">);</span>
     <span class="o">}</span>
 
     <span class="nd">@PostConstruct</span><span class="o">()</span>
@@ -361,21 +371,24 @@
         <span class="n">configureReporters</span><span class="o">();</span>
     <span class="o">}</span>
 <span class="o">}</span>
-</code></pre></div>
+</code></pre></div></div>
+
 <p>Here is an example of dashboard visualized in <a href="https://grafana.com/">Grafana</a></p>
 
-<p><img src="/images/monitoring-example.png" alt=""></p>
+<p><img src="/images/monitoring-example.png" alt="" /></p>
 
 <p>The above complete project is available on my <a href="https://github.com/madhur/jvm-monitoring-example">github repository</a></p>
 
 <p>The repo contains a dockerized spring boot application, grafana and a graphite instance.</p>
 
 <p>Assuming you have docker installed, just execute below commands to get the project up and running.</p>
-<div class="highlight"><pre><code class="language-shell" data-lang="shell">./gradlew build
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./gradlew build
 docker build <span class="nt">-t</span> metrics-example <span class="nb">.</span>
 docker-compose up <span class="nt">-d</span>
-</code></pre></div>
-<p>Use <code>http://localhost:3000</code> to browse the grafana portal and setup your dashboards.</p>
+</code></pre></div></div>
+
+<p>Use <code class="highlighter-rouge">http://localhost:3000</code> to browse the grafana portal and setup your dashboards.</p>
 
 <p>Do let me know if you have any suggestions / feedback</p>
 
@@ -462,7 +475,7 @@ docker-compose up <span class="nt">-d</span>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

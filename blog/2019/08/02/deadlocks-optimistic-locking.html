@@ -197,7 +197,7 @@
 
 			 <p>Recently, our application has been generating lot of deadlocks in Oracle database. The application uses <a href="https://en.wikipedia.org/wiki/Optimistic_concurrency_control">Optimistic concurrency control</a></p>
 
-<p><code>Error: ORA-00060: deadlock detected while waiting for resource</code></p>
+<p><code class="highlighter-rouge">Error: ORA-00060: deadlock detected while waiting for resource</code></p>
 
 <p>In an optimistic concurrency control, transactions use data resources without acquiring locks on the resources. Before committing, each transaction verifies that no other transaction has modified the data it has read. If the check reveals conflicting modifications, the committing transaction rolls back and can be restarted.</p>
 
@@ -206,12 +206,15 @@
 <p>The keypoint to understand here first is that Optimistic locking is not a feature provided by DBMS engine. Databases just provide mechanism to initiate transactions, rollbacks, versioning and locks. Ultiamtely, it is upto the application to implement eithe optimisitc locking or pessimistic locking.</p>
 
 <p>An example of implementing optimistic locking is as follows:</p>
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> <span class="n">address_line1</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="k">state</span><span class="p">,</span> <span class="n">zip</span><span class="p">,</span> <span class="k">version</span>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="n">address_line1</span><span class="p">,</span> <span class="n">city</span><span class="p">,</span> <span class="k">state</span><span class="p">,</span> <span class="n">zip</span><span class="p">,</span> <span class="k">version</span>
   <span class="k">FROM</span> <span class="n">addressTable</span>
  <span class="k">WHERE</span> <span class="n">address_id</span> <span class="o">=</span> <span class="nv">`&lt;&lt;some key&gt;&gt;`</span>
-</code></pre></div>
+</code></pre></div></div>
+
 <p>When you are about to do the update, you use the version in your update and throw an error if the row changed:</p>
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"> <span class="k">UPDATE</span> <span class="n">addressTable</span>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">UPDATE</span> <span class="n">addressTable</span>
    <span class="k">SET</span> <span class="n">address_line1</span> <span class="o">=</span> <span class="nv">`&lt;&lt;new address line 1&gt;&gt;`</span><span class="p">,</span>
        <span class="n">city</span> <span class="o">=</span> <span class="nv">`&lt;&lt;new city&gt;&gt;`</span><span class="p">,</span>
        <span class="k">state</span> <span class="o">=</span> <span class="nv">`&lt;&lt;new state&gt;&gt;`</span><span class="p">,</span>
@@ -224,9 +227,11 @@
 <span class="k">THEN</span>
   <span class="n">RAISE_APPLICATION_ERROR</span><span class="p">(</span> <span class="o">-</span><span class="mi">20001</span><span class="p">,</span> <span class="s1">'Oops, the row has changed since you read it.'</span> <span class="p">);</span>
 <span class="k">END</span> <span class="n">IF</span><span class="p">;</span>
-</code></pre></div>
-<p>However, it is possible for a deadlock to occur in oracle, because of the way transactions are implemented in database engines. </p>
-<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">BEGIN</span><span class="p">;</span>    <span class="c1">-- in one connection</span>
+</code></pre></div></div>
+
+<p>However, it is possible for a deadlock to occur in oracle, because of the way transactions are implemented in database engines.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">BEGIN</span><span class="p">;</span>    <span class="c1">-- in one connection</span>
 <span class="k">UPDATE</span> <span class="n">thing_1</span><span class="p">;</span>
 <span class="k">UPDATE</span> <span class="n">thing_2</span><span class="p">;</span>
 <span class="k">COMMIT</span><span class="p">;</span>
@@ -235,16 +240,17 @@
 <span class="k">UPDATE</span> <span class="n">thing_2</span><span class="p">;</span>
 <span class="k">UPDATE</span> <span class="n">thing_1</span><span class="p">;</span>
 <span class="k">COMMIT</span><span class="p">;</span>
-</code></pre></div>
-<p>This is the classic example of a deadlock </p>
+</code></pre></div></div>
+
+<p>This is the classic example of a deadlock</p>
 
 <p>After a few seconds, Oracle will detect the deadlock and pick one of the sessions and ‘rollback’ the statement. This is where we see our first misunderstanding about deadlocks.</p>
 
 <ul>
-<li>Oracle does not kill the session.</li>
-<li>Oracle does not kill the transaction.</li>
-<li>Oracle only kills the statement.</li>
-<li>Oracle does rollback the failing statement, but Oracle does not rollback the entire transaction that the failing statement is part of. (Correction by Mark Bobak.)
+  <li>Oracle does not kill the session.</li>
+  <li>Oracle does not kill the transaction.</li>
+  <li>Oracle only kills the statement.</li>
+  <li>Oracle does rollback the failing statement, but Oracle does not rollback the entire transaction that the failing statement is part of. (Correction by Mark Bobak.)
 PMON (Process Monitor) does not clear out the locks.</li>
 </ul>
 
@@ -333,7 +339,7 @@ PMON (Process Monitor) does not clear out the locks.</li>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

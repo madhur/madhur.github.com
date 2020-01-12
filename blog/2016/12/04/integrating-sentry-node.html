@@ -197,13 +197,13 @@
 
 			 <p>Effective logging is crucial to any application deployed in production. For node.js, <a href="http://expressjs.com/">express</a> based applications, we use <a href="https://github.com/winstonjs/winston">Winston</a> as our logging framework.</p>
 
-<p>In our scenario, we also want some crucial logs to be logged to <a href="https://sentry.io/welcome/">Sentry</a>. </p>
+<p>In our scenario, we also want some crucial logs to be logged to <a href="https://sentry.io/welcome/">Sentry</a>.</p>
 
 <p>A simple setup of Sentry is described below. This is same as what is described in <a href="https://docs.sentry.io/clients/node/integrations/express/">sentry docs</a>.</p>
 
 <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">sentry_enabled</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
 
-<span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">==</span> <span class="s1">'production'</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">==</span> <span class="dl">'</span><span class="s1">production</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">sentry_enabled</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
 <span class="p">}</span>
 
@@ -212,45 +212,45 @@
 <span class="p">}</span>
 
 <span class="c1">// setup routes</span>
-<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/'</span><span class="p">,</span> <span class="nx">healthcheck</span><span class="p">);</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="dl">'</span><span class="s1">/</span><span class="dl">'</span><span class="p">,</span> <span class="nx">healthcheck</span><span class="p">);</span>
 
 <span class="k">if</span> <span class="p">(</span><span class="nx">sentry_enabled</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">raven</span><span class="p">.</span><span class="nx">middleware</span><span class="p">.</span><span class="nx">express</span><span class="p">.</span><span class="nx">errorHandler</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">sentry_dsn</span><span class="p">));</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>All good uptil now, except that this setup logs only unhandled exceptions to Sentry. For sending manual log lines to Sentry, sentry recommends using <code>client.captureException(e)</code> or <code>client.captureMessage(msg)</code> as per these <a href="http://expressjs.com/">docs</a></p>
+<p>All good uptil now, except that this setup logs only unhandled exceptions to Sentry. For sending manual log lines to Sentry, sentry recommends using <code class="highlighter-rouge">client.captureException(e)</code> or <code class="highlighter-rouge">client.captureMessage(msg)</code> as per these <a href="http://expressjs.com/">docs</a></p>
 
-<p>However, it could be great if we send our winston <code>error</code> level logs to sentry.</p>
+<p>However, it could be great if we send our winston <code class="highlighter-rouge">error</code> level logs to sentry.</p>
 
-<p>That&#39;s where <a href="https://github.com/guzru/winston-sentry">winston-sentry</a> packages comes to help. It can send your winston logs to sentry automatically.</p>
+<p>That’s where <a href="https://github.com/guzru/winston-sentry">winston-sentry</a> packages comes to help. It can send your winston logs to sentry automatically.</p>
 
 <p>All that is needed is to add a Sentry transport to the winston logger.</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">winston</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'winston'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">Sentry</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'winston-sentry'</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">winston</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">winston</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">Sentry</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">winston-sentry</span><span class="dl">'</span><span class="p">);</span>
 <span class="nx">winston</span><span class="p">.</span><span class="nx">emitErrs</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
 
 <span class="kd">var</span> <span class="nx">logger</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">winston</span><span class="p">.</span><span class="nx">Logger</span><span class="p">({</span>
     <span class="na">transports</span><span class="p">:</span> <span class="p">[</span>
         <span class="k">new</span> <span class="nx">winston</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">File</span><span class="p">({</span>
-            <span class="na">level</span><span class="p">:</span> <span class="s1">'0'</span><span class="p">,</span>
-            <span class="na">filename</span><span class="p">:</span> <span class="s1">'/opt/logfile.log'</span><span class="p">,</span>
+            <span class="na">level</span><span class="p">:</span> <span class="dl">'</span><span class="s1">0</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">filename</span><span class="p">:</span> <span class="dl">'</span><span class="s1">/opt/logfile.log</span><span class="dl">'</span><span class="p">,</span>
             <span class="na">handleExceptions</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
             <span class="na">json</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
             <span class="na">colorize</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-            <span class="na">timestamp</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">toLocaleString</span><span class="p">(</span><span class="s1">'ca'</span><span class="p">);</span> <span class="p">}</span>
+            <span class="na">timestamp</span><span class="p">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">toLocaleString</span><span class="p">(</span><span class="dl">'</span><span class="s1">ca</span><span class="dl">'</span><span class="p">);</span> <span class="p">}</span>
         <span class="p">}),</span>
         <span class="k">new</span> <span class="nx">winston</span><span class="p">.</span><span class="nx">transports</span><span class="p">.</span><span class="nx">Console</span><span class="p">({</span>
-            <span class="na">level</span><span class="p">:</span> <span class="s1">'info'</span><span class="p">,</span>
+            <span class="na">level</span><span class="p">:</span> <span class="dl">'</span><span class="s1">info</span><span class="dl">'</span><span class="p">,</span>
             <span class="na">handleExceptions</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
             <span class="na">json</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
             <span class="na">colorize</span><span class="p">:</span> <span class="kc">true</span>
         <span class="p">}),</span>
         <span class="k">new</span> <span class="nx">Sentry</span><span class="p">({</span>
-            <span class="na">level</span><span class="p">:</span> <span class="s1">'error'</span><span class="p">,</span>
+            <span class="na">level</span><span class="p">:</span> <span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span>
             <span class="na">dsn</span><span class="p">:</span> <span class="nx">config</span><span class="p">.</span><span class="nx">sentry_dsn</span><span class="p">,</span>
-            <span class="na">tags</span><span class="p">:</span> <span class="p">{</span> <span class="na">key</span><span class="p">:</span> <span class="s1">'value'</span> <span class="p">},</span>
-            <span class="na">extra</span><span class="p">:</span> <span class="p">{</span> <span class="na">key</span><span class="p">:</span> <span class="s1">'value'</span> <span class="p">}</span>
+            <span class="na">tags</span><span class="p">:</span> <span class="p">{</span> <span class="na">key</span><span class="p">:</span> <span class="dl">'</span><span class="s1">value</span><span class="dl">'</span> <span class="p">},</span>
+            <span class="na">extra</span><span class="p">:</span> <span class="p">{</span> <span class="na">key</span><span class="p">:</span> <span class="dl">'</span><span class="s1">value</span><span class="dl">'</span> <span class="p">}</span>
         <span class="p">})</span>
     <span class="p">],</span>
     <span class="na">exitOnError</span><span class="p">:</span> <span class="kc">false</span>
@@ -341,7 +341,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

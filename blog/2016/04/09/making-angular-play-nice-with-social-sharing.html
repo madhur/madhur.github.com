@@ -199,7 +199,7 @@
 
 <p>However, after complete implementation. When someone tried to share the story on Facebook, we saw this:</p>
 
-<p><img src="/images/Blog/angular1.png" alt=""></p>
+<p><img src="/images/Blog/angular1.png" alt="" /></p>
 
 <p>This happens because of social media sites like <a href="">Facebook</a> do not evalaute Javascript while fetching the meta tags. In our case, the meta tags were defined like this:</p>
 
@@ -208,7 +208,7 @@
 <span class="nt">&lt;meta</span> <span class="na">property=</span><span class="s">"og:image"</span> <span class="na">content=</span><span class="s">"{{ data.xImage}}"</span> <span class="nt">/&gt;</span>
 <span class="nt">&lt;meta</span> <span class="na">property=</span><span class="s">"og:description"</span> <span class="na">content=</span><span class="s">"{{ data.caption }}"</span> <span class="nt">/&gt;</span></code></pre></figure>
 
-<p>We were relying on Angular&#39;s interpolation to evaluate the meta tags which didn&#39;t work since AngularJs is entirely executed on client side. This caused facebook to show raw values i.e. 
+<p>We were relying on Angular’s interpolation to evaluate the meta tags which didn’t work since AngularJs is entirely executed on client side. This caused facebook to show raw values i.e. 
 ``</p>
 
 <p>To solve this problem, we moved the meta tags evaluation to server side. Since we were using Java stack along with Spring, it was easy to do so. We made sure that our HTML markup was filtered through JSP tags. It was as easy as adding these directives on top of page:</p>
@@ -228,27 +228,28 @@
 
 <p>Before returning the JSP page through an API call, we evaluated these meta tags on the server side itself:</p>
 
-<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/view/{newsId}"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="n">RequestMethod</span><span class="o">.</span><span class="na">GET</span><span class="o">)</span>
-    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getNews</span><span class="o">(</span><span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"newsId"</span><span class="o">)</span> <span class="n">String</span> <span class="n">slug</span><span class="o">,</span> <span class="n">ModelMap</span> <span class="n">mv</span><span class="o">,</span> <span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/view/{newsId}"</span><span class="o">,</span> <span class="n">method</span> <span class="o">=</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">GET</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getNews</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nd">@PathVariable</span><span class="o">(</span><span class="s">"newsId"</span><span class="o">)</span> <span class="nc">String</span> <span class="n">slug</span><span class="o">,</span> <span class="nc">ModelMap</span> <span class="n">mv</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
 
-        <span class="n">NewsArticlesV2</span> <span class="n">newsArticlesV2</span> <span class="o">=</span> <span class="n">newsServiceV2</span><span class="o">.</span><span class="na">getByExternalId</span><span class="o">(</span><span class="n">slug</span><span class="o">);</span>
+		<span class="nc">NewsArticlesV2</span> <span class="n">newsArticlesV2</span> <span class="o">=</span> <span class="n">newsServiceV2</span><span class="o">.</span><span class="na">getByExternalId</span><span class="o">(</span><span class="n">slug</span><span class="o">);</span>
 
-        <span class="n">String</span> <span class="n">title</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getArticleTitle</span><span class="o">();</span>
-        <span class="n">String</span> <span class="n">description</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getNewsContent</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">title</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getArticleTitle</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">description</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getNewsContent</span><span class="o">();</span>
 
-        <span class="n">String</span> <span class="n">image</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getImage</span><span class="o">();</span>
-        <span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html"</span><span class="o">);</span>
-        <span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"title"</span><span class="o">,</span> <span class="n">title</span><span class="o">);</span>
-        <span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"image"</span><span class="o">,</span> <span class="n">image</span><span class="o">);</span>
-        <span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"description"</span><span class="o">,</span> <span class="n">description</span><span class="o">);</span>
-        <span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"slug"</span><span class="o">,</span><span class="n">slug</span><span class="o">);</span>
-        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"request"</span><span class="o">,</span><span class="n">request</span><span class="o">);</span>
-        <span class="k">return</span> <span class="s">"webforms/news"</span><span class="o">;</span>
-    <span class="o">}</span></code></pre></figure>
+		<span class="nc">String</span> <span class="n">image</span> <span class="o">=</span> <span class="n">newsArticlesV2</span><span class="o">.</span><span class="na">getImage</span><span class="o">();</span>
+		<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html"</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"title"</span><span class="o">,</span> <span class="n">title</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"image"</span><span class="o">,</span> <span class="n">image</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"description"</span><span class="o">,</span> <span class="n">description</span><span class="o">);</span>
+		<span class="n">mv</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">"slug"</span><span class="o">,</span><span class="n">slug</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"request"</span><span class="o">,</span><span class="n">request</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"webforms/news"</span><span class="o">;</span>
+	<span class="o">}</span></code></pre></figure>
 
 <p>And the result becomes:</p>
 
-<p><img src="/images/Blog/angular2.png" alt=""></p>
+<p><img src="/images/Blog/angular2.png" alt="" /></p>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -331,7 +332,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

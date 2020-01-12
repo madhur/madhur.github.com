@@ -195,47 +195,48 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>Ever since I have started working with Kafka, I have came across these terms very frequently, Atleast once, Atmost once and Exactly Once. </p>
+			 <p>Ever since I have started working with Kafka, I have came across these terms very frequently, Atleast once, Atmost once and Exactly Once.</p>
 
 <p>As an engineer, It is very important to understand these concepts.</p>
 
-<h2>At-most once Configuration</h2>
+<h2 id="at-most-once-configuration">At-most once Configuration</h2>
 
 <p>As the name suggests, At-most-once means the message will be delivered atmost once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically commiting the last offset used.</p>
 
 <ul>
-<li>Set <code>enable.auto.commit</code> to <code>true</code></li>
-<li>Set <code>auto.commit.interval.ms</code> to low value</li>
-<li>Since <code>auto.commit</code> is set to true, there is no need to call <code>consumer.commitSync()</code> from the consumer.</li>
+  <li>Set <code class="highlighter-rouge">enable.auto.commit</code> to <code class="highlighter-rouge">true</code></li>
+  <li>Set <code class="highlighter-rouge">auto.commit.interval.ms</code> to low value</li>
+  <li>Since <code class="highlighter-rouge">auto.commit</code> is set to true, there is no need to call <code class="highlighter-rouge">consumer.commitSync()</code> from the consumer.</li>
 </ul>
 
-<p>Note that it is also possible to have at-lest-once scenario with the same configuration. Let&#39;s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.</p>
+<p>Note that it is also possible to have at-lest-once scenario with the same configuration. Let’s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.</p>
 
 <p>Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.</p>
 
-<h2>At-least once configuration</h2>
+<h2 id="at-least-once-configuration">At-least once configuration</h2>
 
 <p>At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.</p>
 
 <ul>
-<li>Set <code>enable.auto.commit</code> to <code>false</code> OR</li>
-<li>Consumer should now then take control of the message offset commits to Kafka by making the <code>consumer.commitSync()</code> call.</li>
+  <li>Set <code class="highlighter-rouge">enable.auto.commit</code> to <code class="highlighter-rouge">false</code> OR</li>
+  <li>Consumer should now then take control of the message offset commits to Kafka by making the <code class="highlighter-rouge">consumer.commitSync()</code> call.</li>
 </ul>
 
-<p>Let&#39;s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.</p>
+<p>Let’s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.</p>
 
-<h2>Exactly-once configuraition</h2>
+<h2 id="exactly-once-configuraition">Exactly-once configuraition</h2>
 
 <p>Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.</p>
 
 <p>In this case offset needs to be manually managed.</p>
 
 <ul>
-<li>Set <code>enable.auto.commit</code> to <code>false</code></li>
-<li>Do not make call to <code>consumer.commitSync()</code></li>
-<li>Implement a <code>ConsumerRebalanceListener</code> and within the listener perform <code>consumer.seek(topicPartition,offset);</code> to start reading from a specific offset of that topic/partition.</li>
-<li>While processing the messages, get hold of the offset of each message.  Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.</li>
+  <li>Set <code class="highlighter-rouge">enable.auto.commit</code> to <code class="highlighter-rouge">false</code></li>
+  <li>Do not make call to <code class="highlighter-rouge">consumer.commitSync()</code></li>
+  <li>Implement a <code class="highlighter-rouge">ConsumerRebalanceListener</code> and within the listener perform <code class="highlighter-rouge">consumer.seek(topicPartition,offset);</code> to start reading from a specific offset of that topic/partition.</li>
+  <li>While processing the messages, get hold of the offset of each message.  Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.</li>
 </ul>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -318,7 +319,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

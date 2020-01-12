@@ -195,16 +195,22 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>The <a href="https://en.wikipedia.org/wiki/Staged_event-driven_architecture">staged event-driven architecture (SEDA)</a> refers to an approach to software architecture that decomposes a complex, event-driven application into a set of stages connected by queues. It avoids the high overhead associated with thread-based concurrency models (i.e. locking, unlocking, and polling for locks), and decouples event and thread scheduling from application logic. </p>
+			 <p>The <a href="https://en.wikipedia.org/wiki/Staged_event-driven_architecture">staged event-driven architecture (SEDA)</a> refers to an approach to software architecture that decomposes a complex, event-driven application into a set of stages connected by queues. It avoids the high overhead associated with thread-based concurrency models (i.e. locking, unlocking, and polling for locks), and decouples event and thread scheduling from application logic.</p>
 
 <p>For Java platform, <a href="http://camel.apache.org/">Apache Camel</a> provides support for <a href="https://camel.apache.org/seda.html">SEDA component</a></p>
 
 <p>These are some of the important properties of SEDA:</p>
 
 <ul>
-<li><p><code>size</code>: Size of the queue. By default, its unbounded</p></li>
-<li><p><code>concurrentconsumers</code>: By default only one thread will be consuming from the queue</p></li>
-<li><p><code>blockWhenFull</code> : If the queue is full, the thread can be blocked. By default, an exception is thrown. In most scenario, you would want the thread to block.</p></li>
+  <li>
+    <p><code class="highlighter-rouge">size</code>: Size of the queue. By default, its unbounded</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">concurrentconsumers</code>: By default only one thread will be consuming from the queue</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">blockWhenFull</code> : If the queue is full, the thread can be blocked. By default, an exception is thrown. In most scenario, you would want the thread to block.</p>
+  </li>
 </ul>
 
 <p>Now, onto some code:</p>
@@ -217,22 +223,22 @@
 <span class="nd">@ComponentScan</span><span class="o">()</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">SedaApplication</span> <span class="o">{</span>
 
-    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="n">SedaApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">SpringApplication</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="nc">SedaApplication</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">args</span><span class="o">);</span>
     <span class="o">}</span>
 
     <span class="nd">@Autowired</span>
-    <span class="kd">private</span> <span class="n">ProducerTemplate</span> <span class="n">producerTemplate</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">ProducerTemplate</span> <span class="n">producerTemplate</span><span class="o">;</span>
 
     <span class="nd">@Autowired</span>
-    <span class="kd">private</span> <span class="n">CamelContext</span> <span class="n">camelContext</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">CamelContext</span> <span class="n">camelContext</span><span class="o">;</span>
 
     <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/send/{message}"</span><span class="o">)</span>
-    <span class="kd">public</span> <span class="n">String</span> <span class="nf">sendMessage</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="n">String</span> <span class="n">message</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">sendMessage</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
         <span class="n">producerTemplate</span><span class="o">.</span><span class="na">sendBody</span><span class="o">(</span><span class="s">"seda:start?size=10&amp;blockWhenFull=false"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
-        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Producing message: "</span> <span class="o">+</span> <span class="n">message</span><span class="o">);</span>
-        <span class="n">SedaEndpoint</span> <span class="n">sedaEndpoint</span> <span class="o">=</span> <span class="o">(</span><span class="n">SedaEndpoint</span><span class="o">)</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">getEndpoint</span><span class="o">(</span><span class="s">"seda:start"</span><span class="o">);</span>
-        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Remaining capacity : "</span> <span class="o">+</span> <span class="n">sedaEndpoint</span><span class="o">.</span><span class="na">getQueue</span><span class="o">().</span><span class="na">remainingCapacity</span><span class="o">());</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Producing message: "</span> <span class="o">+</span> <span class="n">message</span><span class="o">);</span>
+        <span class="nc">SedaEndpoint</span> <span class="n">sedaEndpoint</span> <span class="o">=</span> <span class="o">(</span><span class="nc">SedaEndpoint</span><span class="o">)</span> <span class="n">camelContext</span><span class="o">.</span><span class="na">getEndpoint</span><span class="o">(</span><span class="s">"seda:start"</span><span class="o">);</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Remaining capacity : "</span> <span class="o">+</span> <span class="n">sedaEndpoint</span><span class="o">.</span><span class="na">getQueue</span><span class="o">().</span><span class="na">remainingCapacity</span><span class="o">());</span>
         <span class="k">return</span> <span class="s">""</span><span class="o">;</span>
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
@@ -241,12 +247,12 @@
 
 <figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="nd">@Component</span>
 <span class="nd">@Slf4j</span>
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestRouter</span> <span class="kd">extends</span> <span class="n">RouteBuilder</span> <span class="o">{</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestRouter</span> <span class="kd">extends</span> <span class="nc">RouteBuilder</span> <span class="o">{</span>
 
     <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
         <span class="n">from</span><span class="o">(</span><span class="s">"seda:start?size=10"</span><span class="o">).</span><span class="na">process</span><span class="o">(</span><span class="n">exchange</span> <span class="o">-&gt;</span> <span class="o">{</span>
-            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Consumed message: "</span> <span class="o">+</span> <span class="n">exchange</span><span class="o">.</span><span class="na">getIn</span><span class="o">().</span><span class="na">getBody</span><span class="o">());</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Consumed message: "</span> <span class="o">+</span> <span class="n">exchange</span><span class="o">.</span><span class="na">getIn</span><span class="o">().</span><span class="na">getBody</span><span class="o">());</span>
         <span class="o">}).</span><span class="na">end</span><span class="o">();</span>
     <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
@@ -336,7 +342,7 @@
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

@@ -195,24 +195,30 @@
 			<hr style="margin-top:0px" />
 
 
-			 <p>Recently, I have been working on an Android app which communicates with a web platform. One of the challenges we have been faced with is cross platform emoji solution. There are just too many emoji standards out there. There is no standard as of now although Google have come together to formalize <a href="http://www.unicode.org/%7Escherer/emoji4unicode/snapshot/full.html">Emoji Symbols</a></p>
+			 <p>Recently, I have been working on an Android app which communicates with a web platform. One of the challenges we have been faced with is cross platform emoji solution. There are just too many emoji standards out there. There is no standard as of now although Google have come together to formalize <a href="http://www.unicode.org/~scherer/emoji4unicode/snapshot/full.html">Emoji Symbols</a></p>
 
 <p>GitHub introduced <a href="https://github.com/blog/816-emoji">emoji pngs</a> and here you see that in action :smile: throughout their application. Campfire <a href="https://signalvnoise.com/posts/3059-2011-year-end-campfire-feature-blowout">supports emoji</a>. Both GitHub, Campfire, and others support a simple set of codes to inject these pngs into an html page. <a href="http://www.emoji-cheat-sheet.com/">http://www.emoji-cheat-sheet.com/</a> has emerged to guide users and has almost formalized how these codes should work.</p>
 
 <p>Most of the above techniques can be categorized into three basic categories:</p>
 
 <ul>
-<li><p><strong>Colon:</strong> The emojis are converted to their colon style strings. This is simple to save in the database since its just a string.
-See the examples: <a href="http://www.emoji-cheat-sheet.com/">http://www.emoji-cheat-sheet.com/</a>. <a href="https://web.telegram.org/#/im">Web interface of telegram</a> uses this technique of rendering and storing emoji. <a href="https://help.github.com/articles/writing-on-github/">Github flavored markdown</a> also uses this.</p></li>
-<li><p><strong>UTF-8 Characters:</strong> Emojis are mapped to their Unicode characters.  The advatage of this method is that some platforms (such as Android, iOS) can render them automatically as emoji unlike colon style encoding which almost always require decoding. On the disadvantage, Saving them in databases require special handling. See <a href="#db">note below</a>.
-A comprehensive list of unicode codes can be obtained from <a href="http://apps.timwhitlock.info/emoji/tables/unicode">http://apps.timwhitlock.info/emoji/tables/unicode</a></p></li>
-<li><p><strong>HTML:</strong> Emojis are converted to HTML <code>&lt;img&gt;</code> tags rendering each emoji as an image either from the single image or a sprite. 
-This is the least useful method to adopt as its not cross platform. There is no standardization of Emoji sprite images and hence you will never be sure that target platform has the same emoji images. Though, this solution works perfect for a single isolated website.</p></li>
+  <li>
+    <p><strong>Colon:</strong> The emojis are converted to their colon style strings. This is simple to save in the database since its just a string.
+See the examples: <a href="http://www.emoji-cheat-sheet.com/">http://www.emoji-cheat-sheet.com/</a>. <a href="https://web.telegram.org/#/im">Web interface of telegram</a> uses this technique of rendering and storing emoji. <a href="https://help.github.com/articles/writing-on-github/">Github flavored markdown</a> also uses this.</p>
+  </li>
+  <li>
+    <p><strong>UTF-8 Characters:</strong> Emojis are mapped to their Unicode characters.  The advatage of this method is that some platforms (such as Android, iOS) can render them automatically as emoji unlike colon style encoding which almost always require decoding. On the disadvantage, Saving them in databases require special handling. See <a href="#db">note below</a>.
+A comprehensive list of unicode codes can be obtained from <a href="http://apps.timwhitlock.info/emoji/tables/unicode">http://apps.timwhitlock.info/emoji/tables/unicode</a></p>
+  </li>
+  <li>
+    <p><strong>HTML:</strong> Emojis are converted to HTML <code class="highlighter-rouge">&lt;img&gt;</code> tags rendering each emoji as an image either from the single image or a sprite. 
+This is the least useful method to adopt as its not cross platform. There is no standardization of Emoji sprite images and hence you will never be sure that target platform has the same emoji images. Though, this solution works perfect for a single isolated website.</p>
+  </li>
 </ul>
 
-<h2>Our Solution - <a href="https://github.com/madhur/angular-emoji-popup">Github Repo</a> and <a href="http://coraza.github.io/angular-emoji-popup">demo page</a></h2>
+<h2 id="our-solution---github-repo-and-demo-page">Our Solution - <a href="https://github.com/madhur/angular-emoji-popup">Github Repo</a> and <a href="http://coraza.github.io/angular-emoji-popup">demo page</a></h2>
 
-<p>Since we are using AngularJs as our frontend, We have come up with an AngularJs directive and set of filters to handle all of above cases for Emoji. The solution supports encoding and decoding emoji from various formats. For us, We decided to go with storing Emoji as UTF-8 characters for the simple reason that Android can render them natively and hence, no special effort is required to implement this on Android side. Though, it did require tweaking our MySql tables and database to switch from <code>utf8</code> to <code>utf8mb4</code>. I will not go into the details of their differences.</p>
+<p>Since we are using AngularJs as our frontend, We have come up with an AngularJs directive and set of filters to handle all of above cases for Emoji. The solution supports encoding and decoding emoji from various formats. For us, We decided to go with storing Emoji as UTF-8 characters for the simple reason that Android can render them natively and hence, no special effort is required to implement this on Android side. Though, it did require tweaking our MySql tables and database to switch from <code class="highlighter-rouge">utf8</code> to <code class="highlighter-rouge">utf8mb4</code>. I will not go into the details of their differences.</p>
 
 <p>I also realize that this might be a far from perfect solution especially when we plan to introduce support more devices such as iOS and Windows Phone. But, this works for us perfectly and I believe changing it in future will not be difficult.</p>
 
@@ -221,32 +227,38 @@ This is the least useful method to adopt as its not cross platform. There is no 
 <p>This solution utilizes snippets and ideas from following awesome open source projects:</p>
 
 <ul>
-<li><a href="https://github.com/arvida/emoji-cheat-sheet.com">emoji-cheat-sheet</a> - Complete reference for emoji in colon style</li>
-<li><a href="https://github.com/diy/jquery-emojiarea">jquery-emojiarea</a> - We wrapped this awesome Jquery plugin in angular directive</li>
-<li><a href="https://github.com/jamesflorentino/nanoScrollerJS">nanoScrollerJS</a> - The above jquery plugin utilzes nanoScroller as its scrollbar</li>
-<li><a href="https://github.com/iamcal/js-emoji">js-emoji</a></li>
+  <li><a href="https://github.com/arvida/emoji-cheat-sheet.com">emoji-cheat-sheet</a> - Complete reference for emoji in colon style</li>
+  <li><a href="https://github.com/diy/jquery-emojiarea">jquery-emojiarea</a> - We wrapped this awesome Jquery plugin in angular directive</li>
+  <li><a href="https://github.com/jamesflorentino/nanoScrollerJS">nanoScrollerJS</a> - The above jquery plugin utilzes nanoScroller as its scrollbar</li>
+  <li><a href="https://github.com/iamcal/js-emoji">js-emoji</a></li>
 </ul>
 
 <p><a name="db"></a></p>
-
-<h2>Using MySQL for storage</h2>
-
+<h2 id="using-mysql-for-storage">Using MySQL for storage</h2>
 <p>The following text is taken verbatim from <a href="https://github.com/iamcal/js-emoji">https://github.com/iamcal/js-emoji</a></p>
 
 <blockquote>
-<p>Some special care may be needed to store emoji in your database. While some characters (e.g. Cloud, U+2601) are
+  <p>Some special care may be needed to store emoji in your database. While some characters (e.g. Cloud, U+2601) are
 within the Basic Multilingual Plane (BMP), others (e.g. Close Umbrella, U+1F302) are not. As such, 
-they require 4 bytes of storage to encode each character. Inside MySQL, this requires switching from <code>utf8</code> 
-storage to <code>utf8mb4</code>.</p>
+they require 4 bytes of storage to encode each character. Inside MySQL, this requires switching from <code class="highlighter-rouge">utf8</code> 
+storage to <code class="highlighter-rouge">utf8mb4</code>.</p>
+</blockquote>
 
-<p>You can modify a database and table using a statement like:</p>
+<blockquote>
+  <p>You can modify a database and table using a statement like:</p>
+</blockquote>
 
-<p><code>ALTER DATABASE my_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;</code>
- <code>ALTER TABLE my_table CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;</code></p>
+<blockquote>
+  <p><code class="highlighter-rouge">ALTER DATABASE my_database DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;</code>
+ <code class="highlighter-rouge">ALTER TABLE my_table CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;</code></p>
+</blockquote>
 
-<p>You will also need to modify your connection character set.</p>
+<blockquote>
+  <p>You will also need to modify your connection character set.</p>
+</blockquote>
 
-<p>You don&#39;t need to worry about this if you translate to colon syntax before storage.</p>
+<blockquote>
+  <p>You don’t need to worry about this if you translate to colon syntax before storage.</p>
 </blockquote>
 
 			<footer>
@@ -332,7 +344,7 @@ storage to <code>utf8mb4</code>.</p>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

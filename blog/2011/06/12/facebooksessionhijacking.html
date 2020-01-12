@@ -198,23 +198,23 @@
 			 <p>Recently, there was a <a href="http://www.wtfuzz.com/blogs/linkedin-ssl-cookie-vulnerability/">vulnerability</a> discovered in popular professional networking site <a href="http://www.linkedin.com">LinkedIn</a> in which an attacker could steal an authentication cookie used by the site to authenticate the client. It was a classic case of Session sidejacking, which is desribed by <a href="http://en.wikipedia.org/wiki/Session_hijacking">Wikipedia</a> as</p>
 
 <blockquote>
-<p>where the attacker uses packet sniffing to read network traffic between two parties to steal the session cookie. Many web sites use SSL encryption for login pages  &gt; to prevent attackers from seeing the password, but do not use encryption for the rest of the site once authenticated. This allows attackers that can read the       &gt; network traffic to intercept all the data that is submitted to the server or web pages viewed by the client. Since this data includes the session cookie, it allows &gt; him to impersonate the victim, even if the password itself is not compromised. Unsecured Wi-Fi hotspots are particularly vulnerable, as anyone sharing the network  &gt; will generally be able to read most of the web traffic between other nodes and the access point.</p>
+  <p>where the attacker uses packet sniffing to read network traffic between two parties to steal the session cookie. Many web sites use SSL encryption for login pages  &gt; to prevent attackers from seeing the password, but do not use encryption for the rest of the site once authenticated. This allows attackers that can read the       &gt; network traffic to intercept all the data that is submitted to the server or web pages viewed by the client. Since this data includes the session cookie, it allows &gt; him to impersonate the victim, even if the password itself is not compromised. Unsecured Wi-Fi hotspots are particularly vulnerable, as anyone sharing the network  &gt; will generally be able to read most of the web traffic between other nodes and the access point.</p>
 </blockquote>
 
-<p>One of the basic solution implemented by the web sites for this problem is SSL. Almost all of the web sites use SSL during the authentication phase to encrypt the cookie data which is transmitted on the network. However, this is only a partial solution to the problem since most of the clients transmit this cookie data during further HTTP POST and GET requests. This is the reason many  websites such as Gmail, Facebook have an option to turn on SSL for the entire session, because they know that sensitive bytes are being transmitted all the time even if the user has authenticated. Let us see how a user&#39;s security can be compromised if he has not turned on full SSL settings for these web sites such as Facebook. Consider a home LAN network where users are using WiFi hotspots to browse the internet. Its easy to set up a MITM attack on this network by spoofing the ARP. For example, on linux,  it can be done using <a href="http://ettercap.sourceforge.net/">Ettercap</a> or <a href="http://arpspoof.sourceforge.net/">Arpspoof</a></p>
+<p>One of the basic solution implemented by the web sites for this problem is SSL. Almost all of the web sites use SSL during the authentication phase to encrypt the cookie data which is transmitted on the network. However, this is only a partial solution to the problem since most of the clients transmit this cookie data during further HTTP POST and GET requests. This is the reason many  websites such as Gmail, Facebook have an option to turn on SSL for the entire session, because they know that sensitive bytes are being transmitted all the time even if the user has authenticated. Let us see how a user’s security can be compromised if he has not turned on full SSL settings for these web sites such as Facebook. Consider a home LAN network where users are using WiFi hotspots to browse the internet. Its easy to set up a MITM attack on this network by spoofing the ARP. For example, on linux,  it can be done using <a href="http://ettercap.sourceforge.net/">Ettercap</a> or <a href="http://arpspoof.sourceforge.net/">Arpspoof</a></p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo </span>1 <span class="o">&gt;</span> /proc/sys/net/ipv4/ip_forward
 arpspoof <span class="nt">-t</span> <span class="s2">"target ip(person to own)"</span> <span class="s2">"gateway ip(router)"</span></code></pre></figure>
 
-<p>Use any packet sniffer such as <a href="http://www.wireshark.org/">Wireshark</a> to sniff the packets between the target IP and the host <a href="http://www.facebook.com">www.facebook.com</a>. The following is an example of a POST request sniffed from wireshark:</p>
+<p>Use any packet sniffer such as <a href="http://www.wireshark.org/">Wireshark</a> to sniff the packets between the target IP and the host www.facebook.com. The following is an example of a POST request sniffed from wireshark:</p>
 
 <p>From this screen, we are mainly interested in grabbing the cookies, which are specified in this header</p>
 
-<p><img src="/images/Blog/facebook.png" alt="Pic"></p>
+<p><img src="/images/Blog/facebook.png" alt="Pic" /></p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">Cookie: <span class="nv">datr</span><span class="o">=</span>09bXXXQ2oOgQuUK0yAzK_JU9<span class="p">;</span> <span class="nv">lu</span><span class="o">=</span>wgj9pmpkAsdXXXTp5vthfh2w<span class="p">;</span> <span class="nv">locale</span><span class="o">=</span>en_US<span class="p">;</span> <span class="nv">L</span><span class="o">=</span>2<span class="p">;</span> <span class="nv">act</span><span class="o">=</span>13078123502562F3<span class="p">;</span> <span class="nv">c_user</span><span class="o">=</span>xxxxxx<span class="p">;</span> <span class="nv">sct</span><span class="o">=</span>1123416461<span class="p">;</span> <span class="nv">xs</span><span class="o">=</span>603Afe43db8a71239bd8d7b2a831xxx6241f<span class="p">;</span> <span class="nv">presence</span><span class="o">=</span>EM307818375L26REp_5f123422481F22X3078XXX1367K1H0V0Z21G307818375PEuoFD769839560FDexpF1307818409174EflF_5b_5dEolF-1CCCC<span class="p">;</span> <span class="nv">e</span><span class="o">=</span>n</code></pre></figure>
 
-<p>In my proof of concept, I was just required to copy the <strong>xs</strong> and <strong>c_user</strong> cookies to hijack the target session. <strong>c_user</strong> is the user ID of the user which is not at all a secret. However, <strong>xs</strong> does seems to be the authentication token and which should not be passed around in cleartext. </p>
+<p>In my proof of concept, I was just required to copy the <strong>xs</strong> and <strong>c_user</strong> cookies to hijack the target session. <strong>c_user</strong> is the user ID of the user which is not at all a secret. However, <strong>xs</strong> does seems to be the authentication token and which should not be passed around in cleartext.</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">c_user:xxxxxx
 xs:603Afe43db8a71239bd8d7b2a831aad6241f</code></pre></figure>
@@ -222,10 +222,11 @@ xs:603Afe43db8a71239bd8d7b2a831aad6241f</code></pre></figure>
 <p>Since now we have the cookies and one of it is indeed an authentication cookie. We can plug this in browser manually or using a Chrome extension such as 
 <a href="https://chrome.google.com/webstore/detail/fngmhnnpilhplaeedifhccceomclgfbg">Edit this Cookie</a></p>
 
-<p>Once the values are plugged, browse to <a href="http://www.facebook.com">http://www.facebook.com</a> , you would have intercepted the target user session.</p>
+<p>Once the values are plugged, browse to http://www.facebook.com , you would have intercepted the target user session.</p>
 
 <p><strong><em>This post is just for educational purposes regarding the implications of using unencrypted communication. I am not responsible for any damage or harm done using any
 knowledge contained in this article</em></strong></p>
+
 
 			<footer>
 				<div class="blocked tags">
@@ -312,7 +313,7 @@ knowledge contained in this article</em></strong></p>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

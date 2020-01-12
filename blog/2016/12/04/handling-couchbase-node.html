@@ -197,9 +197,9 @@
 
 			 <p>We use <a href="http://www.couchbase.com/">Couchbase</a> as our NOSQL document store. Couchbase provides lots of software development kits (SDKs) in different programming languages, including one in Node.js, so JavaScript development integrates Couchbase into the product very easily. For example:</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'couchbase'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">cluster</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">couchbase</span><span class="p">.</span><span class="nx">Cluster</span><span class="p">(</span><span class="s1">'couchbase://127.0.01'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">bucket</span> <span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="s1">'default'</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">couchbase</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">cluster</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">couchbase</span><span class="p">.</span><span class="nx">Cluster</span><span class="p">(</span><span class="dl">'</span><span class="s1">couchbase://127.0.01</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">bucket</span> <span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="dl">'</span><span class="s1">default</span><span class="dl">'</span><span class="p">);</span>
 <span class="nx">bucket</span><span class="p">.</span><span class="kd">get</span><span class="p">(</span><span class="nx">userId</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
@@ -210,31 +210,31 @@
     <span class="p">}</span>
 <span class="p">});</span></code></pre></figure>
 
-<p>However, there are some caveats which we have discovered. Suppose, the application was not able to connect to couchbase when it was started. There will never be a connection to couchbase and <code>bucket.get</code> will throw an exception <code>cannot perform operations on a shutdown bucket</code>. Note that, this will not fall into an error case, infact this will be treated as an unhandled exception.</p>
+<p>However, there are some caveats which we have discovered. Suppose, the application was not able to connect to couchbase when it was started. There will never be a connection to couchbase and <code class="highlighter-rouge">bucket.get</code> will throw an exception <code class="highlighter-rouge">cannot perform operations on a shutdown bucket</code>. Note that, this will not fall into an error case, infact this will be treated as an unhandled exception.</p>
 
 <p>This was really undesirable for us, since we were using couchbase as a caching store. An error in connecting to couchbase is ideally a miss, which our code should handle and lookup the data in our persistent store, MySQL.</p>
 
-<h2>Solution</h2>
+<h2 id="solution">Solution</h2>
 
 <p>There are few solutions to this problem. I am describing here what we choose.
 Some of them are described <a href="https://wiredcraft.com/blog/reconnect-couchbase-nodejs/">here</a> as well.</p>
 
 <p>First is to track the connection status of couchbase at startup. And then connect to couchbase, only if the status indicated success. For example,</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'couchbase'</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">couchbase</span><span class="dl">'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">cluster</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">couchbase</span><span class="p">.</span><span class="nx">Cluster</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">couch</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">bucket</span> <span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="s1">'default'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">bucket</span> <span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="dl">'</span><span class="s1">default</span><span class="dl">'</span><span class="p">);</span>
 <span class="c1">// connection status</span>
 <span class="kd">var</span> <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
 
-<span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'CONNECT ERROR:'</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">CONNECT ERROR:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 <span class="p">});</span>
 
-<span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connect'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+<span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connect</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
     <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'connected couchbase'</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">connected couchbase</span><span class="dl">'</span><span class="p">);</span>
 <span class="p">});</span></code></pre></figure>
 
 <p>Now, since we have the status at startup, we can use it to decide weather to connect to couchbase or not.</p>
@@ -257,7 +257,7 @@ Some of them are described <a href="https://wiredcraft.com/blog/reconnect-couchb
 
 <p>One solution to it is to try and reconnect the bucket. For example, we modify our code as follows:</p>
 
-<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'couchbase'</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">couchbase</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">couchbase</span><span class="dl">'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">cluster</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">couchbase</span><span class="p">.</span><span class="nx">Cluster</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">couch</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">bucket</span><span class="p">;</span>
 <span class="kd">var</span> <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
@@ -266,17 +266,17 @@ Some of them are described <a href="https://wiredcraft.com/blog/reconnect-couchb
 
 <span class="kd">function</span> <span class="nx">tryOpenBucket</span><span class="p">()</span> <span class="p">{</span>
 
-    <span class="nx">bucket</span><span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="s1">'default'</span><span class="p">);</span>
+    <span class="nx">bucket</span><span class="o">=</span> <span class="nx">cluster</span><span class="p">.</span><span class="nx">openBucket</span><span class="p">(</span><span class="dl">'</span><span class="s1">default</span><span class="dl">'</span><span class="p">);</span>
 
-    <span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'CONNECT ERROR:'</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">CONNECT ERROR:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
     <span class="p">});</span>
 
-    <span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connect'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">bucket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connect</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
 
         <span class="nx">couchbaseConnected</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'connected couchbase'</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">connected couchbase</span><span class="dl">'</span><span class="p">);</span>
     <span class="p">});</span>
 <span class="p">}</span></code></pre></figure>
 
@@ -299,7 +299,7 @@ Some of them are described <a href="https://wiredcraft.com/blog/reconnect-couchb
     <span class="c1">// Get data from persistent store, mysql</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>In this solution, We try and open bucket again everytime we access the key. If its successful, <code>couchbaseConnected</code> will bet set to true and next time data will be fetched from couchbase.</p>
+<p>In this solution, We try and open bucket again everytime we access the key. If its successful, <code class="highlighter-rouge">couchbaseConnected</code> will bet set to true and next time data will be fetched from couchbase.</p>
 
 			<footer>
 				<div class="blocked tags">
@@ -384,7 +384,7 @@ Some of them are described <a href="https://wiredcraft.com/blog/reconnect-couchb
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

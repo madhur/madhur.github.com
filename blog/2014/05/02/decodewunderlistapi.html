@@ -202,157 +202,157 @@ its API to public so that users can build great apps around it and integrate it 
 Nevertheless, what I found is that it is easy to discover the Wunderlist API by simply inspecting the HTTPS traffic over the Wunderlist web site. If we see their Licenses section, it is easy to see that they 
 use <a href="http://backbonejs.org/">backbone.js</a> along with <a href="http://jquery.com/">Jquery</a> and <a href="http://requirejs.org/">RequireJs</a> giving the clear indication of MVC pattern being in use along with <a href="">JSON</a> as the data exchange format</p>
 
-<p><img src="/images/Blog/screenshot.1.png" alt=""></p>
+<p><img src="/images/Blog/screenshot.1.png" alt="" /></p>
 
 <p>Now, lets head over to the browser to inspect the HTTPS traffic and see if we can get some information about their API. What I am going to do is login to Wunderlist website with my credentials and record the 
-HTTPS traffic in the Chrome inspector. I have also turned on the button for <code>Preserve log upon Navigation</code></p>
+HTTPS traffic in the Chrome inspector. I have also turned on the button for <code class="highlighter-rouge">Preserve log upon Navigation</code></p>
 
-<p><img src="/images/Blog/screenshot.2.png" alt="">
-<img src="/images/Blog/screenshot.3.png" alt=""></p>
+<p><img src="/images/Blog/screenshot.2.png" alt="" />
+<img src="/images/Blog/screenshot.3.png" alt="" /></p>
 
-<p>If we filter by requests of type XML HTTP Request(XHR), we will see a <code>POST</code> request <code>/login</code> to the host <code>api.wunderlist.com</code>. In the request payload, I also see my username and password in cleartext. Although
+<p>If we filter by requests of type XML HTTP Request(XHR), we will see a <code class="highlighter-rouge">POST</code> request <code class="highlighter-rouge">/login</code> to the host <code class="highlighter-rouge">api.wunderlist.com</code>. In the request payload, I also see my username and password in cleartext. Although
 I do not have anything to worry since this is transmitted over SSL</p>
 
-<p><img src="/images/Blog/screenshot.4.png" alt=""></p>
+<p><img src="/images/Blog/screenshot.4.png" alt="" /></p>
 
-<p>If we just scroll few lines down, I see another request <code>/batch</code> to <code>api.wunderlist.com</code> with this JSON payload and the response is a considerable JSON response. I could the names of lists and tasks in the JSON response.</p>
+<p>If we just scroll few lines down, I see another request <code class="highlighter-rouge">/batch</code> to <code class="highlighter-rouge">api.wunderlist.com</code> with this JSON payload and the response is a considerable JSON response. I could the names of lists and tasks in the JSON response.</p>
 
-<p><img src="/images/Blog/screenshot.5.png" alt=""></p>
+<p><img src="/images/Blog/screenshot.5.png" alt="" /></p>
 
-<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="s2">"ops"</span><span class="p">:[</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"put"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/settings"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{</span><span class="s2">"web_significant_event_count"</span><span class="p">:</span><span class="s2">"5"</span><span class="p">,</span><span class="s2">"web_shortcut_add_new_task"</span><span class="p">:</span><span class="s2">"CTRL + 0"</span><span class="p">}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me"</span><span class="p">},{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/settings"</span><span class="p">},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/contacts"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/services"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/lists"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{</span><span class="s2">"since"</span><span class="p">:</span><span class="s2">"1399004140"</span><span class="p">}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/tasks"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{</span><span class="s2">"before"</span><span class="p">:</span><span class="mi">1399141799</span><span class="p">,</span><span class="s2">"limit"</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="s2">"compact"</span><span class="p">:</span><span class="kc">true</span><span class="p">}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/reminders"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/shares"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/events"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{</span><span class="s2">"locale"</span><span class="p">:</span><span class="s2">"en_US"</span><span class="p">}},</span><span class="w">
-</span><span class="p">{</span><span class="s2">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="s2">"url"</span><span class="p">:</span><span class="s2">"/me/quota"</span><span class="p">,</span><span class="s2">"params"</span><span class="p">:{}}],</span><span class="w">
-</span><span class="s2">"sequential"</span><span class="p">:</span><span class="kc">true</span><span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="nl">"ops"</span><span class="p">:[</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"put"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/settings"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{</span><span class="nl">"web_significant_event_count"</span><span class="p">:</span><span class="s2">"5"</span><span class="p">,</span><span class="nl">"web_shortcut_add_new_task"</span><span class="p">:</span><span class="s2">"CTRL + 0"</span><span class="p">}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me"</span><span class="p">},{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/settings"</span><span class="p">},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/contacts"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/services"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/lists"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{</span><span class="nl">"since"</span><span class="p">:</span><span class="s2">"1399004140"</span><span class="p">}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/tasks"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{</span><span class="nl">"before"</span><span class="p">:</span><span class="mi">1399141799</span><span class="p">,</span><span class="nl">"limit"</span><span class="p">:</span><span class="mi">1000</span><span class="p">,</span><span class="nl">"compact"</span><span class="p">:</span><span class="kc">true</span><span class="p">}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/reminders"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/shares"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/events"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{</span><span class="nl">"locale"</span><span class="p">:</span><span class="s2">"en_US"</span><span class="p">}},</span><span class="w">
+</span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/quota"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}}],</span><span class="w">
+</span><span class="nl">"sequential"</span><span class="p">:</span><span class="kc">true</span><span class="p">}</span></code></pre></figure>
 
-<p>Great, it seems that we have just discovered a bunch of REST API calls. These are batched together in single HTTP request for optimization. We also know the method <code>GET</code> or <code>POST</code> of these requests and also the parameters some of them. The next step is to take this request individually and test it one by one. But how do we do it?</p>
+<p>Great, it seems that we have just discovered a bunch of REST API calls. These are batched together in single HTTP request for optimization. We also know the method <code class="highlighter-rouge">GET</code> or <code class="highlighter-rouge">POST</code> of these requests and also the parameters some of them. The next step is to take this request individually and test it one by one. But how do we do it?</p>
 
 <p>For this purpose, I am using an excellent Chrome extension called <a href="https://chrome.google.com/webstore/detail/dev-http-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en">Dev HTTP Client</a></p>
 
-<p>First, lets authenticate ourselves using the <code>/login</code> API. This will be a post request containing the <code>username</code> and <code>password</code> for the Wunderlist.</p>
+<p>First, lets authenticate ourselves using the <code class="highlighter-rouge">/login</code> API. This will be a post request containing the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> for the Wunderlist.</p>
 
-<p><a href="/images/Blog/screenshot.7.png"><img src="/images/Blog/screenshot.7.png" alt=""></a></p>
+<p><a href="/images/Blog/screenshot.7.png"><img src="/images/Blog/screenshot.7.png" alt="" /></a></p>
 
 <p>The result is the following JSON response:</p>
 
 <figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
-</span><span class="s2">"id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"created_at"</span><span class="p">:</span><span class="s2">"2014-04-30T11:59:36Z"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-30T11:59:36Z"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"name"</span><span class="p">:</span><span class="s2">"madhur"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"User"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"avatar"</span><span class="p">:</span><span class="s2">"https://graph.facebook.com/522955158/picture?width=0&amp;height=0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"email"</span><span class="p">:</span><span class="s2">"ahuja.madhur@gmail.com"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"token"</span><span class="p">:</span><span class="s2">"8758a4a0f983177a427a879a30b144d92bc2f01e"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"terms_accepted_at"</span><span class="p">:</span><span class="s2">"2013-07-07"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"confirmation_state"</span><span class="p">:</span><span class="s2">"confirmed_email"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"email_confirmed"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w">
-</span><span class="s2">"channel"</span><span class="p">:</span><span class="s2">"me.updates.2ea715786fc5ed6af21a97d2104ac4a095349e9b"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"product"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
-</span><span class="s2">"group_product"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
-</span><span class="s2">"facebook"</span><span class="p">:</span><span class="s2">"522955158"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"settings"</span><span class="p">:{</span><span class="w">
-</span><span class="s2">"account_locale"</span><span class="p">:</span><span class="s2">"en"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"background"</span><span class="p">:</span><span class="s2">"wlbackground03"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"campaign_iyf4_notification"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"campaign_iyf4_notification_last_date"</span><span class="p">:</span><span class="s2">"2013-12-16T00:47:14Z"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"campaign_iyf4_notification_variation"</span><span class="p">:</span><span class="s2">"c"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_assigning_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_assigning_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_assigning_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_comments_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_comments_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_comments_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_files_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_files_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"consumed_quota_files_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"created_by_compound_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"created_by_id"</span><span class="p">:</span><span class="s2">"5704468"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"created_by_type"</span><span class="p">:</span><span class="s2">"User"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"experiment_chatter_notifications"</span><span class="p">:</span><span class="s2">"compacted"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"notifications_email_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"notifications_push_enabled"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"setting"</span><span class="p">:</span><span class="s2">"{}"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"show_completed_items"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"sound_checkoff_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"sound_notification_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"start_of_week"</span><span class="p">:</span><span class="s2">"mon"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"use_badge_icon"</span><span class="p">:</span><span class="s2">"notifications"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_app_open_count"</span><span class="p">:</span><span class="s2">"2"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_coach_mark_detail_view"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_coach_mark_inbox"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_coach_mark_smart_list"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_last_app_open_date"</span><span class="p">:</span><span class="s2">"1398969000000"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_last_used_release"</span><span class="p">:</span><span class="s2">"2.3.8.3"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_new_installation"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_shortcut_add_new_task"</span><span class="p">:</span><span class="s2">"CTRL + 0"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_significant_event_count"</span><span class="p">:</span><span class="s2">"5"</span><span class="p">,</span><span class="w">
-</span><span class="s2">"web_uuid"</span><span class="p">:</span><span class="s2">"d45186f5-0699-4986-906d-c6ad3f88c180"</span><span class="w">
+</span><span class="nl">"id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"created_at"</span><span class="p">:</span><span class="s2">"2014-04-30T11:59:36Z"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-30T11:59:36Z"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"madhur"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"User"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"avatar"</span><span class="p">:</span><span class="s2">"https://graph.facebook.com/522955158/picture?width=0&amp;height=0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"email"</span><span class="p">:</span><span class="s2">"ahuja.madhur@gmail.com"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"token"</span><span class="p">:</span><span class="s2">"8758a4a0f983177a427a879a30b144d92bc2f01e"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"terms_accepted_at"</span><span class="p">:</span><span class="s2">"2013-07-07"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"confirmation_state"</span><span class="p">:</span><span class="s2">"confirmed_email"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"email_confirmed"</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w">
+</span><span class="nl">"channel"</span><span class="p">:</span><span class="s2">"me.updates.2ea715786fc5ed6af21a97d2104ac4a095349e9b"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"product"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+</span><span class="nl">"group_product"</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w">
+</span><span class="nl">"facebook"</span><span class="p">:</span><span class="s2">"522955158"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"settings"</span><span class="p">:{</span><span class="w">
+</span><span class="nl">"account_locale"</span><span class="p">:</span><span class="s2">"en"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"background"</span><span class="p">:</span><span class="s2">"wlbackground03"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"campaign_iyf4_notification"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"campaign_iyf4_notification_last_date"</span><span class="p">:</span><span class="s2">"2013-12-16T00:47:14Z"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"campaign_iyf4_notification_variation"</span><span class="p">:</span><span class="s2">"c"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_assigning_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_assigning_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_assigning_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_comments_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_comments_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_comments_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_files_daily"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_files_daily_date"</span><span class="p">:</span><span class="s2">"2013-09-26"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"consumed_quota_files_overall"</span><span class="p">:</span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"created_by_compound_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"created_by_id"</span><span class="p">:</span><span class="s2">"5704468"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"created_by_type"</span><span class="p">:</span><span class="s2">"User"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"experiment_chatter_notifications"</span><span class="p">:</span><span class="s2">"compacted"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"notifications_email_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"notifications_push_enabled"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"setting"</span><span class="p">:</span><span class="s2">"{}"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"show_completed_items"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"sound_checkoff_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"sound_notification_enabled"</span><span class="p">:</span><span class="s2">"false"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"start_of_week"</span><span class="p">:</span><span class="s2">"mon"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"use_badge_icon"</span><span class="p">:</span><span class="s2">"notifications"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_app_open_count"</span><span class="p">:</span><span class="s2">"2"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_coach_mark_detail_view"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_coach_mark_inbox"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_coach_mark_smart_list"</span><span class="p">:</span><span class="s2">"completed"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_last_app_open_date"</span><span class="p">:</span><span class="s2">"1398969000000"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_last_used_release"</span><span class="p">:</span><span class="s2">"2.3.8.3"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_new_installation"</span><span class="p">:</span><span class="s2">"true"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_shortcut_add_new_task"</span><span class="p">:</span><span class="s2">"CTRL + 0"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_significant_event_count"</span><span class="p">:</span><span class="s2">"5"</span><span class="p">,</span><span class="w">
+</span><span class="nl">"web_uuid"</span><span class="p">:</span><span class="s2">"d45186f5-0699-4986-906d-c6ad3f88c180"</span><span class="w">
 </span><span class="p">}</span></code></pre></figure>
 
-<p>This piece of information is very important for us in JSON response: <code>token:8758a4a0f983177a427a879a30b144d92bc2f01e</code>. This is the token which we need to send in 
+<p>This piece of information is very important for us in JSON response: <code class="highlighter-rouge">token:8758a4a0f983177a427a879a30b144d92bc2f01e</code>. This is the token which we need to send in 
 any of the other REST API requests otherwise you will get this error in response:</p>
 
 <figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
-</span><span class="s2">"errors"</span><span class="p">:</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"message"</span><span class="p">:</span><span class="s2">"You must be authenticated to continue."</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"unauthorized"</span><span class="w">
-    </span><span class="p">}</span><span class="w">
+</span><span class="nl">"errors"</span><span class="p">:</span><span class="w">
+	</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"message"</span><span class="p">:</span><span class="s2">"You must be authenticated to continue."</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"unauthorized"</span><span class="w">
+	</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span></code></pre></figure>
 
-<p>Let&#39;s try to retrieve the lists using the <code>/lists</code> API and the token:</p>
+<p>Let’s try to retrieve the lists using the <code class="highlighter-rouge">/lists</code> API and the token:</p>
 
-<p><a href="/images/Blog/screenshot.8.png"><img src="/images/Blog/screenshot.8.png" alt=""></a></p>
+<p><a href="/images/Blog/screenshot.8.png"><img src="/images/Blog/screenshot.8.png" alt="" /></a></p>
 
 <p>The result is the list of Wunderlist lists I have in my account:</p>
 
-<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="w">    </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="s2">"ABAEAAS9pWM"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"List"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"local_identifier"</span><span class="p">:</span><span class="s2">"localId:prepopulated:AAAEAABXCxQ:List:private"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"owner_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"position"</span><span class="p">:</span><span class="mf">4.37502</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"title"</span><span class="p">:</span><span class="s2">"Private"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"created_at"</span><span class="p">:</span><span class="s2">"2013-07-07T01:25:06Z"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-29T11:05:46Z"</span><span class="w">
-    </span><span class="p">},</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="s2">"ABAEAAS9pWQ"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"type"</span><span class="p">:</span><span class="s2">"List"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"local_identifier"</span><span class="p">:</span><span class="s2">"localId:prepopulated:AAAEAABXCxQ:List:work"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"owner_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"position"</span><span class="p">:</span><span class="mf">1.87502</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"title"</span><span class="p">:</span><span class="s2">"Work"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"created_at"</span><span class="p">:</span><span class="s2">"2013-07-07T01:25:06Z"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-11T07:52:33Z"</span><span class="w">
-    </span><span class="p">}</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="w">	</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"id"</span><span class="p">:</span><span class="s2">"ABAEAAS9pWM"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"List"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"local_identifier"</span><span class="p">:</span><span class="s2">"localId:prepopulated:AAAEAABXCxQ:List:private"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"owner_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"position"</span><span class="p">:</span><span class="mf">4.37502</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Private"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"created_at"</span><span class="p">:</span><span class="s2">"2013-07-07T01:25:06Z"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-29T11:05:46Z"</span><span class="w">
+	</span><span class="p">}</span><span class="err">,</span><span class="w">
+	</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"id"</span><span class="p">:</span><span class="s2">"ABAEAAS9pWQ"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"type"</span><span class="p">:</span><span class="s2">"List"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"local_identifier"</span><span class="p">:</span><span class="s2">"localId:prepopulated:AAAEAABXCxQ:List:work"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"owner_id"</span><span class="p">:</span><span class="s2">"AAAEAABXCxQ"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"position"</span><span class="p">:</span><span class="mf">1.87502</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"title"</span><span class="p">:</span><span class="s2">"Work"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"created_at"</span><span class="p">:</span><span class="s2">"2013-07-07T01:25:06Z"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"updated_at"</span><span class="p">:</span><span class="s2">"2014-04-11T07:52:33Z"</span><span class="w">
+	</span><span class="p">}</span></code></pre></figure>
 
-<p>Using a similar approach, we can invoke the following REST API&#39;s and get their responses in JSON:</p>
+<p>Using a similar approach, we can invoke the following REST API’s and get their responses in JSON:</p>
 
-<p><code>/me/settings</code><br>
-<code>/me</code><br>
-<code>/me/contacts</code><br>
-<code>/me/services</code><br>
-<code>/me/lists</code><br>
-<code>/me/tasks</code><br>
-<code>/me/reminders</code><br>
-<code>/me/shares</code><br>
-<code>/me/events</code><br>
-<code>/me/quota</code>  </p>
+<p><code class="highlighter-rouge">/me/settings</code><br />
+<code class="highlighter-rouge">/me</code><br />
+<code class="highlighter-rouge">/me/contacts</code><br />
+<code class="highlighter-rouge">/me/services</code><br />
+<code class="highlighter-rouge">/me/lists</code><br />
+<code class="highlighter-rouge">/me/tasks</code><br />
+<code class="highlighter-rouge">/me/reminders</code><br />
+<code class="highlighter-rouge">/me/shares</code><br />
+<code class="highlighter-rouge">/me/events</code><br />
+<code class="highlighter-rouge">/me/quota</code></p>
 
-<h2>A note about authentication</h2>
+<h2 id="a-note-about-authentication">A note about authentication</h2>
 
 <p>At this moment, there is no OAuth implementation for the authorization on this API and probably this is the reason the API is not public yet.
-This means, the token we recieve in response <code>/login</code> call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,
-it is sufficient to assume that we need to re-authenticate using the <code>username</code> and <code>password</code> once the token expires.</p>
+This means, the token we recieve in response <code class="highlighter-rouge">/login</code> call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,
+it is sufficient to assume that we need to re-authenticate using the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> once the token expires.</p>
 
 <p>In the part II of this blog post, I am going to share a partial implementation of this API in java using <a href="http://square.github.io/retrofit/">Retrofit</a></p>
 
@@ -441,7 +441,7 @@ it is sufficient to assume that we need to re-authenticate using the <code>usern
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by

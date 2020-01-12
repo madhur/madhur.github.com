@@ -225,11 +225,11 @@ at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.
 at java.lang.reflect.Method.invoke(Method.java:606) 
 at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144) [Raw read]: length = 5 </code></pre></figure>
 
-<p>As per the vendor, there was no issue with their site. Other partners were able to call their API&#39;s successfully.</p>
+<p>As per the vendor, there was no issue with their site. Other partners were able to call their API’s successfully.</p>
 
 <p>This is one of the peculiar problem which happens with Java 7, due to the mismatch of ciphers between Java 7 and the destination webserver.</p>
 
-<p>In order to debug this in Java, we need to add the parameter <code>-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p>
+<p>In order to debug this in Java, we need to add the parameter <code class="highlighter-rouge">-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">main, READ: TLSv1.2 Handshake, length = 333
 *** ECDH ServerKeyExchange
@@ -305,31 +305,31 @@ verify_data:  { 23, 158, 68, 25, 66, 210, 127, 41, 116, 127, 102, 168 }
 [read] MD5 and SHA1 hashes:  len = 16
 0000: 14 00 00 0C 17 9E 44 19   42 D2 7F 29 74 7F 66 A8  ......D.B..)t.f.</code></pre></figure>
 
-<p>Unless you really know SSL protocol in detail, you won&#39;t understand all of it. But atleast I am able to figure out the following:</p>
+<p>Unless you really know SSL protocol in detail, you won’t understand all of it. But atleast I am able to figure out the following:</p>
 
 <ul>
-<li>The protocol in use is TLSv1.2</li>
-<li>Cipher used was TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</li>
-<li>The handshake was successfully completed</li>
+  <li>The protocol in use is TLSv1.2</li>
+  <li>Cipher used was TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</li>
+  <li>The handshake was successfully completed</li>
 </ul>
 
 <p>Some of the secure webservers, will only support TLS v1.2 protocol and deny any request on SSLv3 or TSL v1 protocol.</p>
 
 <p>If that is the case, this is easy to fix in Java by adding following command line parameters</p>
 
-<p><code>JAVACMD=&quot;$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\
-deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true&quot;</code></p>
+<p><code class="highlighter-rouge">JAVACMD="$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\
+deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true"</code></p>
 
 <p>or even this</p>
 
-<p><code>-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p>
+<p><code class="highlighter-rouge">-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p>
 
 <p>However, some of the webservers can force the clients to use very strong ciphers which are not available in Java 7. They are only available in Java 8.</p>
 
 <p>The list of ciphers supported by SSL site can be found through 
 <a href="https://www.ssllabs.com/index.html">https://www.ssllabs.com/index.html</a></p>
 
-<p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from <a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html</a> and replace the two JARs (<code>local_policy.jar, US_export_policy.jar</code>) under your JRE&#39;s <code>lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p>
+<p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html and replace the two JARs (<code class="highlighter-rouge">local_policy.jar, US_export_policy.jar</code>) under your JRE’s <code class="highlighter-rouge">lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p>
 
 <p>For reference, here are the ciphersuites available in Java 7 (1.7.0_79):</p>
 
@@ -474,6 +474,7 @@ deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true&quot;</code>
 
 <p>Hope that helps anyone running into SSL issues with Java.</p>
 
+
 			<footer>
 				<div class="blocked tags">
 					<p>
@@ -557,7 +558,7 @@ deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true&quot;</code>
         <footer id="footer" class="row">
 
             <p id="copyright">
-                &copy; 2011-2019 Madhur Ahuja
+                &copy; 2011-2020 Madhur Ahuja
             </p>
             <p id="poweredby" class="visible-lg visible-md">
                 Powered by
