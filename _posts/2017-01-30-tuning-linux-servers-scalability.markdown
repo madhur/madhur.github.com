@@ -23,7 +23,7 @@ Knowing Linux OS and related concepts such as [Iptables](https://en.wikipedia.or
 
 
   
-##Open files
+## Open files
 
 We need to keep our file limit high for any linux production server. Check the current value using `ulimit -a`
 
@@ -48,11 +48,11 @@ Max open files            30000
 {% endhighlight %}
 
   
-##Ephemeral Ports
+## Ephemeral Ports
 Increase the number of ephemeal ports availabl to your application. The default value is `32768 - 61000`. 
 
   
-##TIME_WAIT state
+## TIME_WAIT state
 
 TCP connections go through lot of states, last of them is `TIME_WAIT` state.
 The default `TIME_WAIT` timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.
@@ -65,7 +65,7 @@ net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1
 {% endhighlight %}
 
   
-##Connection Tracking
+## Connection Tracking
 
 The next parameter we looked at was Connection Tracking. This is a side effect of using `iptables`. Since `iptables` needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.
 
@@ -80,7 +80,7 @@ Keep in mind though, that the larger this value, the more RAM the kernel will us
 We started down this path, increasing net.nf_conntrack_max, but soon we were just pushing it up every day. Connections that were getting in there were never getting out.
 
   
-##Maximum number of pending connections on a socket
+## Maximum number of pending connections on a socket
 
 During some of our initial load testing, we ran into a strange problem where we were unable to open more than approximately 128 concurrent connections at once.
 
@@ -95,7 +95,7 @@ This kernel parameter is the size of the backlog of TCP connections waiting to b
 Bumping up this limit in `/etc/sysctl.conf` helped us get rid of the “connection refused” issues on our Linux machines.
 
   
-##JVM thread count
+## JVM thread count
 
 A few hours after we allowed a significant percentage of production traffic to hit our server for the first time, we were alerted to the fact that the load balancer was unable to connect to a few of our machines. On further investigation, we saw the following all over our server logs.
 

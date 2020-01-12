@@ -23,7 +23,7 @@ img:
 #Vocab Builder
 Vocab Builder helps you build and revise your vocabulary. Works great for GRE, CAT, CMAT, XAT, SAT, GMAT, etc
 
-##Features
+## Features
 
 * Collection of around 4800 words
 * Completely offline - no internet connection required.
@@ -38,7 +38,7 @@ In learning mode, the meaning is automatically shown.
 * The notification can be configured to show only the words you want to learn.
 
 
-##Star Rating System
+## Star Rating System
 Vocab Builder is unique from other vocabulary building software in a way it employs flexible star rating system. It makes no assumption regarding your current level of vocabulary or the words you find easy/difficulty.   
 
 Instead, it allows you to mark words in 3 different categories  

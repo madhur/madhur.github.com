@@ -19,7 +19,7 @@ Design considerations
 
 In case you are using, Java with Hibernate JPA, it can be configured as follows:
 
-##Identity
+## Identity
 
 The GenerationType.IDENTITY is the easiest to use but not the best one from a performance point of view. It relies on an auto-incremented database column and lets the database generate a new value with each insert operation. From a database point of view, this is very efficient because the auto-increment columns are highly optimized, and it doesn’t require any additional statements.
 
@@ -30,7 +30,7 @@ The GenerationType.IDENTITY is the easiest to use but not the best one from a pe
 private Long id;
 ```
 
-##Sequence
+## Sequence
 The GenerationType.SEQUENCE is my preferred way to generate primary key values and uses a database sequence to generate unique values.
 
 It requires additional select statements to get the next value from a database sequence. But this has no performance impact for most applications. 
@@ -43,7 +43,7 @@ It requires additional select statements to get the next value from a database s
 @Column(name = "id", updatable = false, nullable = false)
 private Long id;
 ```
-##Table
+## Table
 
 The GenerationType.TABLE gets only rarely used nowadays. It simulates a sequence by storing and updating its current value in a database table which requires the use of pessimistic locks which put all transactions into a sequential order. This slows down your application, and you should, therefore, prefer the GenerationType.SEQUENCE, if your database supports sequences, which most popular databases do.
 
@@ -55,7 +55,7 @@ The GenerationType.TABLE gets only rarely used nowadays. It simulates a sequence
 private Long id;
 ```
 
-##UUID
+## UUID
 
 UUIDs are 128-bit hexadecimal numbers that are globally unique. The chances of the same UUID getting generated twice is negligible.
 
@@ -63,16 +63,16 @@ The problem with UUIDs is that they are very big in size and don’t index well.
 
 * If you use a timestamp as the first component of the ID, the IDs remain time-sortable
 
-##Another component like twitter snowflake
+## Another component like twitter snowflake
 
 [Twitter snowflake](https://github.com/twitter-archive/snowflake/tree/snowflake-2010) is a dedicated component just for generating ids. I am not sure if its good to have this a new component in your infrastructure.
 
 
-##Conclusion
+## Conclusion
 * MySQL does not support custom sequences. So if you are using mysql and want to avoid auto-increment ids, your only bet is server side.
 * UUID has performance impact on indexing
 * Auto-increment keys are not possible in sharded databases
 
 
-###References
+### References
 [Sharding & IDs at Instagram](https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c)

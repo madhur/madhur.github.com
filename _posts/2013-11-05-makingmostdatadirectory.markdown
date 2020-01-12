@@ -15,7 +15,7 @@ categories:
 Jekyll 1.3.0 comes with exciting new features especially the use of `\_data` directories. The `\_data` directory is very useful in cases where you want to store
 metadata related to your site or blog and want to load it in runtime. Earlier people used to put this in `\_config.yml` which was kind of a hack.
 
-##How can you make most out of \_data directory ?##
+## How can you make most out of \_data directory ? ##
 
 If you've a file `trucks.yaml` under `\_data`, then you can access it with 
 {% highlight text %}

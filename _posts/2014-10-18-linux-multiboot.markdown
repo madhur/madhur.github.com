@@ -87,7 +87,7 @@ Some of the parameters deserve explanation:
 
 Once done with all the changes, fire `sudo update-grub` to update your `grub.cfg` with these changes.
 
-###Troubleshooting
+### Troubleshooting
 * Note that you might not just get this right in first go. Things can go wrong and be prepared for it.
 * Take special care of `(hd0, msdos2)` to determine your correct configuration. It is not easy as /dev/sda1=(hd0, 1) and /dev/sdb1 = (hd1, 1). In my case /dev/sdc referred to hd0. Had hard time figuring out.
 * While booting from grub, you can press `e` to edit the command line on the fly and try out various options wuch as commenting out `nomodeset` and different combinations for `(hd#, msdos#)`. Once you have figured out the correct option, update the `40_custom` and execute `update-grub` again.

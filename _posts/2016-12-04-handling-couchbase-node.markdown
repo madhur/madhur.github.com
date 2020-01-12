@@ -30,7 +30,7 @@ However, there are some caveats which we have discovered. Suppose, the applicati
 
 This was really undesirable for us, since we were using couchbase as a caching store. An error in connecting to couchbase is ideally a miss, which our code should handle and lookup the data in our persistent store, MySQL.
 
-##Solution
+## Solution
 
 There are few solutions to this problem. I am describing here what we choose.
 Some of them are described [here](https://wiredcraft.com/blog/reconnect-couchbase-nodejs/) as well.

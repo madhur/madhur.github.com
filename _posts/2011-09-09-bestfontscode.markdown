@@ -40,13 +40,13 @@ I have also switched from *Terminal* to *Consolas* in my favourite editor [Notep
 ![](/images/notepad-term.png)
 ![](/images/notepad-cons.png)
 
-##Installing Consolas in Linux##
+## Installing Consolas in Linux ##
 You might also want to use Consolas in Linux terminal and Gedit, Gvim or vim.
 
-##Method 1##
+## Method 1 ##
 Create a '.fonts' folder in your home directory and copy the necessary fonts into it. Now you have access to the fonts on a per user basis.
 
-##Method 2##
+## Method 2 ##
 
 First find out in which location linux has installed the truetype fonts.
 
@@ -83,7 +83,7 @@ Lastly run the command fc-cache.
  fc-cache
 {% endhighlight %} 
 
-##Other good programming fonts##
+## Other good programming fonts ##
 * Inconsolata
 * Proggy Clean
 * Terminus
@@ -92,5 +92,5 @@ Lastly run the command fc-cache.
 * Anonymous
 * Terminus
 
-##References##
+## References ##
 * [http://www.codeproject.com/KB/work/FontSurvey.aspx](http://www.codeproject.com/KB/work/FontSurvey.aspx)

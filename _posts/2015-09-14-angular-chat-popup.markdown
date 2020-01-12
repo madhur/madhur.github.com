@@ -19,12 +19,12 @@ Looking at slack, it seems to use its own custom implementation. I liked the sla
 
 Finally, I decided to write my own directive in angular for this feature. Take a look at this [github repository](https://github.com/madhur/angular-chat-popup) for the soure code and how to use it in your own project.
 
-##How does this work
+## How does this work
 
 Upon `/` character, a popup menu is rendered. Its template is fetched from `partials/popupmenu.html` file.
 
 
-##How do I configure the popup
+## How do I configure the popup
 
 The input data is fetched from the `appsettings.js` file. Currently 3 levels are supported. In actual case, this data may come from a 
 `$http` service.
@@ -115,7 +115,7 @@ The input data is fetched from the `appsettings.js` file. Currently 3 levels are
         ];
 ```
 
-##Next Steps
+## Next Steps
 
 * Add filtering through keyboard
 * Include scrollbar for long menus

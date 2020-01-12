@@ -11,13 +11,13 @@ categories:
 - Development
 ---
 
-##Collections##
+## Collections ##
 * An object is an unordered collection of name/value pairs
 * Names are strings
 * Values are any type, including other objects
 * Every object is a little database
 
-##Object Literals##
+## Object Literals ##
 * Object literals are wrapped in {}
 * Values can be expressions
 * : separate names and values
@@ -26,7 +26,7 @@ categories:
 * New members can be added to any object by simple assignment
 	`myObject[name]=value`
 
-##Maker function##
+## Maker function ##
 
 
 {% highlight javascript %}
@@ -41,7 +41,7 @@ function maker(name, where)
 myObject = maker("Madhur Ahuja", "Jail");
 {% endhighlight %}
 
-##Linkage##
+## Linkage ##
 * Objects can be created with a secret link to another object
 * The `object(o)` function will be used with a secret link to object o
 * The linkage cannot be changed once created. It is possible in Mozilla implementation, but is non-standard.
@@ -65,7 +65,7 @@ myObject = maker("Madhur Ahuja", "Jail");
 
 * members can be removed by using `delete` operator
 
-##Arrays##
+## Arrays ##
 
 * Inherits from `object`
 * No need to provide a length or type when creating array

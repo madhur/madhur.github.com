@@ -36,7 +36,7 @@ The problem is as soon as I set the status bar image, the image in the view also
 
 I have tried using `icon?.cacheMode = NSImageCacheMode.Never` but there is no effect.
 
-###Solution
+### Solution
 
 `[NSImage imageNamed:]` may return an existing cached instance of the image.
 

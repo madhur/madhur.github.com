@@ -10,7 +10,7 @@ tags:
 
 I recently discovered in one of my projects that results of DNS are not cached by [NodeJs](https://nodejs.org/en/). Caching the results of DNS queries is one of the important things and can dramatically improve the speed and scalability of your application. In our application, we saw the number of HTTP requests jump from 35 to 2500 per seconds which is an almost 100x factor.
 
-##How to cache results of DNS queries
+## How to cache results of DNS queries
 
 One way could be to use a caching DNS library for Node such as [DnsCache](https://www.npmjs.com/package/dnscache). Once this module is installed via `npm install dnscache` , every call to a dns method is first looked into the local cache, in case of cache hit the value from cache is returned, in case of cache miss the original dns call is made and the return value is cached in the local cache.
 
@@ -43,7 +43,7 @@ var dns = require('dns'),
 
 Second way is to cache the results of queries at OS level. This is my preferred way as your application does not have to worry about caching as it is done automatically by OS for you. There are many DNS caching resolvers available such as: [Bind](https://www.isc.org/downloads/bind/), [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html) and [unbound](http://unbound.net/)
 
-##How to check if DNS cache is working
+## How to check if DNS cache is working
 
 If you are using the DNS caching resolver such as dnsmasq or unbound, the result of DNS query should be very fast i.e. in order of 1 msec or even 0 msec.
 

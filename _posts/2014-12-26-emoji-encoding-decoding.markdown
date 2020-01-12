@@ -25,7 +25,7 @@ A comprehensive list of unicode codes can be obtained from [http://apps.timwhitl
 * **HTML:** Emojis are converted to HTML `<img>` tags rendering each emoji as an image either from the single image or a sprite. 
 This is the least useful method to adopt as its not cross platform. There is no standardization of Emoji sprite images and hence you will never be sure that target platform has the same emoji images. Though, this solution works perfect for a single isolated website.
 
-##Our Solution - [Github Repo](https://github.com/madhur/angular-emoji-popup) and [demo page](http://coraza.github.io/angular-emoji-popup)
+## Our Solution - [Github Repo](https://github.com/madhur/angular-emoji-popup) and [demo page](http://coraza.github.io/angular-emoji-popup)
 
 Since we are using AngularJs as our frontend, We have come up with an AngularJs directive and set of filters to handle all of above cases for Emoji. The solution supports encoding and decoding emoji from various formats. For us, We decided to go with storing Emoji as UTF-8 characters for the simple reason that Android can render them natively and hence, no special effort is required to implement this on Android side. Though, it did require tweaking our MySql tables and database to switch from `utf8` to `utf8mb4`. I will not go into the details of their differences.
 

@@ -11,7 +11,7 @@ categories:
 - Development
 ---
 
-##Statements##
+## Statements ##
 
 * `break` 
 * `for` 
@@ -21,7 +21,7 @@ categories:
 * `with`
 
 
-###For statement###
+### For statement ###
 
 {% highlight javascript %}
 for (var name in object)
@@ -34,12 +34,12 @@ for (var name in object)
 }
 {% endhighlight %}
 
-###Switch statement###
+### Switch statement ###
 
 * The switch value can be a string. Not restricted to integer
 * The cast statements can be expressions, not just constants
 
-###Throw statement###
+### Throw statement ###
 
 {% highlight javascript %}
 throw new Error(reason);
@@ -51,7 +51,7 @@ throw
 }
 {% endhighlight %}
 
-###Try statement###
+### Try statement ###
 
 * Because we don't have classes, we just have one `catch` clause. There cannot be multiple catch clauses.
 * The javascript implementation can produce these exception names:
@@ -75,7 +75,7 @@ catch(e)
 {% endhighlight %}
 
 
-###With statement###
+### With statement ###
 * Ambiguous and error prone, don't use it. 
 
 {% highlight javascript %}
@@ -87,7 +87,7 @@ with (o)
 
 Either `o.foo = null;` or `foo = null;` depending on if foo is a global variable
 
-###Function statement###
+### Function statement ###
 
 {% highlight javascript %}
 function name(parameters)
@@ -96,16 +96,16 @@ function name(parameters)
 }
 {% endhighlight %}
 
-###Var statement###
+### Var statement ###
 * Types are not specified
 * Initial values are optional
 
-###Scope###
+### Scope ###
 * Blocks do not have scopes, only function has scopes.
 * Because of laziness while writing the compiler :)
 * This is a mistake in language
 
-###Return statement###
+### Return statement ###
 
 `return expression;`
 Or

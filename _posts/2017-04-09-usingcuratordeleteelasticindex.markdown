@@ -19,10 +19,10 @@ Fortunately, [Logstash](https://www.elastic.co/products/logstash) creates a new 
 Thus, we can ask [Curator](https://github.com/elastic/curator) to simply delete the indices x days old and which follow a particular naming pattern.
 
 
-###Installing Curator
+### Installing Curator
 Simple use `pip install elasticsearch-curator` to install Curator on your machine. I prefer to install it on the Elasticsearch machine itself.
 
-###Configuring Curator
+### Configuring Curator
 Create a file `curator.yml` with following contents.
 
 {% highlight yaml %}

@@ -13,7 +13,7 @@ tags:
 
 I have just [published](https://github.com/madhur/android-chat-starter) an Android sample application demonstrating the chat bubbles and a native Emoji keyboard.
 
-###What it includes?
+### What it includes?
 
 * Native Emoji Keyboard - Same as found in WhatsApp
 * Chat bubbles - Modeled after WhatsApp

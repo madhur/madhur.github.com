@@ -18,7 +18,7 @@ the hyperlinks on the page invisibly even if user has not explicitly clicked on 
 Anyways, Focusing away from all that attention, I would like to present the statistics of browser share of visitors of my blog. I really do believe that results of my blog will be applicable
 to all of the community. My blog recieves approximately 100 vists/day.
 
-##Overall Market Share##
+## Overall Market Share ##
 ![](/images/share.png)  
 <br/>
 In my opinion, the high usage of Internet explorer is clearly because of usage of IE as an Enterprise standard browser. Many users, who are working in companies and use company
@@ -26,22 +26,22 @@ provided assets, have no choice but to use the browser installed on their device
 
 It is interesting to see how drastically the share of Internet Explorer drops to **single digit** percentages on **Weekends**.
 
-##Monday##  
+## Monday ##  
 ![](/images/monday.png)  
-##Tuesday##  
+## Tuesday ##  
 ![](/images/tuesday.png)  
-##Wednesday##  
+## Wednesday ##  
 ![](/images/wednesday.png)  
-##Thursday##  
+## Thursday ##  
 ![](/images/thursday.png)  
-##Friday##  
+## Friday ##  
 ![](/images/friday.png)  
-##Saturday##  
+## Saturday ##  
 ![](/images/saturday.png)  
-##Sunday##  
+## Sunday ##  
 ![](/images/sunday.png)  
 
 
-##Conclusion##
+## Conclusion ##
 To conclude, high market share of IE is only and only because its a standard browser on Microsoft Windows Operating System. The gain which Microsoft gets because of monopoly in Operating System market
 is still unparalleled. It would be interesting to see, how the share of IE slides when the enterprise starts moving more and more on mobile platforms and start introducing [BYOD](http://en.wikipedia.org/wiki/Bring_your_own_device)

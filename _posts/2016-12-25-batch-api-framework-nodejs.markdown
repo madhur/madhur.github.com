@@ -53,13 +53,13 @@ For each operation, the response includes a status code, header information, and
 
 One could have also included `headers` in the output if required, but I believe it adds unnecessary overhead in the payload.
 
-###Handling errors
+### Handling errors
 
 Its possible that one of the requested operations may throw an error.  In this scenario, the batch API throws a similar response to the standard Graph API, but encapsulated in the batch response syntax:
 
 Other requests within the batch should still complete successfully and will be returned, as normal, with a 200 status code.
 
-###Implementation
+### Implementation
 
 The batch API framework is implemented in Node.js using [async](https://github.com/caolan/async) and [request](https://github.com/request/request) module. 
 

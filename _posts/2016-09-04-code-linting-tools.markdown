@@ -16,7 +16,7 @@ I have been researching appropriate linting tools for programming languages used
 
 Given below is my findings and our choosen lint tools.
 
-##Java
+## Java
 
 * [Findbugs](http://findbugs.sourceforge.net/)
   It looks for bugs in Java programs. It can detect a variety of common coding mistakes, including thread synchronization problems, misuse of API methods, etc.
@@ -27,7 +27,7 @@ Given below is my findings and our choosen lint tools.
 * [Checkstyle](http://checkstyle.sourceforge.net/)  
   It is a development tool to help programmers write Java code that adheres to a coding standard.
 
-##Javascript
+## Javascript
 
 * [EsLint](http://eslint.org/)  
   ESLint is the most recent out of the four. It was designed to be easily extensible, comes with a large number of custom rules, and it’s easy to install more in the form of plugins. It gives concise output, but includes the rule name by default so you always know which rules are causing the error messages.
@@ -42,14 +42,14 @@ Given below is my findings and our choosen lint tools.
 * [JSLint](http://www.jslint.com/)  
   JSLint is the oldest of the four. Douglas Crockford created it in 2002 to enforce what, in his experience, are the good parts of JavaScript. If you agree with the good parts, JSLint can be a good tool—you install it and it’s ready to go.
 
-##Python
+## Python
 * [pychecker](http://pychecker.sourceforge.net/) - executes (be careful)
 * [pyflakes](https://pypi.python.org/pypi/pyflakes) - parses, great for finding NameErrors, obsolete imports
 * [pylint](https://www.pylint.org/) - parses, very comprehensive (on the excessive-compulsive side).
 * [pep8](https://www.python.org/dev/peps/pep-0008/) - parses, a style checker.
 * [flake8](https://pypi.python.org/pypi/flake8) - parser, combines pep8 and pyflakes, with added complexity support, extensible.
 
-##Conclusion
+## Conclusion
 For java, we went with [Findbugs](http://findbugs.sourceforge.net/), simply because the kind of problems it can detect. Other java linting tools focus more on code style, indentation, spacing , variable naming etc. Findbugs is only tool which can go deep and find out some real issues in your code.
 
 For Javascript, [ESLint](http://eslint.org/), because of its extensibility. Other contenders like JSHit and JSLint are either obsolete or does not offer extensibility.

@@ -14,7 +14,7 @@ categories:
 
 I was going through many of the Douglas Crockford videos on Javascript and came across many of the oddities in the Javascript language. I was highly impressed by his outspoken admission on some of the features of the languages being "bad". But at the same time, he highlighted that Javascript is one of the most widely mis-understood programming languages and there are many powerful features which are quite powerful.
 
-##Value Types (Everything else is objects)## 
+## Value Types (Everything else is objects) ## 
 
 * Number
 * Strings
@@ -37,36 +37,36 @@ Few points about NaN:
 
 * Convert a string to a number
 
-###parseInt function###
+### parseInt function ###
 
 `parseInt(value, 10)`
 
 * The radix (10) should be required
 
-###Math object###
+### Math object ###
 
 * Math object is modeled on Java's `Math` class
 
-###Strings###
+### Strings ###
 
 * Strings are immutable
 * Similar strings are equal (==). Jave got that wrong
 * Strings literals can use single or double quotes
 * `string.length` determines the length of string
 
-###String function###
+### String function ###
 `string(value)`
 
 * Convert a number to String
 
-###Boolean function###
+### Boolean function ###
 `Boolean(value)`
 
 * returns `true` if the value is truthy
 * returns `false` if the value is falsy
 * Similar to `!!` operator
 
-###Falsy Values###
+### Falsy Values ###
 
 * false
 * null
@@ -75,31 +75,31 @@ Few points about NaN:
 * 0
 * Nan
 
-###Truthy Values###
+### Truthy Values ###
 
 * All other values (including all objects) are truthy including `"0"` , `"false"`
 
 * `undefined` is the default value for variables
 * Thus, a variable can be defined and also `undefined` at the same time :)
 
-###Dynamic objects###
+### Dynamic objects ###
 
 * `new Object()` produces an empty container of name/value pairs
 * A name can be any string, a value can be any value except `undefined`
 * members can be accessed with dot notation or subscript notation
 
-###Loosely typed###
+### Loosely typed ###
 
 * Any variable can recieve or send any type of parameter
 * Language is not untyped
 
 
-###Reserved words###
+### Reserved words ###
 
 * Many of hte words are reserved but only handful of them are being used in language
 
 
-###== and != operators###
+### == and != operators ###
 
 * These operators can do type coercion
 * It is better to use === and !==, which do not do type coercion.

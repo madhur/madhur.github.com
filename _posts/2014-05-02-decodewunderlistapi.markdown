@@ -177,7 +177,7 @@ Using a similar approach, we can invoke the following REST API's and get their r
 `/me/events`  
 `/me/quota`  
 
-##A note about authentication##
+## A note about authentication ##
 
 At this moment, there is no OAuth implementation for the authorization on this API and probably this is the reason the API is not public yet.
 This means, the token we recieve in response `/login` call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,

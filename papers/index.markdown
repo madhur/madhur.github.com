@@ -4,7 +4,7 @@ title: Papers
 section: Papers
 ---
 
-##Articles authored##
+## Articles authored ##
 
 * [Passing multiple filter values to an EWA pivot table filter cell](http://www.codeproject.com/KB/sharepoint/EWAFilter.aspx)  \[www.codeproject.com\]
 * [Creating an RSS Reader Web Part with tab support and asynchronous periodic data refresh using AJAX](http://www.codeproject.com/KB/sharepoint/RSSReaderAjax.aspx)  \[www.codeproject.com\]
@@ -13,7 +13,7 @@ section: Papers
 
 
 
-##Papers, Articles & Presentations##
+## Papers, Articles & Presentations ##
 
 * Ultrawideband: [Synopsis](/files/uwb_synopsis.pdf), [Seminar Paper](/files/Ultrawideband_Madhur.pdf) and [Presentation](/files/Ultrawideband.ppt)
 

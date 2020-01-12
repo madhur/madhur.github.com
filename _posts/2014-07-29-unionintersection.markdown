@@ -11,7 +11,7 @@ tags:
 ---
 
 
-##Intersection
+## Intersection
 
 ```Java
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class Main
 [B, C]
 [B, C, D, E, F]
 ```
-##Union
+## Union
 
 ```Java
 import java.util.ArrayList;

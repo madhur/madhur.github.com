@@ -11,7 +11,7 @@ categories:
 - Development
 ---
 
-###Distinguishing Arrays###
+### Distinguishing Arrays ###
 * `value.constructor === Array`
 * `value instanceof Array`
 * Neither work when value comes from different frame
@@ -25,7 +25,7 @@ categories:
 
 * You can augment all arrays. Assign methods to `Array.prototype`
 
-###Functions###
+### Functions ###
 * Functions are first class objects. Functions can be passed, returned and stored just like any other value
 * Functions inherit from `Object` and can store name/value pairs. Very strange.
 * Can anywhere appear expression is required
@@ -44,19 +44,19 @@ categories:
 * There is no type checking on the arguements
 
 
-###Closure###
+### Closure ###
 * The scope that an inner function enjoys continues even after the parent functions have returned
 * This is what makes javascript worth attention.
 
 
-##Invocation##
+## Invocation ##
 
-###Method form : `thisObject.methodName(arguments)`###
+### Method form : `thisObject.methodName(arguments)` ###
 
 * When a function is called in method form, `this` is set to `thisObject`, the object containing the function
 * This allows function to have reference object
 
-###Function form - `functionObject(arguments)`###
+### Function form - `functionObject(arguments)` ###
 
 * `this` is set to global object. That is not very useful. Error in design
 * Harder to write helper functions.
@@ -70,7 +70,7 @@ categories:
 * function is invoked, it also gets a special parameter called `arguments`
 * It contains all of the arguments. Contains the `length` parameter. It's not a real array.
 
-##Misc##
+## Misc ##
 * The `typeof` prefix operator returns a string identifying the type of a value
 * `typeof null` is `Object`. This is wrong.
 * `eval` is the most dangerous feature. Don't use it. Browser uses it.
@@ -80,7 +80,7 @@ categories:
 * Global variables are evil.
 * Any `var` not declared is assumed global. Use `JsLint` tool to identify weaknesses
 
-##Namespace##
+## Namespace ##
 * Every object is a separate namespace
 * Use an object to organize your variables and functions.
 * Use an anonymous function to wrap your application

@@ -17,7 +17,7 @@ To start the New Year my web site has had a makeover, but it is not just a chang
 
 The screenshots demonstrates below how this site looks on an Samsung Galaxy S3 compared to how it used to look previously. Thanks to the new CSS media query features in CSS 3.
 
-##Old look##
+## Old look ##
 
 <div style=";text-align:center">
 <a href="/images/oldsite11.png"><img src="/images/oldsite1.png" /></a>
@@ -25,7 +25,7 @@ The screenshots demonstrates below how this site looks on an Samsung Galaxy S3 c
 <a href="/images/oldsite33.png"><img src="/images/oldsite3.png" /></a>
 </div>
 
-##New look##
+## New look ##
 <div style=";text-align:center">
 <a href="/images/newsite11.png"><img src="/images/newsite1.png" /></a>
 <a href="/images/newsite22.png"><img src="/images/newsite2.png" /></a>

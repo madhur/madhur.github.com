@@ -108,7 +108,7 @@ Now browse to http://localhost:4000
 
 #Troubleshooting#
 
-##Liquid error: Bad file descriptor##
+## Liquid error: Bad file descriptor ##
 
 You are likely to hit this error if you are using Python version >3 as opposed to 2.7.5 as mentioned in the beginning
 
@@ -132,14 +132,14 @@ I have created the gist of the changes required [here](https://gist.github.com/1
 
 This will occur if Pygments is not installed. In that case, edit the \_config.yml and Change 'pygments: true' to 'pygments: false'
 
-##Pygments not working ##
+## Pygments not working ##
 
 {% highlight text %}
 gem uninstall pygments.rb --version "=0.5.2"  ; or whatever version you got installed
 gem install pygments.rb --version "=0.5.0"
 {% endhighlight %}
 
-##Failed to build gem native extension. or  "python" is not recognized as an internal or external command, operable program or batch file. ##
+## Failed to build gem native extension. or  "python" is not recognized as an internal or external command, operable program or batch file. ##
 
 "python" here can also be "ruby", "gem" or "easy_install", etc.
 
@@ -159,7 +159,7 @@ In Windows, you can also set PATH permanently by following the steps below
 4. Append ;C:\python27 to the Path variable.
 5. Restart Command Prompt.
 
-##If you get the following error with the --watch option##
+## If you get the following error with the --watch option ##
 
 {% highlight text %}
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/listen-1.3.1/lib/listen/adapter.rb:207:in `require': cannot load such file -- wdm (LoadError)
@@ -172,7 +172,7 @@ require 'rbconfig'
 gem 'wdm', '>= 0.1.0' if RbConfig::CONFIG['target_os'] =~ /mswin|mingw/i
 {% endhighlight %}
 
-##UTF-8 breaks on windows##
+## UTF-8 breaks on windows ##
 UTF-8 files have sometimes problems on Windows. To fix this error, either have your files in non-UTF-8 format or specify `RedCarpet` as your Markdown engine in `_config.yml`
 
 {% highlight text %}

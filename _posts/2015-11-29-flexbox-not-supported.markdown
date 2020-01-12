@@ -17,7 +17,7 @@ More analysis revealed that the issue occurred on only pre-kitkat devices. The s
 
 And then, I stumbled upon this [issue](https://github.com/driftyco/ionic/issues/998). Turned out that this issue was because of ionic framework. [Ionic framework](http://ionicframework.com/) by default uses [Flexible Box Layout Module](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Using_CSS_flexible_boxes) called as `flex` in short. As per [this](http://caniuse.com/#feat=flexbox) `flex` is only supported on Android 4.4 and above.
 
-###Solution
+### Solution
 
 The solution was just a one line change where we override the `display` property to `block` instead of `flex`
 

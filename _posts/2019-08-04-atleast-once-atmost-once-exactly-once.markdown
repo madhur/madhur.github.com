@@ -11,7 +11,7 @@ Ever since I have started working with Kafka, I have came across these terms ver
 
 As an engineer, It is very important to understand these concepts.
 
-##At-most once Configuration
+## At-most once Configuration
 
 As the name suggests, At-most-once means the message will be delivered atmost once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically commiting the last offset used.
 
@@ -23,7 +23,7 @@ Note that it is also possible to have at-lest-once scenario with the same config
 
 Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.
 
-##At-least once configuration
+## At-least once configuration
 
 At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.
 
@@ -32,7 +32,7 @@ At-least once as the name suggests, message will be delivered atleast once. Ther
 
 Let's say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.
 
-##Exactly-once configuraition
+## Exactly-once configuraition
 
 Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.
 

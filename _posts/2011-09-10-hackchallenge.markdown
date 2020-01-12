@@ -14,16 +14,16 @@ tags:
 
 Compass Security has come up with a hacking challenge on their [site](https://www.hacking-lab.com/sh/LAE04Jf). The challenge consist of an .NET client having some hidden functionality which needs to be uncovered by the user. I decided to give it a try.
 
-##Requirements##
+## Requirements ##
 * Download  [Application: DotNetFatClientHacking.exe](http://media.hacking-lab.com/largefiles/7205/DotNetFatClientHacking.exe)
 
-##Tools used in the trade##
+## Tools used in the trade ##
 * [Reflector](http://www.reflector.net/) or now better [DotPeek](http://www.jetbrains.com/decompiler/)
 * ILDasm
 * Hex Editor
 * MSDN
 
-##Solution##
+## Solution ##
 
 Let's run our .NET assembly and see what it looks like. Its a normal Windows Form application with just one button which does nothing. I could not figure out anything else from the application.
 

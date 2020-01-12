@@ -16,83 +16,83 @@ Most of the usenet groups are now archived in [Google groups](https://support.go
 Below are some of my select resources for developers on [Google groups](https://groups.google.com/forum/#!overview)
 
 ## Java
-* ###[Akka user list](https://groups.google.com/forum/#!forum/akka-user)
+* ### [Akka user list](https://groups.google.com/forum/#!forum/akka-user)
 
-* ###[asynchttpclient](https://groups.google.com/forum/#!forum/asynchttpclient)
+* ### [asynchttpclient](https://groups.google.com/forum/#!forum/asynchttpclient)
 
-* ###[RxJava](https://groups.google.com/forum/#!forum/rxjava)  
+* ### [RxJava](https://groups.google.com/forum/#!forum/rxjava)  
 
   
 ## Android
-* ###[Android Building](https://groups.google.com/forum/#!forum/android-building)
+* ### [Android Building](https://groups.google.com/forum/#!forum/android-building)
 
-* ###[Android Platform](https://groups.google.com/forum/#!forum/android-platform)
+* ### [Android Platform](https://groups.google.com/forum/#!forum/android-platform)
 
-* ###[adt-dev](https://groups.google.com/forum/#!forum/adt-dev)
+* ### [adt-dev](https://groups.google.com/forum/#!forum/adt-dev)
 
-* ###[acra-discuss](https://groups.google.com/forum/#!forum/acra-discuss)
+* ### [acra-discuss](https://groups.google.com/forum/#!forum/acra-discuss)
 
-* ###[Facebook for Android Beta testers](https://groups.google.com/forum/#!forum/facebook-for-android-beta-testers)  
+* ### [Facebook for Android Beta testers](https://groups.google.com/forum/#!forum/facebook-for-android-beta-testers)  
 
   
 ## Javascript
 
-* ###[backbonejs](https://groups.google.com/forum/#!forum/backbonejs)
+* ### [backbonejs](https://groups.google.com/forum/#!forum/backbonejs)
 
-* ###[faye-users](https://groups.google.com/forum/#!forum/faye-users)
+* ### [faye-users](https://groups.google.com/forum/#!forum/faye-users)
 
-* ###[firebug](https://groups.google.com/forum/#!forum/firebug)
+* ### [firebug](https://groups.google.com/forum/#!forum/firebug)
 
-* ###[httpfiddler](https://groups.google.com/forum/#!forum/httpfiddler)
+* ### [httpfiddler](https://groups.google.com/forum/#!forum/httpfiddler)
 
-* ###[ReactJs](https://groups.google.com/forum/#!forum/reactjs)
+* ### [ReactJs](https://groups.google.com/forum/#!forum/reactjs)
 
-* ###[nodejs](https://groups.google.com/forum/#!forum/nodejs)
+* ### [nodejs](https://groups.google.com/forum/#!forum/nodejs)
 
-* ###[Jquery](https://groups.google.com/forum/#!forum/jquery-en)
+* ### [Jquery](https://groups.google.com/forum/#!forum/jquery-en)
 
-* ###[JsTree](https://groups.google.com/forum/#!forum/jstree)
+* ### [JsTree](https://groups.google.com/forum/#!forum/jstree)
 
 
 ## Ruby / Python
 
-* ###[Jekyll](https://groups.google.com/forum/#!forum/jekyll-rb)
+* ### [Jekyll](https://groups.google.com/forum/#!forum/jekyll-rb)
 
-* ###[celery-users](https://groups.google.com/forum/#!forum/celery-users)
+* ### [celery-users](https://groups.google.com/forum/#!forum/celery-users)
   
 
 ## AngularJs
 
-* ###[AngularJs](https://groups.google.com/forum/#!forum/angular)
+* ### [AngularJs](https://groups.google.com/forum/#!forum/angular)
 
-* ###[angular-cache](https://groups.google.com/forum/#!forum/angular-cache)
+* ### [angular-cache](https://groups.google.com/forum/#!forum/angular-cache)
 
-* ###[angular-data](https://groups.google.com/forum/#!forum/angular-data)
+* ### [angular-data](https://groups.google.com/forum/#!forum/angular-data)
 
   
 ## Google
 
-* ###[Google App Engine](https://groups.google.com/forum/#!forum/google-appengine)
+* ### [Google App Engine](https://groups.google.com/forum/#!forum/google-appengine)
 
-* ###[Google Tasks API](https://groups.google.com/forum/#!forum/google-tasks-api)
+* ### [Google Tasks API](https://groups.google.com/forum/#!forum/google-tasks-api)
 
-* ###[Google Visualization API](https://groups.google.com/forum/#!forum/google-visualization-api)
+* ### [Google Visualization API](https://groups.google.com/forum/#!forum/google-visualization-api)
 
-* ###[Adsense API Forum](https://groups.google.com/forum/#!forum/adsense-api)
+* ### [Adsense API Forum](https://groups.google.com/forum/#!forum/adsense-api)
 
   
 ## Others
 
-* ###[rabbitmq-discuss](https://groups.google.com/forum/#!forum/rabbitmq-discuss)
+* ### [rabbitmq-discuss](https://groups.google.com/forum/#!forum/rabbitmq-discuss)
 
-* ###[rabbitmq-users](https://groups.google.com/forum/#!forum/rabbitmq-users)
+* ### [rabbitmq-users](https://groups.google.com/forum/#!forum/rabbitmq-users)
 
-* ###[Redis](https://groups.google.com/forum/#!forum/redis-db)
+* ### [Redis](https://groups.google.com/forum/#!forum/redis-db)
 
-* ###[memcached](https://groups.google.com/forum/#!forum/memcached)
+* ### [memcached](https://groups.google.com/forum/#!forum/memcached)
 
-* ###[Stomp](https://groups.google.com/forum/#!forum/stomp-spec)
+* ### [Stomp](https://groups.google.com/forum/#!forum/stomp-spec)
 
-* ###[MongoDb User](https://groups.google.com/forum/#!forum/mongodb-user)
+* ### [MongoDb User](https://groups.google.com/forum/#!forum/mongodb-user)
 
 

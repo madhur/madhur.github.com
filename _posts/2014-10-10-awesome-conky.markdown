@@ -12,7 +12,7 @@ tags:
 
 My simple but awesome conky configuration. Feel free to [fork my repo](https://github.com/madhur/awesome-conky) and use it yourself. Though it will require some work to setup.
 
-###Screenshots
+### Screenshots
 Click [here](https://raw.githubusercontent.com/madhur/awesome-conky/master/screenshots/conky.png) to see how it looks on a desktop when nicely arranged
 
 <div style="float:left;width:100%">
@@ -23,7 +23,7 @@ Click [here](https://raw.githubusercontent.com/madhur/awesome-conky/master/scree
  
 
 
-###Features
+### Features
 * Fetches Gmail using Atom feed 
 * Fetches Facebook friend requests, notifications using [fbcmd](http://fbcmd.dtompkins.com/)
 * Fetches Pocket unread items
@@ -32,12 +32,12 @@ Click [here](https://raw.githubusercontent.com/madhur/awesome-conky/master/scree
 * Fetches github statistics
 
 
-###Prerequisites
+### Prerequisites
 * Python 3 - `sudo apt-get install python3`
 * [lm-sensors](http://www.lm-sensors.org/) for monitoring Core temperatures - `sudo apt-get install lm-sensors`
 
 
-###Usage
+### Usage
 1. All the files need to be dropped into `.conky` folder inside your home directory i.e. `~/.conky/`
 
 2. Fonts should be installed to `/usr/share/fonts/` and then executing `sudo fc-cache -fv`
@@ -58,7 +58,7 @@ There are 3 conky configurations as follows:
 
 
 
-###OAuth Setup<a name="oauth"></a>
+### OAuth Setup<a name="oauth"></a>
 Most of the social networks use OAuth as their authentication mechanism. You will need to setup your own OAuth access tokens for the conky to work and update it in `.password.json` file. Given below is each social network which this conky reads data from and its authentication mechanism.
 
 * Gmail - Username / password
@@ -70,7 +70,7 @@ Most of the social networks use OAuth as their authentication mechanism. You wil
 * Feedly - OAuth token must be requested via email
 
 
-###Fonts
+### Fonts
 It utilizes few fonts to render social icons. They are present in the fonts folder
 
 * [Poky](https://github.com/madhur/awesome-conky/raw/master/fonts/Poky.ttf)
@@ -78,11 +78,11 @@ It utilizes few fonts to render social icons. They are present in the fonts fold
 * [Open Sans Light](https://github.com/madhur/awesome-conky/raw/master/fonts/OpenSans-Regular.ttf)
 
 
-###Update Intervals
+### Update Intervals
 There are different intervals configured for each conky and individual social networks within conky configuration file. I am not describing it out here as I assume that user knows how to tweak conky configurations.
 
 
-###Credits
+### Credits
 I would like to thank following people for their awesome open source projects used in this conky:
 
 * [fbcmd](http://fbcmd.dtompkins.com/)

@@ -20,7 +20,7 @@ img:
 -->
 {% endcomment %}
 
-##DashAnalytics for DashClock
+## DashAnalytics for DashClock
 
 DashAnalytics is an extension for [DashClock Widget](https://play.google.com/store/apps/details?id=net.nurik.roman.dashclock)
 
