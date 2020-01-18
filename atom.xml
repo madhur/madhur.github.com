@@ -4,7 +4,7 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2020-01-12T12:25:59+05:30</updated>
+ <updated>2020-01-18T20:13:35+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -13,10 +13,56 @@
  
  
  <entry>
+   <title>Running splunk on docker on OSX</title>
+   <link href="http://madhur.co.in/blog/2020/01/18/running-splunk-docker-osx.html"/>
+   <updated>2020-01-18T00:00:00+05:30</updated>
+   <id>id:/blog/2020/01/18/running-splunk-docker-osx</id>
+   <content type="html">&lt;p&gt;Recently, I tried to try out the &lt;a href=&quot;https://www.splunk.com/&quot;&gt;Splunk&lt;/a&gt; for log aggregation instead of &lt;a href=&quot;https://www.elastic.co/what-is/elk-stack&quot;&gt;ELK stack&lt;/a&gt;. I wanted to see what are the advantages of it over ELK. Well, that’s reserved for another post.&lt;/p&gt;
+
+&lt;p&gt;However, I faced an issue as soon as I start the splunk container.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;homePath&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/opt/splunk/var/lib/splunk/audit/db'&lt;/span&gt; of &lt;span class=&quot;nv&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;_audit on unusable filesystem. Validating databases &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;splunkd validatedb&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; failed with code &lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The problem is that splunk relies on the filesystem with the locking mechanism while the OSX does not have that functionality.&lt;/p&gt;
+
+&lt;p&gt;The solution is to use the option &lt;code class=&quot;highlighter-rouge&quot;&gt;OPTIMISTIC_ABOUT_FILE_LOCKING=1&lt;/code&gt; in the splunk configuration file &lt;code class=&quot;highlighter-rouge&quot;&gt;splunk-launch.conf&lt;/code&gt;. For this, I mounted both the configuration (&lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/splunk/etc&lt;/code&gt;) and the data directory (&lt;code class=&quot;highlighter-rouge&quot;&gt;/opt/splunk/var&lt;/code&gt;) of the splunk through the host machines. This also helps preserves configuration and data in case of docker container exits.&lt;/p&gt;
+
+&lt;p&gt;The following &lt;code class=&quot;highlighter-rouge&quot;&gt;docker-compose.yaml&lt;/code&gt; works perfectly fine for testing out splunk through docker.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3.7&quot;&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;splunk&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;splunk/splunk:7.2.6&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SPLUNK_START_ARGS=--accept-license&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SPLUNK_PASSWORD=******&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/log:/log&lt;/span&gt;    
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./opt-splunk-etc:/opt/splunk/etc&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./opt-splunk-var:/opt/splunk/var&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;8000:8000&lt;/span&gt;
+
+
+  &lt;span class=&quot;na&quot;&gt;forwarder&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;splunk/universalforwarder:7.2.6&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SPLUNK_START_ARGS=--accept-license&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SPLUNK_PASSWORD==******&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/log:/log&lt;/span&gt;    
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;9997:9997&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>Ensuring git commit messages contain JIRA ID</title>
-   <link href="http://madhur.co.in/blog/2020/01/12/git-prepare-commit-message-jira-id.html"/>
+   <link href="http://madhur.co.in/blog/2020/01/12/git-prepare-commit-message-jira-id-copy.html"/>
    <updated>2020-01-12T00:00:00+05:30</updated>
-   <id>id:/blog/2020/01/12/git-prepare-commit-message-jira-id</id>
+   <id>id:/blog/2020/01/12/git-prepare-commit-message-jira-id copy</id>
    <content type="html">&lt;p&gt;Recently, we implemented a policy where every commit message includes the JIRA ID from the committer. This makes sure that every change to repo is tagged against either a user story or an issue which helps in traceability. Initially, it was difficult and users used to forget it. We had a github hook which would validate the commit message and reject the updates to the remote repo. Users would then amend the commmit using
 &lt;code class=&quot;highlighter-rouge&quot;&gt;git commit --amend&lt;/code&gt; or even &lt;code class=&quot;highlighter-rouge&quot;&gt;git rebase -i HEAD~n&lt;/code&gt; if there are multiple commits to be amended.&lt;/p&gt;
 
@@ -922,48 +968,6 @@ When setting life goals for yourself, it is better to self-ask, how much of risk
 &lt;p&gt;The high performers are also the same. They will never be satisfied with the average. They will do everything in their capacity such as learn, re-skill themselves, practice hard to outperform others.&lt;/p&gt;
 
 &lt;p&gt;PS: Exceptions are always there.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Koshish</title>
-   <link href="http://madhur.co.in/blog/2018/04/07/koshish.html"/>
-   <updated>2018-04-07T00:00:00+05:30</updated>
-   <id>id:/blog/2018/04/07/koshish</id>
-   <content type="html">&lt;p&gt;Here is another piece of poetry by &lt;a href=&quot;https://en.wikipedia.org/wiki/Harivansh_Rai_Bachchan&quot;&gt;Harivansh Rai Bachchan&lt;/a&gt; which was shared in our group sometime back. At that time,  I ignored it as just useless trifle. Looking back I realize how true and motivating it is.&lt;/p&gt;
-
-&lt;pre style=&quot;font-size:16px&quot;&gt;
-लहरों से डर कर नौका पार नहीं होती,
-कोशिश करने वालों की कभी हार नहीं होती।
-
-नन्हीं चींटी जब दाना लेकर चलती है,
-चढ़ती दीवारों पर, सौ बार फिसलती है।
-मन का विश्वास रगों में साहस भरता है,
-चढ़कर गिरना, गिरकर चढ़ना न अखरता है।
-आख़िर उसकी मेहनत बेकार नहीं होती,
-कोशिश करने वालों की कभी हार नहीं होती।
-
-डुबकियां सिंधु में गोताखोर लगाता है,
-जा जा कर खाली हाथ लौटकर आता है।
-मिलते नहीं सहज ही मोती गहरे पानी में,
-बढ़ता दुगना उत्साह इसी हैरानी में।
-मुट्ठी उसकी खाली हर बार नहीं होती,
-कोशिश करने वालों की कभी हार नहीं होती।
-
-असफलता एक चुनौती है, इसे स्वीकार करो,
-क्या कमी रह गई, देखो और सुधार करो।
-जब तक न सफल हो, नींद चैन को त्यागो तुम,
-संघर्ष का मैदान छोड़ कर मत भागो तुम।
-कुछ किये बिना ही जय जय कार नहीं होती,
-कोशिश करने वालों की कभी हार नहीं होती।
-&lt;/pre&gt;
-
-&lt;p&gt;If this was not enough, here is a recent &lt;a href=&quot;https://twitter.com/RayDalio/status/981995852456693761&quot;&gt;tweet&lt;/a&gt; by &lt;a href=&quot;https://en.wikipedia.org/wiki/Ray_Dalio&quot;&gt;Ray Dalio&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;It’s important to understand the difference between “you had a failure” and “you are a failure.” 
-People who think they are a failure because they had a failure will fail.&lt;/p&gt;
-&lt;/blockquote&gt;
 </content>
  </entry>
  
