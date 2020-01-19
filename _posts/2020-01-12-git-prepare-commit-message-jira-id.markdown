@@ -3,6 +3,7 @@ layout: blog-post
 title: "Ensuring git commit messages contain JIRA ID"
 excerpt: "Ensuring git commit messages contain JIRA ID"
 disqus_id: /2020/01/12/git-prepare-commit-message-jira-id/
+slug: git-prepare-commit-message-jira-id
 tags:
 - Git
 ---
