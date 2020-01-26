@@ -4,13 +4,59 @@
  <title>Coding it my way</title>
  <link href="http://madhur.co.in/atom.xml" rel="self"/>
  <link href="http://madhur.co.in/blogindex.html/"/>
- <updated>2020-01-20T19:19:39+05:30</updated>
+ <updated>2020-01-26T11:14:14+05:30</updated>
  <id>http://madhur.co.in/blogindex.html</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Must have Java code analysis Tools - Part 1</title>
+   <link href="http://madhur.co.in/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html"/>
+   <updated>2020-01-26T00:00:00+05:30</updated>
+   <id>id:/blog/2020/01/26/must-have-java-code-analysis-tools-part1</id>
+   <content type="html">&lt;p&gt;When you are working in a big team ( &amp;gt; 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
+class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.&lt;/p&gt;
+
+&lt;p&gt;In this post, we will look at &lt;a href=&quot;https://github.com/checkstyle/checkstyle&quot;&gt;checkstyle&lt;/a&gt; , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even befor the compile phase has started&lt;/p&gt;
+
+&lt;h2 id=&quot;running-with-build-process&quot;&gt;Running with build process&lt;/h2&gt;
+
+&lt;p&gt;The code analysis tools such as checkstyle are most useful when integrated with build process as useful reports can be generated and even build can be failed to enforce the standards.&lt;/p&gt;
+
+&lt;p&gt;For example, We use the following section in &lt;a href=&quot;https://maven.apache.org/guides/introduction/introduction-to-the-pom.html&quot;&gt;pom.xml&lt;/a&gt; to run checkstyle as part of build process&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.maven.plugins&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;maven-checkstyle-plugin&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.1.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;configLocation&amp;gt;&lt;/span&gt;./checks.xml&lt;span class=&quot;nt&quot;&gt;&amp;lt;/configLocation&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;encoding&amp;gt;&lt;/span&gt;UTF-8&lt;span class=&quot;nt&quot;&gt;&amp;lt;/encoding&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;consoleOutput&amp;gt;&lt;/span&gt;true&lt;span class=&quot;nt&quot;&gt;&amp;lt;/consoleOutput&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;failsOnError&amp;gt;&lt;/span&gt;true&lt;span class=&quot;nt&quot;&gt;&amp;lt;/failsOnError&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;linkXRef&amp;gt;&lt;/span&gt;false&lt;span class=&quot;nt&quot;&gt;&amp;lt;/linkXRef&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;id&amp;gt;&lt;/span&gt;validate&lt;span class=&quot;nt&quot;&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;phase&amp;gt;&lt;/span&gt;validate&lt;span class=&quot;nt&quot;&gt;&amp;lt;/phase&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
+				&lt;span class=&quot;nt&quot;&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;check&lt;span class=&quot;nt&quot;&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
+			&lt;span class=&quot;nt&quot;&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here setting &lt;code class=&quot;highlighter-rouge&quot;&gt;failsOnError&lt;/code&gt;  attribute &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt; causes the build to fail if violations are fail. The file &lt;code class=&quot;highlighter-rouge&quot;&gt;checks.xml&lt;/code&gt; specifies the styling configuration. I used the modified &lt;a href=&quot;https://google.github.io/styleguide/javaguide.html#s4.1-braces&quot;&gt;google check style&lt;/a&gt; to make our own styling conventions.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/madhur/745b42c72efa8986340cb05acab91497.js&quot;&gt;&lt;/script&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Running splunk on docker on OSX</title>
@@ -933,41 +979,6 @@ has first-class support for both streams and tables, which is where stream proce
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Here is the link to complete &lt;a href=&quot;https://github.com/madhur/camel-example&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Life is a game of risk and reward</title>
-   <link href="http://madhur.co.in/blog/2018/04/18/liferiskreward.html"/>
-   <updated>2018-04-18T00:00:00+05:30</updated>
-   <id>id:/blog/2018/04/18/liferiskreward</id>
-   <content type="html">&lt;p&gt;I can’t stop thinking of life as a game of risk and reward. Achieving anything great in life requires substantial risk whether fame, money or success.&lt;/p&gt;
-
-&lt;p&gt;Many sportsman who excel in their field risk considerable physical injuries to attain that level of wealth, fame and success. Many people believe that becoming a sportsperson is a path to becoming rich. Its highly untrue. Unless one reaches the pinnacle i.e. international level (which by no means is a small feat), don’t even dream of becoming rich by playing state or even national level sports. National level sportsman are payed far below their international counterparts. It is also worth noting that a sportperson might play at max 10-15 yrs before taking retirement. Hence their earning potential is maximized in this period.&lt;/p&gt;
-
-&lt;p&gt;Moving away from sports, What about enterpreneurs who run companies? What’s their risk? Just like sportsperson carry physical injuries, enterpreneurship risk mental injuries. This might be a surprise for many, but its the unsaid truth of enterpreneurship known between fellow enterpreneurs only. Check out the following articles:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.inc.com/magazine/201309/jessica-bruder/psychological-price-of-entrepreneurship.html&quot;&gt;The Psychological Price of Entrepreneurship&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.theglobeandmail.com/report-on-business/small-business/startups/why-so-many-entrepreneurs-struggle-with-mental-illness/article30042089/&quot;&gt;Why so many entrepreneurs struggle with mental illness&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.huffingtonpost.com/amy-morin/entrepreneur-mental-health_b_6946718.html&quot;&gt;There’s a Hidden Dark Side to Being an Entrepreneur — It Can Wreak Havoc on Your Mental Health&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.marketwatch.com/story/elon-musk-admits-to-unrelenting-stress-says-he-may-be-bipolar-2017-07-31&quot;&gt;Elon Musk gets personal about his ‘terrible lows’ and ‘unrelenting stress’&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/elon_quote.png&quot; /&gt;&lt;/p&gt;
-&lt;p /&gt;
-
-&lt;p&gt;Not just that, 90% of startups end up in failure, that means earning potential during that period is lost for an enterpreneur.&lt;/p&gt;
-
-&lt;p&gt;So, the next time you are thinking of achieving great success without paying any price or taking any big risk. You can very well stop right there. 
-When setting life goals for yourself, it is better to self-ask, how much of risk and pain you are willing to struggle for?&lt;/p&gt;
-
-&lt;p&gt;Don’t believe in luck or born intelligence. Everything can be learnt through practice hard work.&lt;/p&gt;
-
-&lt;p&gt;The high performers are also the same. They will never be satisfied with the average. They will do everything in their capacity such as learn, re-skill themselves, practice hard to outperform others.&lt;/p&gt;
-
-&lt;p&gt;PS: Exceptions are always there.&lt;/p&gt;
 </content>
  </entry>
  
