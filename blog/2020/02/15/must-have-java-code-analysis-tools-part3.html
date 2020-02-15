@@ -4,11 +4,11 @@
 
 <head>
     <meta charset="utf-8" /> 
-    <title>Must have Java code analysis Tools - Part 1 &#8211; Madhur Ahuja</title>
+    <title>Must have Java code analysis Tools - Part 3 &#8211; Madhur Ahuja</title>
     
 
     <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Must have Java code analysis Tools - Part 1" />
+    <meta name="description" content=" Must have Java code analysis Tools - Part 3" />
 
     <link rel="start" href="/" />
 
@@ -122,12 +122,12 @@
 
 		<article id="blog-article" class="post col-md-12 clearfix">
 
-				<header><h1>Must have Java code analysis Tools - Part 1</h1></header>
+				<header><h1>Must have Java code analysis Tools - Part 3</h1></header>
 			
 					<!-- Place this tag where you want the +1 button to render -->
 <div class="row social hidden-xs">
 	<div class="col-md-2 col-sm-2">
-		<time datetime="2020-01-26 00:00:00 +0530" pubdate="pubdate">26 January 2020</time>
+		<time datetime="2020-02-15 00:00:00 +0530" pubdate="pubdate">15 February 2020</time>
 	</div>
     <div class="social-icon col-md-1 col-sm-1">
         <div class="g-plusone" data-size="small"></div>
@@ -196,47 +196,52 @@
 
 
 			 <ul>
+  <li><a href="/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html">Must have Java code analysis Tools - Part 1</a></li>
   <li><a href="/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html">Must have Java code analysis Tools - Part 2</a></li>
-  <li><a href="/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html">Must have Java code analysis Tools - Part 3</a></li>
 </ul>
 
-<p>When you are working in a big team ( &gt; 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
-class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.</p>
+<p>In the last <a href="/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html">post</a>, we looked at <a href="https://spotbugs.github.io/">Spotbugs</a>, which focuses on the code linting at the bytecode level.</p>
 
-<p>In this post, we will look at <a href="https://github.com/checkstyle/checkstyle">checkstyle</a> , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even befor the compile phase has started</p>
+<p>In this post, we will look at <a href="https://pmd.github.io/">PMD</a>, which agains works at the source level to find out possible bugs in your java code.</p>
 
-<h2 id="running-with-build-process">Running with build process</h2>
+<p>The list of entire checks which PMD finds can be found <a href="https://pmd.github.io/pmd-6.21.0/pmd_rules_java.html">here</a></p>
 
-<p>The code analysis tools such as checkstyle are most useful when integrated with build process as useful reports can be generated and even build can be failed to enforce the standards.</p>
+<p>There is also a <a href="https://stackoverflow.com/questions/4297014/what-are-the-differences-between-pmd-and-findbugs">discussion</a> of differences between Findbugs and PMD</p>
 
-<p>For example, We use the following section in <a href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html">pom.xml</a> to run checkstyle as part of build process</p>
+<h2 id="running-the-pmd">Running the PMD</h2>
 
-<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;plugin&gt;</span>
-	<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
-	<span class="nt">&lt;artifactId&gt;</span>maven-checkstyle-plugin<span class="nt">&lt;/artifactId&gt;</span>
-	<span class="nt">&lt;version&gt;</span>3.1.0<span class="nt">&lt;/version&gt;</span>
-	<span class="nt">&lt;configuration&gt;</span>
-		<span class="nt">&lt;configLocation&gt;</span>./checks.xml<span class="nt">&lt;/configLocation&gt;</span>
-		<span class="nt">&lt;encoding&gt;</span>UTF-8<span class="nt">&lt;/encoding&gt;</span>
-		<span class="nt">&lt;consoleOutput&gt;</span>true<span class="nt">&lt;/consoleOutput&gt;</span>
-		<span class="nt">&lt;failsOnError&gt;</span>true<span class="nt">&lt;/failsOnError&gt;</span>
-		<span class="nt">&lt;linkXRef&gt;</span>false<span class="nt">&lt;/linkXRef&gt;</span>
-	<span class="nt">&lt;/configuration&gt;</span>
-	<span class="nt">&lt;executions&gt;</span>
-		<span class="nt">&lt;execution&gt;</span>
-			<span class="nt">&lt;id&gt;</span>validate<span class="nt">&lt;/id&gt;</span>
-			<span class="nt">&lt;phase&gt;</span>validate<span class="nt">&lt;/phase&gt;</span>
-			<span class="nt">&lt;goals&gt;</span>
-				<span class="nt">&lt;goal&gt;</span>check<span class="nt">&lt;/goal&gt;</span>
-			<span class="nt">&lt;/goals&gt;</span>
-		<span class="nt">&lt;/execution&gt;</span>
-	<span class="nt">&lt;/executions&gt;</span>
-<span class="nt">&lt;/plugin&gt;</span>
+<p>Instead of focusing on running with build process, I will focus on running it manually. Though it still can be integrated with build process and that remains the recommended apporach.</p>
+
+<p>On MAC, it can be simply installed with command <code class="highlighter-rouge">brew install pmd</code></p>
+
+<p>On other OS, installation instructures are given <a href="https://pmd.github.io/latest/pmd_userdocs_installation.html">here</a></p>
+
+<h3 id="configuring-rules">Configuring Rules</h3>
+
+<p>As shown in the documentation, PMD comes with rich set of rules. As opposed to Checkstyle, PMD is lot fuzzier in its analysis i.e. it can flag rules, which sometimes might not be really a violation. For this reason, PMD allows you to assign priorities (a number between 1 to 5) to the rules and then based on your preferences, you can choose to fix, let’s say highest priority issues only (1 being the highest).</p>
+
+<h3 id="executing-pmd">Executing PMD</h3>
+
+<p>Once PMD is installed, it can be executed simply as below in the root directory of your project.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pmd pmd <span class="nt">-d</span> ./ <span class="nt">-language</span> java <span class="nt">-R</span> rulesets/java/quickstart.xml
 </code></pre></div></div>
 
-<p>Here setting <code class="highlighter-rouge">failsOnError</code>  attribute <code class="highlighter-rouge">true</code> causes the build to fail if violations are fail. The file <code class="highlighter-rouge">checks.xml</code> specifies the styling configuration. I used the modified <a href="https://google.github.io/styleguide/javaguide.html#s4.1-braces">google check style</a> to make our own styling conventions.</p>
+<p>Here <code class="highlighter-rouge">rulesets/java/quickstart.xml</code> specifies the list of rules to be executed which is an inbuilt ruleset to get started with.</p>
 
-<script src="https://gist.github.com/madhur/745b42c72efa8986340cb05acab91497.js"></script>
+<p>We can also filter the output by priority, such as</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pmd pmd <span class="nt">-d</span> ./ <span class="nt">-language</span> java <span class="nt">-R</span> rulesets/java/quickstart.xml - min 2
+</code></pre></div></div>
+
+<p>I prefer to create my own rules file for my projects. A custom rule file can be specified as</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pmd pmd <span class="nt">-d</span> ./ <span class="nt">-language</span> java <span class="nt">-R</span> ./pmd-rules.xml
+</code></pre></div></div>
+
+<p>Finally, here is the list of rules, which I use for my projects. This has served us really well.</p>
+
+<script src="https://gist.github.com/madhur/62e57a851b1dbfbbc3a2646d32dd8897.js"></script>
 
 
 			<footer>
@@ -266,9 +271,9 @@ class naming conventions everytime, unused variables or imports etc. Hence, its 
 			<script type="text/javascript">
   var disqus_developer = 0; // developer mode is on
   var disqus_shortname = 'madhur';
-  var disqus_identifier = '/2020/01/26/must-have-java-code-analysis-tools-part1/';
-  var disqus_title = 'Must have Java code analysis Tools - Part 1';
-  var disqus_url = 'http://madhur.co.in/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html';
+  var disqus_identifier = '/2020/02/15/must-have-java-code-analysis-tools-part3/';
+  var disqus_title = 'Must have Java code analysis Tools - Part 3';
+  var disqus_url = 'http://madhur.co.in/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html';
   (function() {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';

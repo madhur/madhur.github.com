@@ -3,13 +3,69 @@
  
  <title>Coding it my way</title>
   <link href="http://madhur.co.in/blog/"/>
- <updated>2020-02-08T22:08:20+05:30</updated>
+ <updated>2020-02-15T14:37:46+05:30</updated>
  <id>http://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Must have Java code analysis Tools - Part 3</title>
+   <link href="http://madhur.co.in/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html"/>
+   <updated>2020-02-15T00:00:00+05:30</updated>
+   <id>id:/blog/2020/02/15/must-have-java-code-analysis-tools-part3</id>
+   <content type="html">&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html&quot;&gt;Must have Java code analysis Tools - Part 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html&quot;&gt;Must have Java code analysis Tools - Part 2&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the last &lt;a href=&quot;/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html&quot;&gt;post&lt;/a&gt;, we looked at &lt;a href=&quot;https://spotbugs.github.io/&quot;&gt;Spotbugs&lt;/a&gt;, which focuses on the code linting at the bytecode level.&lt;/p&gt;
+
+&lt;p&gt;In this post, we will look at &lt;a href=&quot;https://pmd.github.io/&quot;&gt;PMD&lt;/a&gt;, which agains works at the source level to find out possible bugs in your java code.&lt;/p&gt;
+
+&lt;p&gt;The list of entire checks which PMD finds can be found &lt;a href=&quot;https://pmd.github.io/pmd-6.21.0/pmd_rules_java.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;There is also a &lt;a href=&quot;https://stackoverflow.com/questions/4297014/what-are-the-differences-between-pmd-and-findbugs&quot;&gt;discussion&lt;/a&gt; of differences between Findbugs and PMD&lt;/p&gt;
+
+&lt;h2 id=&quot;running-the-pmd&quot;&gt;Running the PMD&lt;/h2&gt;
+
+&lt;p&gt;Instead of focusing on running with build process, I will focus on running it manually. Though it still can be integrated with build process and that remains the recommended apporach.&lt;/p&gt;
+
+&lt;p&gt;On MAC, it can be simply installed with command &lt;code class=&quot;highlighter-rouge&quot;&gt;brew install pmd&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;On other OS, installation instructures are given &lt;a href=&quot;https://pmd.github.io/latest/pmd_userdocs_installation.html&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;configuring-rules&quot;&gt;Configuring Rules&lt;/h3&gt;
+
+&lt;p&gt;As shown in the documentation, PMD comes with rich set of rules. As opposed to Checkstyle, PMD is lot fuzzier in its analysis i.e. it can flag rules, which sometimes might not be really a violation. For this reason, PMD allows you to assign priorities (a number between 1 to 5) to the rules and then based on your preferences, you can choose to fix, let’s say highest priority issues only (1 being the highest).&lt;/p&gt;
+
+&lt;h3 id=&quot;executing-pmd&quot;&gt;Executing PMD&lt;/h3&gt;
+
+&lt;p&gt;Once PMD is installed, it can be executed simply as below in the root directory of your project.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pmd pmd &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; ./ &lt;span class=&quot;nt&quot;&gt;-language&lt;/span&gt; java &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; rulesets/java/quickstart.xml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here &lt;code class=&quot;highlighter-rouge&quot;&gt;rulesets/java/quickstart.xml&lt;/code&gt; specifies the list of rules to be executed which is an inbuilt ruleset to get started with.&lt;/p&gt;
+
+&lt;p&gt;We can also filter the output by priority, such as&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pmd pmd &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; ./ &lt;span class=&quot;nt&quot;&gt;-language&lt;/span&gt; java &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; rulesets/java/quickstart.xml - min 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I prefer to create my own rules file for my projects. A custom rule file can be specified as&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pmd pmd &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; ./ &lt;span class=&quot;nt&quot;&gt;-language&lt;/span&gt; java &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; ./pmd-rules.xml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, here is the list of rules, which I use for my projects. This has served us really well.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/madhur/62e57a851b1dbfbbc3a2646d32dd8897.js&quot;&gt;&lt;/script&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Incrementally routing traffic to newer version of service</title>
@@ -64,7 +120,12 @@
    <link href="http://madhur.co.in/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html"/>
    <updated>2020-02-02T00:00:00+05:30</updated>
    <id>id:/blog/2020/02/02/must-have-java-code-analysis-tools-part2</id>
-   <content type="html">&lt;p&gt;In the last post, we looked at &lt;a href=&quot;https://github.com/checkstyle/checkstyle&quot;&gt;checkstyle&lt;/a&gt;, which focuses on the code linting at the source level.&lt;/p&gt;
+   <content type="html">&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html&quot;&gt;Must have Java code analysis Tools - Part 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html&quot;&gt;Must have Java code analysis Tools - Part 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the last post, we looked at &lt;a href=&quot;https://github.com/checkstyle/checkstyle&quot;&gt;checkstyle&lt;/a&gt;, which focuses on the code linting at the source level.&lt;/p&gt;
 
 &lt;p&gt;In this post, we will look at &lt;a href=&quot;https://spotbugs.github.io/&quot;&gt;SpotBugs&lt;/a&gt;, which is a successor of &lt;a href=&quot;http://findbugs.sourceforge.net/&quot;&gt;FindBugs&lt;/a&gt;. SpotBugs works at the bytecode level instead of the source level. Hence it is able, to find out possible bugs in your java code.&lt;/p&gt;
 
@@ -417,7 +478,12 @@
    <link href="http://madhur.co.in/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html"/>
    <updated>2020-01-26T00:00:00+05:30</updated>
    <id>id:/blog/2020/01/26/must-have-java-code-analysis-tools-part1</id>
-   <content type="html">&lt;p&gt;When you are working in a big team ( &amp;gt; 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
+   <content type="html">&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html&quot;&gt;Must have Java code analysis Tools - Part 2&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html&quot;&gt;Must have Java code analysis Tools - Part 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When you are working in a big team ( &amp;gt; 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
 class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.&lt;/p&gt;
 
 &lt;p&gt;In this post, we will look at &lt;a href=&quot;https://github.com/checkstyle/checkstyle&quot;&gt;checkstyle&lt;/a&gt; , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even befor the compile phase has started&lt;/p&gt;
@@ -1184,40 +1250,6 @@ docker-compose up &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt;
     &lt;p&gt;Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message.&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Lessons from History</title>
-   <link href="http://madhur.co.in/blog/2019/06/15/lessonsfromhistory.html"/>
-   <updated>2019-06-15T00:00:00+05:30</updated>
-   <id>id:/blog/2019/06/15/lessonsfromhistory</id>
-   <content type="html">&lt;p&gt;Came across this &lt;a href=&quot;https://www.collaborativefund.com/blog/five-lessons-from-history/&quot;&gt;blog post&lt;/a&gt; and find it very intriguing.&lt;/p&gt;
-
-&lt;p&gt;Lesson #2: Reversion to the mean occurs because people persuasive enough to make something grow don’t have the kind of personalities that allow them to stop before pushing too far.&lt;/p&gt;
-
-&lt;p&gt;What kind of person makes their way to the top of a successful company, or a big country?&lt;/p&gt;
-
-&lt;p&gt;Someone who is determined, optimistic, doesn’t take “no” for an answer, and is relentlessly confident in their own abilities.&lt;/p&gt;
-
-&lt;p&gt;What kind of person is likely to go overboard, bite off more than they can chew, and discount risks that are blindingly obvious to others?&lt;/p&gt;
-
-&lt;p&gt;Someone who is determined, optimistic, doesn’t take “no” for an answer, and is relentlessly confident in their own abilities.&lt;/p&gt;
-
-&lt;p&gt;Reversion to the mean is one of the most common stories in history. It’s the main character in economies, markets, countries, companies, careers – everything.&lt;/p&gt;
-
-&lt;p&gt;Part of the reason it happens is because the same personality traits that push people to the top also increase the odds of pushing them over the edge.&lt;/p&gt;
-
-&lt;p&gt;This is true for countries, particularly empires. A country determined to expand by acquiring more land is unlikely to be run a person capable of saying, “OK, that’s enough. Let’s be thankful for what we have and stop invading other countries.” They’ll keep pushing until they meet their match (usually Russia).&lt;/p&gt;
-
-&lt;p&gt;It’s true for companies. The kind of corporate culture that lets companies dominate an industry is not friendly to people who say, “I think we’ve grown too fast. Maybe we should scale back.” They’ll keep pushing until they’re forced to make painful cuts.&lt;/p&gt;
-
-&lt;p&gt;It’s true for investors. The kind of personality willing to take enough risks to earn outsized returns is generally not compatible with the kind of personality willing to shift everything into muni bonds once they’ve made enough money. They’ll keep taking risks until those risks backfire. It’s why the Forbes list of billionaires has 60% turnover per decade.&lt;/p&gt;
-
-&lt;p&gt;Long-term success in any endeavor requires two tasks: Getting something, and keeping it. Getting rich and staying rich. Getting market share and keeping market share.&lt;/p&gt;
-
-&lt;p&gt;These things are not only separate tasks, but often require contradictory skills. Getting something often requires risk-taking and confidence. Keeping it often requires room for error and paranoia. Sometimes a person masters both skills – Warren Buffett is a good example. But it’s rare. Far more common is big success occurring because a person had a set of traits that also come at the direct cost of keeping their success. Which is why downside reversion to the mean is such a repeating theme in history.&lt;/p&gt;
-
 </content>
  </entry>
  
