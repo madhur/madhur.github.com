@@ -7,6 +7,10 @@ tags:
 - Java
 ---
 
+
+* [Must have Java code analysis Tools - Part 2]({% post_url 2020-02-02-must-have-java-code-analysis-tools-part2 %}) 
+* [Must have Java code analysis Tools - Part 3]({% post_url 2020-02-15-must-have-java-code-analysis-tools-part3 %}) 
+
 When you are working in a big team ( > 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
 class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.
 

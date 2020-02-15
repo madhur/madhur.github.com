@@ -7,6 +7,9 @@ tags:
 - Java
 ---
 
+* [Must have Java code analysis Tools - Part 1]({% post_url 2020-01-26-must-have-java-code-analysis-tools-part1 %}) 
+* [Must have Java code analysis Tools - Part 3]({% post_url 2020-02-15-must-have-java-code-analysis-tools-part3 %}) 
+
 In the last post, we looked at [checkstyle](https://github.com/checkstyle/checkstyle), which focuses on the code linting at the source level.
 
 In this post, we will look at [SpotBugs](https://spotbugs.github.io/), which is a successor of [FindBugs](http://findbugs.sourceforge.net/). SpotBugs works at the bytecode level instead of the source level. Hence it is able, to find out possible bugs in your java code.
