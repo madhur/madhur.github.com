@@ -143,7 +143,7 @@ module.exports = function(grunt) {
         gitpush: {
             task: {
                 options: {
-                    remote: 'upstream',
+                    remote: 'origin',
                     branch: 'master',
                     cwd: '../site/'
                 }
