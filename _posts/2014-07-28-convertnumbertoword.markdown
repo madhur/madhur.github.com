@@ -101,7 +101,7 @@ This time another algorithm, converting a number to word. Try typing in a number
 
 The algorithm in Javascript below. [Click here](https://gist.github.com/madhur/5f4f49149e9ce68f619e) for C# gist.
 
-```Javascript
+```js
 NumberToWords= function(number)
 			{
 				
