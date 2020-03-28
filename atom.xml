@@ -3,13 +3,53 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-03-22T08:25:03+05:30</updated>
+ <updated>2020-03-28T17:04:07+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Adding package suppressions in Checkstyle and Spotbugs</title>
+   <link href="https://madhur.co.in/blog/2020/03/28/adding-package-suppressions-checkstyle-spotbugs.html"/>
+   <updated>2020-03-28T00:00:00+05:30</updated>
+   <id>id:/blog/2020/03/28/adding-package-suppressions-checkstyle-spotbugs</id>
+   <content type="html">&lt;p&gt;I was recently trying to add a package level suppression in both checkstyle / spotbugs and found it to be having wierd syntax.&lt;/p&gt;
+
+&lt;p&gt;For &lt;a href=&quot;https://github.com/checkstyle/checkstyle/blob/master/config/suppressions.xml&quot;&gt;checkstyle&lt;/a&gt;,&lt;/p&gt;
+
+&lt;p&gt;First add a module in your checkstyle configuration file&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;module&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SuppressionFilter&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;property&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;file&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;./suppressions.xml&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/module&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And then in the &lt;code class=&quot;highlighter-rouge&quot;&gt;suppressions.xml&lt;/code&gt; , specify the package as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;&amp;lt;!DOCTYPE suppressions PUBLIC
+        &quot;-//Puppy Crawl//DTD Suppressions 1.1//EN&quot;
+        &quot;http://www.puppycrawl.com/dtds/suppressions_1_1.dtd&quot;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;suppressions&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;suppress&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;files=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;[\\/]com[\\/]domain[\\/]package&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;checks=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/suppressions&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For, &lt;a href=&quot;https://spotbugs.readthedocs.io/en/stable/filter.html&quot;&gt;Spotbugs&lt;/a&gt;, you specify the package level suppression in the exclude file as follows&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;FindBugsFilter&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;Match&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;Package&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;~com\.domain\.package.*&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/Match&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/FindBugsFilter&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Lessons learnt using Apache HTTP Connection Pooling Library</title>
@@ -1083,74 +1123,6 @@ This is usually the best strategy. Because your database engine will handle any 
   &lt;li&gt;While processing the messages, get hold of the offset of each message.  Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
 &lt;/ul&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Deadlocks in Optimistic locking</title>
-   <link href="https://madhur.co.in/blog/2019/08/02/deadlocks-optimistic-locking.html"/>
-   <updated>2019-08-02T00:00:00+05:30</updated>
-   <id>id:/blog/2019/08/02/deadlocks-optimistic-locking</id>
-   <content type="html">&lt;p&gt;Recently, our application has been generating lot of deadlocks in Oracle database. The application uses &lt;a href=&quot;https://en.wikipedia.org/wiki/Optimistic_concurrency_control&quot;&gt;Optimistic concurrency control&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Error: ORA-00060: deadlock detected while waiting for resource&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;In an optimistic concurrency control, transactions use data resources without acquiring locks on the resources. Before committing, each transaction verifies that no other transaction has modified the data it has read. If the check reveals conflicting modifications, the committing transaction rolls back and can be restarted.&lt;/p&gt;
-
-&lt;p&gt;Which begs the questions, why should there be a deadlock at all in optimistic concurrency control?&lt;/p&gt;
-
-&lt;p&gt;The keypoint to understand here first is that Optimistic locking is not a feature provided by DBMS engine. Databases just provide mechanism to initiate transactions, rollbacks, versioning and locks. Ultiamtely, it is upto the application to implement eithe optimisitc locking or pessimistic locking.&lt;/p&gt;
-
-&lt;p&gt;An example of implementing optimistic locking is as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_line1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;zip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addressTable&lt;/span&gt;
- &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;some key&amp;gt;&amp;gt;`&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;When you are about to do the update, you use the version in your update and throw an error if the row changed:&lt;/p&gt;
-
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;addressTable&lt;/span&gt;
-   &lt;span class=&quot;k&quot;&gt;SET&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_line1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new address line 1&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-       &lt;span class=&quot;n&quot;&gt;city&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new city&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-       &lt;span class=&quot;k&quot;&gt;state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new state&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-       &lt;span class=&quot;n&quot;&gt;zip&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;new zip&amp;gt;&amp;gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-       &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
- &lt;span class=&quot;k&quot;&gt;WHERE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;some key&amp;gt;&amp;gt;`&lt;/span&gt;
-   &lt;span class=&quot;k&quot;&gt;AND&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;`&amp;lt;&amp;lt;version you read initially&amp;gt;&amp;gt;`&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;SQL&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ROWCOUNT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;THEN&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;RAISE_APPLICATION_ERROR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;20001&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Oops, the row has changed since you read it.'&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;END&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;However, it is possible for a deadlock to occur in oracle, because of the way transactions are implemented in database engines.&lt;/p&gt;
-
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;BEGIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;-- in one connection&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;COMMIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;BEGIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;-- in another connection, at the &quot;exact same time&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;UPDATE&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;thing_1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;COMMIT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This is the classic example of a deadlock&lt;/p&gt;
-
-&lt;p&gt;After a few seconds, Oracle will detect the deadlock and pick one of the sessions and ‘rollback’ the statement. This is where we see our first misunderstanding about deadlocks.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Oracle does not kill the session.&lt;/li&gt;
-  &lt;li&gt;Oracle does not kill the transaction.&lt;/li&gt;
-  &lt;li&gt;Oracle only kills the statement.&lt;/li&gt;
-  &lt;li&gt;Oracle does rollback the failing statement, but Oracle does not rollback the entire transaction that the failing statement is part of. (Correction by Mark Bobak.)
-PMON (Process Monitor) does not clear out the locks.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;It is the responsibility of the session that detects the “ORA-00060 deadlock detected while waiting for resource” error to trap and handle the error by issuing a rollback (or a commit) command. Only once this has been done will the other session be able to continue.&lt;/p&gt;
 </content>
  </entry>
  
