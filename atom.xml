@@ -3,13 +3,58 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-03-28T17:04:07+05:30</updated>
+ <updated>2020-04-11T13:13:33+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Fastest way to spin up Kubernetes cluster on AWS</title>
+   <link href="https://madhur.co.in/blog/2020/04/11/fastest-way-spin-kubernetes-cluster.html"/>
+   <updated>2020-04-11T00:00:00+05:30</updated>
+   <id>id:/blog/2020/04/11/fastest-way-spin-kubernetes-cluster</id>
+   <content type="html">&lt;p&gt;Recently, I was trying to do a POC on Kubernetes and required a kuberentes Cluster.&lt;/p&gt;
+
+&lt;p&gt;Its easy to spin up a single machine cluster using &lt;a href=&quot;https://kubernetes.io/docs/tasks/tools/install-minikube/&quot;&gt;Minkube&lt;/a&gt; on Windows, Linux and MacOS&lt;/p&gt;
+
+&lt;p&gt;But the behaviour of Minkube is not as close to real Kubernetes cluster primarily because:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;You can’t simulate multiple nodes&lt;/li&gt;
+  &lt;li&gt;You cannot have a public DNS for your services unless you use &lt;a href=&quot;https://minikube.sigs.k8s.io/docs/handbook/accessing/#using-minikube-tunnel&quot;&gt;minikube tunnel&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;The way minikube runs either in Docker, VirtualBox or over HyperV makes it difficult to test some of the networking features which would be as close to real Kubernetes cluster&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Because of the above disadvantages, I decided to setup my own Kubernetes cluster in AWS. Sure it would cost me some $$$ but atleast my testing would as close to real.&lt;/p&gt;
+
+&lt;p&gt;Couple of years ago, I remember following long series of steps to setup cluster on AWS. But now, thanks to &lt;a href=&quot;https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html&quot;&gt;AWS CLI and eksctl&lt;/a&gt;, it takes a few terminal commands to run AWS Kubernetes cluster without even logging onto AWS UI.&lt;/p&gt;
+
+&lt;p&gt;Assuming, you have AWS CLI installed and configured with your AWS Credentials,&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;eksctl create cluster &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--name&lt;/span&gt; prod &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--region&lt;/span&gt; ap-south-1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--nodegroup-name&lt;/span&gt; standard-workers &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--node-type&lt;/span&gt; t3.medium &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--nodes&lt;/span&gt; 3 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--nodes-min&lt;/span&gt; 1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--nodes-max&lt;/span&gt; 4 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--ssh-access&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--ssh-public-key&lt;/span&gt; ~/.ssh/id_rsa.pub &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;--managed&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here is the output of &lt;code class=&quot;highlighter-rouge&quot;&gt;kubectl cluster-info&lt;/code&gt; after running the above command&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;~ ./kubectl cluster-info
+Kubernetes master is running at https://92797800687320683968AF0937C2B5D3.yl4.ap-south-1.eks.amazonaws.com
+CoreDNS is running at https://92797800687320683968AF0937C2B5D3.yl4.ap-south-1.eks.amazonaws.com/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Adding package suppressions in Checkstyle and Spotbugs</title>
@@ -1073,56 +1118,6 @@ This is usually the best strategy. Because your database engine will handle any 
 
 &lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
 &lt;p&gt;&lt;a href=&quot;https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c&quot;&gt;Sharding &amp;amp; IDs at Instagram&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Meaning of atleast once, atmost once and exactly once delivery</title>
-   <link href="https://madhur.co.in/blog/2019/08/04/atleast-once-atmost-once-exactly-once.html"/>
-   <updated>2019-08-04T00:00:00+05:30</updated>
-   <id>id:/blog/2019/08/04/atleast-once-atmost-once-exactly-once</id>
-   <content type="html">&lt;p&gt;Ever since I have started working with Kafka, I have came across these terms very frequently, Atleast once, Atmost once and Exactly Once.&lt;/p&gt;
-
-&lt;p&gt;As an engineer, It is very important to understand these concepts.&lt;/p&gt;
-
-&lt;h2 id=&quot;at-most-once-configuration&quot;&gt;At-most once Configuration&lt;/h2&gt;
-
-&lt;p&gt;As the name suggests, At-most-once means the message will be delivered atmost once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically commiting the last offset used.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
-  &lt;li&gt;Since &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Note that it is also possible to have at-lest-once scenario with the same configuration. Let’s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.&lt;/p&gt;
-
-&lt;p&gt;Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.&lt;/p&gt;
-
-&lt;h2 id=&quot;at-least-once-configuration&quot;&gt;At-least once configuration&lt;/h2&gt;
-
-&lt;p&gt;At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt; OR&lt;/li&gt;
-  &lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Let’s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.&lt;/p&gt;
-
-&lt;h2 id=&quot;exactly-once-configuraition&quot;&gt;Exactly-once configuraition&lt;/h2&gt;
-
-&lt;p&gt;Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.&lt;/p&gt;
-
-&lt;p&gt;In this case offset needs to be manually managed.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Do not make call to &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Implement a &lt;code class=&quot;highlighter-rouge&quot;&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
-  &lt;li&gt;While processing the messages, get hold of the offset of each message.  Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
-&lt;/ul&gt;
-
 </content>
  </entry>
  
