@@ -3,13 +3,29 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-04-11T13:13:33+05:30</updated>
+ <updated>2020-04-25T19:38:46+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Classloaders, Containers & Unit Tests</title>
+   <link href="https://madhur.co.in/blog/2020/04/25/classloaders-containers-unit-tests.html"/>
+   <updated>2020-04-25T00:00:00+05:30</updated>
+   <id>id:/blog/2020/04/25/classloaders-containers-unit-tests</id>
+   <content type="html">&lt;p&gt;Classloaders are an important concept for every engineer to be aware of.&lt;/p&gt;
+
+&lt;p&gt;Classloaders are basic building blocks of Containers like Tomcat. Suppose, we have written a java application and have a singleton instance, we might say its singleton across JVM. Wrong. Its not singleton across JVM, its a singleton across classloader.&lt;/p&gt;
+
+&lt;p&gt;The same application can be deployed in a container like Tomcat, as two different application. In that case, there will be 2 copies of the Singleton object with exact same package and class names inside a single JVM.&lt;/p&gt;
+
+&lt;p&gt;Tomcat has a &lt;a href=&quot;http://tomcat.apache.org/tomcat-8.0-doc/class-loader-howto.html&quot;&gt;dedicated page&lt;/a&gt; on how it loads the classloaders.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Fastest way to spin up Kubernetes cluster on AWS</title>
@@ -1038,86 +1054,6 @@ and kindle books from &lt;a href=&quot;https://www.amazon.in&quot;&gt;Amazon&lt;
 &lt;h2 id=&quot;replaying-messages&quot;&gt;Replaying messages&lt;/h2&gt;
 
 &lt;p&gt;Kafka (starting with version 0.10.1.0) allows you to search message offsets by timestamp. Most language implementations of Kafka API provide corresponding functions/API to perform such a search. Using this API, you can program your consumer to determine the offset of the message that appeared in its assigned partition at or immediately after a certain point of time. When configured for replaying, the consumer can thus determine the offset for a given timestamp, and simply flag it as the “committed” offset. Once this is done, the consumer will start consuming messages from that point onwards, until the the message at the latest offset is consumed. This effectively achieves the “rewind and replay” objective.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>id generation strategies</title>
-   <link href="https://madhur.co.in/blog/2019/08/19/id-generation-strategies.html"/>
-   <updated>2019-08-19T00:00:00+05:30</updated>
-   <id>id:/blog/2019/08/19/id-generation-strategies</id>
-   <content type="html">&lt;p&gt;In any distributed system, one of the primary probem statement every engineer faces is the id generation for an entity. In this post, we are going to look at the id generation strategies at a very high level. I wanted to have a quick reference or a cheat sheet to lookup for a problem like this:&lt;/p&gt;
-
-&lt;p&gt;Design considerations&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Shold the ids be sortable?&lt;/li&gt;
-  &lt;li&gt;The system should introduce as few new ‘moving parts’ as possible&lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Should the id be generated at server or database?&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Let your database handle it
-This is usually the best strategy. Because your database engine will handle any collisions etc. For MySQL, it can be autoincrement number. The con of an autoincrement number is it is susceptible to attacks. You do not want your autoincrement ids to be exposed to public in the form of Order number etc. They also don’t work with sharded databases.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In case you are using, Java with Hibernate JPA, it can be configured as follows:&lt;/p&gt;
-
-&lt;h2 id=&quot;identity&quot;&gt;Identity&lt;/h2&gt;
-
-&lt;p&gt;The GenerationType.IDENTITY is the easiest to use but not the best one from a performance point of view. It relies on an auto-incremented database column and lets the database generate a new value with each insert operation. From a database point of view, this is very efficient because the auto-increment columns are highly optimized, and it doesn’t require any additional statements.&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Id&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@GeneratedValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strategy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GenerationType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;IDENTITY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Column&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;updatable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;sequence&quot;&gt;Sequence&lt;/h2&gt;
-&lt;p&gt;The GenerationType.SEQUENCE is my preferred way to generate primary key values and uses a database sequence to generate unique values.&lt;/p&gt;
-
-&lt;p&gt;It requires additional select statements to get the next value from a database sequence. But this has no performance impact for most applications.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Note that custom sequences are not supported by MySQL.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Id&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@GeneratedValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strategy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GenerationType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;SEQUENCE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Column&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;updatable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;h2 id=&quot;table&quot;&gt;Table&lt;/h2&gt;
-
-&lt;p&gt;The GenerationType.TABLE gets only rarely used nowadays. It simulates a sequence by storing and updating its current value in a database table which requires the use of pessimistic locks which put all transactions into a sequential order. This slows down your application, and you should, therefore, prefer the GenerationType.SEQUENCE, if your database supports sequences, which most popular databases do.&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Id&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@GeneratedValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strategy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;GenerationType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;TABLE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Column&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;updatable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nullable&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Long&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;uuid&quot;&gt;UUID&lt;/h2&gt;
-
-&lt;p&gt;UUIDs are 128-bit hexadecimal numbers that are globally unique. The chances of the same UUID getting generated twice is negligible.&lt;/p&gt;
-
-&lt;p&gt;The problem with UUIDs is that they are very big in size and don’t index well. When your dataset increases, the index size increases as well and the query performance takes a hit.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;If you use a timestamp as the first component of the ID, the IDs remain time-sortable&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;another-component-like-twitter-snowflake&quot;&gt;Another component like twitter snowflake&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/twitter-archive/snowflake/tree/snowflake-2010&quot;&gt;Twitter snowflake&lt;/a&gt; is a dedicated component just for generating ids. I am not sure if its good to have this a new component in your infrastructure.&lt;/p&gt;
-
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
-&lt;ul&gt;
-  &lt;li&gt;MySQL does not support custom sequences. So if you are using mysql and want to avoid auto-increment ids, your only bet is server side.&lt;/li&gt;
-  &lt;li&gt;UUID has performance impact on indexing&lt;/li&gt;
-  &lt;li&gt;Auto-increment keys are not possible in sharded databases&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
-&lt;p&gt;&lt;a href=&quot;https://instagram-engineering.com/sharding-ids-at-instagram-1cf5a71e5a5c&quot;&gt;Sharding &amp;amp; IDs at Instagram&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
