@@ -215,11 +215,11 @@
 
 
 <span class="k">def</span> <span class="nf">orders_v4</span><span class="p">(</span><span class="n">order_number</span><span class="p">):</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s">"GET"</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">querystring</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">request</span><span class="p">(</span><span class="s">"GET"</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">querystring</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span><span class="p">.</span><span class="n">json</span><span class="p">()</span>
 
 <span class="n">newcsvFile</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s">'gom_acr_status.csv'</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span>
-<span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">newcsvFile</span><span class="p">)</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">writer</span><span class="p">(</span><span class="n">newcsvFile</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">process_line</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
     <span class="n">ol_key</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s">'ORDER_LINE_KEY'</span><span class="p">]</span>
@@ -237,13 +237,13 @@
             <span class="k">print</span><span class="p">(</span><span class="n">ftype</span><span class="p">)</span>
             <span class="k">print</span><span class="p">(</span><span class="n">status_desc</span><span class="p">)</span>
             <span class="n">listrow</span> <span class="o">=</span> <span class="p">[</span><span class="n">ol_key</span><span class="p">,</span> <span class="n">order_number</span><span class="p">,</span> <span class="n">ftype</span><span class="p">,</span> <span class="n">status_desc</span><span class="p">]</span>            
-            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">listrow</span><span class="p">)</span>
-            <span class="n">newcsvFile</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">writer</span><span class="p">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">listrow</span><span class="p">)</span>
+            <span class="n">newcsvFile</span><span class="p">.</span><span class="n">flush</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">get_next_line</span><span class="p">():</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">"gom_acr.csv"</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csvfile</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">row</span>
 
@@ -251,8 +251,8 @@
 <span class="n">t</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">map_async</span><span class="p">(</span><span class="n">process_line</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,))</span>
-<span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">t</span><span class="p">.</span><span class="n">map_async</span><span class="p">(</span><span class="n">process_line</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,))</span>
+<span class="n">results</span><span class="p">.</span><span class="n">get</span><span class="p">()</span>
 </code></pre></div></div>
 
 			<footer>

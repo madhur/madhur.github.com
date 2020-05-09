@@ -277,17 +277,17 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I have seen developers blindly putting `try` `except` block with a `retry` statement and then showing off that how `safe` their code is from failures. This is not a good idea. For example, consider the simple task below, which fails because of division by zero in some case (where random no. zero is generated)
 </code></pre></div></div>
 
-<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">divbad_noretry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 	<span class="n">a</span> <span class="o">=</span> <span class="mi">2</span>
-	<span class="n">b</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randing</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+	<span class="n">b</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="n">randing</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 	<span class="n">c</span>  <span class="o">=</span> <span class="n">a</span><span class="o">/</span><span class="n">b</span>
 	<span class="k">print</span> <span class="n">c</span>
 	<span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
 <p>We can blindly put the <code class="highlighter-rouge">except</code> block with a retry logic, but this is a terrible idea. The tasks will now go into infinite retry loop causing waste of CPU resources unless <a href="https://en.wikipedia.org/wiki/Exponential_backoff">back off</a> is used</p>
 
-<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">divbad_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 	<span class="k">try</span><span class="p">:</span>
 		<span class="n">a</span> <span class="o">=</span> <span class="mi">2</span>
@@ -296,12 +296,12 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 		<span class="k">print</span> <span class="n">c</span>
 	<span class="k">except</span><span class="p">:</span>
 		<span class="k">print</span> <span class="s">'exception caught: Divide by zero'</span>
-		<span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>
+		<span class="k">raise</span> <span class="bp">self</span><span class="p">.</span><span class="n">retry</span><span class="p">()</span>
 	<span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
 <p>Another example is a programming mistake, for example:</p>
 
-<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">codebad_noretry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 	<span class="n">a</span> <span class="o">=</span> <span class="mi">2</span>
 	<span class="n">b</span> <span class="o">=</span> <span class="mi">0</span>
@@ -310,7 +310,7 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 
 <p>Here the variable <code class="highlighter-rouge">d</code> is getting printed without getting defined. The <code class="highlighter-rouge">except</code> and <code class="highlighter-rouge">retry</code> logic below is also unnecessary. The better solution is to resolve the programming error.</p>
 
-<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="o">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">codebad_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 	<span class="k">try</span><span class="p">:</span>
 		<span class="n">a</span> <span class="o">=</span> <span class="mi">2</span>
@@ -318,7 +318,7 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 		<span class="k">print</span> <span class="n">d</span>
 	<span class="k">except</span><span class="p">:</span>
 		<span class="k">print</span> <span class="s">'exception caught: global name d is not defined'</span>
-		<span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>
+		<span class="k">raise</span> <span class="bp">self</span><span class="p">.</span><span class="n">retry</span><span class="p">()</span>
 	<span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
 

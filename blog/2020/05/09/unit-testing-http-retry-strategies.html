@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Unit testing HTTP retry strategies &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Unit testing HTTP retry strategies" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Unit testing HTTP retry strategies</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+	<div class="col-md-2 col-sm-2">
+		<time datetime="2020-05-09 00:00:00 +0530" pubdate="pubdate">09 May 2020</time>
+	</div>
+    <div class="social-icon col-md-1 col-sm-1">
+        <div class="g-plusone" data-size="small"></div>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="https://twitter.com/share?count=vertical" class="twitter-share-button" data-via="madhur25">Tweet</a>
+        <script>
+        ! function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + '://platform.twitter.com/widgets.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, 'script', 'twitter-wjs');
+        </script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="//platform.linkedin.com/in.js" type="text/javascript">
+        lang: en_US
+        </script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a href="http://bufferapp.com/add" class="buffer-add-button" data-count="horizontal">Buffer</a>
+        <script type="text/javascript" src="https://d389zggrogs7qo.cloudfront.net/js/button.js"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a data-pocket-label="pocket" data-pocket-count="horizontal" class="pocket-btn" data-lang="en"></a>
+        <script type="text/javascript">
+        ! function(d, i) {
+            if (!d.getElementById(i)) {
+                var j = d.createElement("script");
+                j.id = i;
+                j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                var w = d.getElementById(i);
+                d.body.appendChild(j);
+            }
+        }(document, "pocket-btn-js");
+        </script>
+    </div>
+				<div class="social-icon col-md-2 col-sm-2">
+<script type="text/javascript" src="//www.redditstatic.com/button/button1.js"></script>
+				</div>
+
+	
+</div>
+<!-- Place this tag after the last plusone tag -->
+<!-- Place this tag after the last +1 button tag. -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script');
+    po.type = 'text/javascript';
+    po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(po, s);
+})();
+</script>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>The sample code below is available in <a href="https://github.com/madhur/unit-test-http-retry">my github repo</a></p>
+
+<p>Let’s face it, HTTP network calls can face intermittenyly. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.</p>
+
+<p>For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differes from scenario to scenario.</p>
+
+<p>In this post, we will not discuss about possible solutions, but look at how to accurately unit test the choosen solution.</p>
+
+<p>For example, a very naive HTTP retry strategy to be to retry 3 times at an interval of 500ms in case of any <a href="https://docs.oracle.com/javase/7/docs/api/java/net/SocketException.html">SocketException</a> or if the HTTP response status code is <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503">Service Unavailable</a></p>
+
+<p>If we are using Java and <a href="https://spring.io/">Spring Framework</a>, we could implement this in <a href="https://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a> as follows</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Bean</span>
+    <span class="kd">public</span> <span class="nc">HttpClient</span> <span class="nf">retryHttpClient</span><span class="o">()</span> <span class="o">{</span>
+
+        <span class="n">connectionManager</span><span class="o">.</span><span class="na">setDefaultMaxPerRoute</span><span class="o">(</span><span class="no">CONN_POOL_DEFAULT_MAX_PER_ROUTE</span><span class="o">);</span>
+        <span class="n">connectionManager</span><span class="o">.</span><span class="na">setMaxTotal</span><span class="o">(</span><span class="no">CONN_POOL_DEFAULT_MAX</span><span class="o">);</span>
+
+        <span class="nc">RequestConfig</span> <span class="n">requestConfig</span> <span class="o">=</span> <span class="nc">RequestConfig</span><span class="o">.</span><span class="na">custom</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">setConnectTimeout</span><span class="o">(</span><span class="no">CONN_TIMEOUT_MS</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">setConnectionRequestTimeout</span><span class="o">(</span><span class="no">CONN_REQUEST_TIMEOUT_MS</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">setSocketTimeout</span><span class="o">(</span><span class="no">CONN_SOCKET_TIMEOUT_MS</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+
+        <span class="k">return</span> <span class="nc">HttpClientBuilder</span><span class="o">.</span><span class="na">create</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">setConnectionManager</span><span class="o">(</span><span class="n">connectionManager</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">setDefaultRequestConfig</span><span class="o">(</span><span class="n">requestConfig</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">setRetryHandler</span><span class="o">((</span><span class="n">exception</span><span class="o">,</span> <span class="n">executionCount</span><span class="o">,</span> <span class="n">context</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">executionCount</span> <span class="o">&lt;=</span> <span class="no">MAX_RETRIES</span>
+                        <span class="o">&amp;&amp;</span> <span class="n">exception</span> <span class="k">instanceof</span> <span class="nc">SocketException</span><span class="o">).</span><span class="na">setServiceUnavailableRetryStrategy</span><span class="o">(</span><span class="k">new</span> <span class="nc">ServiceUnavailableRetryStrategy</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">long</span> <span class="nf">getRetryInterval</span><span class="o">()</span> <span class="o">{</span>
+                        <span class="k">return</span> <span class="mi">500</span><span class="o">;</span>
+                    <span class="o">}</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">retryRequest</span><span class="o">(</span><span class="nc">HttpResponse</span> <span class="n">response</span><span class="o">,</span>
+                                                <span class="kt">int</span> <span class="n">executionCount</span><span class="o">,</span> <span class="nc">HttpContext</span> <span class="n">context</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="k">return</span> <span class="n">executionCount</span> <span class="o">&lt;=</span> <span class="no">MAX_RETRIES</span> <span class="o">&amp;&amp;</span> <span class="n">response</span>
+                                <span class="o">.</span><span class="na">getStatusLine</span><span class="o">()</span>
+                                <span class="o">.</span><span class="na">getStatusCode</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">SC_SERVICE_UNAVAILABLE</span><span class="o">;</span>
+                    <span class="o">}</span>
+                <span class="o">})</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<p>But how do we go about testing that it works according to our defined specification? In this case, retrying only for SocketException or 503 status code. The strategy here is very simple but it could be complex or there could be multiple instances of HTTP clients implementing various strategies. How do we make sure they all work ? This is the question I recently faced while working with a big enterprise project recently.</p>
+
+<p>Turns out, there is an excellent library called <a href="http://wiremock.org/">Wiremock</a> for spinning up a mock HTTP server during unit testing and it can service defined responses or response status codes. It can even generate network faults such as connection reset or network socket exceptions, which allows us to simulate any network response from the unit test code.</p>
+
+<p>In addition to that, one powerful aspect of Wiremock is its <a href="http://wiremock.org/docs/verifying/">Verify APIs</a>, which allows us to exactly measure how many times a particular endpoint was called. This is what we will be using in our tests.</p>
+
+<p>To spin up a mock server, we simply add a <a href="https://junit.org/junit4/javadoc/4.12/org/junit/Rule.html">Junit Rule</a>, within our test class</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Rule</span>
+<span class="kd">public</span> <span class="nc">WireMockRule</span> <span class="n">wireMockRule</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">WireMockRule</span><span class="o">(</span><span class="n">port</span><span class="o">);</span> <span class="c1">// No-args constructor defaults to port 8080</span>
+</code></pre></div></div>
+
+<p>Now, lets say we want to ensure our client retries for 503 status but not for 502 status code, we can simply test using the following tests</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFourRetryFor503StatusCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">stubFor</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)).</span><span class="na">willReturn</span><span class="o">(</span><span class="n">aResponse</span><span class="o">().</span><span class="na">withStatus</span><span class="o">(</span><span class="mi">503</span><span class="o">)));</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">retryHttpClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">HttpGet</span><span class="o">(</span><span class="n">getMockUri</span><span class="o">()));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="o">|</span> <span class="nc">URISyntaxException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="nc">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="n">verify</span><span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span><span class="o">,</span> <span class="n">getRequestedFor</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)));</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testZeroRetryFor502StatusCode</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">stubFor</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)).</span><span class="na">willReturn</span><span class="o">(</span><span class="n">aResponse</span><span class="o">().</span><span class="na">withStatus</span><span class="o">(</span><span class="mi">502</span><span class="o">)));</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">retryHttpClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">HttpGet</span><span class="o">(</span><span class="n">getMockUri</span><span class="o">()));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="o">|</span> <span class="nc">URISyntaxException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="nc">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="n">verify</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">getRequestedFor</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)));</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<p>Similarly, to generate a socket exception we can configure the response to generate a <a href="http://wiremock.org/docs/simulating-faults/">Fault</a> as follows</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">testFourRetryForSocketException</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">stubFor</span><span class="o">(</span><span class="n">get</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)).</span><span class="na">willReturn</span><span class="o">(</span><span class="n">aResponse</span><span class="o">().</span><span class="na">withFault</span><span class="o">(</span><span class="nc">Fault</span><span class="o">.</span><span class="na">CONNECTION_RESET_BY_PEER</span><span class="o">)));</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">retryHttpClient</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">HttpGet</span><span class="o">(</span><span class="n">getMockUri</span><span class="o">()));</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// IOException is expected</span>
+        <span class="o">}</span>
+        <span class="k">catch</span> <span class="o">(</span><span class="nc">URISyntaxException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+            <span class="nc">Assert</span><span class="o">.</span><span class="na">fail</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="n">verify</span><span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span><span class="o">,</span> <span class="n">getRequestedFor</span><span class="o">(</span><span class="n">urlEqualTo</span><span class="o">(</span><span class="n">testResource</span><span class="o">)));</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<p>The sample code above is available in <a href="https://github.com/madhur/unit-test-http-retry">my github repo</a></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/java">Java</a> |
+					
+						<a href="/blog/tags/http">HTTP</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2020/05/09/unit-testing-http-retry-strategies/';
+  var disqus_title = 'Unit testing HTTP retry strategies';
+  var disqus_url = 'https://madhur.co.in/blog/2020/05/09/unit-testing-http-retry-strategies.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2020 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

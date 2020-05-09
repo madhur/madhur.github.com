@@ -268,14 +268,14 @@ other threads completes.</p>
     <span class="k">def</span> <span class="nf">_error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
             <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
            
-    <span class="n">pubnub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s">'16182'</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
+    <span class="n">pubnub</span><span class="p">.</span><span class="n">publish</span><span class="p">(</span><span class="s">'16182'</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
 
     <span class="k">while</span> <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">.001</span><span class="p">)</span>
+        <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(.</span><span class="mi">001</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
+        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="p">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="p">.</span><span class="n">request</span><span class="p">.</span><span class="n">retries</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="p">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="s">'success'</span></code></pre></figure>
 
@@ -289,21 +289,21 @@ other threads completes.</p>
 
 <span class="k">class</span> <span class="nc">CountDownLatch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Condition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">threading</span><span class="p">.</span><span class="n">Condition</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">count_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">notifyAll</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">notifyAll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">release</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">await</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
-        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></code></pre></figure>
+        <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="p">.</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">lock</span><span class="p">.</span><span class="n">release</span><span class="p">()</span></code></pre></figure>
 
 <p>With this construct, we can improve our existing version of code significantly as follows:</p>
 
@@ -315,19 +315,19 @@ other threads completes.</p>
 
     <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
         <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">latch</span><span class="o">.</span><span class="n">count_down</span><span class="p">()</span>
+        <span class="n">latch</span><span class="p">.</span><span class="n">count_down</span><span class="p">()</span>
  
     <span class="k">def</span> <span class="nf">_error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
         <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-        <span class="n">latch</span><span class="o">.</span><span class="n">count_down</span><span class="p">()</span>
+        <span class="n">latch</span><span class="p">.</span><span class="n">count_down</span><span class="p">()</span>
            
-    <span class="n">pubnub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="s">'16182'</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
+    <span class="n">pubnub</span><span class="p">.</span><span class="n">publish</span><span class="p">(</span><span class="s">'16182'</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">_callback</span><span class="p">,</span> <span class="n">_error</span><span class="p">)</span>
 
-	<span class="n">latch</span><span class="o">.</span><span class="k">await</span><span class="p">()</span>
+	<span class="n">latch</span><span class="p">.</span><span class="k">await</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">retries</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
+        <span class="n">countdown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">random</span><span class="p">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="p">.</span><span class="n">request</span><span class="p">.</span><span class="n">retries</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="bp">self</span><span class="p">.</span><span class="n">retry</span><span class="p">(</span><span class="n">countdown</span> <span class="o">=</span> <span class="n">countdown</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">status</span><span class="p">[</span><span class="s">'result'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="s">'success'</span></code></pre></figure>
 
