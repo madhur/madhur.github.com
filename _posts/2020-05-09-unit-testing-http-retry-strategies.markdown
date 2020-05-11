@@ -10,9 +10,9 @@ tags:
 
 The sample code below is available in [my github repo](https://github.com/madhur/unit-test-http-retry)
 
-Let's face it, HTTP network calls can face intermittenyly. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.
+Let's face it, HTTP network calls can face intermittently. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.
 
-For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differes from scenario to scenario.
+For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differs from scenario to scenario.
 
 In this post, we will not discuss about possible solutions, but look at how to accurately unit test the choosen solution.
 
