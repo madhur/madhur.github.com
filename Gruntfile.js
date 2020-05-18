@@ -64,7 +64,7 @@ module.exports = function(grunt) {
 
         shell: {
             jekyllBuild: {
-                command: 'jekyll build --incremental'
+                command: 'jekyll build'
             },
             jekyllServe: {
                 command: 'jekyll serve'
