@@ -3,7 +3,7 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-05-09T21:48:17+05:30</updated>
+ <updated>2020-05-18T07:46:55+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -12,15 +12,66 @@
  
  
  <entry>
+   <title>Different HTTP Timeouts in HTTP Client</title>
+   <link href="https://madhur.co.in/blog/2020/05/16/http-timeouts.html"/>
+   <updated>2020-05-16T05:30:00+05:30</updated>
+   <id>id:/blog/2020/05/16/http-timeouts</id>
+   <content type="html">&lt;p&gt;In a well designed backend application, which makes calls to other HTTP services, it is very important to configure appropriate timeout values. In event of a service failure, a large timeout value can cause threads on the application to keep waiting for service to respond and may ultimately run out of threads which could have been used for doing other work. Otherwise, low timeout value can cause genuine requests to be aborted which would have been responded.&lt;/p&gt;
+
+&lt;p&gt;First of all, it is very important which are the different types of timeouts which can be configured from the aspect of a HTTP client.&lt;/p&gt;
+
+&lt;h3 id=&quot;connection-timeout&quot;&gt;Connection Timeout&lt;/h3&gt;
+
+&lt;p&gt;A connect timeout is the period between which the connection between a client and a server must be established. It includes the time for DNS resolution, and setup a TCP connection including the handshake. This is a client setting because it’s the client which will initiate the connection.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http.connection.timeout&lt;/code&gt; - the default value is zero, which means infinite.&lt;/p&gt;
+
+&lt;h3 id=&quot;request-timeout&quot;&gt;Request Timeout&lt;/h3&gt;
+
+&lt;p&gt;This is the time, during which a request must be completed after the connection has been made. It includes the time for the client to send the request, and also the server to respond. If the client doesn’t send the request, the request can time out.&lt;/p&gt;
+
+&lt;p&gt;Note that this is a server side setting. This is because, server wouldn’t want to keep the connection (and ultimately a thread) waiting indefinitely for the client to request.&lt;/p&gt;
+
+&lt;p&gt;One must think that this should be a client setting as well, what if the server takes too much time to respond. Correct. There is a similar setting on client as well, which is usually called, Socket Timeout, but it is not exactly same as Request TimeOut&lt;/p&gt;
+
+&lt;h3 id=&quot;socket-timeout&quot;&gt;Socket Timeout&lt;/h3&gt;
+
+&lt;p&gt;This is a maximum time between two data packets to arrive. This is a client side setting. Some people confuse this with RequestTimeout on the client side. It is only a timeout between two packets. If we set this value to 5 seconds, it can still take the entire request to take lets say 15 seconds given that the time period between two consecutive packets was always &amp;lt; 5 seconds.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http.socket.timeout&lt;/code&gt; - The default value is zero, which means infinite.&lt;/p&gt;
+
+&lt;h3 id=&quot;connection-request-timeout&quot;&gt;Connection Request TimeOut&lt;/h3&gt;
+
+&lt;p&gt;This is applicable if you are using connection pooling on the client. This Timeout setting defines the maximum time during which a connection must be obtained from the pool.&lt;/p&gt;
+
+&lt;p&gt;The below code snippet shows how to set the various client timeout settings on the Apache HTTP Client.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;custom&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionRequestTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_REQUEST_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setSocketTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_SOCKET_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClientBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDefaultRequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>Unit testing HTTP retry strategies</title>
    <link href="https://madhur.co.in/blog/2020/05/09/unit-testing-http-retry-strategies.html"/>
    <updated>2020-05-09T00:00:00+05:30</updated>
    <id>id:/blog/2020/05/09/unit-testing-http-retry-strategies</id>
    <content type="html">&lt;p&gt;The sample code below is available in &lt;a href=&quot;https://github.com/madhur/unit-test-http-retry&quot;&gt;my github repo&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Let’s face it, HTTP network calls can face intermittenyly. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.&lt;/p&gt;
+&lt;p&gt;Let’s face it, HTTP network calls can face intermittently. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.&lt;/p&gt;
 
-&lt;p&gt;For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differes from scenario to scenario.&lt;/p&gt;
+&lt;p&gt;For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differs from scenario to scenario.&lt;/p&gt;
 
 &lt;p&gt;In this post, we will not discuss about possible solutions, but look at how to accurately unit test the choosen solution.&lt;/p&gt;
 
@@ -1242,82 +1293,6 @@ class naming conventions everytime, unused variables or imports etc. Hence, its 
     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/log:/log&lt;/span&gt;    
     &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;9997:9997&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Ensuring git commit messages contain JIRA ID</title>
-   <link href="https://madhur.co.in/blog/2020/01/12/git-prepare-commit-message-jira-id.html"/>
-   <updated>2020-01-12T00:00:00+05:30</updated>
-   <id>id:/blog/2020/01/12/git-prepare-commit-message-jira-id</id>
-   <content type="html">&lt;p&gt;Recently, we implemented a policy where every commit message includes the JIRA ID from the committer. This makes sure that every change to repo is tagged against either a user story or an issue which helps in traceability. Initially, it was difficult and users used to forget it. We had a github hook which would validate the commit message and reject the updates to the remote repo. Users would then amend the commmit using
-&lt;code class=&quot;highlighter-rouge&quot;&gt;git commit --amend&lt;/code&gt; or even &lt;code class=&quot;highlighter-rouge&quot;&gt;git rebase -i HEAD~n&lt;/code&gt; if there are multiple commits to be amended.&lt;/p&gt;
-
-&lt;p&gt;Fortunately, there is a provision in git itself which can validate your commit message in the local repo itself. All you to have to do is make a copy of  &lt;code class=&quot;highlighter-rouge&quot;&gt;.git/prepare-commit-msg.sample&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;.git/prepare-commit-msg&lt;/code&gt; and then include your logic there. We used a convention that users create branch name with JIRA ID itself and this script can pickup the JIRA ID from the branch name itself. In the worst case, while working with branches such as &lt;code class=&quot;highlighter-rouge&quot;&gt;staging&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;master&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;release&lt;/code&gt; etc, the users can provide the JIRA ID in the commit message. If there is no JIRA ID provided, the commit will be aborted with an error.&lt;/p&gt;
-
-&lt;p&gt;Below is the snippet I used, written in ruby&lt;/p&gt;
-
-&lt;div class=&quot;language-ruby highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env ruby&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# Git Prepare Commit Message Hook Script&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# Location: &amp;lt;repository&amp;gt;/.git/hooks/prepare-commit-msg&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# This script will automatically add the correct&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# JIRA ISSUE ID to the end of each commit message&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# When the branch ID starts with the JIRA ISSUE ID.&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# It can be overridden if specified in the message.&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# Example:&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# jira-123/branch-name =&amp;gt; 'JIRA-123 commit message'&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# The name of the commit file is the first argument&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;message_filename&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;ARGV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#puts filename: message_filename&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# Read the contents of the commit file&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message_filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#puts message: message&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# Match a JIRA ID in the commit message that&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;jira_pattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/^([A-Z]{1,32}-[0-9]{1,32})\s/&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# Capture the JIRA ID if one is present in the commit message&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;jira_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jira_pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#puts jira_id: jira_id&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;# Do nothing if the commit message has a JIRA ID&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jira_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;nil?&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;# Otherwise we need to add one to the message&lt;/span&gt;
-
-  &lt;span class=&quot;c1&quot;&gt;# Grab the current git branch&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;current_branch_name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sb&quot;&gt;`git rev-parse --abbrev-ref HEAD`&lt;/span&gt;
-
-  &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_branch_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/^(master|develop|release|hotfix)/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-
-  &lt;span class=&quot;c1&quot;&gt;# Match the JIRA ID at the beginning of the branch name&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;jira_branch_pattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/^([a-zA-Z]{1,32}-[0-9]{1,32})[-_\/]?/&lt;/span&gt;
-
-  &lt;span class=&quot;c1&quot;&gt;# Capture the JIRA ID from the branch name&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;jira_branch_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;current_branch_name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jira_branch_pattern&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-  &lt;span class=&quot;c1&quot;&gt;#puts jira_branch_id: jira_branch_id&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jira_branch_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;nil?&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jira_branch_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;empty?&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;# Blow up and let the user know they're missing a JIRA ID&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;raise&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Commit message missing JIRA ID and/or branch name does not have one&quot;&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;# Append a link to the JIRA issue and the JIRA ID to the message&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;jira_url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;https://jira.walmart.com/browse/&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jira_branch_id&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;new_message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jira_branch_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;upcase&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; - &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jira_url&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;#puts new_message: message&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;# Write the updated message back to the commit file&lt;/span&gt;
-    &lt;span class=&quot;no&quot;&gt;File&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message_filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'w'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;write&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;new_message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
