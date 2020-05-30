@@ -3,6 +3,7 @@ layout: blog-post
 title: "Different HTTP Timeouts in HTTP Client"
 excerpt: "Different HTTP Timeouts in HTTP Client"
 disqus_id: /2020/05/16/http-timeouts/
+date: 2020-05-16 00:00:00
 tags:
     - Java
     - HTTP
