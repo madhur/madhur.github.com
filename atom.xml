@@ -3,13 +3,82 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-05-30T11:07:00+05:30</updated>
+ <updated>2020-06-07T23:00:52+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Executing commands in parallel in Shell and other fun stuff</title>
+   <link href="https://madhur.co.in/blog/2020/06/06/generate-multiple-uuid-shell.html"/>
+   <updated>2020-06-06T00:00:00+05:30</updated>
+   <id>id:/blog/2020/06/06/generate-multiple-uuid-shell</id>
+   <content type="html">&lt;p&gt;Recently, I was required to generate multiple UUID’s and pass onto HTTP request as a paremeter. I thought of using &lt;a href=&quot;https://www.python.org/&quot;&gt;Python&lt;/a&gt; or &lt;a href=&quot;https://nodejs.org/en/&quot;&gt;Node.js&lt;/a&gt; for this purpose, but thought why not use a plain old &lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_shell&quot;&gt;shell&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;But, is there a way to generate UUID in shell? Turns out, there is using &lt;a href=&quot;https://www.man7.org/linux/man-pages/man1/uuidgen.1.html&quot;&gt;uuidgen&lt;/a&gt; command which works on both Linux and MacOS.&lt;/p&gt;
+
+&lt;p&gt;Hence, using the power of another command called &lt;a href=&quot;https://en.wikipedia.org/wiki/Seq_(Unix)&quot;&gt;seq&lt;/a&gt;, and &lt;a href=&quot;https://man7.org/linux/man-pages/man1/xargs.1.html&quot;&gt;xargs&lt;/a&gt; we can achieve many powerful things on shell&lt;/p&gt;
+
+&lt;p&gt;Sequentially print 1 to 10000:&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Print and pipe to &lt;code class=&quot;highlighter-rouge&quot;&gt;xargs&lt;/code&gt; command for printing the output using single thread&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 1 printf '{}\n'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Parallely print 1 to 10000 using 10 threads:&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 10 printf '{}\n'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can test out the parallelism using &lt;a href=&quot;https://www.man7.org/linux/man-pages/man1/time.1.html&quot;&gt;time&lt;/a&gt; command, which will print the output for above 2 commands. For me output is:&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;________________________________________________________
+Executed in   14.23 secs   fish           external
+   usr time    3.88 secs  167.00 micros    3.88 secs
+   sys time    9.31 secs  1005.00 micros    9.31 secs
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;________________________________________________________
+Executed in    5.08 secs   fish           external
+   usr time    4.77 secs  229.00 micros    4.77 secs
+   sys time   16.05 secs  1027.00 micros   16.05 secs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Another way to confirm the parallelism, is to observe that, with parallelism, numbers are printed slightly jumbled in between.&lt;/p&gt;
+
+&lt;p&gt;Using, the above fundamental knowledge, we can generate multiple UUID’s using &lt;code class=&quot;highlighter-rouge&quot;&gt;uuidgen&lt;/code&gt; command as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10 | xargs -I {} -P 1 uuidgen
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Output will be:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;C327AB74-D84B-43C1-B188-550AE86DD398
+6B6E541D-74BE-4FB8-892A-03C8FD3E7F59
+101B2E23-F6AC-4AB3-82DA-08C22F1A35CF
+0F3E72C8-56A9-438D-8785-9D1DC9242E63
+C7326E3E-C79A-46AB-BCA4-FBE935D01700
+CCBC8496-71A9-4CDF-B38F-8A13A565C191
+245862F7-6087-4730-96CC-B21FF25846A6
+052A9889-262E-4513-AFF2-62E71BC4A2D2
+AF969198-0DA8-49BA-9931-D38709510354
+74497908-6E59-402A-93EE-514B541B308F
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;How about using this uuid’s in a curl command:&lt;/p&gt;
+
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10 | xargs -I {}  uuidgen | xargs -I{} -n1 -P 10 curl -X GET 'http://google.com/{}'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Hope you enjoyed little fun tricks in shell&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Customize Windows 10 Desktop</title>
@@ -1229,57 +1298,6 @@ into production environment, but even if it arises, its better to go with orches
     &lt;span class=&quot;nt&quot;&gt;&amp;lt;/Match&amp;gt;&lt;/span&gt;
 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/FindBugsFilter&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Must have Java code analysis Tools - Part 1</title>
-   <link href="https://madhur.co.in/blog/2020/01/26/must-have-java-code-analysis-tools-part1.html"/>
-   <updated>2020-01-26T00:00:00+05:30</updated>
-   <id>id:/blog/2020/01/26/must-have-java-code-analysis-tools-part1</id>
-   <content type="html">&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/02/must-have-java-code-analysis-tools-part2.html&quot;&gt;Must have Java code analysis Tools - Part 2&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;/blog/2020/02/15/must-have-java-code-analysis-tools-part3.html&quot;&gt;Must have Java code analysis Tools - Part 3&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;When you are working in a big team ( &amp;gt; 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
-class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.&lt;/p&gt;
-
-&lt;p&gt;In this post, we will look at &lt;a href=&quot;https://github.com/checkstyle/checkstyle&quot;&gt;checkstyle&lt;/a&gt; , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even befor the compile phase has started&lt;/p&gt;
-
-&lt;h2 id=&quot;running-with-build-process&quot;&gt;Running with build process&lt;/h2&gt;
-
-&lt;p&gt;The code analysis tools such as checkstyle are most useful when integrated with build process as useful reports can be generated and even build can be failed to enforce the standards.&lt;/p&gt;
-
-&lt;p&gt;For example, We use the following section in &lt;a href=&quot;https://maven.apache.org/guides/introduction/introduction-to-the-pom.html&quot;&gt;pom.xml&lt;/a&gt; to run checkstyle as part of build process&lt;/p&gt;
-
-&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;plugin&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.apache.maven.plugins&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;maven-checkstyle-plugin&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;3.1.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;configLocation&amp;gt;&lt;/span&gt;./checks.xml&lt;span class=&quot;nt&quot;&gt;&amp;lt;/configLocation&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;encoding&amp;gt;&lt;/span&gt;UTF-8&lt;span class=&quot;nt&quot;&gt;&amp;lt;/encoding&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;consoleOutput&amp;gt;&lt;/span&gt;true&lt;span class=&quot;nt&quot;&gt;&amp;lt;/consoleOutput&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;failsOnError&amp;gt;&lt;/span&gt;true&lt;span class=&quot;nt&quot;&gt;&amp;lt;/failsOnError&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;linkXRef&amp;gt;&lt;/span&gt;false&lt;span class=&quot;nt&quot;&gt;&amp;lt;/linkXRef&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;executions&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;execution&amp;gt;&lt;/span&gt;
-			&lt;span class=&quot;nt&quot;&gt;&amp;lt;id&amp;gt;&lt;/span&gt;validate&lt;span class=&quot;nt&quot;&gt;&amp;lt;/id&amp;gt;&lt;/span&gt;
-			&lt;span class=&quot;nt&quot;&gt;&amp;lt;phase&amp;gt;&lt;/span&gt;validate&lt;span class=&quot;nt&quot;&gt;&amp;lt;/phase&amp;gt;&lt;/span&gt;
-			&lt;span class=&quot;nt&quot;&gt;&amp;lt;goals&amp;gt;&lt;/span&gt;
-				&lt;span class=&quot;nt&quot;&gt;&amp;lt;goal&amp;gt;&lt;/span&gt;check&lt;span class=&quot;nt&quot;&gt;&amp;lt;/goal&amp;gt;&lt;/span&gt;
-			&lt;span class=&quot;nt&quot;&gt;&amp;lt;/goals&amp;gt;&lt;/span&gt;
-		&lt;span class=&quot;nt&quot;&gt;&amp;lt;/execution&amp;gt;&lt;/span&gt;
-	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/executions&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/plugin&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here setting &lt;code class=&quot;highlighter-rouge&quot;&gt;failsOnError&lt;/code&gt;  attribute &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt; causes the build to fail if violations are fail. The file &lt;code class=&quot;highlighter-rouge&quot;&gt;checks.xml&lt;/code&gt; specifies the styling configuration. I used the modified &lt;a href=&quot;https://google.github.io/styleguide/javaguide.html#s4.1-braces&quot;&gt;google check style&lt;/a&gt; to make our own styling conventions.&lt;/p&gt;
-
-&lt;script src=&quot;https://gist.github.com/madhur/745b42c72efa8986340cb05acab91497.js&quot;&gt;&lt;/script&gt;
 
 </content>
  </entry>
