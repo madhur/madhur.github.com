@@ -3,13 +3,50 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-06-13T19:31:13+05:30</updated>
+ <updated>2020-06-21T09:48:04+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Determine if your Macbook battery is about to die</title>
+   <link href="https://madhur.co.in/blog/2020/06/21/find-out-if-your-macbook-battery-die.html"/>
+   <updated>2020-06-21T00:00:00+05:30</updated>
+   <id>id:/blog/2020/06/21/find-out-if-your-macbook-battery-die</id>
+   <content type="html">&lt;p&gt;Recently, one of my Macbook Pro 2014 model started showing this information on battery usage:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/image_480.png&quot; width=&quot;240px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Naturally, it got me worried as I had lot of code and data which was not backed up.&lt;/p&gt;
+
+&lt;p&gt;However, at the same time I was curious to know how Apple is able to determine the degradation in battery health.&lt;/p&gt;
+
+&lt;p&gt;Is it a function of age, discharge / charging time OR something else?&lt;/p&gt;
+
+&lt;p&gt;Upon further debugging, turns it its a function of a number called Cycle count which is maintained.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-cycle-count&quot;&gt;What is cycle count?&lt;/h3&gt;
+
+&lt;p&gt;As per apple,&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;When you use your Mac notebook, its battery goes through charge cycles. A charge cycle happens when you use all of the battery’s power—but that doesn’t necessarily mean a single charge.
+For example, you could use half of your notebook’s charge in one day, and then recharge it fully. If you did the same thing the next day, it would count as one charge cycle, not two. In this way, it might take several days to &amp;gt; complete a cycle.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Batteries have a limited amount of charge cycles before their performance is expected to diminish.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://support.apple.com/en-in/HT201585&quot;&gt;Cycle count&lt;/a&gt; can be viewed by going to Apple  menu -&amp;gt; About this Mac -&amp;gt; System Report -&amp;gt; Hardware -&amp;gt; Power&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/cycle count.png&quot; width=&quot;489px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;There is a table in this &lt;a href=&quot;https://support.apple.com/en-in/HT201585&quot;&gt;Apple support article&lt;/a&gt;, which tells you for each Model number, after how many cycle counts, a battery replacement is required.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Finding intersection of two lists in shell</title>
@@ -939,54 +976,6 @@ into production environment, but even if it arises, its better to go with orches
 
 &lt;script src=&quot;https://gist.github.com/madhur/62e57a851b1dbfbbc3a2646d32dd8897.js&quot;&gt;&lt;/script&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Incrementally routing traffic to newer version of service</title>
-   <link href="https://madhur.co.in/blog/2020/02/08/incrementally-route-traffic-newer-version-service.html"/>
-   <updated>2020-02-08T00:00:00+05:30</updated>
-   <id>id:/blog/2020/02/08/incrementally-route-traffic-newer-version-service</id>
-   <content type="html">&lt;p&gt;Recently, I had a requirement to incrementally increase the traffic to a newer version of service we were deploying in production.&lt;/p&gt;
-
-&lt;p&gt;We didn’t wanted to go with random percentage approach. This is because our users are mobile app users and we didn’t want the users to hit the older version and newer verison of service randomly.&lt;/p&gt;
-
-&lt;p&gt;That is, we wanted to consistently map the user to either be routed to an older version of newer version based on certain configurable percentage.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/hash.png&quot;&gt;Open diagram in fullscren&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/hash.png&quot; height=&quot;500px&quot; width=&quot;852px&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Our proxy server was based on node.js&lt;/p&gt;
-
-&lt;p&gt;After evaluatin several algorithms to generate hash based on user id, such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Base64&quot;&gt;Base64&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/MD5&quot;&gt;MD5&lt;/a&gt;. I finally zeroed out on &lt;a href=&quot;https://en.wikipedia.org/wiki/Cyclic_redundancy_check&quot;&gt;CRC32 algorithm&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The simple reason being that output of CRC32 is a simple 32 bit integer which can be easily converted to a percentage value and the performance of crc32 being the fastest among all.&lt;/p&gt;
-
-&lt;p&gt;The simple methods below give the gist of algorithm. Our &lt;code class=&quot;highlighter-rouge&quot;&gt;getHash&lt;/code&gt; function generates the 32 bit integer and &lt;code class=&quot;highlighter-rouge&quot;&gt;routeRequestBasedonRampUp&lt;/code&gt; method uses this integer to map it to 1..100 buckets. Based on the rampup percentage value, it gives a boolean response which is used by proxy layer.&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getHash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CRC32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;routeRequestBasedonRampUp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rampUpPercent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NUM_BUCKETS&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  
-  &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;hash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getHash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;userId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;bucket&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;hash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NUM_BUCKETS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bucket&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rampUpPercent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;I have used this approach in production with this &lt;a href=&quot;https://www.npmjs.com/package/crc-32&quot;&gt;crc32 library&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The decisioning time is &amp;lt;1ms and have been serving us really well.&lt;/p&gt;
-
-&lt;p&gt;Please let me know in the comments section if you think any better approach is available.&lt;/p&gt;
 </content>
  </entry>
  
