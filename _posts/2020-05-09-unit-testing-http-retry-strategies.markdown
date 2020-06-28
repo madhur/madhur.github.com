@@ -21,36 +21,36 @@ For example, a very naive HTTP retry strategy to be to retry 3 times at an inter
 If we are using Java and [Spring Framework](https://spring.io/), we could implement this in [Apache HTTP Client](https://hc.apache.org/httpcomponents-client-ga/) as follows
 
 ```java
-    @Bean
-    public HttpClient retryHttpClient() {
+@Bean
+public HttpClient retryHttpClient() {
 
-        connectionManager.setDefaultMaxPerRoute(CONN_POOL_DEFAULT_MAX_PER_ROUTE);
-        connectionManager.setMaxTotal(CONN_POOL_DEFAULT_MAX);
+    connectionManager.setDefaultMaxPerRoute(CONN_POOL_DEFAULT_MAX_PER_ROUTE);
+    connectionManager.setMaxTotal(CONN_POOL_DEFAULT_MAX);
 
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(CONN_TIMEOUT_MS)
-                .setConnectionRequestTimeout(CONN_REQUEST_TIMEOUT_MS)
-                .setSocketTimeout(CONN_SOCKET_TIMEOUT_MS).build();
+    RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(CONN_TIMEOUT_MS)
+            .setConnectionRequestTimeout(CONN_REQUEST_TIMEOUT_MS)
+            .setSocketTimeout(CONN_SOCKET_TIMEOUT_MS).build();
 
-        return HttpClientBuilder.create()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(requestConfig)
-                .setRetryHandler((exception, executionCount, context) -> executionCount <= MAX_RETRIES
-                        && exception instanceof SocketException).setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy() {
-                    @Override
-                    public long getRetryInterval() {
-                        return 500;
-                    }
-                    @Override
-                    public boolean retryRequest(HttpResponse response,
-                                                int executionCount, HttpContext context) {
-                        return executionCount <= MAX_RETRIES && response
-                                .getStatusLine()
-                                .getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE;
-                    }
-                })
-                .build();
-    }
+    return HttpClientBuilder.create()
+            .setConnectionManager(connectionManager)
+            .setDefaultRequestConfig(requestConfig)
+            .setRetryHandler((exception, executionCount, context) -> executionCount <= MAX_RETRIES
+                    && exception instanceof SocketException).setServiceUnavailableRetryStrategy(new ServiceUnavailableRetryStrategy() {
+                @Override
+                public long getRetryInterval() {
+                    return 500;
+                }
+                @Override
+                public boolean retryRequest(HttpResponse response,
+                                            int executionCount, HttpContext context) {
+                    return executionCount <= MAX_RETRIES && response
+                            .getStatusLine()
+                            .getStatusCode() == HttpStatus.SC_SERVICE_UNAVAILABLE;
+                }
+            })
+            .build();
+}
 ```
 
 But how do we go about testing that it works according to our defined specification? In this case, retrying only for SocketException or 503 status code. The strategy here is very simple but it could be complex or there could be multiple instances of HTTP clients implementing various strategies. How do we make sure they all work ? This is the question I recently faced while working with a big enterprise project recently.
@@ -69,51 +69,51 @@ public WireMockRule wireMockRule = new WireMockRule(port); // No-args constructo
 Now, lets say we want to ensure our client retries for 503 status but not for 502 status code, we can simply test using the following tests
 
 ```java
-    @Test
-    public void testFourRetryFor503StatusCode() {
-        stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withStatus(503)));
+@Test
+public void testFourRetryFor503StatusCode() {
+    stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withStatus(503)));
 
-        try {
-            retryHttpClient.execute(new HttpGet(getMockUri()));
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-        verify(1 + 3, getRequestedFor(urlEqualTo(testResource)));
+    try {
+        retryHttpClient.execute(new HttpGet(getMockUri()));
+    } catch (IOException | URISyntaxException e) {
+        e.printStackTrace();
+        Assert.fail();
     }
+    verify(1 + 3, getRequestedFor(urlEqualTo(testResource)));
+}
 
-    @Test
-    public void testZeroRetryFor502StatusCode() {
-        stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withStatus(502)));
+@Test
+public void testZeroRetryFor502StatusCode() {
+    stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withStatus(502)));
 
-        try {
-            retryHttpClient.execute(new HttpGet(getMockUri()));
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-        verify(1, getRequestedFor(urlEqualTo(testResource)));
+    try {
+        retryHttpClient.execute(new HttpGet(getMockUri()));
+    } catch (IOException | URISyntaxException e) {
+        e.printStackTrace();
+        Assert.fail();
     }
+    verify(1, getRequestedFor(urlEqualTo(testResource)));
+}
 ```
 
 Similarly, to generate a socket exception we can configure the response to generate a [Fault](http://wiremock.org/docs/simulating-faults/) as follows
 
 ```java
-    @Test
-    public void testFourRetryForSocketException() {
-        stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+@Test
+public void testFourRetryForSocketException() {
+    stubFor(get(urlEqualTo(testResource)).willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
 
-        try {
-            retryHttpClient.execute(new HttpGet(getMockUri()));
-        } catch (IOException e) {
-            // IOException is expected
-        }
-        catch (URISyntaxException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-        verify(1 + 3, getRequestedFor(urlEqualTo(testResource)));
+    try {
+        retryHttpClient.execute(new HttpGet(getMockUri()));
+    } catch (IOException e) {
+        // IOException is expected
     }
+    catch (URISyntaxException e) {
+        e.printStackTrace();
+        Assert.fail();
+    }
+    verify(1 + 3, getRequestedFor(urlEqualTo(testResource)));
+}
 ```
 
 The sample code above is available in [my github repo](https://github.com/madhur/unit-test-http-retry)
