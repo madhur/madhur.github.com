@@ -35,7 +35,7 @@ import Cocoa
 import CreateML
 import NaturalLanguage
 
-let data = try MLDataTable(contentsOf: URL(fileURLWithPath: "/Users/m0a04y6/Desktop/iOS/ML/twitter-sanders-apple3.csv"))
+let data = try MLDataTable(contentsOf: URL(fileURLWithPath: "/Users/madhur/Desktop/iOS/ML/twitter-sanders-apple3.csv"))
 let (trainingData, testingData) = data.randomSplit(by: 0.8, seed: 5)
 let parameters = MLTextClassifier.ModelParameters.init(validationData: trainingData, algorithm: MLTextClassifier.ModelAlgorithmType.maxEnt(revision: 1), language: NLLanguage.english, textColumnValidationData: "text", labelColumnValidationData: "class")
 let sentimentClassifier = try MLTextClassifier(trainingData: trainingData, textColumn: "text", labelColumn: "class", parameters: parameters)
