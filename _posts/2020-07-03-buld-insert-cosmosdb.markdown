@@ -27,7 +27,7 @@ public class Event {
 }
 ```    
 
-The simplest way to insert batch of these entities into MongoDb is by using  [Bulk APIs]()
+The simplest way to insert batch of these entities into MongoDb is by using  [Bulk APIs](https://docs.mongodb.com/manual/reference/method/Bulk/)
 
 ```java
 public void writeRecords(List<Event> eventsList) {
