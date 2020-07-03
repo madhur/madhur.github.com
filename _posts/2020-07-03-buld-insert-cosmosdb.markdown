@@ -2,7 +2,7 @@
 layout: blog-post
 title: "Bulk insertion of Rows in CosmosDB"
 excerpt: "Bulk insertion of Rows in CosmosDB"
-disqus_id: /2020/07/02/bulk-insert-cosmosdb/
+disqus_id: /2020/07/03/bulk-insert-cosmosdb/
 tags:
     - Java
     - CosmosDB
