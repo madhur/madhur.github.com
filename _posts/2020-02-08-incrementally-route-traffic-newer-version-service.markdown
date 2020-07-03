@@ -37,10 +37,7 @@ const routeRequestBasedonRampUp = (userId, rampUpPercent) => {
   const hash = getHash(userId);
   const bucket = hash % NUM_BUCKETS;
 
-  if (bucket + 1 <= rampUpPercent) {
-      return true;
-  }
-  return false;
+  return (bucket + 1 <= rampUpPercent); 
 };
 ```
 
