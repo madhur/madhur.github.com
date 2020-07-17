@@ -66,21 +66,21 @@ println(employee2 === employee3)        // false
 
 <a name="checked"></a>
 
-## No checked exceptions and no throws keyowrd
-How many times in Java we have to decorate the method with `throws` keyword just because the called method inside it throws a checked exception. I have never been fan of this rule. In my opinon, it should be left to developer to decide on he wants to handle the exception or even completely ignore it.
+## No checked exceptions and no throws keyword
+How many times in Java we have to decorate the method with `throws` keyword just because the called method inside it throws a checked exception. I have never been fan of this rule. In my opinion, it should be left to developer to decide on he wants to handle the exception or even completely ignore it.
 
 Kotlin gets rid of this uglier aspect of Java.
 
 <a name="wrapper"></a>
 
-### Wrapper classes for convinient methods such as `println()`
-Kotlin provides useful wrapper for many of the convienent functions such as now you can do simply `println("myString")` to print out something to console or even `arrayOf(1,2,3)` to create an array.
+### Wrapper classes for convenient methods such as `println()`
+Kotlin provides useful wrapper for many of the convenient functions such as now you can do simply `println("myString")` to print out something to console or even `arrayOf(1,2,3)` to create an array.
 
 
 <a name="forloop"></a>
 
 ### Kotlin gets rid of traditional for loop
-The traditional for loop has been omitted in Kotlin in favour of below kind of loop.
+The traditional for loop has been omitted in Kotlin in favor of below kind of loop.
 
 ```kotlin
 val names = listOf("Anne", "Peter", "Jeff")
@@ -91,7 +91,7 @@ for (name in names) {
 <a name="valvar"></a>
 
 ### `val` and `var` keywords for immutability
-Just like Swift and Javascript, `val` can be used to declare immutables (final in java) and `var` for a mutable object. 
+Just like Swift and JavaScript, `val` can be used to declare immutable (final in java) and `var` for a mutable object. 
 Just like Swift, Kotlin compiler can do type inference. Type information is required only if compiler cannot infer type, which results in lot of conciseness
 
 <a name="ternary"></a>
