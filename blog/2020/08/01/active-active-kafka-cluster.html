@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Overview of Active-Active Kafka Cluster using MirrorMaker 2.0 &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Overview of Active-Active Kafka Cluster using MirrorMaker 2.0" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Overview of Active-Active Kafka Cluster using MirrorMaker 2.0</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2020-08-01 00:00:00 +0530" pubdate="pubdate"
+            >01 August 2020</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>In order to make our application, highly available and fault tolerant, I have been researching a lot on best disaster recovery strategy for Kafka.</p>
+
+<p>In earlier relational systems, such as MySQL or Oracle, it was standard to have an active-passive cluster where in the application does
+reads and writes to a primary cluster. This primary cluster is asynchronously replicated to a secondary cluster. The application falls back to the secondary cluster incase the primary cluster fails.</p>
+
+<p>The fall back can be automatic or manual. Database vendors such as <a href="https://www.postgresql.org/docs/9.6/warm-standby-failover.html">Postgres</a>, <a href="https://docs.oracle.com/cd/B28359_01/server.111/b28295/sofo.htm#:~:text=An%20Oracle%20database%20operates%20in,two%20roles%3A%20primary%20or%20standby.&amp;text=A%20failover%20is%20done%20when,take%20over%20the%20primary%20role.">Oracle</a> and <a href="https://mariadb.com/kb/en/mariadb-maxscale-22-automatic-failover-with-mariadb-monitor/">MariaDB</a> have built products to automate the failover.</p>
+
+<p>Newer distributed applications, such as NoSQL databases like Cassandra prefer an active-active approach. This because these databases might not require very high consistency.</p>
+
+<p>Recently, Kafka has also adopted this approach using <a href="https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=27846330">MirrorMaker</a></p>
+
+<h2 id="what-is-mirror-maker">What is Mirror Maker</h2>
+
+<p>In simple terms, Mirror Maker allows you to mirror a Kafka cluster to another cluster. All topics, partitions and messages are replicated. Any changes in source, like addition / deletion of topics, messages will be mirrored to destination. Mirror Makes allows Kafka users to setup an active-passive cluster where in an active cluster is continuously mirroring the data to secondary cluster.</p>
+
+<h2 id="what-is-the-problem-">What is the problem ?</h2>
+
+<p>All is good uptil now, until we realize that huge amount of infrastructure and network bandwidth is being wasted to maintain this active-passive cluster, wherein the passive cluster will come in use only when active goes down.
+Not to mention that large Kafka deployments process millions of messages per sec and all that data needs to be replicated to destination cluster.</p>
+
+<h3 id="solution---mirror-maker-20">Solution - Mirror Maker 2.0</h3>
+
+<p>Kafka team has recently launched a new version of Mirror Maker 2.0, which allows you to setup a bi-directional mirror between two clusters. This solves the problem of wasted network infrastructure of secondary cluster which would have come in use only if primary cluster had gone down.</p>
+
+<p>So, how does this work? In simple terms, Mirror Maker 2.0 does bi-directional mirroring, i.e. data from primary cluster will be mirrored to secondary cluster and data from secondary cluster will be mirrored to primary cluster.</p>
+
+<p>If you logically think of this approach, this can result in an infinite loop, where in a message can be continuously mirrored between two clusters.</p>
+
+<p>To solves, this problem, Mirror Maker allows topic renaming to eliminate the above problem. Let me illustrate how:</p>
+
+<p>Let’s say, We have two DC’s DC1 and DC2, with topics T1 and T2.</p>
+
+<p>Producer in DC1 produces message M1 in topic T1 and M2 in topic T2</p>
+
+<p>Producer in DC2 produces message M3 in topic T1 and M4 in topic T2</p>
+
+<p>Note that these two are completely different clusters with zookeepers of their own and hence topics T1 and T2 are local to their clusters.</p>
+
+<p>What Mirror maker will do is, it will create topic T1.DC2 and T2.DC2 in DC1, which will contain the replicated data from topics T1 and T2 of DC2</p>
+
+<p>Similarly, in DC2, topics T1.DC1 and T2.DC1 will be created which will contain the replicated data from topics T1 and T2 of DC1</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>       DC1                                                                                                                                                                                                    
+                                                                                      DC2                                                                                                                     
+                                                                                                                                                                                                              
++-------------------+                                                                                                                                                                                         
+|                   |                                                           +-------------------+                                                                                                         
+|                   |                                                           |                   |                                                                                                         
+|    PRODUCER       |                                                           |    PRODUCER       |                                                                                                         
+|                   |                                                           |                   |                                                                                                         
++-------------------+                                                           +-------------------+                                                                                                         
+                                                                                                                                                                                                              
+PRODUCES M1 IN TOPIC T1 AND M2 IN TOPIC T2                                      PRODUCES M3 IN TOPIC T1 AND M4 IN TOPIC T2                                                                                    
+                                                                                                                                                                                                              
++-------------------------------------+                                         +----------------------------------+                                                                                          
+|  Topic T1         M1                |---------------------------------------&gt; | Topic T1.DC1      M1             |                                                                                          
++-------------------------------------+                                         +----------------------------------+                                                                                          
+                                                                                                                                                                                                              
++-------------------------------------+                                         +----------------------------------+                                                                                          
+|  Topic T1.DC2      M3               | &lt;-------------------------------------- | Topic T1         M3              |                                                                                          
++-------------------------------------+                                         +----------------------------------+                                                                                          
+                                                      MIRROR MAKER                                                                                                                                            
++-------------------------------------+                                         +----------------------------------+                                                                                          
+| Topic T2          M2                |---------------------------------------&gt; | Topic T2.DC1     M2              |                                                                                          
++-------------------------------------+                                         +----------------------------------+                                                                                          
+                                                                                                                                                                                                              
++-------------------------------------+                                         +----------------------------------+                                                                                          
+| Topic T2.DC2       M4               | &lt;---------------------------------------  Topic T2          M4             |                                                                                          
++-------------------------------------+                                         +----------------------------------+                                                                                          
+</code></pre></div></div>
+
+<p>In this case, the full network cluster bandwidth is utilized. The producers can load balance their traffic to two clusters either using round robin or local affinity.</p>
+
+<p>The consumer in DC1 will have to subscribe to the data from both T1 and T1.DC2. This can be done easily using wild card subscription which is supported in most frameworks such as Spring as shown below:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@KafkaListener</span><span class="o">(</span><span class="n">id</span> <span class="o">=</span> <span class="s">"xxx"</span><span class="o">,</span> <span class="n">topicPattern</span> <span class="o">=</span> <span class="s">"kbgh.*"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">listen</span><span class="o">(</span><span class="nc">String</span> <span class="n">in</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">in</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Even if one DC goes down, the entire data is available in other cluster.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/kafka">Kafka</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2020/08/01/active-active-kafka-cluster/';
+  var disqus_title = 'Overview of Active-Active Kafka Cluster using MirrorMaker 2.0';
+  var disqus_url = 'https://madhur.co.in/blog/2020/08/01/active-active-kafka-cluster.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2020 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
