@@ -3,13 +3,109 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-08-08T22:35:14+05:30</updated>
+ <updated>2020-08-16T13:20:39+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Why do Lambda functions require final variables</title>
+   <link href="https://madhur.co.in/blog/2020/08/16/lambda-functions-final-variable.html"/>
+   <updated>2020-08-16T00:00:00+05:30</updated>
+   <id>id:/blog/2020/08/16/lambda-functions-final-variable</id>
+   <content type="html">&lt;p&gt;Recently, It got me thinking why do lambda functions require final variables
+after all. This is not a requirement in Kotlin.&lt;/p&gt;
+
+&lt;p&gt;For example, this code runs fine in kotlin&lt;/p&gt;
+
+&lt;div class=&quot;language-kotlin highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;fun&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;py&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mutableListOf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;()&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Consumer&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Int&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;-&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;10&lt;/span&gt;
+        &lt;span class=&quot;nf&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;o&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Whereas a similar function in Java will give error&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nc&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ArrayList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This will fail with a compilation failure&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Error:(15, 13) java: local variables referenced from a lambda expression must be final or effectively final
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Effectively final&lt;/code&gt; is a new concept in Java 8.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;… starting in Java SE 8, a local class can access local variables and
+parameters of the enclosing block that are final or effectively final. 
+A variable or parameter whose value is never changed after it is initialized is effectively final.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;But the question remains, why does a variable accessed inside a lambda function
+needs to be effectively final?&lt;/p&gt;
+
+&lt;p&gt;The answer has been &lt;a href=&quot;https://stackoverflow.com/questions/4732544/why-are-only-final-variables-accessible-in-anonymous-class&quot;&gt;given
+here&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;It’s basically due to the way Java manages &lt;a href=&quot;https://en.wikipedia.org/wiki/Closure_(computer_programming)&quot;&gt;closures&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;When you create an instance of an anonymous inner class, any variables which
+are used within that class &amp;gt; have their values copied in via the autogenerated
+constructor. This avoids the compiler having to autogenerate various extra
+types to hold the logical state of the “local variables”, as for example the
+C# compiler does… (When C# captures a variable in an anonymous function, it
+really captures the variable - the closure can update the variable in a way
+which is seen by the main body of the method, and vice versa.)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;As the value has been copied into the instance of the anonymous inner class,
+it would look odd if the &amp;gt; variable could be modified by the rest of the
+method - you could have code which appeared to be working with an out-of-date
+variable (because that’s effectively what would be happening… you’d be
+working with a copy taken at a different time). Likewise if you could make
+changes within the anonymous inner class, developers might expect those
+changes to be visible within the body of the enclosing method.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Making the variable final removes all these possibilities - as the value can’t
+be changed at all, you &amp;gt; don’t need to worry about whether such changes will
+be visible. The only ways to allow the method and the anonymous inner class
+see each other’s changes is to use a mutable type of some description. This
+could be the enclosing class itself, an array, a mutable wrapper type…
+anything like that. Basically it’s a bit like communicating between one method
+and another: changes made to the parameters of one method aren’t seen by its
+caller, but changes made to the objects referred to by the parameters are
+seen.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If you’re interested in a more detailed comparison between Java and C#
+closures, I have an &lt;a href=&quot;https://csharpindepth.com/Articles/Closures&quot;&gt;article&lt;/a&gt; which &amp;gt; goes into it further. I wanted to focus on
+the Java side in this answer :)&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Best Mechanical Keyboards in India for Engineers</title>
@@ -1336,22 +1432,6 @@ tcp        0     52 10.33.128.63:22         172.28.96.245:58173     ESTABLISHED
 &lt;h1 id=&quot;nmap&quot;&gt;nmap&lt;/h1&gt;
 &lt;p&gt;&lt;a href=&quot;https://nmap.org/&quot;&gt;nmap&lt;/a&gt; is one of the most advanced tools out of these. It might not be installed out of the box in every Linux distribution.
 It is considered a very advanced security tool for OS fingerprinting, port scanning.&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Classloaders, Containers & Unit Tests</title>
-   <link href="https://madhur.co.in/blog/2020/04/25/classloaders-containers-unit-tests.html"/>
-   <updated>2020-04-25T00:00:00+05:30</updated>
-   <id>id:/blog/2020/04/25/classloaders-containers-unit-tests</id>
-   <content type="html">&lt;p&gt;Classloaders are an important concept for every engineer to be aware of.&lt;/p&gt;
-
-&lt;p&gt;Classloaders are basic building blocks of Containers like Tomcat. Suppose, we have written a java application and have a singleton instance, we might say its singleton across JVM. Wrong. Its not singleton across JVM, its a singleton across classloader.&lt;/p&gt;
-
-&lt;p&gt;The same application can be deployed in a container like Tomcat, as two different application. In that case, there will be 2 copies of the Singleton object with exact same package and class names inside a single JVM.&lt;/p&gt;
-
-&lt;p&gt;Tomcat has a &lt;a href=&quot;http://tomcat.apache.org/tomcat-8.0-doc/class-loader-howto.html&quot;&gt;dedicated page&lt;/a&gt; on how it loads the classloaders.&lt;/p&gt;
 
 </content>
  </entry>
