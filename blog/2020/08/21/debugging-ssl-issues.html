@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Debugging SSL Issues &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Debugging SSL Issues" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Debugging SSL Issues</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2020-08-21 00:00:00 +0530" pubdate="pubdate"
+            >21 August 2020</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>I wrote this article <a href="/blog/2016/10/30/debugging-ssl-issues-java.html">Debugging SSL Issues in Java</a> almost 4 years ago. I am writing again
+a new post on the same topic because I faced the same issue and that article
+didn’t help me. So I’ll list my new learnings in this post and it will be to the
+point.</p>
+
+<h3 id="use--djavaxnetdebugall-to-command-line">Use -Djavax.net.debug=all to command line</h3>
+
+<p>When using Java program, you can add <code class="highlighter-rouge">-Djavax.net.debug=all</code> to the commandline to produce debug output of the complete handshake of SSL.</p>
+
+<p>In short, this is how the handshake looks like</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Client                          Server
+
+ClientHello         ----&gt;   
+                                ServerHello
+                                Certificate*
+                                ServerKeyExchange*
+                                CertificateRequest*
+                                ServerHelloDone
+                    &lt;---- 
+Certificate*
+ClientKeyExchange
+CertificateVerify*
+[ChangeCipherSpec]
+Finished
+                    ----&gt;
+                                [ChangeCipherSpec]
+                                Finished
+                    &lt;-----
+
+Application Data    &lt;-----&gt;     Application Data
+</code></pre></div></div>
+<p>In our case, server abruptly stopped responding after client sent <code class="highlighter-rouge">[ChangeCipherSpec]</code> message.</p>
+
+<h2 id="ssldump">SSLDump</h2>
+
+<p><a href="https://linux.die.net/man/1/ssldump">SSLDump</a> is another utility which can show decrypted SSL traffic to debug any issues. So, if you are not using Java, this is the utility to go to debug the SSL issue.</p>
+
+<p>Its output will be as follows, showing each of the SSL handhsake.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3 1  0.5765 (0.5765)  C&gt;S  Handshake
+      ClientHello
+        Version 3.3
+        cipher suites
+        TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+        compression methods
+                  NULL
+3 2  0.6972 (0.1207)  S&gt;C  Handshake
+      ServerHello
+        Version 3.3
+        session_id[32]=
+          ac f1 e7 3d 87 18 3f 75 f4 b5 d8 bc 61 51 dc 8e
+          da 1c db 82 89 c4 d1 df 60 83 e3 8b 56 c7 23 87
+        cipherSuite         TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        compressionMethod                   NULL
+3 3  0.6972 (0.0000)  S&gt;C  Handshake
+      Certificate
+3 4  0.6972 (0.0000)  S&gt;C  Handshake
+      ServerKeyExchange
+Not enough data. Found 327 bytes (expecting 32767)
+3 5    0.6972   (0.0000)    S&gt;C    Handshake
+        ServerHelloDone
+3 6    0.7427   (0.0454)    C&gt;S    Handshake
+        ClientKeyExchange
+Not enough data. Found 64 bytes (expecting 16384)
+3 7    0.7598   (0.0171)    C&gt;S    ChangeCipherSpec
+3 8    0.7605   (0.0007)    C&gt;S      Handshake
+3 9    0.8779   (0.1173)    S&gt;C    ChangeCipherSpec
+3 10   0.8779   (0.0000)    S&gt;C      Handshake
+3 11   0.8956   (0.0177)    C&gt;S      application_data
+3 12   1.0474   (0.1517)    S&gt;C      application_data
+3 13   11.0491   (10.0017)    S&gt;C      Alert
+  3      11.0492   (0.0000)    S&gt;C    TCP FIN
+</code></pre></div></div>
+
+<h2 id="wireshark">Wireshark</h2>
+
+<p><a href="https://www.wireshark.org/">Wireshark</a> or <a href="https://www.tcpdump.org/">TCPDump</a> can give some insights into what is happening. From the server terminal, you can capture the SSL traffic using TCPDump into a file and open it in wireshark</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo tcpdump -i eth0 -v  -dst host x.x.x.x or src host x.x.x.x -w /tmp/test.pcap
+</code></pre></div></div>
+
+<h2 id="ssllabs-analysis">SSLLabs Analysis</h2>
+
+<p><a href="https://www.ssllabs.com/ssltest/">SSLLabs</a> site can give very useful information about server capabilities of SSL certificates. It will show what versions of TLS and list of cipher suites are supported by server.</p>
+
+<p>It can also perform the connection tests to the server using various clients such as Apache HTTP, OkHTTP, browsers, mobile etc.</p>
+
+<h2 id="java-runtime-parameters">Java Runtime parameters</h2>
+
+<p>There are various runtime parameters which affect the SSL connectivity in Java. Watchout for these parameters, if you are facing SSL issue in a Java application. Note that, its just not enough to look at the arguments while starting the program, since these runtime parameters can be set at runtime too.</p>
+
+<p>For example, in one our client library, the following snippet of code disabled <a href="https://en.wikipedia.org/wiki/Server_Name_Indication">Server Name Indication</a> which caused problems with the TLS connections to virtual servers, in which multiple servers for different network names are hosted at a single underlying network address.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"jsse.enableSNIExtension"</span><span class="o">)</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+	<span class="nc">System</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">"jsse.enableSNIExtension"</span><span class="o">,</span> <span class="s">"false"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>There are other paramters to watch out for as well. <a href="https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html">Java Secure Socket Extension Reference Guide</a> is a helpful page to start with.</p>
+
+<p>Hope that helps anyone facing trouble with SSL connections. If you believe, there are some other useful tools to debug SSL issues further, do let me know in the comments.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/java">Java</a> |
+					
+						<a href="/blog/tags/ssl">SSL</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2020/08/16/debugging-ssl-issues/';
+  var disqus_title = 'Debugging SSL Issues';
+  var disqus_url = 'https://madhur.co.in/blog/2020/08/21/debugging-ssl-issues.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2020 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
