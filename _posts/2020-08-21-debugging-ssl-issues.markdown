@@ -2,7 +2,7 @@
 layout: blog-post
 title: "Debugging SSL Issues"
 excerpt: "Debugging SSL Issues"
-disqus_id: /2020/08/16/debugging-ssl-issues/
+disqus_id: /2020/08/21/debugging-ssl-issues/
 tags:
     - Java
     - SSL
