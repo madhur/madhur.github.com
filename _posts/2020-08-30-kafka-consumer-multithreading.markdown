@@ -185,7 +185,7 @@ spring-group    test-topic3     9          consumer-1-51ce4005-ce57-472f-bfe4-44
 
 On the other hand, if we split the consumption within different methods,
 
-```
+```java
 @KafkaListener(containerFactory = "kafkaListenerContainerFactory", topics = "test-topic")
 public void consume(String message) {
     logger.info(String.format("$$ -> Consumed Message -> %s",message));
