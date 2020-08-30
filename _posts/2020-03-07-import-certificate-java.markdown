@@ -62,7 +62,7 @@ sudo ./javacert.sh google.com
 
 <script src="https://gist.github.com/madhur/bbda66fe8f244a8aef22102f1bd05edd.js"></script>
 
-Though, the above solution works for development servers, this is not a recommended solution for production servers. A situation should not arise where you have to import the un-siged certificate 
+Though, the above solution works for development servers, this is not a recommended solution for production servers. A situation should not arise where you have to import the un-signed certificate 
 into production environment, but even if it arises, its better to go with orchestration solution either using [Ansible](https://www.ansible.com/) or [Chef](https://www.chef.io/)
 
 In my case, the below simple ansible playbook does the job for us:

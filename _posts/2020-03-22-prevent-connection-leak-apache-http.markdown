@@ -27,7 +27,7 @@ org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connect
 	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:56)
 ```
 
-The pecuilar thing was that it was happening for only single endpoint and not any other endpoint.
+The peculiar thing was that it was happening for only single endpoint and not any other endpoint.
 
 We were using Apache HTTP connection pooling library and my focus shifted to that. According to [PoolingHttpClientConnectionManager](https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html) documentation, it maintains a maximum limit of connection on a per route basis and in total.
 
@@ -59,7 +59,7 @@ public HttpClient httpClient()
 ```
 
 After going through our code, I observed that in some cases, where response case was != 200, we weren't consuming the response
-using `EntityUtils.toString(response.getEntity())` and that seemed to be the probem. This is because, we weren't interested in the response if the status code indidcated a failure. However, according to Apache HTTP documentation, the response must be consumed using `EntityUtils.toString(response.getEntity())`  or `EntityUtils.consumeQuietly(response.getEntity())`. The latter can be used when the client is not intersted in the response, which can be the case for failure scenarios.
+using `EntityUtils.toString(response.getEntity())` and that seemed to be the problem. This is because, we weren't interested in the response if the status code indicated a failure. However, according to Apache HTTP documentation, the response must be consumed using `EntityUtils.toString(response.getEntity())`  or `EntityUtils.consumeQuietly(response.getEntity())`. The latter can be used when the client is not interested in the response, which can be the case for failure scenarios.
 
 ## Pool Statistics
 

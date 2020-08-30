@@ -12,9 +12,9 @@ tags:
 * [Must have Java code analysis Tools - Part 3]({% post_url 2020-02-15-must-have-java-code-analysis-tools-part3 %}) 
 
 When you are working in a big team ( > 5 engineers), It is very important to have consistent code styling, development environment and code review process. As a reviewer, its very difficult I see different 
-class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and codingi standards.
+class naming conventions everytime, unused variables or imports etc. Hence, its very important that a team shares same coding styles and coding standards.
 
-In this post, we will look at [checkstyle](https://github.com/checkstyle/checkstyle) , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even befor the compile phase has started
+In this post, we will look at [checkstyle](https://github.com/checkstyle/checkstyle) , a tool that helps developers adhere to coding standards. Checkstyle operates at the source level, i.e. even before the compile phase has started
 
 ## Running with build process
 

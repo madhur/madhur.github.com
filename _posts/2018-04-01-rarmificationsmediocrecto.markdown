@@ -8,7 +8,7 @@ tags:
 - Thoughts
 ---
 
-Any startup while expanding and hiring tech talent, always looks for the high quality talent which can fit its bill. Even if the company is able to tap into high quality talent pool (through innovative marketing techniques etc), when the talent joins the startup, they are exposed to code / culture / practices which are not industry standards due to mediocrity in founding team. The new recruits will  miss  high quality design discussions and coding practices. Ultimately, it leads to job dissatisfaction and the talent eventually quits.
+Any startup while expanding and hiring tech talent, always looks for the high quality talent which can fit its bill. Even if the company is able to tap into high quality talent pool (through innovative marketing techniques etc.), when the talent joins the startup, they are exposed to code / culture / practices which are not industry standards due to mediocrity in founding team. The new recruits will  miss  high quality design discussions and coding practices. Ultimately, it leads to job dissatisfaction and the talent eventually quits.
 
 As a result, the startup end up maintaining bunch of mediocre developers which in turn produce mediocre developed features / products containing bugs. This in turn increases the cost of development, as the startup has to:
 1. Invest time in fixing bugs (one team might allocate x% of its time in sprint to fixing bugs) and 

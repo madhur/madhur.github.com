@@ -9,9 +9,9 @@ tags:
 
 I can't stop thinking of life as a game of risk and reward. Achieving anything great in life requires substantial risk whether fame, money or success.
 
-Many sportsman who excel in their field risk considerable physical injuries to attain that level of wealth, fame and success. Many people believe that becoming a sportsperson is a path to becoming rich. Its highly untrue. Unless one reaches the pinnacle i.e. international level (which by no means is a small feat), don't even dream of becoming rich by playing state or even national level sports. National level sportsman are payed far below their international counterparts. It is also worth noting that a sportperson might play at max 10-15 yrs before taking retirement. Hence their earning potential is maximized in this period.
+Many sportsman who excel in their field risk considerable physical injuries to attain that level of wealth, fame and success. Many people believe that becoming a sportsperson is a path to becoming rich. Its highly untrue. Unless one reaches the pinnacle i.e. international level (which by no means is a small feat), don't even dream of becoming rich by playing state or even national level sports. National level sportsman are payed far below their international counterparts. It is also worth noting that a sportsperson might play at max 10-15 yrs before taking retirement. Hence their earning potential is maximized in this period.
 
-Moving away from sports, What about enterpreneurs who run companies? What's their risk? Just like sportsperson carry physical injuries, enterpreneurship risk mental injuries. This might be a surprise for many, but its the unsaid truth of enterpreneurship known between fellow enterpreneurs only. Check out the following articles:
+Moving away from sports, What about entrepreneurs who run companies? What's their risk? Just like sportsperson carry physical injuries, entrepreneurship risk mental injuries. This might be a surprise for many, but its the unsaid truth of entrepreneurship known between fellow entrepreneurs only. Check out the following articles:
 
 [The Psychological Price of Entrepreneurship](https://www.inc.com/magazine/201309/jessica-bruder/psychological-price-of-entrepreneurship.html)
 
@@ -25,7 +25,7 @@ Moving away from sports, What about enterpreneurs who run companies? What's thei
 <p/>
 
   
-Not just that, 90% of startups end up in failure, that means earning potential during that period is lost for an enterpreneur.
+Not just that, 90% of startups end up in failure, that means earning potential during that period is lost for an entrepreneur.
 
 So, the next time you are thinking of achieving great success without paying any price or taking any big risk. You can very well stop right there. 
 When setting life goals for yourself, it is better to self-ask, how much of risk and pain you are willing to struggle for?

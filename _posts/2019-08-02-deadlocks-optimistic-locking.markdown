@@ -16,7 +16,7 @@ In an optimistic concurrency control, transactions use data resources without ac
 
 Which begs the questions, why should there be a deadlock at all in optimistic concurrency control?
 
-The keypoint to understand here first is that Optimistic locking is not a feature provided by DBMS engine. Databases just provide mechanism to initiate transactions, rollbacks, versioning and locks. Ultiamtely, it is upto the application to implement eithe optimisitc locking or pessimistic locking.
+The key point to understand here first is that Optimistic locking is not a feature provided by DBMS engine. Databases just provide mechanism to initiate transactions, rollbacks, versioning and locks. Ultimately, it is upto the application to implement either optimistic locking or pessimistic locking.
 
 An example of implementing optimistic locking is as follows:
 

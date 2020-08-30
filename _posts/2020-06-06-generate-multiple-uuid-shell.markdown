@@ -7,7 +7,7 @@ tags:
     - Shell
 ---
 
-Recently, I was required to generate multiple UUID's and pass onto HTTP request as a paremeter. I thought of using [Python](https://www.python.org/) or [Node.js](https://nodejs.org/en/) for this purpose, but thought why not use a plain old [shell](https://en.wikipedia.org/wiki/Unix_shell).
+Recently, I was required to generate multiple UUID's and pass onto HTTP request as a parameter. I thought of using [Python](https://www.python.org/) or [Node.js](https://nodejs.org/en/) for this purpose, but thought why not use a plain old [shell](https://en.wikipedia.org/wiki/Unix_shell).
 
 But, is there a way to generate UUID in shell? Turns out, there is using [uuidgen](https://www.man7.org/linux/man-pages/man1/uuidgen.1.html) command which works on both Linux and MacOS.
 
@@ -25,7 +25,7 @@ Print and pipe to `xargs` command for printing the output using single thread
 seq 1 10000 | xargs -I {} -P 1 printf '{}\n'
 ```
 
-Parallely print 1 to 10000 using 10 threads:
+Parallelly print 1 to 10000 using 10 threads:
 
 ```console
 seq 1 10000 | xargs -I {} -P 10 printf '{}\n'

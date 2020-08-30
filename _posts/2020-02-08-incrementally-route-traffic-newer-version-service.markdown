@@ -10,7 +10,7 @@ tags:
 
 Recently, I had a requirement to incrementally increase the traffic to a newer version of service we were deploying in production.
 
-We didn't wanted to go with random percentage approach. This is because our users are mobile app users and we didn't want the users to hit the older version and newer verison of service randomly.
+We didn't wanted to go with random percentage approach. This is because our users are mobile app users and we didn't want the users to hit the older version and newer version of service randomly.
 
 That is, we wanted to consistently map the user to either be routed to an older version of newer version based on certain configurable percentage.
 
@@ -20,7 +20,7 @@ That is, we wanted to consistently map the user to either be routed to an older 
 
 Our proxy server was based on node.js 
 
-After evaluatin several algorithms to generate hash based on user id, such as [Base64](https://en.wikipedia.org/wiki/Base64), [MD5](https://en.wikipedia.org/wiki/MD5). I finally zeroed out on [CRC32 algorithm](https://en.wikipedia.org/wiki/Cyclic_redundancy_check).
+After evaluating several algorithms to generate hash based on user id, such as [Base64](https://en.wikipedia.org/wiki/Base64), [MD5](https://en.wikipedia.org/wiki/MD5). I finally zeroed out on [CRC32 algorithm](https://en.wikipedia.org/wiki/Cyclic_redundancy_check).
 
 The simple reason being that output of CRC32 is a simple 32 bit integer which can be easily converted to a percentage value and the performance of crc32 being the fastest among all.
 

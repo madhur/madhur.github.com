@@ -10,7 +10,7 @@ tags:
 
 I have been playing with Apple's [CreateML](https://developer.apple.com/documentation/createml).  Specifically, I have been following Apple's tutorial on [creating text classification models](https://developer.apple.com/documentation/createml/creating_a_text_classifier_model)
 
-The exact code as described in article doesn't work, atleast on OSX 10.14 Mojave.
+The exact code as described in article doesn't work, at least on OSX 10.14 Mojave.
 
 The snippet I have been using is:
 
@@ -41,7 +41,7 @@ let parameters = MLTextClassifier.ModelParameters.init(validationData: trainingD
 let sentimentClassifier = try MLTextClassifier(trainingData: trainingData, textColumn: "text", labelColumn: "class", parameters: parameters)
 ```
 
-Hope this helps anyone encountering this issue. Just for sake of completeness, the complete sample code to generate a text classification model is given below. The genrated `mlmodel` can then be imported in an iOS or MacOS App.
+Hope this helps anyone encountering this issue. Just for sake of completeness, the complete sample code to generate a text classification model is given below. The generated `mlmodel` can then be imported in an iOS or MacOS App.
 
 ```swift
 import Cocoa

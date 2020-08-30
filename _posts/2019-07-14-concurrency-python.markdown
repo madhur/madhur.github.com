@@ -12,7 +12,7 @@ Recently, I was required to process bunch of huge CSV and perform the output. I 
 
 I thought why not make it process through multiple threads. Python is notorious for not having a good support for concurrency. Some of it is because of its [Global Interpreter lock](https://realpython.com/python-gil/)
 
-Recent versions of python > 3.x , do have multiprocessing and mulithreading modules built in.
+Recent versions of python > 3.x , do have multiprocessing and multithreading modules built in.
 
 Honestly, I find the whole world of multiprocessing / multithreading very confusing in python world. 
 

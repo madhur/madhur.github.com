@@ -7,10 +7,10 @@ tags:
 - Design
 ---
 
-In any distributed system, one of the primary probem statement every engineer faces is the id generation for an entity. In this post, we are going to look at the id generation strategies at a very high level. I wanted to have a quick reference or a cheat sheet to lookup for a problem like this:
+In any distributed system, one of the primary problem statement every engineer faces is the id generation for an entity. In this post, we are going to look at the id generation strategies at a very high level. I wanted to have a quick reference or a cheat sheet to lookup for a problem like this:
 
 Design considerations
-* Shold the ids be sortable?
+* Should the ids be sortable?
 * The system should introduce as few new ‘moving parts’ as possible 
 * Should the id be generated at server or database?
 

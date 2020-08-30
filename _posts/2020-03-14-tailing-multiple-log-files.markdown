@@ -44,10 +44,10 @@ Also, what I like to do is instead of typing this log command, just alias it int
 alias catalinadev='fab -P -u username  --linewise -H x.x.x.x,y.y.y.y  -- tail -f /path/file.log'
 ```
 
-Thus, I can just type `catalinadev` anytime and start tailing my Tomcata catalina log files from dev envrionment.
+Thus, I can just type `catalinadev` anytime and start tailing my Tomcata catalina log files from dev environment.
 
 Here is the output in action, notice how the IP address on the left handside tells us the machine from which the log line was fetched:
 
-[Open in fullscren](/images/Blog/output.gif)
+[Open in fullscreen](/images/Blog/output.gif)
 
 <img src='/images/Blog/output.gif' height='897px' width='1417px' />

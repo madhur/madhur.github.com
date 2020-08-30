@@ -27,11 +27,11 @@ org.apache.coyote.http11.Http11Processor.service Error parsing HTTP request head
     at java.lang.Thread.run(Thread.java:745)
 ```
 
-Interestingly, the occurence of these errors in the logs were very few but I was seeing lot of failures in our availability dashboards. That's where I observed this note in the exception:
+Interestingly, the occurrence of these errors in the logs were very few but I was seeing lot of failures in our availability dashboards. That's where I observed this note in the exception:
 
 ` Note: further occurrences of HTTP header parsing errors will be logged at DEBUG level.`
 
-The way tomcat works is that for certain type of errors such as above, it will only log the error once with the `INFO` level, and then further occurences are logged only at the `DEBUG` level. 
+The way tomcat works is that for certain type of errors such as above, it will only log the error once with the `INFO` level, and then further occurrences are logged only at the `DEBUG` level. 
 
 This change in log level is an in memory change and hence is retained until the tomcat is restarted.
 

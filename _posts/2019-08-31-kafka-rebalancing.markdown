@@ -9,13 +9,13 @@ tags:
 
 ## What is kafka rebalancing?
 
-Every consumer in a consumer group is assinged one or more topic partitions exclusively and rebalance is re-assignment of partition ownership among consumers.
+Every consumer in a consumer group is assigned one or more topic partitions exclusively and rebalance is re-assignment of partition ownership among consumers.
 
 It can happen when:
 * a consumer joins the group
 * a consumer shuts down
 * a consumer is considered dead
-* new partitons are added
+* new partitions are added
 
 Starting from version 0.8.2.0, the offsets committed by the consumers aren’t saved in ZooKeeper but on a partitioned and replicated topic named `__consumer_offsets`, which is hosted on the Kafka brokers in the cluster.
 

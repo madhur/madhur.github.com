@@ -12,7 +12,7 @@ tags:
 
 In the last [post]({% post_url 2020-02-02-must-have-java-code-analysis-tools-part2 %}), we looked at [Spotbugs](https://spotbugs.github.io/), which focuses on the code linting at the bytecode level.
 
-In this post, we will look at [PMD](https://pmd.github.io/), which agains works at the source level to find out possible bugs in your java code.
+In this post, we will look at [PMD](https://pmd.github.io/), which again works at the source level to find out possible bugs in your java code.
 
 The list of entire checks which PMD finds can be found [here](https://pmd.github.io/pmd-6.21.0/pmd_rules_java.html)
 
@@ -20,11 +20,11 @@ There is also a [discussion](https://stackoverflow.com/questions/4297014/what-ar
 
 ## Running the PMD
 
-Instead of focusing on running with build process, I will focus on running it manually. Though it still can be integrated with build process and that remains the recommended apporach.
+Instead of focusing on running with build process, I will focus on running it manually. Though it still can be integrated with build process and that remains the recommended approach.
 
 On MAC, it can be simply installed with command `brew install pmd`
 
-On other OS, installation instructures are given [here](https://pmd.github.io/latest/pmd_userdocs_installation.html)
+On other OS, installation instructions are given [here](https://pmd.github.io/latest/pmd_userdocs_installation.html)
 
 ### Configuring Rules
 

@@ -9,7 +9,7 @@ tags:
 ---
 
 
-Recently, we implemented a policy where every commit message includes the JIRA ID from the committer. This makes sure that every change to repo is tagged against either a user story or an issue which helps in traceability. Initially, it was difficult and users used to forget it. We had a github hook which would validate the commit message and reject the updates to the remote repo. Users would then amend the commmit using
+Recently, we implemented a policy where every commit message includes the JIRA ID from the committer. This makes sure that every change to repo is tagged against either a user story or an issue which helps in traceability. Initially, it was difficult and users used to forget it. We had a github hook which would validate the commit message and reject the updates to the remote repo. Users would then amend the commit using
 `git commit --amend` or even `git rebase -i HEAD~n` if there are multiple commits to be amended.
 
 Fortunately, there is a provision in git itself which can validate your commit message in the local repo itself. All you to have to do is make a copy of  `.git/prepare-commit-msg.sample` to `.git/prepare-commit-msg` and then include your logic there. We used a convention that users create branch name with JIRA ID itself and this script can pickup the JIRA ID from the branch name itself. In the worst case, while working with branches such as `staging`, `master`, `release` etc, the users can provide the JIRA ID in the commit message. If there is no JIRA ID provided, the commit will be aborted with an error.

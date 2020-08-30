@@ -10,7 +10,7 @@ tags:
 
 In any Java application deployed to monitoring, it is important to have proper monitoring / alerting infrastructure setup. 
 
-Apart from the infrastrucutre monitoring, it is essential to setup JVM metrics as well as application monitoring.
+Apart from the infrastructure monitoring, it is essential to setup JVM metrics as well as application monitoring.
 
 When I say application monitoring, it means monitoring the business transactions such as no. of orders / transactions, successful orders, failed orders , user signups, email triggered etc.
 
@@ -18,13 +18,13 @@ For this, we have to emit events from our application. These are usually called 
 
 [Dropwizard metrics](https://metrics.dropwizard.io/4.0.0/) is one of the standard libraries out there which allows you to emit events.
 
-The events can be sent to various data stores, most propular being [Graphite](https://metrics.dropwizard.io/4.0.0/manual/graphite.html) and [Influxdb](https://github.com/kickstarter/dropwizard-influxdb-reporter)
+The events can be sent to various data stores, most popular being [Graphite](https://metrics.dropwizard.io/4.0.0/manual/graphite.html) and [Influxdb](https://github.com/kickstarter/dropwizard-influxdb-reporter)
 
 The most popular types of metrics are:
 
 * Meters - A meter measures the rate of events over time. Also called as requests per second or TPS(transactions per second). Meters also track 1-, 5- and 15- minute moving averages, also called `m1_rate` , `m5_rate` and `m15_rate`. Meters have `mark` method to indicate the event.
 
-* Counters - A counter is used to keep track of counts. For example pending jobs and total requests. Total requests etc is usually a useless parameter but tools like graphite / influxdb can provide derivate function over the counters which can give us the additional functionality of meters using counters.
+* Counters - A counter is used to keep track of counts. For example pending jobs and total requests. Total requests etc. is usually a useless parameter but tools like graphite / influxdb can provide derivate function over the counters which can give us the additional functionality of meters using counters.
 
 * Timer - A timer measures both the rate a particular piece of code is called and as well as the distribution of its duration. Usually if you are using timer, you don't need meter or counter, since those functionalities are implemented by timer as well. A good practice is to have timer for your normal execution and counter/meter for exception scenarios, so that you can visualize no. of errors or rate of errors. A timer also provides, percentile times using variables `p50`, `p75`, `p95`, `p98`, `p99` and standard deviation.
 

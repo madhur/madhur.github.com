@@ -32,7 +32,7 @@ At-least once as the name suggests, message will be delivered atleast once. Ther
 
 Let's say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.
 
-## Exactly-once configuraition
+## Exactly-once configuration
 
 Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.
 

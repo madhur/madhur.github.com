@@ -9,7 +9,7 @@ tags:
 - Java
 ---
 
-I was recently trying to add a package level suppression in both checkstyle / spotbugs and found it to be having wierd syntax.
+I was recently trying to add a package level suppression in both checkstyle / spotbugs and found it to be having weird syntax.
 
 For [checkstyle](https://github.com/checkstyle/checkstyle/blob/master/config/suppressions.xml),
 

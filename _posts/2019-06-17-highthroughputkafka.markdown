@@ -56,6 +56,6 @@ public void publish(String messageKey, String payload, String topic) {
 ```
 
 
-* In case of kafka messages, it is useful to provide a complete publish timestamp and origial modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new upate.
+* In case of kafka messages, it is useful to provide a complete publish timestamp and original modify timestamp of the message (such as db record). Using these timestamps, client can determine if the incoming message is stale or a new update.
 
 * Initially, during development, it is very useful to store the partition and offset of the consumed messages. This can be stored in the consumer data store or application logs. Using this information, the message can be directly looked up in kafka to see the original message. 

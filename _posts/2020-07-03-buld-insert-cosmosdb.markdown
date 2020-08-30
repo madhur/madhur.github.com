@@ -43,7 +43,7 @@ The line `bulkOps.execute()` will be a blocking call and will return only after 
 
 I wouldn't recommend using `BulkMode.UNORDERED` especially if you are dealing with transactional data.
 
-Even with `BulkMode.ORDERED`, there can be other failures duing this batch insertion for ex, network blips, server crashes etc. Thus, this approach is fine if we are bulk inserting thousands of rows (which would probably take a second or two). However, for inserting millions of records, it is best idea to batch this process using [Spring Batch](https://spring.io/projects/spring-batch) or a custom batching logic. The idea is that you want to be able to resume the insertion in an event of the failure. How the failure is handled totally depends on the type of failure occurred.
+Even with `BulkMode.ORDERED`, there can be other failures during this batch insertion for ex, network blips, server crashes etc. Thus, this approach is fine if we are bulk inserting thousands of rows (which would probably take a second or two). However, for inserting millions of records, it is best idea to batch this process using [Spring Batch](https://spring.io/projects/spring-batch) or a custom batching logic. The idea is that you want to be able to resume the insertion in an event of the failure. How the failure is handled totally depends on the type of failure occurred.
 
 One might note that, [Spring Data](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#reference) provides the `saveAll()` method, so why not use that and do an insertion like this:
 

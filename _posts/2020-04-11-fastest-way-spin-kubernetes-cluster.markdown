@@ -7,11 +7,11 @@ tags:
 - Kubernetes
 ---
 
-Recently, I was trying to do a POC on Kubernetes and required a kuberentes Cluster.
+Recently, I was trying to do a POC on Kubernetes and required a kubernetes Cluster.
 
 Its easy to spin up a single machine cluster using [Minkube](https://kubernetes.io/docs/tasks/tools/install-minikube/) on Windows, Linux and MacOS
 
-But the behaviour of Minkube is not as close to real Kubernetes cluster primarily because:
+But the behavior of Minkube is not as close to real Kubernetes cluster primarily because:
 
 * You can't simulate multiple nodes
 * You cannot have a public DNS for your services unless you use [minikube tunnel](https://minikube.sigs.k8s.io/docs/handbook/accessing/#using-minikube-tunnel)

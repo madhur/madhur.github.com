@@ -16,7 +16,7 @@ point.
 
 ### Use -Djavax.net.debug=all to command line
 
-When using Java program, you can add `-Djavax.net.debug=all` to the commandline to produce debug output of the complete handshake of SSL.
+When using Java program, you can add `-Djavax.net.debug=all` to the command line to produce debug output of the complete handshake of SSL.
 
 In short, this is how the handshake looks like
 
@@ -49,7 +49,7 @@ In our case, server abruptly stopped responding after client sent `[ChangeCipher
 
 [SSLDump](https://linux.die.net/man/1/ssldump) is another utility which can show decrypted SSL traffic to debug any issues. So, if you are not using Java, this is the utility to go to debug the SSL issue.
 
-Its output will be as follows, showing each of the SSL handhsake. 
+Its output will be as follows, showing each of the SSL handshake. 
 
 ```
 3 1  0.5765 (0.5765)  C>S  Handshake
@@ -104,7 +104,10 @@ It can also perform the connection tests to the server using various clients suc
 
 ## Java Runtime parameters
 
-There are various runtime parameters which affect the SSL connectivity in Java. Watchout for these parameters, if you are facing SSL issue in a Java application. Note that, its just not enough to look at the arguments while starting the program, since these runtime parameters can be set at runtime too.
+There are various runtime parameters which affect the SSL connectivity in Java.
+Watch out for these parameters, if you are facing SSL issue in a Java
+application. Note that, its just not enough to look at the arguments while
+starting the program, since these runtime parameters can be set at runtime too.
 
 For example, in one our client library, the following snippet of code disabled [Server Name Indication](https://en.wikipedia.org/wiki/Server_Name_Indication) which caused problems with the TLS connections to virtual servers, in which multiple servers for different network names are hosted at a single underlying network address.
 
@@ -114,7 +117,7 @@ if (System.getProperty("jsse.enableSNIExtension") == null) {
 	System.setProperty("jsse.enableSNIExtension", "false");
 }
 ```
-There are other paramters to watch out for as well. [Java Secure Socket Extension Reference Guide](https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html) is a helpful page to start with.
+There are other parameters to watch out for as well. [Java Secure Socket Extension Reference Guide](https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html) is a helpful page to start with.
 
 
 Hope that helps anyone facing trouble with SSL connections. If you believe, there are some other useful tools to debug SSL issues further, do let me know in the comments.

@@ -15,12 +15,12 @@ Note that our focus will be on covering out of the box tools in Linux and not an
 
 So, let's get down to it.
 
-* [ping](#ping)
-* [telnet](#telnet)
-* [netcat](#netcat)
-* [curl](#curl)
-* [netstat](#netstat)
-* [nmap](#nmap)
+- [ping](#ping)
+- [telnet](#telnet)
+- [netcat (nc)](#netcat-nc)
+- [curl](#curl)
+- [netstat](#netstat)
+- [nmap](#nmap)
 
 <a name="ping"></a>
 
@@ -41,14 +41,14 @@ PING www.example.com (93.184.216.34): 56 data bytes
 round-trip min/avg/max/stddev = 9.674/10.968/11.726/0.748 ms
 ```
 
-- The issue with ping is that it does not test TCP connectivity to a particular port. It was designed in mind when there used to be no firwalls or restriction between 2 hosts. But in modern world, ICMP traffic is usually restricted. So its possible that there exists a valid connectvity between two hosts at a particular port while ping command shows unreachable.
+- The issue with ping is that it does not test TCP connectivity to a particular port. It was designed in mind when there used to be no firewalls or restriction between 2 hosts. But in modern world, ICMP traffic is usually restricted. So its possible that there exists a valid connectivity between two hosts at a particular port while ping command shows unreachable.
 
 <a name="telnet"></a>
 
 # telnet
 [Telnet](https://en.wikipedia.org/wiki/Telnet) is another utility which has been widely used in history to test connectivity between hosts at a specific port. For ex,
 
-if we want to test the connectivty at IP 172.217.163.46 at port 443, we can simply do
+if we want to test the connectivity at IP 172.217.163.46 at port 443, we can simply do
 
 ```console
 $ ~ telnet 172.217.163.46 443
@@ -163,7 +163,7 @@ The document has moved
 <a name="netstat"></a>
 
 # netstat
-[netstat](https://linux.die.net/man/8/netstat) is another one of mine favourite tools. Though, it doesn't allow you to test the connectivity with the new host, its the best tool if you want to view the list of already 
+[netstat](https://linux.die.net/man/8/netstat) is another one of mine favorite tools. Though, it doesn't allow you to test the connectivity with the new host, its the best tool if you want to view the list of already 
 connected hosts.
 
 ```console
