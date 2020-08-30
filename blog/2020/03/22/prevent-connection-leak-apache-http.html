@@ -214,7 +214,7 @@
 	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:56)
 </code></pre>
 
-<p>The pecuilar thing was that it was happening for only single endpoint and not any other endpoint.</p>
+<p>The peculiar thing was that it was happening for only single endpoint and not any other endpoint.</p>
 
 <p>We were using Apache HTTP connection pooling library and my focus shifted to that. According to <a href="https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html">PoolingHttpClientConnectionManager</a> documentation, it maintains a maximum limit of connection on a per route basis and in total.</p>
 
@@ -245,7 +245,7 @@
 </code></pre></div></div>
 
 <p>After going through our code, I observed that in some cases, where response case was != 200, we weren’t consuming the response
-using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code> and that seemed to be the probem. This is because, we weren’t interested in the response if the status code indidcated a failure. However, according to Apache HTTP documentation, the response must be consumed using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code>  or <code class="highlighter-rouge">EntityUtils.consumeQuietly(response.getEntity())</code>. The latter can be used when the client is not intersted in the response, which can be the case for failure scenarios.</p>
+using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code> and that seemed to be the problem. This is because, we weren’t interested in the response if the status code indicated a failure. However, according to Apache HTTP documentation, the response must be consumed using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code>  or <code class="highlighter-rouge">EntityUtils.consumeQuietly(response.getEntity())</code>. The latter can be used when the client is not interested in the response, which can be the case for failure scenarios.</p>
 
 <h2 id="pool-statistics">Pool Statistics</h2>
 

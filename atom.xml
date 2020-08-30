@@ -3,13 +3,258 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-08-23T11:49:29+05:30</updated>
+ <updated>2020-08-30T13:13:18+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Kafka Consumer Multithreading</title>
+   <link href="https://madhur.co.in/blog/2020/08/30/kafka-consumer-multithreading.html"/>
+   <updated>2020-08-30T00:00:00+05:30</updated>
+   <id>id:/blog/2020/08/30/kafka-consumer-multithreading</id>
+   <content type="html">&lt;p&gt;Multithreading / Concurrency have always been the favorite topic of mine. It gives me a pure joy to extract most out of a machine by loading the CPU with work just like a master exploiting its slaves :)&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, these days due to distributed nature of computing, most of the time in a machine is spent waiting on I/O (either from database, API’s etc.) and our CPU just sits idle most of the time.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://kafka.apache.org/&quot;&gt;Kafka&lt;/a&gt; allows you to scale your distributed system through partitions where a compute can be attached to consuming from particular partition, which is an ordered subset of messages in a topic.&lt;/p&gt;
+
+&lt;p&gt;Recently, I have seen a trend where developers instead of making sure a compute is able to efficiently process the data from the single partition, prefer the easy way out of increasing the partitions/vm’s to reach the desired
+throughput. It’s like throwing money at the problem.&lt;/p&gt;
+
+&lt;p&gt;In this post, we will look at ways to increase concurrency of Kafka consumer so
+that we are able to achieve more from a single consumer instead of increasing
+the partitions. There are two types of multithreading which can be achieved with
+Kafka -&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Thread per consumer model&lt;/li&gt;
+  &lt;li&gt;Multi-threaded consumer model&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the thread per consumer model, each thread is instantiated and connects to
+Kafka broker. The kafka broker assigns the partitions whose messages will be
+delivered to these threads.&lt;/p&gt;
+
+&lt;p&gt;In the multi-threaded consumer mode, a single thread connects to Kafka and may
+get data from multiple / single partition(s). Once the data has been delivered
+that thread, the thread may deliver the messages to multiple pool of threads to
+allow them to process in parallel. In this approach, consumer thread can decide
+which type of messages will be handled by which child thread. However, offset
+management becomes very tricky in this case.&lt;/p&gt;
+
+&lt;p&gt;There are pros/cons of each approach and we’ll go over these.&lt;/p&gt;
+
+&lt;h2 id=&quot;thread-per-consumer-model&quot;&gt;Thread per consumer model&lt;/h2&gt;
+
+&lt;p&gt;This is a simplest approach, which can be easily
+achieved using Spring Kafka as shown below.&lt;/p&gt;
+
+&lt;p&gt;It’s very easy to configure spring to spawn multiple threads to connect to
+Kafka. Let’s see how the behavior differs. We have a single topic &lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic&lt;/code&gt;
+with 10 partitions and a single VM running spring application with single
+concurrency.&lt;/p&gt;
+
+&lt;p&gt;Just to be clear, the following configuration specifies the concurrency in
+spring kafka listener&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/**
+* Consumer configuration for email topics
+*
+* @return
+*/&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nc&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;BOOTSTRAP_SERVERS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;localhost:9092&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GROUP_ID_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;EMAIL_STATUS_CONSUMER_GROUP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;KEY_DESERIALIZER_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;StringDeserializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;VALUE_DESERIALIZER_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;StringDeserializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DefaultKafkaConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;cm&quot;&gt;/**
+* Sets Concurrency for kafka listener
+*
+* @return
+*/&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;kafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;consumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConcurrency&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We are using consumer group &lt;code class=&quot;highlighter-rouge&quot;&gt;spring-group&lt;/code&gt; to listen to this partition.
+Following is the behavior with single concurrency:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+spring-group    test-topic      8          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      2          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      1          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      4          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      5          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      6          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      3          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      7          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      9          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+spring-group    test-topic      0          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you closely observe the above output, the consumer ID of the application is
+same for all the 10 partitions, indicating that its the single thread which is
+connected to all the partitions.&lt;/p&gt;
+
+&lt;p&gt;Now, let’s see the output, when concurrency is increased to 2,&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+spring-group    test-topic      8          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
+spring-group    test-topic      5          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
+spring-group    test-topic      6          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
+spring-group    test-topic      7          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
+spring-group    test-topic      9          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
+spring-group    test-topic      4          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
+spring-group    test-topic      2          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
+spring-group    test-topic      3          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
+spring-group    test-topic      1          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
+spring-group    test-topic      0          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you notice above, now there are 2 threads which have been equally given 5
+partitions each.&lt;/p&gt;
+
+&lt;p&gt;This is very straightforward to understand, Kafka will try to distribute the
+partitions equally among the threads belonging to same consumer group. If we
+spawn, 10 concurrency, we will have a dedicated thread for each partition.&lt;/p&gt;
+
+&lt;p&gt;It’s interesting to study this behavior when there are multiple topics to
+consumer from. So now, let’s create two more topics, &lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic2&lt;/code&gt; and
+&lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic3&lt;/code&gt; with 10 partitions each.&lt;/p&gt;
+
+&lt;p&gt;This has an interesting behaviour the way consumers are written within spring.&lt;/p&gt;
+
+&lt;p&gt;For example, if we are consuming from all three topics like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;containerFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafkaListenerContainerFactory&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topics&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;test-topic&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic2&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic3&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consume&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We get a single thread listening from all the 30 partitions of 3 topics combined&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+spring-group    test-topic3     7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic      0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic2     4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+spring-group    test-topic3     9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;On the other hand, if we split the consumption within different methods,&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@KafkaListener(containerFactory = &quot;kafkaListenerContainerFactory&quot;, topics = &quot;test-topic&quot;)
+public void consume(String message) {
+    logger.info(String.format(&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;,message));
+}
+
+@KafkaListener(containerFactory = &quot;kafkaListenerContainerFactory&quot;, topics = &quot;test-topic2&quot;)
+public void consume2(String message) {
+    logger.info(String.format(&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;,message));
+}
+
+@KafkaListener(containerFactory = &quot;kafkaListenerContainerFactory&quot;, topics = &quot;test-topic3&quot;)
+public void consume3(String message) {
+    logger.info(String.format(&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;,message));
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Spring will automatically spawn a thread for each listener even though we have
+provided the concurrency as one&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+spring-group    test-topic3     6          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     7          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     0          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     3          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     1          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     2          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     8          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     4          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     5          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic3     9          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
+spring-group    test-topic2     5          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     9          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     2          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     6          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     0          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     3          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     7          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     1          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     8          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic2     4          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
+spring-group    test-topic      8          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      2          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      1          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      4          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      5          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      6          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      3          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      7          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      9          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+spring-group    test-topic      0          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is a very important distinct to be aware of in order to properly scale your
+applications to consume the heavy traffic from the topics without any lag.&lt;/p&gt;
+
+&lt;p&gt;So what we understand is that the method
+&lt;a href=&quot;https://docs.spring.io/spring-kafka/api/org/springframework/kafka/listener/ConcurrentMessageListenerContainer.html#setConcurrency-int-&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;setConcurrency&lt;/code&gt;&lt;/a&gt;
+is per instance of
+&lt;a href=&quot;https://docs.spring.io/spring-kafka/api/org/springframework/kafka/config/KafkaListenerContainerFactory.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;KafkaListener&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;It is also important to understand that there is no point creating more threads
+than there are number of partitions as those will be left idle.&lt;/p&gt;
+
+&lt;p&gt;The above sample application source can be found in my &lt;a href=&quot;https://github.com/madhur/kafka-consumer-concurrency&quot;&gt;Github repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;In the next post, we will look at Multi-threaded consumer model.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Debugging SSL Issues</title>
@@ -23,7 +268,7 @@ point.&lt;/p&gt;
 
 &lt;h3 id=&quot;use--djavaxnetdebugall-to-command-line&quot;&gt;Use -Djavax.net.debug=all to command line&lt;/h3&gt;
 
-&lt;p&gt;When using Java program, you can add &lt;code class=&quot;highlighter-rouge&quot;&gt;-Djavax.net.debug=all&lt;/code&gt; to the commandline to produce debug output of the complete handshake of SSL.&lt;/p&gt;
+&lt;p&gt;When using Java program, you can add &lt;code class=&quot;highlighter-rouge&quot;&gt;-Djavax.net.debug=all&lt;/code&gt; to the command line to produce debug output of the complete handshake of SSL.&lt;/p&gt;
 
 &lt;p&gt;In short, this is how the handshake looks like&lt;/p&gt;
 
@@ -54,7 +299,7 @@ Application Data    &amp;lt;-----&amp;gt;     Application Data
 
 &lt;p&gt;&lt;a href=&quot;https://linux.die.net/man/1/ssldump&quot;&gt;SSLDump&lt;/a&gt; is another utility which can show decrypted SSL traffic to debug any issues. So, if you are not using Java, this is the utility to go to debug the SSL issue.&lt;/p&gt;
 
-&lt;p&gt;Its output will be as follows, showing each of the SSL handhsake.&lt;/p&gt;
+&lt;p&gt;Its output will be as follows, showing each of the SSL handshake.&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;3 1  0.5765 (0.5765)  C&amp;gt;S  Handshake
       ClientHello
@@ -106,7 +351,10 @@ Not enough data. Found 64 bytes (expecting 16384)
 
 &lt;h2 id=&quot;java-runtime-parameters&quot;&gt;Java Runtime parameters&lt;/h2&gt;
 
-&lt;p&gt;There are various runtime parameters which affect the SSL connectivity in Java. Watchout for these parameters, if you are facing SSL issue in a Java application. Note that, its just not enough to look at the arguments while starting the program, since these runtime parameters can be set at runtime too.&lt;/p&gt;
+&lt;p&gt;There are various runtime parameters which affect the SSL connectivity in Java.
+Watch out for these parameters, if you are facing SSL issue in a Java
+application. Note that, its just not enough to look at the arguments while
+starting the program, since these runtime parameters can be set at runtime too.&lt;/p&gt;
 
 &lt;p&gt;For example, in one our client library, the following snippet of code disabled &lt;a href=&quot;https://en.wikipedia.org/wiki/Server_Name_Indication&quot;&gt;Server Name Indication&lt;/a&gt; which caused problems with the TLS connections to virtual servers, in which multiple servers for different network names are hosted at a single underlying network address.&lt;/p&gt;
 
@@ -114,7 +362,7 @@ Not enough data. Found 64 bytes (expecting 16384)
 	&lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;jsse.enableSNIExtension&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;false&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;There are other paramters to watch out for as well. &lt;a href=&quot;https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html&quot;&gt;Java Secure Socket Extension Reference Guide&lt;/a&gt; is a helpful page to start with.&lt;/p&gt;
+&lt;p&gt;There are other parameters to watch out for as well. &lt;a href=&quot;https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html&quot;&gt;Java Secure Socket Extension Reference Guide&lt;/a&gt; is a helpful page to start with.&lt;/p&gt;
 
 &lt;p&gt;Hope that helps anyone facing trouble with SSL connections. If you believe, there are some other useful tools to debug SSL issues further, do let me know in the comments.&lt;/p&gt;
 </content>
@@ -920,7 +1168,7 @@ Java projects by just adding &lt;a href=&quot;https://kotlinlang.org/api/latest/
 
 &lt;p&gt;I wouldn’t recommend using &lt;code class=&quot;highlighter-rouge&quot;&gt;BulkMode.UNORDERED&lt;/code&gt; especially if you are dealing with transactional data.&lt;/p&gt;
 
-&lt;p&gt;Even with &lt;code class=&quot;highlighter-rouge&quot;&gt;BulkMode.ORDERED&lt;/code&gt;, there can be other failures duing this batch insertion for ex, network blips, server crashes etc. Thus, this approach is fine if we are bulk inserting thousands of rows (which would probably take a second or two). However, for inserting millions of records, it is best idea to batch this process using &lt;a href=&quot;https://spring.io/projects/spring-batch&quot;&gt;Spring Batch&lt;/a&gt; or a custom batching logic. The idea is that you want to be able to resume the insertion in an event of the failure. How the failure is handled totally depends on the type of failure occurred.&lt;/p&gt;
+&lt;p&gt;Even with &lt;code class=&quot;highlighter-rouge&quot;&gt;BulkMode.ORDERED&lt;/code&gt;, there can be other failures during this batch insertion for ex, network blips, server crashes etc. Thus, this approach is fine if we are bulk inserting thousands of rows (which would probably take a second or two). However, for inserting millions of records, it is best idea to batch this process using &lt;a href=&quot;https://spring.io/projects/spring-batch&quot;&gt;Spring Batch&lt;/a&gt; or a custom batching logic. The idea is that you want to be able to resume the insertion in an event of the failure. How the failure is handled totally depends on the type of failure occurred.&lt;/p&gt;
 
 &lt;p&gt;One might note that, &lt;a href=&quot;https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#reference&quot;&gt;Spring Data&lt;/a&gt; provides the &lt;code class=&quot;highlighter-rouge&quot;&gt;saveAll()&lt;/code&gt; method, so why not use that and do an insertion like this:&lt;/p&gt;
 
@@ -950,7 +1198,7 @@ Java projects by just adding &lt;a href=&quot;https://kotlinlang.org/api/latest/
    <id>id:/blog/2020/06/28/validation-data-provided-must-contain-class</id>
    <content type="html">&lt;p&gt;I have been playing with Apple’s &lt;a href=&quot;https://developer.apple.com/documentation/createml&quot;&gt;CreateML&lt;/a&gt;.  Specifically, I have been following Apple’s tutorial on &lt;a href=&quot;https://developer.apple.com/documentation/createml/creating_a_text_classifier_model&quot;&gt;creating text classification models&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;The exact code as described in article doesn’t work, atleast on OSX 10.14 Mojave.&lt;/p&gt;
+&lt;p&gt;The exact code as described in article doesn’t work, at least on OSX 10.14 Mojave.&lt;/p&gt;
 
 &lt;p&gt;The snippet I have been using is:&lt;/p&gt;
 
@@ -979,7 +1227,7 @@ Java projects by just adding &lt;a href=&quot;https://kotlinlang.org/api/latest/
 &lt;span class=&quot;k&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;sentimentClassifier&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;MLTextClassifier&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;trainingData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;trainingData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;textColumn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;labelColumn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;class&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;parameters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Hope this helps anyone encountering this issue. Just for sake of completeness, the complete sample code to generate a text classification model is given below. The genrated &lt;code class=&quot;highlighter-rouge&quot;&gt;mlmodel&lt;/code&gt; can then be imported in an iOS or MacOS App.&lt;/p&gt;
+&lt;p&gt;Hope this helps anyone encountering this issue. Just for sake of completeness, the complete sample code to generate a text classification model is given below. The generated &lt;code class=&quot;highlighter-rouge&quot;&gt;mlmodel&lt;/code&gt; can then be imported in an iOS or MacOS App.&lt;/p&gt;
 
 &lt;div class=&quot;language-swift highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;Cocoa&lt;/span&gt;
 &lt;span class=&quot;kd&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;CreateML&lt;/span&gt;
@@ -1089,7 +1337,7 @@ lines only in file1; lines only in file2; and lines in both files.&lt;/p&gt;
    <link href="https://madhur.co.in/blog/2020/06/06/generate-multiple-uuid-shell.html"/>
    <updated>2020-06-06T00:00:00+05:30</updated>
    <id>id:/blog/2020/06/06/generate-multiple-uuid-shell</id>
-   <content type="html">&lt;p&gt;Recently, I was required to generate multiple UUID’s and pass onto HTTP request as a paremeter. I thought of using &lt;a href=&quot;https://www.python.org/&quot;&gt;Python&lt;/a&gt; or &lt;a href=&quot;https://nodejs.org/en/&quot;&gt;Node.js&lt;/a&gt; for this purpose, but thought why not use a plain old &lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_shell&quot;&gt;shell&lt;/a&gt;.&lt;/p&gt;
+   <content type="html">&lt;p&gt;Recently, I was required to generate multiple UUID’s and pass onto HTTP request as a parameter. I thought of using &lt;a href=&quot;https://www.python.org/&quot;&gt;Python&lt;/a&gt; or &lt;a href=&quot;https://nodejs.org/en/&quot;&gt;Node.js&lt;/a&gt; for this purpose, but thought why not use a plain old &lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_shell&quot;&gt;shell&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;But, is there a way to generate UUID in shell? Turns out, there is using &lt;a href=&quot;https://www.man7.org/linux/man-pages/man1/uuidgen.1.html&quot;&gt;uuidgen&lt;/a&gt; command which works on both Linux and MacOS.&lt;/p&gt;
 
@@ -1105,7 +1353,7 @@ lines only in file1; lines only in file2; and lines in both files.&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 1 printf '{}\n'
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Parallely print 1 to 10000 using 10 threads:&lt;/p&gt;
+&lt;p&gt;Parallelly print 1 to 10000 using 10 threads:&lt;/p&gt;
 
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 10 printf '{}\n'
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -1162,7 +1410,7 @@ AF969198-0DA8-49BA-9931-D38709510354
 
 &lt;p&gt;The current rig which I use is listed here on &lt;a href=&quot;https://pcpartpicker.com/user/madhur_ahuja/saved/#view=FdqWXL&quot;&gt;PCPartPicker&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;It is also very important to continously monitor the performance of such system so as to make sure they are running in optimum systems.&lt;/p&gt;
+&lt;p&gt;It is also very important to continuously monitor the performance of such system so as to make sure they are running in optimum systems.&lt;/p&gt;
 
 &lt;p&gt;Especially important is CPU and GPU temperatures. With latest software and games, pushing the limits of hardware, these hardware peripherals dissipate lot of heat when running at their peak levels.&lt;/p&gt;
 
@@ -1170,9 +1418,9 @@ AF969198-0DA8-49BA-9931-D38709510354
 
 &lt;p&gt;In my case, I invested in &lt;a href=&quot;https://www.amazon.in/Cooler-Master-Hyper-H410R-RR-H410-20PK-R1/dp/B0784FZT8H/ref=sr_1_1?dchild=1&amp;amp;keywords=cooler+master+cpu+cooler&amp;amp;qid=1590814801&amp;amp;sr=8-1&quot;&gt;Cooler Master CPU Cooler&lt;/a&gt; and &lt;a href=&quot;https://www.amazon.in/Arctic-Silver-Thermal-Compound-3-5G/dp/B0087X728K/ref=sr_1_2_sspa?dchild=1&amp;amp;keywords=thermal+compound&amp;amp;qid=1590814840&amp;amp;sr=8-2-spons&amp;amp;psc=1&amp;amp;spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzOEFVT080Qzk5WkYmZW5jcnlwdGVkSWQ9QTA4NTc4ODBKSzM5QVRKSTBNOTQmZW5jcnlwdGVkQWRJZD1BMDEyMjEzOTJYTzRZODcwSVpDVkgmd2lkZ2V0TmFtZT1zcF9hdGYmYWN0aW9uPWNsaWNrUmVkaXJlY3QmZG9Ob3RMb2dDbGljaz10cnVl&quot;&gt;Arctic Silver thermal compound&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Just addition of two compunds reduced my CPU’s idle temperature from 60 C to 40 C&lt;/p&gt;
+&lt;p&gt;Just addition of two compounds reduced my CPU’s idle temperature from 60 C to 40 C&lt;/p&gt;
 
-&lt;p&gt;In addition to that, its very important to continously monitor the temperature over time. while using Linux, I was always the fan of &lt;a href=&quot;https://en.wikipedia.org/wiki/Conky_(software)&quot;&gt;Conky&lt;/a&gt; to monitor the same.&lt;/p&gt;
+&lt;p&gt;In addition to that, its very important to continuously monitor the temperature over time. while using Linux, I was always the fan of &lt;a href=&quot;https://en.wikipedia.org/wiki/Conky_(software)&quot;&gt;Conky&lt;/a&gt; to monitor the same.&lt;/p&gt;
 
 &lt;p&gt;While currently using Windows, I depend heavily on &lt;a href=&quot;https://www.rainmeter.net/&quot;&gt;Rainmeter&lt;/a&gt; to display a desktop widget to display CPU and GPU details as shown below.&lt;/p&gt;
 
@@ -1180,7 +1428,7 @@ AF969198-0DA8-49BA-9931-D38709510354
 
 &lt;p&gt;The wallpaper is from &lt;a href=&quot;https://steamcommunity.com/sharedfiles/filedetails/?id=2108388008&quot;&gt;Wallpaper engine&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;Open image in fullscren&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;Open image in fullscreen&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;&lt;img src=&quot;/images/screenshot.43.jpg&quot; height=&quot;386px&quot; width=&quot;914px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 </content>
@@ -1234,119 +1482,6 @@ AF969198-0DA8-49BA-9931-D38709510354
                 &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Unit testing HTTP retry strategies</title>
-   <link href="https://madhur.co.in/blog/2020/05/09/unit-testing-http-retry-strategies.html"/>
-   <updated>2020-05-09T00:00:00+05:30</updated>
-   <id>id:/blog/2020/05/09/unit-testing-http-retry-strategies</id>
-   <content type="html">&lt;p&gt;The sample code below is available in &lt;a href=&quot;https://github.com/madhur/unit-test-http-retry&quot;&gt;my github repo&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Let’s face it, HTTP network calls can face intermittently. Even if you best configure the Linux Operating System, the TCP/IP networking stack and the best possible private / public cloud networks, failures are inevitable. Sometimes, the reason can be dropped packets at router / NIC or could be any issue in networking stack.&lt;/p&gt;
-
-&lt;p&gt;For any well designed backend application, it is imperative to design for failures upfront rather than as afterthought. It depends on scenario to scenario, for example, mobile client making a call to HTTP server or it could be even a server making a inter-service call in a microservice architecture. The solution differs from scenario to scenario.&lt;/p&gt;
-
-&lt;p&gt;In this post, we will not discuss about possible solutions, but look at how to accurately unit test the choosen solution.&lt;/p&gt;
-
-&lt;p&gt;For example, a very naive HTTP retry strategy to be to retry 3 times at an interval of 500ms in case of any &lt;a href=&quot;https://docs.oracle.com/javase/7/docs/api/java/net/SocketException.html&quot;&gt;SocketException&lt;/a&gt; or if the HTTP response status code is &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503&quot;&gt;Service Unavailable&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;If we are using Java and &lt;a href=&quot;https://spring.io/&quot;&gt;Spring Framework&lt;/a&gt;, we could implement this in &lt;a href=&quot;https://hc.apache.org/httpcomponents-client-ga/&quot;&gt;Apache HTTP Client&lt;/a&gt; as follows&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-
-    &lt;span class=&quot;n&quot;&gt;connectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDefaultMaxPerRoute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_POOL_DEFAULT_MAX_PER_ROUTE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;connectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setMaxTotal&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_POOL_DEFAULT_MAX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-    &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;custom&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionRequestTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_REQUEST_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setSocketTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_SOCKET_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClientBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDefaultRequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setRetryHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;executionCount&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;executionCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;MAX_RETRIES&lt;/span&gt;
-                    &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;exception&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;instanceof&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SocketException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setServiceUnavailableRetryStrategy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ServiceUnavailableRetryStrategy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-                &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getRetryInterval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-                &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-                &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;retryRequest&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;HttpResponse&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
-                                            &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;executionCount&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;executionCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;MAX_RETRIES&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;
-                            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getStatusLine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-                            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getStatusCode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;SC_SERVICE_UNAVAILABLE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;But how do we go about testing that it works according to our defined specification? In this case, retrying only for SocketException or 503 status code. The strategy here is very simple but it could be complex or there could be multiple instances of HTTP clients implementing various strategies. How do we make sure they all work ? This is the question I recently faced while working with a big enterprise project recently.&lt;/p&gt;
-
-&lt;p&gt;Turns out, there is an excellent library called &lt;a href=&quot;http://wiremock.org/&quot;&gt;Wiremock&lt;/a&gt; for spinning up a mock HTTP server during unit testing and it can service defined responses or response status codes. It can even generate network faults such as connection reset or network socket exceptions, which allows us to simulate any network response from the unit test code.&lt;/p&gt;
-
-&lt;p&gt;In addition to that, one powerful aspect of Wiremock is its &lt;a href=&quot;http://wiremock.org/docs/verifying/&quot;&gt;Verify APIs&lt;/a&gt;, which allows us to exactly measure how many times a particular endpoint was called. This is what we will be using in our tests.&lt;/p&gt;
-
-&lt;p&gt;To spin up a mock server, we simply add a &lt;a href=&quot;https://junit.org/junit4/javadoc/4.12/org/junit/Rule.html&quot;&gt;Junit Rule&lt;/a&gt;, within our test class&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Rule&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WireMockRule&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wireMockRule&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WireMockRule&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// No-args constructor defaults to port 8080&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Now, lets say we want to ensure our client retries for 503 status but not for 502 status code, we can simply test using the following tests&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Test&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;testFourRetryFor503StatusCode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;stubFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;willReturn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;withStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;503&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpGet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getMockUri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()));&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;URISyntaxException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;printStackTrace&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;Assert&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fail&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;verify&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getRequestedFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;nd&quot;&gt;@Test&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;testZeroRetryFor502StatusCode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;stubFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;willReturn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;withStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;502&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpGet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getMockUri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()));&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;URISyntaxException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;printStackTrace&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;Assert&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fail&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;verify&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getRequestedFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Similarly, to generate a socket exception we can configure the response to generate a &lt;a href=&quot;http://wiremock.org/docs/simulating-faults/&quot;&gt;Fault&lt;/a&gt; as follows&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Test&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;testFourRetryForSocketException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;stubFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;willReturn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;aResponse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;withFault&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Fault&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;CONNECTION_RESET_BY_PEER&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;execute&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpGet&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getMockUri&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()));&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;c1&quot;&gt;// IOException is expected&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;URISyntaxException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;printStackTrace&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;Assert&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;fail&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;verify&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getRequestedFor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;urlEqualTo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;testResource&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The sample code above is available in &lt;a href=&quot;https://github.com/madhur/unit-test-http-retry&quot;&gt;my github repo&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
