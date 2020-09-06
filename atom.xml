@@ -3,13 +3,59 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-08-30T13:16:57+05:30</updated>
+ <updated>2020-09-06T23:33:43+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Estimate no. of kafka partitions handled by a single thread on compute</title>
+   <link href="https://madhur.co.in/blog/2020/09/06/estimate-partitions-single-thread-compute.html"/>
+   <updated>2020-09-06T00:00:00+05:30</updated>
+   <id>id:/blog/2020/09/06/estimate-partitions-single-thread-compute</id>
+   <content type="html">&lt;p&gt;In a complex multi data center Kafka deployments, it is also important to
+estimate no. of partition each thread will be handling per compute. It is very
+important parameter to tune. For example, if you are seeing high lag and less
+CPU usage, it could be because a single thread is handling too much partitions
+and it might be advisable to increase the no. of threads per compute.&lt;/p&gt;
+
+&lt;p&gt;Let me take a hypothetical example of ours.&lt;/p&gt;
+
+&lt;p&gt;We have an active-active kafka setup with a topic having 210 partitions.&lt;/p&gt;
+
+&lt;p&gt;There is concurrency of 2 per compute i.e. a single VM will be spawning 2
+threads to connect to Kafka broker.&lt;/p&gt;
+
+&lt;p&gt;There is imbalance in no. of computes. There are 8 computes in DC 1 and
+16 computes in DC2.&lt;/p&gt;
+
+&lt;p&gt;Thus in DC1, 8*2=16 threads consume 120 partitions. 120/16 = 7.5, which means
+Kafka should be allocating 7-8 partitions per thread. When I look at my
+distribution, here is what I discover:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C1 - 8+8 = 16 partitions (8/thread)
+C2 - 8+8 = 16
+C3 - 8+7 = 15
+C4 - 8+8 = 16
+C5 - 7+7 = 14
+C6 - 7+7 = 14
+c7 - 8+7 = 15
+C8 - 7+7 = 14
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Similarly, in DC2, 16*2=32 threads consume 120 partitions. 120/32 = 3.5, means
+Kafka allocates 3-4 partitions per thread on each compute.&lt;/p&gt;
+
+&lt;p&gt;Thus, computes in DC1 are doing a lot more work assuming equal distribution
+across both DC’s.&lt;/p&gt;
+
+&lt;p&gt;It is very important to tune the Kafka settings for both the DC’s separately
+since both are doing unequal amount of work.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Kafka Consumer Multithreading</title>
@@ -1431,57 +1477,6 @@ AF969198-0DA8-49BA-9931-D38709510354
 &lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;Open image in fullscreen&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;&lt;img src=&quot;/images/screenshot.43.jpg&quot; height=&quot;386px&quot; width=&quot;914px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Different HTTP Timeouts in HTTP Client</title>
-   <link href="https://madhur.co.in/blog/2020/05/16/http-timeouts.html"/>
-   <updated>2020-05-16T05:30:00+05:30</updated>
-   <id>id:/blog/2020/05/16/http-timeouts</id>
-   <content type="html">&lt;p&gt;In a well designed backend application, which makes calls to other HTTP services, it is very important to configure appropriate timeout values. In event of a service failure, a large timeout value can cause threads on the application to keep waiting for service to respond and may ultimately run out of threads which could have been used for doing other work. Otherwise, low timeout value can cause genuine requests to be aborted which would have been responded.&lt;/p&gt;
-
-&lt;p&gt;First of all, it is very important which are the different types of timeouts which can be configured from the aspect of a HTTP client.&lt;/p&gt;
-
-&lt;h3 id=&quot;connection-timeout&quot;&gt;Connection Timeout&lt;/h3&gt;
-
-&lt;p&gt;A connect timeout is the period between which the connection between a client and a server must be established. It includes the time for DNS resolution, and setup a TCP connection including the handshake. This is a client setting because it’s the client which will initiate the connection.&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http.connection.timeout&lt;/code&gt; - the default value is zero, which means infinite.&lt;/p&gt;
-
-&lt;h3 id=&quot;request-timeout&quot;&gt;Request Timeout&lt;/h3&gt;
-
-&lt;p&gt;This is the time, during which a request must be completed after the connection has been made. It includes the time for the client to send the request, and also the server to respond. If the client doesn’t send the request, the request can time out.&lt;/p&gt;
-
-&lt;p&gt;Note that this is a server side setting. This is because, server wouldn’t want to keep the connection (and ultimately a thread) waiting indefinitely for the client to request.&lt;/p&gt;
-
-&lt;p&gt;One must think that this should be a client setting as well, what if the server takes too much time to respond. Correct. There is a similar setting on client as well, which is usually called, Socket Timeout, but it is not exactly same as Request TimeOut&lt;/p&gt;
-
-&lt;h3 id=&quot;socket-timeout&quot;&gt;Socket Timeout&lt;/h3&gt;
-
-&lt;p&gt;This is a maximum time between two data packets to arrive. This is a client side setting. Some people confuse this with RequestTimeout on the client side. It is only a timeout between two packets. If we set this value to 5 seconds, it can still take the entire request to take lets say 15 seconds given that the time period between two consecutive packets was always &amp;lt; 5 seconds.&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http.socket.timeout&lt;/code&gt; - The default value is zero, which means infinite.&lt;/p&gt;
-
-&lt;h3 id=&quot;connection-request-timeout&quot;&gt;Connection Request TimeOut&lt;/h3&gt;
-
-&lt;p&gt;This is applicable if you are using connection pooling on the client. This Timeout setting defines the maximum time during which a connection must be obtained from the pool.&lt;/p&gt;
-
-&lt;p&gt;The below code snippet shows how to set the various client timeout settings on the Apache HTTP Client.&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;retryHttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-
-        &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;RequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;custom&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionRequestTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_REQUEST_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setSocketTimeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CONN_SOCKET_TIMEOUT_MS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClientBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connectionManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setDefaultRequestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;requestConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
