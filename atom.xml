@@ -3,13 +3,77 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-09-06T23:33:43+05:30</updated>
+ <updated>2020-09-12T21:24:33+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Javascript Event loop and call stack</title>
+   <link href="https://madhur.co.in/blog/2020/09/12/javascript-event-loop-call-stack.html"/>
+   <updated>2020-09-12T00:00:00+05:30</updated>
+   <id>id:/blog/2020/09/12/javascript-event-loop-call-stack</id>
+   <content type="html">&lt;p&gt;Its amazing how after working so many years on Javascript, I still get some of
+the basic concepts wrong.&lt;/p&gt;
+
+&lt;p&gt;The concept in question is Event loop and Call Stack.&lt;/p&gt;
+
+&lt;p&gt;To get it refreshed, here is the teaser.&lt;/p&gt;
+
+&lt;p&gt;What is the output of the below snippet.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;printHello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Hello&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;blockFor1Sec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;arr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;let&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;setTimeout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;printHello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;blockFor1Sec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Me first!&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I thought that, since &lt;code class=&quot;highlighter-rouge&quot;&gt;printHello&lt;/code&gt; is scheduled to run after 0ms, it will run as
+soon as event loop gets chance to execute it. I assumed the execution order to
+be:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Hello
+Me first!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, it turns out that answer is&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Me first!
+Hello
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The reason for it is the documented behavior when the items in call stack are
+executed.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The specified amount of time (or the delay) is not the guaranteed time to 
+execution, but rather the minimum time to execution. The callbacks you pass to
+these functions cannot run until the stack on the main thread is empty.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;As a consequence, code like setTimeout(fn, 0) will execute as soon as the 
+stack is empty, not immediately. If you execute code like setTimeout(fn, 0) 
+but then immediately after run a loop that counts from 1 to 10 billion, your 
+callback will be executed after a few seconds.&lt;/p&gt;
+&lt;/blockquote&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Estimate no. of kafka partitions handled by a single thread on compute</title>
@@ -1444,39 +1508,6 @@ AF969198-0DA8-49BA-9931-D38709510354
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Hope you enjoyed little fun tricks in shell&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Customize Windows 10 Desktop</title>
-   <link href="https://madhur.co.in/blog/2020/05/30/customize-windows10-desktop.html"/>
-   <updated>2020-05-30T00:00:00+05:30</updated>
-   <id>id:/blog/2020/05/30/customize-windows10-desktop</id>
-   <content type="html">&lt;p&gt;I have always been fan of well assembled desktop systems. Its a joy to carefully pick each component of your personal computer and assemble it to pick best performance.&lt;/p&gt;
-
-&lt;p&gt;The current rig which I use is listed here on &lt;a href=&quot;https://pcpartpicker.com/user/madhur_ahuja/saved/#view=FdqWXL&quot;&gt;PCPartPicker&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;It is also very important to continuously monitor the performance of such system so as to make sure they are running in optimum systems.&lt;/p&gt;
-
-&lt;p&gt;Especially important is CPU and GPU temperatures. With latest software and games, pushing the limits of hardware, these hardware peripherals dissipate lot of heat when running at their peak levels.&lt;/p&gt;
-
-&lt;p&gt;Hence, it is very important to invest in components which run the system cool.&lt;/p&gt;
-
-&lt;p&gt;In my case, I invested in &lt;a href=&quot;https://www.amazon.in/Cooler-Master-Hyper-H410R-RR-H410-20PK-R1/dp/B0784FZT8H/ref=sr_1_1?dchild=1&amp;amp;keywords=cooler+master+cpu+cooler&amp;amp;qid=1590814801&amp;amp;sr=8-1&quot;&gt;Cooler Master CPU Cooler&lt;/a&gt; and &lt;a href=&quot;https://www.amazon.in/Arctic-Silver-Thermal-Compound-3-5G/dp/B0087X728K/ref=sr_1_2_sspa?dchild=1&amp;amp;keywords=thermal+compound&amp;amp;qid=1590814840&amp;amp;sr=8-2-spons&amp;amp;psc=1&amp;amp;spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEzOEFVT080Qzk5WkYmZW5jcnlwdGVkSWQ9QTA4NTc4ODBKSzM5QVRKSTBNOTQmZW5jcnlwdGVkQWRJZD1BMDEyMjEzOTJYTzRZODcwSVpDVkgmd2lkZ2V0TmFtZT1zcF9hdGYmYWN0aW9uPWNsaWNrUmVkaXJlY3QmZG9Ob3RMb2dDbGljaz10cnVl&quot;&gt;Arctic Silver thermal compound&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Just addition of two compounds reduced my CPU’s idle temperature from 60 C to 40 C&lt;/p&gt;
-
-&lt;p&gt;In addition to that, its very important to continuously monitor the temperature over time. while using Linux, I was always the fan of &lt;a href=&quot;https://en.wikipedia.org/wiki/Conky_(software)&quot;&gt;Conky&lt;/a&gt; to monitor the same.&lt;/p&gt;
-
-&lt;p&gt;While currently using Windows, I depend heavily on &lt;a href=&quot;https://www.rainmeter.net/&quot;&gt;Rainmeter&lt;/a&gt; to display a desktop widget to display CPU and GPU details as shown below.&lt;/p&gt;
-
-&lt;p&gt;The skip can be downloaded from my &lt;a href=&quot;https://github.com/madhur/rainmeter-skin/tree/master&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The wallpaper is from &lt;a href=&quot;https://steamcommunity.com/sharedfiles/filedetails/?id=2108388008&quot;&gt;Wallpaper engine&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;Open image in fullscreen&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/screenshot.43.jpg&quot;&gt;&lt;img src=&quot;/images/screenshot.43.jpg&quot; height=&quot;386px&quot; width=&quot;914px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
