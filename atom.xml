@@ -3,13 +3,43 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-09-12T21:24:33+05:30</updated>
+ <updated>2020-09-27T18:41:24+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Handle timeouts while connecting to cassandra</title>
+   <link href="https://madhur.co.in/blog/2020/09/27/handle-cassandra-timeouts.html"/>
+   <updated>2020-09-27T00:00:00+05:30</updated>
+   <id>id:/blog/2020/09/27/handle-cassandra-timeouts</id>
+   <content type="html">&lt;p&gt;I have been recently playing with &lt;a href=&quot;https://cassandra.apache.org/&quot;&gt;Cassandra&lt;/a&gt; a lot using &lt;a href=&quot;https://github.com/datastax/python-driver&quot;&gt;Python cassandra client&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;One issue I saw a lot while timeouts connecting cassandra. The default timeout set in the client library is 5 seconds and it isn’t very intuitive how to increase it.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;cassandra.cluster&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Cluster&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;cassandra.cluster&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExecutionProfile&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;cassandra.auth&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PlainTextAuthProvider&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;cassandra.cluster&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EXEC_PROFILE_DEFAULT&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;auth_provider&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PlainTextAuthProvider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'username'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'password'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;profile&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ExecutionProfile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request_timeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;60&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hostnanme'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;auth_provider&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;auth_provider&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;execution_profiles&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EXEC_PROFILE_DEFAULT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;profile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;connect_timeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;120&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cluster&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;database&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The above coode snippet increases the connect timeout and request timeout to 120 and seconds respectively.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Javascript Event loop and call stack</title>
@@ -1439,75 +1469,6 @@ lines only in file1; lines only in file2; and lines in both files.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Note that comm command expects input to be lexically sorted and not numerically sorted, hence its necesary to sort the file even if its numerically sorted.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Executing commands in parallel in Shell and other fun stuff</title>
-   <link href="https://madhur.co.in/blog/2020/06/06/generate-multiple-uuid-shell.html"/>
-   <updated>2020-06-06T00:00:00+05:30</updated>
-   <id>id:/blog/2020/06/06/generate-multiple-uuid-shell</id>
-   <content type="html">&lt;p&gt;Recently, I was required to generate multiple UUID’s and pass onto HTTP request as a parameter. I thought of using &lt;a href=&quot;https://www.python.org/&quot;&gt;Python&lt;/a&gt; or &lt;a href=&quot;https://nodejs.org/en/&quot;&gt;Node.js&lt;/a&gt; for this purpose, but thought why not use a plain old &lt;a href=&quot;https://en.wikipedia.org/wiki/Unix_shell&quot;&gt;shell&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;But, is there a way to generate UUID in shell? Turns out, there is using &lt;a href=&quot;https://www.man7.org/linux/man-pages/man1/uuidgen.1.html&quot;&gt;uuidgen&lt;/a&gt; command which works on both Linux and MacOS.&lt;/p&gt;
-
-&lt;p&gt;Hence, using the power of another command called &lt;a href=&quot;https://en.wikipedia.org/wiki/Seq_(Unix)&quot;&gt;seq&lt;/a&gt;, and &lt;a href=&quot;https://man7.org/linux/man-pages/man1/xargs.1.html&quot;&gt;xargs&lt;/a&gt; we can achieve many powerful things on shell&lt;/p&gt;
-
-&lt;p&gt;Sequentially print 1 to 10000:&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Print and pipe to &lt;code class=&quot;highlighter-rouge&quot;&gt;xargs&lt;/code&gt; command for printing the output using single thread&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 1 printf '{}\n'
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Parallelly print 1 to 10000 using 10 threads:&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10000 | xargs -I {} -P 10 printf '{}\n'
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You can test out the parallelism using &lt;a href=&quot;https://www.man7.org/linux/man-pages/man1/time.1.html&quot;&gt;time&lt;/a&gt; command, which will print the output for above 2 commands. For me output is:&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;________________________________________________________
-Executed in   14.23 secs   fish           external
-   usr time    3.88 secs  167.00 micros    3.88 secs
-   sys time    9.31 secs  1005.00 micros    9.31 secs
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;________________________________________________________
-Executed in    5.08 secs   fish           external
-   usr time    4.77 secs  229.00 micros    4.77 secs
-   sys time   16.05 secs  1027.00 micros   16.05 secs
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Another way to confirm the parallelism, is to observe that, with parallelism, numbers are printed slightly jumbled in between.&lt;/p&gt;
-
-&lt;p&gt;Using, the above fundamental knowledge, we can generate multiple UUID’s using &lt;code class=&quot;highlighter-rouge&quot;&gt;uuidgen&lt;/code&gt; command as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10 | xargs -I {} -P 1 uuidgen
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Output will be:&lt;/p&gt;
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;C327AB74-D84B-43C1-B188-550AE86DD398
-6B6E541D-74BE-4FB8-892A-03C8FD3E7F59
-101B2E23-F6AC-4AB3-82DA-08C22F1A35CF
-0F3E72C8-56A9-438D-8785-9D1DC9242E63
-C7326E3E-C79A-46AB-BCA4-FBE935D01700
-CCBC8496-71A9-4CDF-B38F-8A13A565C191
-245862F7-6087-4730-96CC-B21FF25846A6
-052A9889-262E-4513-AFF2-62E71BC4A2D2
-AF969198-0DA8-49BA-9931-D38709510354
-74497908-6E59-402A-93EE-514B541B308F
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;How about using this uuid’s in a curl command:&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;seq 1 10 | xargs -I {}  uuidgen | xargs -I{} -n1 -P 10 curl -X GET 'http://google.com/{}'
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Hope you enjoyed little fun tricks in shell&lt;/p&gt;
 </content>
  </entry>
  
