@@ -17,7 +17,7 @@ img:
 {% endcomment %}
 
 
-#RabbitMQ Monitor Widget#
+## RabbitMQ Monitor Widget
 
 [](!https://raw.githubusercontent.com/madhur/dashclock-feedly-extension/develop/res/drawable-xhdpi/ic_launcher.png)
 

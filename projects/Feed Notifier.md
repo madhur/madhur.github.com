@@ -21,7 +21,7 @@ img:
 {% endcomment %}
 
 
-#Feed Notifier#
+## Feed Notifier
 
 [](!https://raw.githubusercontent.com/madhur/dashclock-feedly-extension/develop/res/drawable-xhdpi/ic_launcher.png)
 
