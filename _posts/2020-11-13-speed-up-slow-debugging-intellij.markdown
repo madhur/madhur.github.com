@@ -1,7 +1,7 @@
 ---
 layout: blog-post
 title: "Speed up debugging in IntelliJ"
-excerpt: "speed-up-slow-debugging-intellij"
+excerpt: "Speed up debugging in IntelliJ"
 disqus_id: /2020/11/13/speed-up-slow-debugging-intellij/
 tags:
     - IntelliJ
