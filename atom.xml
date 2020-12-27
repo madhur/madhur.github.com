@@ -3,13 +3,30 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2020-12-13T13:38:44+05:30</updated>
+ <updated>2020-12-27T11:03:27+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Realtime Google Analytics in Firefox tab</title>
+   <link href="https://madhur.co.in/blog/2020/12/27/realtime-google-analytics-firefox-tab.html"/>
+   <updated>2020-12-27T00:00:00+05:30</updated>
+   <id>id:/blog/2020/12/27/realtime-google-analytics-firefox-tab</id>
+   <content type="html">&lt;p&gt;Quick update that I created a small Firefox extension to view the current online
+number of visitors from Google Analytics in the browser tab itself.&lt;/p&gt;
+
+&lt;p&gt;Here its how looks like:&lt;/p&gt;
+
+&lt;p&gt;The extension can be downloaded from &lt;a href=&quot;https://addons.mozilla.org/en-US/firefox/addon/google-analytics-count-in-tab/&quot;&gt;Firefox extensions
+page&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/realtime-analytics.png&quot; /&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Sockets in shell</title>
@@ -1141,96 +1158,6 @@ the higher prices because of custom duty imports.&lt;/p&gt;
 
 &lt;p&gt;Collecting and trying out various keyboards is slowly becoming one of my hobbies
 though a very expensive one :)&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Overview of Active-Active Kafka Cluster using MirrorMaker 2.0</title>
-   <link href="https://madhur.co.in/blog/2020/08/01/active-active-kafka-cluster.html"/>
-   <updated>2020-08-01T00:00:00+05:30</updated>
-   <id>id:/blog/2020/08/01/active-active-kafka-cluster</id>
-   <content type="html">&lt;p&gt;In order to make our application, highly available and fault tolerant, I have been researching a lot on best disaster recovery strategy for Kafka.&lt;/p&gt;
-
-&lt;p&gt;In earlier relational systems, such as MySQL or Oracle, it was standard to have an active-passive cluster where in the application does
-reads and writes to a primary cluster. This primary cluster is asynchronously replicated to a secondary cluster. The application falls back to the secondary cluster incase the primary cluster fails.&lt;/p&gt;
-
-&lt;p&gt;The fall back can be automatic or manual. Database vendors such as &lt;a href=&quot;https://www.postgresql.org/docs/9.6/warm-standby-failover.html&quot;&gt;Postgres&lt;/a&gt;, &lt;a href=&quot;https://docs.oracle.com/cd/B28359_01/server.111/b28295/sofo.htm#:~:text=An%20Oracle%20database%20operates%20in,two%20roles%3A%20primary%20or%20standby.&amp;amp;text=A%20failover%20is%20done%20when,take%20over%20the%20primary%20role.&quot;&gt;Oracle&lt;/a&gt; and &lt;a href=&quot;https://mariadb.com/kb/en/mariadb-maxscale-22-automatic-failover-with-mariadb-monitor/&quot;&gt;MariaDB&lt;/a&gt; have built products to automate the failover.&lt;/p&gt;
-
-&lt;p&gt;Newer distributed applications, such as NoSQL databases like Cassandra prefer an active-active approach. This because these databases might not require very high consistency.&lt;/p&gt;
-
-&lt;p&gt;Recently, Kafka has also adopted this approach using &lt;a href=&quot;https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=27846330&quot;&gt;MirrorMaker&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;what-is-mirror-maker&quot;&gt;What is Mirror Maker&lt;/h2&gt;
-
-&lt;p&gt;In simple terms, Mirror Maker allows you to mirror a Kafka cluster to another cluster. All topics, partitions and messages are replicated. Any changes in source, like addition / deletion of topics, messages will be mirrored to destination. Mirror Makes allows Kafka users to setup an active-passive cluster where in an active cluster is continuously mirroring the data to secondary cluster.&lt;/p&gt;
-
-&lt;h2 id=&quot;what-is-the-problem-&quot;&gt;What is the problem ?&lt;/h2&gt;
-
-&lt;p&gt;All is good uptil now, until we realize that huge amount of infrastructure and network bandwidth is being wasted to maintain this active-passive cluster, wherein the passive cluster will come in use only when active goes down.
-Not to mention that large Kafka deployments process millions of messages per sec and all that data needs to be replicated to destination cluster.&lt;/p&gt;
-
-&lt;h3 id=&quot;solution---mirror-maker-20&quot;&gt;Solution - Mirror Maker 2.0&lt;/h3&gt;
-
-&lt;p&gt;Kafka team has recently launched a new version of Mirror Maker 2.0, which allows you to setup a bi-directional mirror between two clusters. This solves the problem of wasted network infrastructure of secondary cluster which would have come in use only if primary cluster had gone down.&lt;/p&gt;
-
-&lt;p&gt;So, how does this work? In simple terms, Mirror Maker 2.0 does bi-directional mirroring, i.e. data from primary cluster will be mirrored to secondary cluster and data from secondary cluster will be mirrored to primary cluster.&lt;/p&gt;
-
-&lt;p&gt;If you logically think of this approach, this can result in an infinite loop, where in a message can be continuously mirrored between two clusters.&lt;/p&gt;
-
-&lt;p&gt;To solves, this problem, Mirror Maker allows topic renaming to eliminate the above problem. Let me illustrate how:&lt;/p&gt;
-
-&lt;p&gt;Let’s say, We have two DC’s DC1 and DC2, with topics T1 and T2.&lt;/p&gt;
-
-&lt;p&gt;Producer in DC1 produces message M1 in topic T1 and M2 in topic T2&lt;/p&gt;
-
-&lt;p&gt;Producer in DC2 produces message M3 in topic T1 and M4 in topic T2&lt;/p&gt;
-
-&lt;p&gt;Note that these two are completely different clusters with zookeepers of their own and hence topics T1 and T2 are local to their clusters.&lt;/p&gt;
-
-&lt;p&gt;What Mirror maker will do is, it will create topic T1.DC2 and T2.DC2 in DC1, which will contain the replicated data from topics T1 and T2 of DC2&lt;/p&gt;
-
-&lt;p&gt;Similarly, in DC2, topics T1.DC1 and T2.DC1 will be created which will contain the replicated data from topics T1 and T2 of DC1&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;       DC1                                                                                                                                                                                                    
-                                                                                      DC2                                                                                                                     
-                                                                                                                                                                                                              
-+-------------------+                                                                                                                                                                                         
-|                   |                                                           +-------------------+                                                                                                         
-|                   |                                                           |                   |                                                                                                         
-|    PRODUCER       |                                                           |    PRODUCER       |                                                                                                         
-|                   |                                                           |                   |                                                                                                         
-+-------------------+                                                           +-------------------+                                                                                                         
-                                                                                                                                                                                                              
-PRODUCES M1 IN TOPIC T1 AND M2 IN TOPIC T2                                      PRODUCES M3 IN TOPIC T1 AND M4 IN TOPIC T2                                                                                    
-                                                                                                                                                                                                              
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-|  Topic T1         M1                |---------------------------------------&amp;gt; | Topic T1.DC1      M1             |                                                                                          
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-                                                                                                                                                                                                              
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-|  Topic T1.DC2      M3               | &amp;lt;-------------------------------------- | Topic T1         M3              |                                                                                          
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-                                                      MIRROR MAKER                                                                                                                                            
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-| Topic T2          M2                |---------------------------------------&amp;gt; | Topic T2.DC1     M2              |                                                                                          
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-                                                                                                                                                                                                              
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-| Topic T2.DC2       M4               | &amp;lt;---------------------------------------  Topic T2          M4             |                                                                                          
-+-------------------------------------+                                         +----------------------------------+                                                                                          
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;In this case, the full network cluster bandwidth is utilized. The producers can load balance their traffic to two clusters either using round robin or local affinity.&lt;/p&gt;
-
-&lt;p&gt;The consumer in DC1 will have to subscribe to the data from both T1 and T1.DC2. This can be done easily using wild card subscription which is supported in most frameworks such as Spring as shown below:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;xxx&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topicPattern&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kbgh.*&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;listen&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Even if one DC goes down, the entire data is available in other cluster.&lt;/p&gt;
 </content>
  </entry>
  
