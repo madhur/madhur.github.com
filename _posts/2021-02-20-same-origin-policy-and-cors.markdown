@@ -8,9 +8,9 @@ tags:
 ---
 
 
-I have been recently focussed a lot on Web application security especially web vulnerabilities such as [Cross Site Scripting (XSS)]() and [Cross Site Request Forgery (CSRF)]()
+I have been recently focused a lot on Web application security especially web vulnerabilities such as [Cross Site Scripting (XSS)]() and [Cross Site Request Forgery (CSRF)]()
 
-One of the interesteing protection mechanism around these attacks is [Same Origin Policy]() which I believe every application developer should understand in deep.
+One of the interesting protection mechanism around these attacks is [Same Origin Policy]() which I believe every application developer should understand in deep.
 
 ### So what is cross origin policy?
 
@@ -23,7 +23,7 @@ When a browser loads the web page, the web page elements might refer to other or
 
 This is most important. Its very important for developers to understand what is excluded under same origin policy because that's where the web application becomes vulnerable.
 
-1) cross domain form posting is perfectly acceptable in web applciation. i.e. a form loaded at http://localhost:8080  , can execute the following code without any issues:
+1) cross domain form posting is perfectly acceptable in web application. i.e. a form loaded at http://localhost:8080  , can execute the following code without any issues:
 
 ```html
 <html>
@@ -45,7 +45,7 @@ This is most important. Its very important for developers to understand what is 
 
 The above is a classic case of CSRF attack where a forged page is tricking the user to submit a request to other site without his knowledge. If the user is already logged onto http://somesite.com , the browser would also automatically include the cookies appropriate for http://somesite.com to automatically authenticate the request.
 
-2) The script tags do not come under same origin policty. i.e. it is perfectly legal for a site at http://somesite.com to have the following script tag in its html
+2) The script tags do not come under same origin policy. i.e. it is perfectly legal for a site at http://somesite.com to have the following script tag in its html
 
 ```html
 <html>
@@ -57,9 +57,9 @@ The above is a classic case of CSRF attack where a forged page is tricking the u
 <html>
 ```
 
-3) The `<img>` tag is allowed to retireve images from the cross origin. This might seem very innocuous but there have been some [attacks](https://www.evonide.com/side-channel-attacking-browsers-through-css3-features/) because of this.
+3) The `<img>` tag is allowed to retrieve images from the cross origin. This might seem very innocuous but there have been some [attacks](https://www.evonide.com/side-channel-attacking-browsers-through-css3-features/) because of this.
 
-4)
+4) Just like images, in iframe the contents may be loaded but scripts in the outer framing page are not allowed to access the framed page contents.
 
 
 ### Web Storage, IndexedDB and LocalStorage
@@ -77,5 +77,5 @@ The [Cross origin request sharing (CORS)](https://developer.mozilla.org/en-US/do
 
 The protection against these attacks is really a big topic. But primarily two headers are helpful:
 
-* content-security-policy
-* X-XSS-Protection
+* [content-security-policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+* [X-XSS-Protection](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection)
