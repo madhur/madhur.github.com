@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Same origin policy and CORS &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Same origin policy and CORS" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Same origin policy and CORS</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2021-02-20 00:00:00 +0530" pubdate="pubdate"
+            >20 February 2021</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>I have been recently focused a lot on Web application security especially web vulnerabilities such as <a href="">Cross Site Scripting (XSS)</a> and <a href="">Cross Site Request Forgery (CSRF)</a></p>
+
+<p>One of the interesting protection mechanism around these attacks is <a href="">Same Origin Policy</a> which I believe every application developer should understand in deep.</p>
+
+<h3 id="so-what-is-cross-origin-policy">So what is cross origin policy?</h3>
+
+<p>Reference: <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy">Mozilla docs</a></p>
+
+<p>When a browser loads the web page, the web page elements might refer to other origins (basically the combination of protocol, host and port). These elements can be CSS links <code class="highlighter-rouge">&lt;link href&gt;</code>, JS links <code class="highlighter-rouge">&lt;script src&gt;</code>, <code class="highlighter-rouge">&lt;img&gt;</code> tags,</p>
+
+<h3 id="what-is-not-covered-under-same-origin-policy">What is not covered under same origin policy?</h3>
+
+<p>This is most important. Its very important for developers to understand what is excluded under same origin policy because that’s where the web application becomes vulnerable.</p>
+
+<p>1) cross domain form posting is perfectly acceptable in web application. i.e. a form loaded at http://localhost:8080  , can execute the following code without any issues:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;body</span> <span class="na">onload=</span><span class="s">'document.getElementById("csrfform").submit()'</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">'post'</span> <span class="na">id=</span><span class="s">'csrfform'</span> <span class="na">action=</span><span class="s">'http://somesite.com/ve/admin/users/add'</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'token'</span> <span class="na">value =</span><span class="s">''</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'real_name'</span> <span class="na">value =</span><span class="s">'attacker'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'bio'</span> <span class="na">value =</span><span class="s">'test'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'status'</span> <span class="na">value =</span><span class="s">'active'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'role'</span> <span class="na">value =</span><span class="s">'administrator'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'username'</span> <span class="na">value =</span><span class="s">'evilattacker2'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'password'</span> <span class="na">value =</span><span class="s">'pwnd1111'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'hidden'</span> <span class="na">name=</span><span class="s">'email'</span> <span class="na">value =</span><span class="s">'ahuja.madhur@gmail.com'</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">'submit'</span> <span class="na">value =</span><span class="s">'submit'</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/form&gt;</span>
+    <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
+
+<p>The above is a classic case of CSRF attack where a forged page is tricking the user to submit a request to other site without his knowledge. If the user is already logged onto http://somesite.com , the browser would also automatically include the cookies appropriate for http://somesite.com to automatically authenticate the request.</p>
+
+<p>2) The script tags do not come under same origin policy. i.e. it is perfectly legal for a site at http://somesite.com to have the following script tag in its html</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"http://somesite.com/somejs.com"</span><span class="nt">&gt;</span>
+    <span class="o">&lt;</span><span class="sr">/head</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="nx">body</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sr">/body</span><span class="err">&gt;
+</span><span class="o">&lt;</span><span class="nx">html</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>3) The <code class="highlighter-rouge">&lt;img&gt;</code> tag is allowed to retrieve images from the cross origin. This might seem very innocuous but there have been some <a href="https://www.evonide.com/side-channel-attacking-browsers-through-css3-features/">attacks</a> because of this.</p>
+
+<p>4) Just like images, in iframe the contents may be loaded but scripts in the outer framing page are not allowed to access the framed page contents.</p>
+
+<h3 id="web-storage-indexeddb-and-localstorage">Web Storage, IndexedDB and LocalStorage</h3>
+
+<p>Each origin gets its own dedicated Web Storage, IndexedDb and LocalStorage. The site in one origin cannot access the storage data of other origin. For example, the site running at http://localhost:8081 cannot access the localstorage of http://localhost:8082</p>
+
+<h3 id="how-to-circumvent-same-origin-policy">How to circumvent Same origin policy?</h3>
+
+<p>The <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross origin request sharing (CORS)</a> specification permits the cross origin sharing under special circumstances.</p>
+
+<h2 id="protections-against-these-attacks">Protections against these attacks</h2>
+
+<p>The protection against these attacks is really a big topic. But primarily two headers are helpful:</p>
+
+<ul>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">content-security-policy</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection">X-XSS-Protection</a></li>
+</ul>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/web-security">Web Security</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2021/02/20/same-origin-policy-and-cors/';
+  var disqus_title = 'Same origin policy and CORS';
+  var disqus_url = 'https://madhur.co.in/blog/2021/02/20/same-origin-policy-and-cors.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2021 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

@@ -3,13 +3,141 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-02-06T18:13:07+05:30</updated>
+ <updated>2021-02-20T17:01:52+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Same origin policy and CORS</title>
+   <link href="https://madhur.co.in/blog/2021/02/20/same-origin-policy-and-cors.html"/>
+   <updated>2021-02-20T00:00:00+05:30</updated>
+   <id>id:/blog/2021/02/20/same-origin-policy-and-cors</id>
+   <content type="html">&lt;p&gt;I have been recently focused a lot on Web application security especially web vulnerabilities such as &lt;a href=&quot;&quot;&gt;Cross Site Scripting (XSS)&lt;/a&gt; and &lt;a href=&quot;&quot;&gt;Cross Site Request Forgery (CSRF)&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;One of the interesting protection mechanism around these attacks is &lt;a href=&quot;&quot;&gt;Same Origin Policy&lt;/a&gt; which I believe every application developer should understand in deep.&lt;/p&gt;
+
+&lt;h3 id=&quot;so-what-is-cross-origin-policy&quot;&gt;So what is cross origin policy?&lt;/h3&gt;
+
+&lt;p&gt;Reference: &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy&quot;&gt;Mozilla docs&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;When a browser loads the web page, the web page elements might refer to other origins (basically the combination of protocol, host and port). These elements can be CSS links &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;link href&amp;gt;&lt;/code&gt;, JS links &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;script src&amp;gt;&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tags,&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-not-covered-under-same-origin-policy&quot;&gt;What is not covered under same origin policy?&lt;/h3&gt;
+
+&lt;p&gt;This is most important. Its very important for developers to understand what is excluded under same origin policy because that’s where the web application becomes vulnerable.&lt;/p&gt;
+
+&lt;p&gt;1) cross domain form posting is perfectly acceptable in web application. i.e. a form loaded at http://localhost:8080  , can execute the following code without any issues:&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;body&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;onload=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'document.getElementById(&quot;csrfform&quot;).submit()'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'post'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'csrfform'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'http://somesite.com/ve/admin/users/add'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'token'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'real_name'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'attacker'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'bio'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'test'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'status'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'active'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'role'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'administrator'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'username'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'evilattacker2'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'password'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'pwnd1111'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'email'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ahuja.madhur@gmail.com'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'submit'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'submit'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/form&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The above is a classic case of CSRF attack where a forged page is tricking the user to submit a request to other site without his knowledge. If the user is already logged onto http://somesite.com , the browser would also automatically include the cookies appropriate for http://somesite.com to automatically authenticate the request.&lt;/p&gt;
+
+&lt;p&gt;2) The script tags do not come under same origin policy. i.e. it is perfectly legal for a site at http://somesite.com to have the following script tag in its html&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://somesite.com/somejs.com&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/head&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
+&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/body&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;3) The &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tag is allowed to retrieve images from the cross origin. This might seem very innocuous but there have been some &lt;a href=&quot;https://www.evonide.com/side-channel-attacking-browsers-through-css3-features/&quot;&gt;attacks&lt;/a&gt; because of this.&lt;/p&gt;
+
+&lt;p&gt;4) Just like images, in iframe the contents may be loaded but scripts in the outer framing page are not allowed to access the framed page contents.&lt;/p&gt;
+
+&lt;h3 id=&quot;web-storage-indexeddb-and-localstorage&quot;&gt;Web Storage, IndexedDB and LocalStorage&lt;/h3&gt;
+
+&lt;p&gt;Each origin gets its own dedicated Web Storage, IndexedDb and LocalStorage. The site in one origin cannot access the storage data of other origin. For example, the site running at http://localhost:8081 cannot access the localstorage of http://localhost:8082&lt;/p&gt;
+
+&lt;h3 id=&quot;how-to-circumvent-same-origin-policy&quot;&gt;How to circumvent Same origin policy?&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS&quot;&gt;Cross origin request sharing (CORS)&lt;/a&gt; specification permits the cross origin sharing under special circumstances.&lt;/p&gt;
+
+&lt;h2 id=&quot;protections-against-these-attacks&quot;&gt;Protections against these attacks&lt;/h2&gt;
+
+&lt;p&gt;The protection against these attacks is really a big topic. But primarily two headers are helpful:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP&quot;&gt;content-security-policy&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection&quot;&gt;X-XSS-Protection&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Ways of traversing tree</title>
+   <link href="https://madhur.co.in/blog/2021/02/10/ways-of-traversing-tree.html"/>
+   <updated>2021-02-10T00:00:00+05:30</updated>
+   <id>id:/blog/2021/02/10/ways-of-traversing-tree</id>
+   <content type="html">&lt;p&gt;We all know standard way of traversing trees such as&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;InOrder&lt;/li&gt;
+  &lt;li&gt;PostOrder&lt;/li&gt;
+  &lt;li&gt;PreOrder&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;However, its good to know some other ways of traversing trees as well.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;left&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;right&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;right&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;remove&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;TreeNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;val&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;left&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;right&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;findNode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;right&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;remove&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Pitfalls while using Lombok with Java Development</title>
@@ -748,363 +876,6 @@ across both DC’s.&lt;/p&gt;
 
 &lt;p&gt;It is very important to tune the Kafka settings for both the DC’s separately
 since both are doing unequal amount of work.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Kafka Consumer Multithreading</title>
-   <link href="https://madhur.co.in/blog/2020/08/30/kafka-consumer-multithreading.html"/>
-   <updated>2020-08-30T00:00:00+05:30</updated>
-   <id>id:/blog/2020/08/30/kafka-consumer-multithreading</id>
-   <content type="html">&lt;p&gt;Multithreading / Concurrency have always been the favorite topic of mine. It gives me a pure joy to extract most out of a machine by loading the CPU with work just like a master exploiting its slaves :)&lt;/p&gt;
-
-&lt;p&gt;Unfortunately, these days due to distributed nature of computing, most of the time in a machine is spent waiting on I/O (either from database, API’s etc.) and our CPU just sits idle most of the time.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://kafka.apache.org/&quot;&gt;Kafka&lt;/a&gt; allows you to scale your distributed system through partitions where a compute can be attached to consuming from particular partition, which is an ordered subset of messages in a topic.&lt;/p&gt;
-
-&lt;p&gt;Recently, I have seen a trend where developers instead of making sure a compute is able to efficiently process the data from the single partition, prefer the easy way out of increasing the partitions/vm’s to reach the desired
-throughput. It’s like throwing money at the problem.&lt;/p&gt;
-
-&lt;p&gt;In this post, we will look at ways to increase concurrency of Kafka consumer so
-that we are able to achieve more from a single consumer instead of increasing
-the partitions. There are two types of multithreading which can be achieved with
-Kafka -&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Thread per consumer model&lt;/li&gt;
-  &lt;li&gt;Multi-threaded consumer model&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In the thread per consumer model, each thread is instantiated and connects to
-Kafka broker. The kafka broker assigns the partitions whose messages will be
-delivered to these threads.&lt;/p&gt;
-
-&lt;p&gt;In the multi-threaded consumer mode, a single thread connects to Kafka and may
-get data from multiple / single partition(s). Once the data has been delivered
-that thread, the thread may deliver the messages to multiple pool of threads to
-allow them to process in parallel. In this approach, consumer thread can decide
-which type of messages will be handled by which child thread. However, offset
-management becomes very tricky in this case.&lt;/p&gt;
-
-&lt;p&gt;There are pros/cons of each approach and we’ll go over these.&lt;/p&gt;
-
-&lt;h2 id=&quot;thread-per-consumer-model&quot;&gt;Thread per consumer model&lt;/h2&gt;
-
-&lt;p&gt;This is a simplest approach, which can be easily
-achieved using Spring Kafka as shown below.&lt;/p&gt;
-
-&lt;p&gt;It’s very easy to configure spring to spawn multiple threads to connect to
-Kafka. Let’s see how the behavior differs. We have a single topic &lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic&lt;/code&gt;
-with 10 partitions and a single VM running spring application with single
-concurrency.&lt;/p&gt;
-
-&lt;p&gt;Just to be clear, the following configuration specifies the concurrency in
-spring kafka listener&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/**
-* Consumer configuration for email topics
-*
-* @return
-*/&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nc&quot;&gt;Map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Object&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HashMap&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;BOOTSTRAP_SERVERS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;localhost:9092&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;GROUP_ID_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;EMAIL_STATUS_CONSUMER_GROUP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;KEY_DESERIALIZER_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
-            &lt;span class=&quot;nc&quot;&gt;StringDeserializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ConsumerConfig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;VALUE_DESERIALIZER_CLASS_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
-            &lt;span class=&quot;nc&quot;&gt;StringDeserializer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DefaultKafkaConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;cm&quot;&gt;/**
-* Sets Concurrency for kafka listener
-*
-* @return
-*/&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;kafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ConcurrentKafkaListenerContainerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConsumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;consumerFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConcurrency&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;factory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We are using consumer group &lt;code class=&quot;highlighter-rouge&quot;&gt;spring-group&lt;/code&gt; to listen to this partition.
-Following is the behavior with single concurrency:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
-spring-group    test-topic      8          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      2          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      1          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      4          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      5          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      6          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      3          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      7          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      9          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-spring-group    test-topic      0          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;If you closely observe the above output, the consumer ID of the application is
-same for all the 10 partitions, indicating that its the single thread which is
-connected to all the partitions.&lt;/p&gt;
-
-&lt;p&gt;Now, let’s see the output, when concurrency is increased to 2,&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
-spring-group    test-topic      8          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
-spring-group    test-topic      5          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
-spring-group    test-topic      6          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
-spring-group    test-topic      7          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
-spring-group    test-topic      9          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
-spring-group    test-topic      4          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
-spring-group    test-topic      2          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
-spring-group    test-topic      3          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
-spring-group    test-topic      1          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
-spring-group    test-topic      0          consumer-1-886f1a6e-f316-4e17-90d2-599a582682e4 /172.22.0.1     consumer-1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;If you notice above, now there are 2 threads which have been equally given 5
-partitions each.&lt;/p&gt;
-
-&lt;p&gt;This is very straightforward to understand, Kafka will try to distribute the
-partitions equally among the threads belonging to same consumer group. If we
-spawn, 10 concurrency, we will have a dedicated thread for each partition.&lt;/p&gt;
-
-&lt;p&gt;It’s interesting to study this behavior when there are multiple topics to
-consumer from. So now, let’s create two more topics, &lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic2&lt;/code&gt; and
-&lt;code class=&quot;highlighter-rouge&quot;&gt;test-topic3&lt;/code&gt; with 10 partitions each.&lt;/p&gt;
-
-&lt;p&gt;This has an interesting behaviour the way consumers are written within spring.&lt;/p&gt;
-
-&lt;p&gt;For example, if we are consuming from all three topics like this:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;containerFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafkaListenerContainerFactory&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topics&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;test-topic&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic2&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic3&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;})&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consume&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We get a single thread listening from all the 30 partitions of 3 topics combined&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
-spring-group    test-topic3     7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     6          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     3          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic      0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     1          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     8          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic2     4          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     5          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-spring-group    test-topic3     9          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;On the other hand, if we split the consumption within different methods,&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;containerFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafkaListenerContainerFactory&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topics&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consume&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;containerFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafkaListenerContainerFactory&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topics&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic2&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consume2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;nd&quot;&gt;@KafkaListener&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;containerFactory&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;kafkaListenerContainerFactory&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;topics&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;test-topic3&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;consume3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;$$ -&amp;gt; Consumed Message -&amp;gt; %s&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Spring will automatically spawn a thread for each listener even though we have
-provided the concurrency as one&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
-spring-group    test-topic3     6          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     7          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     0          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     3          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     1          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     2          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     8          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     4          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     5          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic3     9          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
-spring-group    test-topic2     5          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     9          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     2          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     6          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     0          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     3          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     7          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     1          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     8          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic2     4          consumer-3-b5304419-cde4-4355-b194-ee7bb8b40894 /172.22.0.1     consumer-3
-spring-group    test-topic      8          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      2          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      1          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      4          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      5          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      6          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      3          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      7          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      9          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-spring-group    test-topic      0          consumer-2-18796186-831a-468a-b3c4-b39d43f750f0 /172.22.0.1     consumer-2
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This is a very important distinct to be aware of in order to properly scale your
-applications to consume the heavy traffic from the topics without any lag.&lt;/p&gt;
-
-&lt;p&gt;So what we understand is that the method
-&lt;a href=&quot;https://docs.spring.io/spring-kafka/api/org/springframework/kafka/listener/ConcurrentMessageListenerContainer.html#setConcurrency-int-&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;setConcurrency&lt;/code&gt;&lt;/a&gt;
-is per instance of
-&lt;a href=&quot;https://docs.spring.io/spring-kafka/api/org/springframework/kafka/config/KafkaListenerContainerFactory.html&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;KafkaListener&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;It is also important to understand that there is no point creating more threads
-than there are number of partitions as those will be left idle.&lt;/p&gt;
-
-&lt;p&gt;The above sample application source can be found in my &lt;a href=&quot;https://github.com/madhur/kafka-consumer-concurrency&quot;&gt;Github repository&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;In the next post, we will look at Multi-threaded consumer model.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Debugging SSL Issues</title>
-   <link href="https://madhur.co.in/blog/2020/08/21/debugging-ssl-issues.html"/>
-   <updated>2020-08-21T00:00:00+05:30</updated>
-   <id>id:/blog/2020/08/21/debugging-ssl-issues</id>
-   <content type="html">&lt;p&gt;I wrote this article &lt;a href=&quot;/blog/2016/10/30/debugging-ssl-issues-java.html&quot;&gt;Debugging SSL Issues in Java&lt;/a&gt; almost 4 years ago. I am writing again
-a new post on the same topic because I faced the same issue and that article
-didn’t help me. So I’ll list my new learnings in this post and it will be to the
-point.&lt;/p&gt;
-
-&lt;h3 id=&quot;use--djavaxnetdebugall-to-command-line&quot;&gt;Use -Djavax.net.debug=all to command line&lt;/h3&gt;
-
-&lt;p&gt;When using Java program, you can add &lt;code class=&quot;highlighter-rouge&quot;&gt;-Djavax.net.debug=all&lt;/code&gt; to the command line to produce debug output of the complete handshake of SSL.&lt;/p&gt;
-
-&lt;p&gt;In short, this is how the handshake looks like&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Client                          Server
-
-ClientHello         ----&amp;gt;   
-                                ServerHello
-                                Certificate*
-                                ServerKeyExchange*
-                                CertificateRequest*
-                                ServerHelloDone
-                    &amp;lt;---- 
-Certificate*
-ClientKeyExchange
-CertificateVerify*
-[ChangeCipherSpec]
-Finished
-                    ----&amp;gt;
-                                [ChangeCipherSpec]
-                                Finished
-                    &amp;lt;-----
-
-Application Data    &amp;lt;-----&amp;gt;     Application Data
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;In our case, server abruptly stopped responding after client sent &lt;code class=&quot;highlighter-rouge&quot;&gt;[ChangeCipherSpec]&lt;/code&gt; message.&lt;/p&gt;
-
-&lt;h2 id=&quot;ssldump&quot;&gt;SSLDump&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://linux.die.net/man/1/ssldump&quot;&gt;SSLDump&lt;/a&gt; is another utility which can show decrypted SSL traffic to debug any issues. So, if you are not using Java, this is the utility to go to debug the SSL issue.&lt;/p&gt;
-
-&lt;p&gt;Its output will be as follows, showing each of the SSL handshake.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;3 1  0.5765 (0.5765)  C&amp;gt;S  Handshake
-      ClientHello
-        Version 3.3
-        cipher suites
-        TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-        compression methods
-                  NULL
-3 2  0.6972 (0.1207)  S&amp;gt;C  Handshake
-      ServerHello
-        Version 3.3
-        session_id[32]=
-          ac f1 e7 3d 87 18 3f 75 f4 b5 d8 bc 61 51 dc 8e
-          da 1c db 82 89 c4 d1 df 60 83 e3 8b 56 c7 23 87
-        cipherSuite         TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-        compressionMethod                   NULL
-3 3  0.6972 (0.0000)  S&amp;gt;C  Handshake
-      Certificate
-3 4  0.6972 (0.0000)  S&amp;gt;C  Handshake
-      ServerKeyExchange
-Not enough data. Found 327 bytes (expecting 32767)
-3 5    0.6972   (0.0000)    S&amp;gt;C    Handshake
-        ServerHelloDone
-3 6    0.7427   (0.0454)    C&amp;gt;S    Handshake
-        ClientKeyExchange
-Not enough data. Found 64 bytes (expecting 16384)
-3 7    0.7598   (0.0171)    C&amp;gt;S    ChangeCipherSpec
-3 8    0.7605   (0.0007)    C&amp;gt;S      Handshake
-3 9    0.8779   (0.1173)    S&amp;gt;C    ChangeCipherSpec
-3 10   0.8779   (0.0000)    S&amp;gt;C      Handshake
-3 11   0.8956   (0.0177)    C&amp;gt;S      application_data
-3 12   1.0474   (0.1517)    S&amp;gt;C      application_data
-3 13   11.0491   (10.0017)    S&amp;gt;C      Alert
-  3      11.0492   (0.0000)    S&amp;gt;C    TCP FIN
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;wireshark&quot;&gt;Wireshark&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.wireshark.org/&quot;&gt;Wireshark&lt;/a&gt; or &lt;a href=&quot;https://www.tcpdump.org/&quot;&gt;TCPDump&lt;/a&gt; can give some insights into what is happening. From the server terminal, you can capture the SSL traffic using TCPDump into a file and open it in wireshark&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo tcpdump -i eth0 -v  -dst host x.x.x.x or src host x.x.x.x -w /tmp/test.pcap
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;ssllabs-analysis&quot;&gt;SSLLabs Analysis&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.ssllabs.com/ssltest/&quot;&gt;SSLLabs&lt;/a&gt; site can give very useful information about server capabilities of SSL certificates. It will show what versions of TLS and list of cipher suites are supported by server.&lt;/p&gt;
-
-&lt;p&gt;It can also perform the connection tests to the server using various clients such as Apache HTTP, OkHTTP, browsers, mobile etc.&lt;/p&gt;
-
-&lt;h2 id=&quot;java-runtime-parameters&quot;&gt;Java Runtime parameters&lt;/h2&gt;
-
-&lt;p&gt;There are various runtime parameters which affect the SSL connectivity in Java.
-Watch out for these parameters, if you are facing SSL issue in a Java
-application. Note that, its just not enough to look at the arguments while
-starting the program, since these runtime parameters can be set at runtime too.&lt;/p&gt;
-
-&lt;p&gt;For example, in one our client library, the following snippet of code disabled &lt;a href=&quot;https://en.wikipedia.org/wiki/Server_Name_Indication&quot;&gt;Server Name Indication&lt;/a&gt; which caused problems with the TLS connections to virtual servers, in which multiple servers for different network names are hosted at a single underlying network address.&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;jsse.enableSNIExtension&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setProperty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;jsse.enableSNIExtension&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;false&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;There are other parameters to watch out for as well. &lt;a href=&quot;https://docs.oracle.com/javase/7/docs/technotes/guides/security/jsse/JSSERefGuide.html&quot;&gt;Java Secure Socket Extension Reference Guide&lt;/a&gt; is a helpful page to start with.&lt;/p&gt;
-
-&lt;p&gt;Hope that helps anyone facing trouble with SSL connections. If you believe, there are some other useful tools to debug SSL issues further, do let me know in the comments.&lt;/p&gt;
 </content>
  </entry>
  
