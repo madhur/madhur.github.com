@@ -3,13 +3,46 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-02-20T17:01:52+05:30</updated>
+ <updated>2021-04-11T13:50:56+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>HashMap with TTL</title>
+   <link href="https://madhur.co.in/blog/2021/02/27/hashmap-with-ttl.html"/>
+   <updated>2021-02-27T00:00:00+05:30</updated>
+   <id>id:/blog/2021/02/27/hashmap-with-ttl</id>
+   <content type="html">&lt;p&gt;We were working on a proof of concept and for that I quickly needed a HashMap with a Time to Live (TTL). Basically, I wanted the keys to expire automatically after a certain time period.&lt;/p&gt;
+
+&lt;p&gt;Fortunatly, &lt;a href=&quot;https://github.com/google/guava&quot;&gt;Google Guava&lt;/a&gt; provides this out of the box in form of &lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/LoadingCache.html&quot;&gt;LoadingCache&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is how you would initialize it,&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LoadingCache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;newBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;maximumSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;MAX_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;expireAfterWrite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeUnit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;MINUTES&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheLoader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+                &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can specify the maximum size of cache, after which the entries will be automatically evicted according to Least Recently Used (LRU) algorithm.&lt;/p&gt;
+
+&lt;p&gt;The TTL can be specified using &lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#expireAfterWrite(long,%20java.util.concurrent.TimeUnit)&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;expireAfterWrite&lt;/code&gt;&lt;/a&gt; method.&lt;/p&gt;
+
+&lt;p&gt;Note that when using this implementation, do not rely on the &lt;code class=&quot;highlighter-rouge&quot;&gt;size()&lt;/code&gt; property of the map since that might contain the expired entries as well. However, they will not be retrievable using the &lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;The expired entires are removed after a certain time duration using a routine maintainence job.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Same origin policy and CORS</title>
@@ -830,52 +863,6 @@ stack is empty, not immediately. If you execute code like setTimeout(fn, 0)
 but then immediately after run a loop that counts from 1 to 10 billion, your 
 callback will be executed after a few seconds.&lt;/p&gt;
 &lt;/blockquote&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Estimate no. of kafka partitions handled by a single thread on compute</title>
-   <link href="https://madhur.co.in/blog/2020/09/06/estimate-partitions-single-thread-compute.html"/>
-   <updated>2020-09-06T00:00:00+05:30</updated>
-   <id>id:/blog/2020/09/06/estimate-partitions-single-thread-compute</id>
-   <content type="html">&lt;p&gt;In a complex multi data center Kafka deployments, it is also important to
-estimate no. of partition each thread will be handling per compute. It is very
-important parameter to tune. For example, if you are seeing high lag and less
-CPU usage, it could be because a single thread is handling too much partitions
-and it might be advisable to increase the no. of threads per compute.&lt;/p&gt;
-
-&lt;p&gt;Let me take a hypothetical example of ours.&lt;/p&gt;
-
-&lt;p&gt;We have an active-active kafka setup with a topic having 210 partitions.&lt;/p&gt;
-
-&lt;p&gt;There is concurrency of 2 per compute i.e. a single VM will be spawning 2
-threads to connect to Kafka broker.&lt;/p&gt;
-
-&lt;p&gt;There is imbalance in no. of computes. There are 8 computes in DC 1 and
-16 computes in DC2.&lt;/p&gt;
-
-&lt;p&gt;Thus in DC1, 8*2=16 threads consume 120 partitions. 120/16 = 7.5, which means
-Kafka should be allocating 7-8 partitions per thread. When I look at my
-distribution, here is what I discover:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;C1 - 8+8 = 16 partitions (8/thread)
-C2 - 8+8 = 16
-C3 - 8+7 = 15
-C4 - 8+8 = 16
-C5 - 7+7 = 14
-C6 - 7+7 = 14
-c7 - 8+7 = 15
-C8 - 7+7 = 14
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Similarly, in DC2, 16*2=32 threads consume 120 partitions. 120/32 = 3.5, means
-Kafka allocates 3-4 partitions per thread on each compute.&lt;/p&gt;
-
-&lt;p&gt;Thus, computes in DC1 are doing a lot more work assuming equal distribution
-across both DC’s.&lt;/p&gt;
-
-&lt;p&gt;It is very important to tune the Kafka settings for both the DC’s separately
-since both are doing unequal amount of work.&lt;/p&gt;
 </content>
  </entry>
  
