@@ -36,7 +36,7 @@ In this case, there are two approaches to solve it:
 
 The problem with this approach is that since the database was unavailable intermittently, this database status update also is going to result in a failure in most probability.
 
-* The order solution is to drop a message after operation 10 into a kafka queue, where this message would be picked up by a consumer and would try to retry operation 10 after some delay. If the operation succeeds, the asynchronous notification to be sent to the user that the money has been refunded.  
+* The other solution is to drop a message after operation 10 into a kafka queue, where this message would be picked up by a consumer and would try to retry operation 10 after some delay. If the operation succeeds, the asynchronous notification to be sent to the user that the money has been refunded.  
 
 
 <img src='/images/Blog/orderflow3.png'  />
