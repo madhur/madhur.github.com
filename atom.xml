@@ -3,13 +3,56 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-05-22T20:26:01+05:30</updated>
+ <updated>2021-05-30T20:31:29+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Fun with Splunk</title>
+   <link href="https://madhur.co.in/blog/2021/05/30/fun-with-splunk.html"/>
+   <updated>2021-05-30T00:00:00+05:30</updated>
+   <id>id:/blog/2021/05/30/fun-with-splunk</id>
+   <content type="html">&lt;p&gt;Many organizations aggregate their logs on &lt;a href=&quot;https://www.splunk.com/en_us/software.html&quot;&gt;Splunk&lt;/a&gt;, which is a popular product for data ingestion and building intelligence on top of it.&lt;/p&gt;
+
+&lt;p&gt;I too have been playing with data hosted on Splunk in last few weeks. Recently, I encountered a problem, where-in the data needs to be extracted based on some specified condition within a JSON array.&lt;/p&gt;
+
+&lt;p&gt;For example, the splunk record was as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Test Name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ac646022-fa55-4e04-9856-a25a41b30014&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;phases&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;query.slots&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;elapsedTime&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;2000.0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;viewPage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;elapsedTime&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;565.0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The requriement was to retrieve all the recods which has the phase &lt;code class=&quot;highlighter-rouge&quot;&gt;query.slots&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;elapsedTime&lt;/code&gt; is greater than some specified value, for example 1000 ms.&lt;/p&gt;
+
+&lt;p&gt;The query required unearthing some commands which I was unfamiliar with:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.splunk.com/Documentation/SplunkCloud/latest/SearchReference/mvexpand&quot;&gt;mvexpand&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://docs.splunk.com/Documentation/Splunk/8.2.0/SearchReference/MultivalueEvalFunctions&quot;&gt;mvzip&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is the final query&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | table temp  | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | table eTimeParsed, nameParsed |  search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Few Useful Kubectl commands</title>
@@ -763,72 +806,6 @@ slow debugging.&lt;/p&gt;
 this setting is turned off.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot67.jpg&quot; /&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Dual Booting Windows and Linux on different HDD / SDD</title>
-   <link href="https://madhur.co.in/blog/2020/11/01/dual-boot-windows-kali-different-hdd.html"/>
-   <updated>2020-11-01T00:00:00+05:30</updated>
-   <id>id:/blog/2020/11/01/dual-boot-windows-kali-different-hdd</id>
-   <content type="html">&lt;p&gt;Recently, I setup dual boot of Windows 10 and &lt;a href=&quot;https://www.kali.org/&quot;&gt;Kali Linux&lt;/a&gt; on different SDD.&lt;/p&gt;
-
-&lt;p&gt;Technically,  its not a dual boot when you install two different OS on different hard disks
-altogether. However, with dropping prices of SSD’s many people want to install
-these OS on different hard disks altogether rather than cramming up them in
-single hard disk with single partition.&lt;/p&gt;
-
-&lt;p&gt;In my case, UEFI rather than legacy boot. Here is the quick guide to setup
-Windows and Linux in two different SDD.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Disable legacy boot in BIOS. Make sure your boot mode is set to &lt;a href=&quot;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&quot;&gt;UEFI&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Disable &lt;a href=&quot;https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-secure-boot&quot;&gt;secure boot&lt;/a&gt; / fast boot&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Install Windows on HDD/ SDD 1 (&lt;code class=&quot;highlighter-rouge&quot;&gt;/dev/sda&lt;/code&gt;). Windows will setup EFI partition on the same
-hard disk as well. You should be able to boot the Windows without any issues
-using UEFI boot.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Coming to Linux installation, here you need to choose custom partitioning. We
-will partition the second hard drive (&lt;code class=&quot;highlighter-rouge&quot;&gt;/dev/sdb&lt;/code&gt;) for setting up Linux.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Create 1st partition &lt;code class=&quot;highlighter-rouge&quot;&gt;/EFI&lt;/code&gt; on &lt;code class=&quot;highlighter-rouge&quot;&gt;/dev/sdc&lt;/code&gt; of around 650 MB. Make sure to set it
-as Use as: &lt;a href=&quot;https://en.wikipedia.org/wiki/EFI_system_partition&quot;&gt;EFI&lt;/a&gt; and its at beginning of space.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Create 2nd partition &lt;code class=&quot;highlighter-rouge&quot;&gt;/&lt;/code&gt; root partition of 80% of your space. Again it should
-be primary partition. However its type will be ext4 and mount point as “/”.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Create 3rd partition as &lt;a href=&quot;https://wiki.archlinux.org/index.php/swap&quot;&gt;swap partition&lt;/a&gt;. You can give remaining space to this
-partition. Make sure to use it as &lt;code class=&quot;highlighter-rouge&quot;&gt;swap&lt;/code&gt;.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;That should be enough for partitions. You can setup optional &lt;code class=&quot;highlighter-rouge&quot;&gt;/home&lt;/code&gt; partition
-incase you need it.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Bootloader device - Installer will ask where you want to install bootloader.
-   Do no install it on Master Boot record. Install it on first EFI partition on
-   &lt;code class=&quot;highlighter-rouge&quot;&gt;/dev/sdb1&lt;/code&gt;.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Finish installation and reboot. You should see that the GRUB bootloader
-automatically adds the option of Windows 10 in its boot menu.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/kali-linux.jpg&quot; width=&quot;700px&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Incase you want to change the default option. You can boot into linux and
-    edit the &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/grub/default&lt;/code&gt; files and run &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo update-grub&lt;/code&gt; to update the
-    GRUB configuration.&lt;/p&gt;
 </content>
  </entry>
  
