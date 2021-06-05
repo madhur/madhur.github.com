@@ -3,13 +3,72 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-05-30T20:31:29+05:30</updated>
+ <updated>2021-06-05T11:46:04+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Migrating from SQL to No-SQL without downtime</title>
+   <link href="https://madhur.co.in/blog/2021/06/05/migrating-from-sql-nosql.html"/>
+   <updated>2021-06-05T00:00:00+05:30</updated>
+   <id>id:/blog/2021/06/05/migrating-from-sql-nosql</id>
+   <content type="html">&lt;p&gt;Recently, we migrated a large MySQL database containing GB’s of data, millions of rows in few tables to CosmosDB.&lt;/p&gt;
+
+&lt;p&gt;This was done without downtime. I want to lay down the approach we took in this post.&lt;/p&gt;
+
+&lt;p&gt;Our intention was to setup both the database active - active and incrementally shift the traffic point to Service v1 (which was reading/writing to MySQL) towards 
+Service v2 (which was reading/writing to CosmosDB)&lt;/p&gt;
+
+&lt;p&gt;The first challenge was doing the initial data migration (called as bootstrap) and then set up a replication pipeline (called as change feed) so that any updates/inserts/deletes
+happening on live MySQL DB are replicated to CosmosDB asynchronously.&lt;/p&gt;
+
+&lt;p&gt;For this, we made use of Kafka.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;The Bootstrap process consisted of reading the table from MySQL and dumping its content into a corresponding Kafka topic. That means, we had a corresponding Kafka topic for each
+table within MySQL. There are products within market such as &lt;a href=&quot;https://www.continuent.com/products/tungsten-replicator&quot;&gt;this&lt;/a&gt; which can do this as well.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The change feed process consisted of having another set of parallel kafka topics which would contain the change feed, i.e. inserts / deletes / updates happening on the MySQL database.
+This was tricky because setting it up requires modifying the service layer to publish this feeds to Kafka.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The point to note above is that bootstrap is a one time process and Change feed is an ongoing process. Also, bootstrap must be executed after the change feed process is up and running, so 
+as to not miss any record.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/migration.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now comes the consumer part,
+The consumer application will connect to these kafka topics and store the data in Cosmos DB. We used bulk insertion in batches of 4000 records/batch to speed up the insertions.&lt;/p&gt;
+
+&lt;p&gt;Here, the bootstrap kafka topics must be first completely consumed and written to target database before starting with ChangeFeed kafka topics.&lt;/p&gt;
+
+&lt;p&gt;As the change feed kafka topics lag becomes closer to zero (it will never be zero, since data is always being written to change feed topics), the databases are considered active active.&lt;/p&gt;
+
+&lt;p&gt;Few notes about Kafka:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Use Kafka partitions to scale up bootstrap and consumption process horizontally. The partition key can be primary key of the table. This is especially important in change feed 
+topics where multiple records will exist for same row.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The consumer application must handle errors gracefully. If there is an error during the batch writes, the entire batch might fail.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Use the &lt;a href=&quot;https://en.wikipedia.org/wiki/Blue-green_deployment&quot;&gt;blue green&lt;/a&gt; deployment methodology&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In our case, it took almost 4 hrs to complete the migration including bootstrap and change feed process for around 3 million rows in couple of tables and fewer records in other tables.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Fun with Splunk</title>
@@ -49,7 +108,7 @@
 
 &lt;p&gt;Here is the final query&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | table temp  | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | table eTimeParsed, nameParsed |  search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -764,48 +823,6 @@ array to be circular.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The full code is available in the &lt;a href=&quot;https://gist.github.com/madhur/8e84a839f9772b2e0ede429f6e0fa770&quot;&gt;gist here&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Speed up debugging in IntelliJ</title>
-   <link href="https://madhur.co.in/blog/2020/11/13/speed-up-slow-debugging-intellij.html"/>
-   <updated>2020-11-13T00:00:00+05:30</updated>
-   <id>id:/blog/2020/11/13/speed-up-slow-debugging-intellij</id>
-   <content type="html">&lt;p&gt;Yesterday, I observed painfully slow debugging in IntelliJ. Every step over or
-step in took almost 10 seconds to perform.&lt;/p&gt;
-
-&lt;p&gt;It was a simple Java console application having about some 88k entries in
-few arrays. I had successfully debugged applications having millions of entries
-in arrays, lists and maps before without any performance issues.&lt;/p&gt;
-
-&lt;p&gt;Then I looked at the &lt;code class=&quot;highlighter-rouge&quot;&gt;toString()&lt;/code&gt; implementation of the custom object which I
-was holding in the array&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;StringBuilder&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;StringBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;V&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; vertices, &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;E&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; edges &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;NEWLINE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;V&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d: &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;adj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%d &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;NEWLINE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toString&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This &lt;code class=&quot;highlighter-rouge&quot;&gt;toString()&lt;/code&gt; implementation was looping over all the 88k items and IntelliJ
-is configured to evaluate &lt;code class=&quot;highlighter-rouge&quot;&gt;toString()&lt;/code&gt; after every step.&lt;/p&gt;
-
-&lt;p&gt;Turning off the setting &lt;code class=&quot;highlighter-rouge&quot;&gt;Enable toString() data views&lt;/code&gt; solved this problem of
-slow debugging.&lt;/p&gt;
-
-&lt;p&gt;Incase you are experiencing slow debugging issues on IntelliJ, do make sure that
-this setting is turned off.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/screenshot67.jpg&quot; /&gt;&lt;/p&gt;
 </content>
  </entry>
  
