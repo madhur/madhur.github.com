@@ -41,5 +41,5 @@ The query required unearthing some commands which I was unfamiliar with:
 Here is the final query
 
 ```
-"phases{}.name"="query.slots" | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | table temp  | eval eTimeParsed=mvindex(split(temp,","),0),nameParsed=mvindex(split(temp,","),1)  | table eTimeParsed, nameParsed |  search nameParsed="query.slots" eTimeParsed > 2000 | table nameParsed, eTimeParsed
+"phases{}.name"="query.slots" | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | eval eTimeParsed=mvindex(split(temp,","),0),nameParsed=mvindex(split(temp,","),1)  | search nameParsed="query.slots" eTimeParsed > 2000 | table nameParsed, eTimeParsed
 ```

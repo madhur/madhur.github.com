@@ -5,6 +5,7 @@ excerpt: "Handling Distributed transactions rollback"
 disqus_id: /2021/05/016/handling-distributed-transactions-rollback/
 tags:
     - Transactions
+    - Design
 ---
 
 Distributed transactions rollback are a tough beast. There are many patterns to solve this such as:
