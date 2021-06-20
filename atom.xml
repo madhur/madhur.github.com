@@ -3,13 +3,64 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-06-13T22:21:02+05:30</updated>
+ <updated>2021-06-20T13:34:38+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Simple Design of Communication Service</title>
+   <link href="https://madhur.co.in/blog/2021/06/20/simple-design-of-communication-service.html"/>
+   <updated>2021-06-20T00:00:00+05:30</updated>
+   <id>id:/blog/2021/06/20/simple-design-of-communication-service</id>
+   <content type="html">&lt;p&gt;Few months back, I had to make some changes to design of Communication Service.&lt;/p&gt;
+
+&lt;p&gt;It was quite a complex architecture overall and I thought of documenting this in blogpost to outline my thought process.&lt;/p&gt;
+
+&lt;p&gt;A communication service is responsible for reliably delivering the customer notification to the end user via any channel.&lt;/p&gt;
+
+&lt;p&gt;In our case, the channels were email, SMS and push notification.&lt;/p&gt;
+
+&lt;p&gt;The communication service was divided into multiple microservices:&lt;/p&gt;
+
+&lt;h2 id=&quot;communication-services&quot;&gt;Communication Services&lt;/h2&gt;
+&lt;p&gt;This was the main service which recieved payloads from other microservices whenever they had to send out a communication.&lt;/p&gt;
+
+&lt;p&gt;The payload was json and interaction was via kafka queue.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Key points:&lt;/strong&gt;
+We had to make sure we monitor the kafka queue for lag very closely. As any lag can potentially delay the communication to the end user.&lt;/p&gt;
+
+&lt;p&gt;The communication service did the enrichment to the payload such as creating the email template, SMS template from its template database and pushed the enriched payload
+to individiual channel kafka queues. We wanted to have individual channel queues for independently scaling them. For instance, our traffic on email was much higher compared to SMS and push notification. That way, we could scale the partitions on email kafka and queue.&lt;/p&gt;
+
+&lt;p&gt;The communication service also generates a unique uuid for each request and persists into cassandra database. This serves as a single point of lookup for&lt;/p&gt;
+
+&lt;h2 id=&quot;email--sms--push-service&quot;&gt;Email / SMS / Push Service&lt;/h2&gt;
+&lt;p&gt;These are individual micro services listening to each of the channel queues. They make a rest call to the provider to actually deliver the email. Once the rest call is successfully made, we push the status message on a feedback kafka queue dedicated for each channel.The feedback kafka queues are again channel independent to allow them to independently scale.&lt;/p&gt;
+
+&lt;p&gt;These services also contain webhook listeners. Typically, when you delivery a email / SMS / push via a vendor, vendor will send the feedback via webhook weather the mail / SMS / push was successfully delivered, or if it bounced or if it went to spam etc.&lt;/p&gt;
+
+&lt;p&gt;It is important to have circuit breaker in these services as vendor services might go down any moment. Thus, it is important to have a dead letter queue, which would retry the failed pushes later.&lt;/p&gt;
+
+&lt;p&gt;These feedbacks are also sent to the same feedback queues as updates.&lt;/p&gt;
+
+&lt;p&gt;We could have had a separate service for feedback altogether, but I believe it didn’t require a separate microservice altogether which would expanded our monitoring footprint.&lt;/p&gt;
+
+&lt;h2 id=&quot;feedback-service&quot;&gt;Feedback Service&lt;/h2&gt;
+
+&lt;p&gt;This is the main services which receives all the updates w.r.t. each communication. These updates are consumed via feedback queues. It is important to scale this service sufficiently as we didn’t had a separate feedback service for each channel in order to have lesser complexity. Our email feedback kakfa topic had 200 partitions and there were 20 computes each running 10 threads to consume from these partitions.&lt;/p&gt;
+
+&lt;p&gt;The job of the feedback service is to receive the feedback and push it to cassandra database. It asynchronously also pushes the feedback to analytics channel mainly an elasticsearch database for analytics purpose, since cassandra is not suited for doing analytics.&lt;/p&gt;
+
+&lt;p&gt;The final design looked like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/comm_service.png&quot;&gt;&lt;img src=&quot;/images/Blog/comm_service.png&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>API Response Group Pattern - Improving latencies using GraphQL</title>
@@ -728,71 +779,6 @@ page&lt;/a&gt;&lt;/p&gt;
 descriptors and files. By associating fd 3 with /dev/tcp/localhost/4000, it 
 attempts to create a file there and thus a connection. We use &amp;gt; to open the socket &amp;gt; for writing, although we don’t need to write anything in this case.&lt;/p&gt;
 &lt;/blockquote&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Binary Search bug in JDK</title>
-   <link href="https://madhur.co.in/blog/2020/12/05/binary-search-jdk-bug.html"/>
-   <updated>2020-12-05T00:00:00+05:30</updated>
-   <id>id:/blog/2020/12/05/binary-search-jdk-bug</id>
-   <content type="html">&lt;p&gt;There was a &lt;a href=&quot;https://ai.googleblog.com/2006/06/extra-extra-read-all-about-it-nearly.html&quot;&gt;famous bug&lt;/a&gt; which existed in JDK implementation of &lt;a href=&quot;https://en.wikipedia.org/wiki/Binary_search_algorithm&quot;&gt;Binary Search&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Randomly, I tried to reproduce the issue this weekend.&lt;/p&gt;
-
-&lt;p&gt;Here is the flawed implementation&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;search&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;high&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;low&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;high&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;high&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;low&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;high&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;If we execute this algorithm with following code:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nc&quot;&gt;BinarySearch&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;binarySearch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;BinarySearch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;newArr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;pow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;];&lt;/span&gt;
-&lt;span class=&quot;nc&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;println&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;binarySearch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;search&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;newArr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;pow&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We see the following exception&lt;/p&gt;
-
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;Exception in thread &quot;main&quot; java.lang.ArrayIndexOutOfBoundsException: -1073741788
-	at binarysearch.BinarySearch.search(BinarySearch.java:14)
-	at binarysearch.BinarySearch.main(BinarySearch.java:31)
-
-Process finished with exit code 1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The issue is in calculation of &lt;code class=&quot;highlighter-rouge&quot;&gt;mid&lt;/code&gt; variable. The value &lt;code class=&quot;highlighter-rouge&quot;&gt;high+low&lt;/code&gt; overflows
-the maximum range of &lt;code class=&quot;highlighter-rouge&quot;&gt;int&lt;/code&gt; and ultimately results in negative value.&lt;/p&gt;
-
-&lt;p&gt;To fix this, we simply need to change the calculation of &lt;code class=&quot;highlighter-rouge&quot;&gt;mid&lt;/code&gt; as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;high&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;low&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This will give us the correct value of &lt;code class=&quot;highlighter-rouge&quot;&gt;-1&lt;/code&gt; which indicates that value doesn’t
-exist in the array.&lt;/p&gt;
-
-&lt;p&gt;Its amazing how simplest of bugs can remain undetected for years. This one
-remain undetected for nine years.&lt;/p&gt;
-
 </content>
  </entry>
  
