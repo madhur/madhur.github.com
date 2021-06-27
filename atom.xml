@@ -3,13 +3,58 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-06-20T13:34:38+05:30</updated>
+ <updated>2021-06-27T12:35:31+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Capacity Estimation Examples</title>
+   <link href="https://madhur.co.in/blog/2021/06/27/capacity-estimation.html"/>
+   <updated>2021-06-27T00:00:00+05:30</updated>
+   <id>id:/blog/2021/06/27/capacity-estimation</id>
+   <content type="html">&lt;p&gt;Capacity estimation is one of the most important excercises in design.&lt;/p&gt;
+
+&lt;p&gt;Twitter Example&lt;/p&gt;
+
+&lt;p&gt;1B Total Users
+200 M DAU
+100 M new tweets eevereday
+Each user follows 200 people avg&lt;/p&gt;
+
+&lt;p&gt;How many favorites per day?
+Each user 5 favorite per day
+200M *5 = 1B favorite&lt;/p&gt;
+
+&lt;p&gt;Total tweet views
+A User visits their timeline 2 times a day and visits 5 other people pages
+Each page has 20 tweets&lt;/p&gt;
+
+&lt;p&gt;200M &lt;em&gt;(2+5)&lt;/em&gt;20 = 28B / day&lt;/p&gt;
+
+&lt;p&gt;Storage&lt;/p&gt;
+
+&lt;p&gt;140 characters ~ 280 bytes
+100M*(280+30) bytes =&amp;gt; 30 GB / day&lt;/p&gt;
+
+&lt;p&gt;Not all tweets will have media, let’s assume that on average every fifth tweet has a photo and every tenth has a video. Let’s also assume on average a photo is 200KB and a video is 2MB. This will lead us to have 24TB of new media every day.
+(100M/5 photos * 200KB) + (100M/10 videos * 2MB) ~= 24TB/day&lt;/p&gt;
+
+&lt;p&gt;Bandwidth Estimates Since total ingress is 24TB per day, this would translate into 290MB/sec.&lt;/p&gt;
+
+&lt;p&gt;Remember that we have 28B tweet views per day. We must show the photo of every tweet (if it has a photo), but let’s assume that the users watch every 3rd video they see in their timeline. So, total egress will be:
+(28B * 280 bytes) / 86400s of text =&amp;gt; 93MB/s&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;(28B/5 * 200KB ) / 86400s of photos =&amp;gt; 13GB/S&lt;/li&gt;
+  &lt;li&gt;(28B/10/3 * 2MB ) / 86400s of Videos =&amp;gt; 22GB/s&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Total ~= 35GB/s&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Simple Design of Communication Service</title>
@@ -729,56 +774,6 @@ number of visitors from Google Analytics in the browser tab itself.&lt;/p&gt;
 page&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/realtime-analytics.png&quot; /&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Sockets in shell</title>
-   <link href="https://madhur.co.in/blog/2020/12/13/sockets-in-shell.html"/>
-   <updated>2020-12-13T00:00:00+05:30</updated>
-   <id>id:/blog/2020/12/13/sockets-in-shell</id>
-   <content type="html">&lt;p&gt;Recently, I read an article on &lt;a href=&quot;https://who23.github.io/2020/12/03/sockets-in-your-shell.html&quot;&gt;Sockets in your shell&lt;/a&gt; and I thought it was amazing find for me.&lt;/p&gt;
-
-&lt;p&gt;Lot of times especially working with docker, I had to install tools like telnet, nc and curl to check basic connectivity.&lt;/p&gt;
-
-&lt;p&gt;Little did I realize that this functionality is inbuilt into shell.&lt;/p&gt;
-
-&lt;p&gt;For ex, let’s say we have a basic http server running in local as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;http&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;requestListener&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Request recieved&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writeHead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;Hello, World!&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;requestListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8080&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;How would you send the request to this port without telnet, browser, curl and nc from terminal? Answer is:&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;GET /&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; /dev/tcp/localhost/8080
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Its as simple as that. The only downside is that it wont be possible to know if the data was successfully submitted to port 8080 or not. However, there is a simple workaround for that:&lt;/p&gt;
-
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/bash&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;if &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;3&amp;gt;/dev/tcp/localhost/8000 &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
-	&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;server up!&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;else
-	&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;server down.&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Quoting from the article:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;If you’re unfamiliar, exec without any arguments is used to redirect file 
-descriptors and files. By associating fd 3 with /dev/tcp/localhost/4000, it 
-attempts to create a file there and thus a connection. We use &amp;gt; to open the socket &amp;gt; for writing, although we don’t need to write anything in this case.&lt;/p&gt;
-&lt;/blockquote&gt;
 </content>
  </entry>
  
