@@ -7,13 +7,13 @@ tags:
     - Design    
 ---
 
-Capacity estimation is one of the most important excercises in design.
+Capacity estimation is one of the most important exercises in design.
 
 Twitter Example
 
 1B Total Users
 200 M DAU
-100 M new tweets eevereday
+100 M new tweets everyday
 Each user follows 200 people avg
 
 How many favorites per day?
