@@ -3,7 +3,7 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-07-11T09:44:41+05:30</updated>
+ <updated>2021-07-18T18:01:06+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -12,11 +12,142 @@
  
  
  <entry>
+   <title>Meaning of at-least once, at-most once and exactly-once delivery</title>
+   <link href="https://madhur.co.in/blog/2021/07/18/meaning-of-at-least-once-at-most-once-and-exactly-once-delivery.html"/>
+   <updated>2021-07-18T00:00:00+05:30</updated>
+   <id>id:/blog/2021/07/18/meaning-of-at-least-once-at-most-once-and-exactly-once-delivery</id>
+   <content type="html">&lt;p&gt;Ever since I have started working with Kafka, I have came across these terms very frequently, At-least once, At-most once and Exactly Once.&lt;/p&gt;
+
+&lt;p&gt;As an engineer, It is very important to understand these concepts.&lt;/p&gt;
+&lt;h2 id=&quot;at-most-once-configuration&quot;&gt;At-most once Configuration&lt;/h2&gt;
+
+&lt;p&gt;As the name suggests, At-most-once means the message will be delivered at-most once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically committing the last offset used.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to true&lt;/li&gt;
+  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
+  &lt;li&gt;Since &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Note that it is also possible to have at-lest-once scenario with the same configuration. Let’s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.&lt;/p&gt;
+
+&lt;p&gt;Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.&lt;/p&gt;
+
+&lt;h2 id=&quot;at-least-once-configuration&quot;&gt;At-least once configuration&lt;/h2&gt;
+&lt;p&gt;At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt; OR&lt;/li&gt;
+  &lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let’s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.&lt;/p&gt;
+
+&lt;h2 id=&quot;exactly-once-configuration&quot;&gt;Exactly-once configuration&lt;/h2&gt;
+
+&lt;p&gt;Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.&lt;/p&gt;
+
+&lt;p&gt;In this case offset needs to be manually managed.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to false&lt;/li&gt;
+  &lt;li&gt;Do not make call to &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Implement a &lt;code class=&quot;highlighter-rouge&quot;&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
+  &lt;li&gt;While processing the messages, get hold of the offset of each message. Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+ </entry>
+ 
+ <entry>
    <title>How tinyUrl Does redirection</title>
    <link href="https://madhur.co.in/blog/2021/07/11/how-tinyurl-does-redirection.html"/>
    <updated>2021-07-11T00:00:00+05:30</updated>
    <id>id:/blog/2021/07/11/how-tinyurl-does-redirection</id>
-   <content type="html">
+   <content type="html">&lt;p&gt;I got curious about how tinyUrl does redirection for its Url. Is it standard browser redirect with 301/302 status code or something else?&lt;/p&gt;
+
+&lt;p&gt;With that created this tinyUrl &lt;a href=&quot;https://tinyurl.com/madhur25&quot;&gt;tinyurl.com/madhur25&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Figured out that it was indeed a browser redirect using 301 status code.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ curl https://tinyurl.com/madhur25 -vvv
+* STATE: INIT =&amp;gt; CONNECT handle 0x600057310; line 1407 (connection #-5000)
+* Added connection 0. The cache now contains 1 members
+*   Trying 104.20.138.65...
+* TCP_NODELAY set
+* STATE: CONNECT =&amp;gt; WAITCONNECT handle 0x600057310; line 1460 (connection #0)
+* Connected to tinyurl.com (104.20.138.65) port 443 (#0)
+* STATE: WAITCONNECT =&amp;gt; SENDPROTOCONNECT handle 0x600057310; line 1567 (connection #0)
+* Marked for [keep alive]: HTTP default
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+*   CAfile: /usr/ssl/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.2 (OUT), TLS header, Certificate Status (22):
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+* STATE: SENDPROTOCONNECT =&amp;gt; PROTOCONNECT handle 0x600057310; line 1581 (connection #0)
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-ECDSA-AES128-GCM-SHA256
+* ALPN, server accepted to use http/1.1
+* Server certificate:
+*  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
+*  start date: Jul  3 00:00:00 2021 GMT
+*  expire date: Jul  2 23:59:59 2022 GMT
+*  subjectAltName: host &quot;tinyurl.com&quot; matched cert's &quot;tinyurl.com&quot;
+*  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
+*  SSL certificate verify ok.
+* STATE: PROTOCONNECT =&amp;gt; DO handle 0x600057310; line 1602 (connection #0)
+&amp;gt; GET /madhur25 HTTP/1.1
+&amp;gt; Host: tinyurl.com
+&amp;gt; User-Agent: curl/7.51.0
+&amp;gt; Accept: */*
+&amp;gt;
+* STATE: DO =&amp;gt; DO_DONE handle 0x600057310; line 1664 (connection #0)
+* STATE: DO_DONE =&amp;gt; WAITPERFORM handle 0x600057310; line 1791 (connection #0)
+* STATE: WAITPERFORM =&amp;gt; PERFORM handle 0x600057310; line 1801 (connection #0)
+* HTTP 1.1 or later with persistent connection, pipelining supported
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;301&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Moved&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Permanently&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Date:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Sun&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;11&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Jul&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;2021&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;04:11:01&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;GMT&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Content-Type:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;charset=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;UTF-8&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Transfer-Encoding:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;chunked&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Connection:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;keep-alive&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;X-Powered-By:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;PHP&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;28&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Location:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;https:&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;www&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;madhur&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;co&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Cache-Control:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;0,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;s-max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;900,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;stale-if-error:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;86400&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Referrer-Policy:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;unsafe-url&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Strict-Transport-Security:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;31536000;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;includeSubDomains&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;preload&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;CF-Cache-Status:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;DYNAMIC&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Expect-CT:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;604800,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;report-uri=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Server&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cloudflare&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;blacklisted&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Server:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cloudflare&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;CF-RAY:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;66cf2f6e7e293c13-BLR&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alt-svc:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-27=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-28=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-29=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;&amp;lt;!&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;DOCTYPE&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;charset=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;UTF-8&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;http-equiv=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;refresh&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0;url='https://www.madhur.co.in/'&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;title&amp;gt;&lt;/span&gt;Redirecting to https://www.madhur.co.in/&lt;span class=&quot;nt&quot;&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+        Redirecting to &lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://www.madhur.co.in/&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;https://www.madhur.co.in/&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;.
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+* STATE: PERFORM =&amp;gt; DONE handle 0x600057310; line 1965 (connection #0)
+* multi_done
+* Curl_http_done: called premature == 0
+* Connection #0 to host tinyurl.com left intact
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
@@ -675,96 +806,6 @@ topics where multiple records will exist for same row.&lt;/p&gt;
         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Pitfalls while using Lombok with Java Development</title>
-   <link href="https://madhur.co.in/blog/2021/02/06/pitfalls-while-using-lombok.html"/>
-   <updated>2021-02-06T00:00:00+05:30</updated>
-   <id>id:/blog/2021/02/06/pitfalls-while-using-lombok</id>
-   <content type="html">&lt;p&gt;These days Java developers almost universally prefers
-&lt;a href=&quot;https://projectlombok.org/&quot;&gt;Lombok&lt;/a&gt; because it cuts down on the boilerplate
-code you have to write while writing new classes.&lt;/p&gt;
-
-&lt;p&gt;Specifically, it allows to generate getters, setters, toString, hashCode and
-constructor function automatically.&lt;/p&gt;
-
-&lt;p&gt;However, there are some pitfalls which developers must be aware of while using
-Lombok:&lt;/p&gt;
-
-&lt;p&gt;For example, when we have boolean fields in our class such as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Getter&lt;/span&gt;
-&lt;span class=&quot;nd&quot;&gt;@Setter&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TestBean&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here is what the Lombok generates by default:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;lombok&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TestBean&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;TestBean&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getStr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getIsOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setStr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isNew&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isNew&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;setIsOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Boolean&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isOld&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isOld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Notice the different strategy used to generate the &lt;code class=&quot;highlighter-rouge&quot;&gt;boolean&lt;/code&gt; primitive
-getters/setters and boolean object getters/setters.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;isNew&lt;/code&gt; getter does not have &lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt; prefixed. The &lt;code class=&quot;highlighter-rouge&quot;&gt;isNew&lt;/code&gt; setter does not
-have &lt;code class=&quot;highlighter-rouge&quot;&gt;is&lt;/code&gt; keyword which is part of variable.&lt;/p&gt;
-
-&lt;p&gt;Whereas, this is not the cause with Object boolean.&lt;/p&gt;
-
-&lt;p&gt;This is documented on &lt;a href=&quot;https://projectlombok.org/features/GetterSetter&quot;&gt;Lombok page&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;For boolean fields that start with is immediately followed by a title-case letter, nothing is prefixed to generate the getter name.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Any variation on boolean will not result in using the is prefix instead of the get prefix; for example, returning java.lang.Boolean results in a get prefix, not an is prefix.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is one of the many pitfalls while using Lombok. These discrepancy can cause
-serialization / deserialization failures if the developer is not aware of the same.&lt;/p&gt;
 </content>
  </entry>
  

@@ -196,7 +196,91 @@
 			<hr style="margin-top:0px" />
 
 
-			 
+			 <p>I got curious about how tinyUrl does redirection for its Url. Is it standard browser redirect with 301/302 status code or something else?</p>
+
+<p>With that created this tinyUrl <a href="https://tinyurl.com/madhur25">tinyurl.com/madhur25</a></p>
+
+<p>Figured out that it was indeed a browser redirect using 301 status code.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl https://tinyurl.com/madhur25 -vvv
+* STATE: INIT =&gt; CONNECT handle 0x600057310; line 1407 (connection #-5000)
+* Added connection 0. The cache now contains 1 members
+*   Trying 104.20.138.65...
+* TCP_NODELAY set
+* STATE: CONNECT =&gt; WAITCONNECT handle 0x600057310; line 1460 (connection #0)
+* Connected to tinyurl.com (104.20.138.65) port 443 (#0)
+* STATE: WAITCONNECT =&gt; SENDPROTOCONNECT handle 0x600057310; line 1567 (connection #0)
+* Marked for [keep alive]: HTTP default
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+*   CAfile: /usr/ssl/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.2 (OUT), TLS header, Certificate Status (22):
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+* STATE: SENDPROTOCONNECT =&gt; PROTOCONNECT handle 0x600057310; line 1581 (connection #0)
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-ECDSA-AES128-GCM-SHA256
+* ALPN, server accepted to use http/1.1
+* Server certificate:
+*  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
+*  start date: Jul  3 00:00:00 2021 GMT
+*  expire date: Jul  2 23:59:59 2022 GMT
+*  subjectAltName: host "tinyurl.com" matched cert's "tinyurl.com"
+*  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
+*  SSL certificate verify ok.
+* STATE: PROTOCONNECT =&gt; DO handle 0x600057310; line 1602 (connection #0)
+&gt; GET /madhur25 HTTP/1.1
+&gt; Host: tinyurl.com
+&gt; User-Agent: curl/7.51.0
+&gt; Accept: */*
+&gt;
+* STATE: DO =&gt; DO_DONE handle 0x600057310; line 1664 (connection #0)
+* STATE: DO_DONE =&gt; WAITPERFORM handle 0x600057310; line 1791 (connection #0)
+* STATE: WAITPERFORM =&gt; PERFORM handle 0x600057310; line 1801 (connection #0)
+* HTTP 1.1 or later with persistent connection, pipelining supported
+<span class="nt">&lt;</span> <span class="nt">HTTP</span><span class="err">/</span><span class="na">1</span><span class="err">.</span><span class="na">1</span> <span class="na">301</span> <span class="na">Moved</span> <span class="na">Permanently</span>
+<span class="err">&lt;</span> <span class="na">Date:</span> <span class="na">Sun</span><span class="err">,</span> <span class="na">11</span> <span class="na">Jul</span> <span class="na">2021</span> <span class="na">04:11:01</span> <span class="na">GMT</span>
+<span class="err">&lt;</span> <span class="na">Content-Type:</span> <span class="na">text</span><span class="err">/</span><span class="na">html</span><span class="err">;</span> <span class="na">charset=</span><span class="s">UTF-8</span>
+<span class="err">&lt;</span> <span class="na">Transfer-Encoding:</span> <span class="na">chunked</span>
+<span class="err">&lt;</span> <span class="na">Connection:</span> <span class="na">keep-alive</span>
+<span class="err">&lt;</span> <span class="na">X-Powered-By:</span> <span class="na">PHP</span><span class="err">/</span><span class="na">7</span><span class="err">.</span><span class="na">3</span><span class="err">.</span><span class="na">28</span>
+<span class="err">&lt;</span> <span class="na">Location:</span> <span class="na">https:</span><span class="err">//</span><span class="na">www</span><span class="err">.</span><span class="na">madhur</span><span class="err">.</span><span class="na">co</span><span class="err">.</span><span class="na">in</span><span class="err">/</span>
+<span class="err">&lt;</span> <span class="na">Cache-Control:</span> <span class="na">max-age=</span><span class="s">0,</span> <span class="na">public</span><span class="err">,</span> <span class="na">s-max-age=</span><span class="s">900,</span> <span class="na">stale-if-error:</span> <span class="na">86400</span>
+<span class="err">&lt;</span> <span class="na">Referrer-Policy:</span> <span class="na">unsafe-url</span>
+<span class="err">&lt;</span> <span class="na">Strict-Transport-Security:</span> <span class="na">max-age=</span><span class="s">31536000;</span> <span class="na">includeSubDomains</span><span class="err">;</span> <span class="na">preload</span>
+<span class="err">&lt;</span> <span class="na">CF-Cache-Status:</span> <span class="na">DYNAMIC</span>
+<span class="err">&lt;</span> <span class="na">Expect-CT:</span> <span class="na">max-age=</span><span class="s">604800,</span> <span class="na">report-uri=</span><span class="s">"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"</span>
+<span class="na">*</span> <span class="na">Server</span> <span class="na">cloudflare</span> <span class="na">is</span> <span class="na">not</span> <span class="na">blacklisted</span>
+<span class="err">&lt;</span> <span class="na">Server:</span> <span class="na">cloudflare</span>
+<span class="err">&lt;</span> <span class="na">CF-RAY:</span> <span class="na">66cf2f6e7e293c13-BLR</span>
+<span class="err">&lt;</span> <span class="na">alt-svc:</span> <span class="na">h3-27=</span><span class="s">":443"</span><span class="err">;</span> <span class="na">ma=</span><span class="s">86400,</span> <span class="na">h3-28=</span><span class="s">":443"</span><span class="err">;</span> <span class="na">ma=</span><span class="s">86400,</span> <span class="na">h3-29=</span><span class="s">":443"</span><span class="err">;</span> <span class="na">ma=</span><span class="s">86400,</span> <span class="na">h3=</span><span class="s">":443"</span><span class="err">;</span> <span class="na">ma=</span><span class="s">86400</span>
+<span class="err">&lt;</span>
+<span class="err">&lt;!</span><span class="na">DOCTYPE</span> <span class="na">html</span><span class="nt">&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+    <span class="nt">&lt;head&gt;</span>
+        <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"refresh"</span> <span class="na">content=</span><span class="s">"0;url='https://www.madhur.co.in/'"</span> <span class="nt">/&gt;</span>
+
+        <span class="nt">&lt;title&gt;</span>Redirecting to https://www.madhur.co.in/<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;/head&gt;</span>
+    <span class="nt">&lt;body&gt;</span>
+        Redirecting to <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"https://www.madhur.co.in/"</span><span class="nt">&gt;</span>https://www.madhur.co.in/<span class="nt">&lt;/a&gt;</span>.
+    <span class="nt">&lt;/body&gt;</span>
+* STATE: PERFORM =&gt; DONE handle 0x600057310; line 1965 (connection #0)
+* multi_done
+* Curl_http_done: called premature == 0
+* Connection #0 to host tinyurl.com left intact
+<span class="nt">&lt;/html&gt;</span>
+</code></pre></div></div>
 
 			<footer>
 				<div class="blocked tags">
