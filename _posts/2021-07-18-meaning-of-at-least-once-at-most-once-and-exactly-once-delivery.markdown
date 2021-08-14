@@ -1,10 +1,10 @@
 ---
 layout: blog-post
-title: "Meaning of at-least once, at-most once and exactly-once delivery"
-excerpt: "Meaning of at-least once, at-most once and exactly-once delivery"
-disqus_id: /2021/07/18/meaning-of-at-least-once-at-most-once-and-exactly-once-delivery/
+title: "Liveness and Readiness Probes"
+excerpt: "Liveness and Readiness Probes"
+disqus_id: /2021/08/14/liveness-and-readiness-probes/
 tags:
-    - Design    
+    - Kubernetes
 ---
 
 Ever since I have started working with Kafka, I have came across these terms very frequently, At-least once, At-most once and Exactly Once.
