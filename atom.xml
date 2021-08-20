@@ -3,13 +3,73 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-08-14T22:24:31+05:30</updated>
+ <updated>2021-08-20T21:57:25+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Designing Change Data Capture</title>
+   <link href="https://madhur.co.in/blog/2021/08/20/design-change-data-capture.html"/>
+   <updated>2021-08-20T00:00:00+05:30</updated>
+   <id>id:/blog/2021/08/20/design-change-data-capture</id>
+   <content type="html">&lt;p&gt;Change Data Capture (CDC) is a very important topic for any backend developer to understand. Lot of systems backbone is based on Change data capture.&lt;/p&gt;
+
+&lt;p&gt;When I started my career as a backend developer, I did not have any understand of CDC. It is only after talking to some of the industry experts, I realized how important this topic is.&lt;/p&gt;
+
+&lt;p&gt;In this post, we will try to understand what is CDC and its practical usages:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Change Data Capture is a software process that identifies and tracks changes to data in a source database. The source database can be relational or any database for that matter. CDC provides real time or near real time movement of data by moving and processing data continuously as new database events occur.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;One of the example of CDC is Microsoft’s Cosmos DB Change Feed&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed&quot;&gt;Change feed in Azure Cosmos DB&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://debezium.io/&quot;&gt;Debezium&lt;/a&gt; is another solution which provides CDC for the databases such as MySQL&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;change-data-capture-methods&quot;&gt;Change data capture Methods&lt;/h2&gt;
+
+&lt;h3 id=&quot;audit-columns&quot;&gt;Audit Columns&lt;/h3&gt;
+
+&lt;p&gt;By using columns such as LAST_UPDATED, DATE_MODIFIED columns. The application can query the rows which have modified that changed since data was last extracted and publish into the stream.&lt;/p&gt;
+
+&lt;h3 id=&quot;trigger-based-cdc&quot;&gt;Trigger Based CDC&lt;/h3&gt;
+
+&lt;p&gt;Defining database triggers that fire after INSERT, UPDATE OR DELETE commands are another method use to create a change log. Some databases have native support for triggers.&lt;/p&gt;
+
+&lt;h3 id=&quot;log-based-cdc&quot;&gt;Log based CDC&lt;/h3&gt;
+
+&lt;p&gt;Databases support transaction logs that store all database events. With log based CDC, new database transactions are read from source database native transaction logs.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The changes are captured without making application level changes and without having to &amp;gt; scan operational tables, both of which add additional workload and reduce source &amp;gt; systems’ performance.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;using-cdc-to-implement-the-outbox-pattern&quot;&gt;Using CDC to implement the Outbox Pattern&lt;/h2&gt;
+
+&lt;p&gt;Content taken from https://debezium.io/blog/2020/02/10/event-sourcing-vs-cdc/&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;The primary goal of the Outbox Pattern is to ensure that updates to the application  state (stored in tables) and publishing of the respective domain event is done within a  single transaction. This involves creating an Outbox table in the database to collect  those domain events as part of a transaction. Having transactional guarantees around the  domain events and their propagation via the Outbox is important for data consistency  across a system.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;After the transaction completes, the domain events are then picked up by a CDC  connector and forwarded to interested consumers using a reliable message broker (see  Figure 5). Those consumers may then use the domain events to materialize their own  aggregates (see above per Event Sourcing)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/Blog/cdc.png&quot; /&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Liveness and Readiness Probes</title>
@@ -742,80 +802,6 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;p&gt;The expired entires are removed after a certain time duration using a routine maintainence job.&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Same origin policy and CORS</title>
-   <link href="https://madhur.co.in/blog/2021/02/20/same-origin-policy-and-cors.html"/>
-   <updated>2021-02-20T00:00:00+05:30</updated>
-   <id>id:/blog/2021/02/20/same-origin-policy-and-cors</id>
-   <content type="html">&lt;p&gt;I have been recently focused a lot on Web application security especially web vulnerabilities such as &lt;a href=&quot;&quot;&gt;Cross Site Scripting (XSS)&lt;/a&gt; and &lt;a href=&quot;&quot;&gt;Cross Site Request Forgery (CSRF)&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;One of the interesting protection mechanism around these attacks is &lt;a href=&quot;&quot;&gt;Same Origin Policy&lt;/a&gt; which I believe every application developer should understand in deep.&lt;/p&gt;
-
-&lt;h3 id=&quot;so-what-is-cross-origin-policy&quot;&gt;So what is cross origin policy?&lt;/h3&gt;
-
-&lt;p&gt;Reference: &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy&quot;&gt;Mozilla docs&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;When a browser loads the web page, the web page elements might refer to other origins (basically the combination of protocol, host and port). These elements can be CSS links &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;link href&amp;gt;&lt;/code&gt;, JS links &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;script src&amp;gt;&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tags,&lt;/p&gt;
-
-&lt;h3 id=&quot;what-is-not-covered-under-same-origin-policy&quot;&gt;What is not covered under same origin policy?&lt;/h3&gt;
-
-&lt;p&gt;This is most important. Its very important for developers to understand what is excluded under same origin policy because that’s where the web application becomes vulnerable.&lt;/p&gt;
-
-&lt;p&gt;1) cross domain form posting is perfectly acceptable in web application. i.e. a form loaded at http://localhost:8080  , can execute the following code without any issues:&lt;/p&gt;
-
-&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;body&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;onload=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'document.getElementById(&quot;csrfform&quot;).submit()'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'post'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'csrfform'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'http://somesite.com/ve/admin/users/add'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'token'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'real_name'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'attacker'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'bio'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'test'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'status'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'active'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'role'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'administrator'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'username'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'evilattacker2'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'password'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'pwnd1111'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'hidden'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'email'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ahuja.madhur@gmail.com'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'submit'&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value =&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'submit'&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/form&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The above is a classic case of CSRF attack where a forged page is tricking the user to submit a request to other site without his knowledge. If the user is already logged onto http://somesite.com , the browser would also automatically include the cookies appropriate for http://somesite.com to automatically authenticate the request.&lt;/p&gt;
-
-&lt;p&gt;2) The script tags do not come under same origin policy. i.e. it is perfectly legal for a site at http://somesite.com to have the following script tag in its html&lt;/p&gt;
-
-&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://somesite.com/somejs.com&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/head&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
-&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/body&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
-&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;3) The &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tag is allowed to retrieve images from the cross origin. This might seem very innocuous but there have been some &lt;a href=&quot;https://www.evonide.com/side-channel-attacking-browsers-through-css3-features/&quot;&gt;attacks&lt;/a&gt; because of this.&lt;/p&gt;
-
-&lt;p&gt;4) Just like images, in iframe the contents may be loaded but scripts in the outer framing page are not allowed to access the framed page contents.&lt;/p&gt;
-
-&lt;h3 id=&quot;web-storage-indexeddb-and-localstorage&quot;&gt;Web Storage, IndexedDB and LocalStorage&lt;/h3&gt;
-
-&lt;p&gt;Each origin gets its own dedicated Web Storage, IndexedDb and LocalStorage. The site in one origin cannot access the storage data of other origin. For example, the site running at http://localhost:8081 cannot access the localstorage of http://localhost:8082&lt;/p&gt;
-
-&lt;h3 id=&quot;how-to-circumvent-same-origin-policy&quot;&gt;How to circumvent Same origin policy?&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS&quot;&gt;Cross origin request sharing (CORS)&lt;/a&gt; specification permits the cross origin sharing under special circumstances.&lt;/p&gt;
-
-&lt;h2 id=&quot;protections-against-these-attacks&quot;&gt;Protections against these attacks&lt;/h2&gt;
-
-&lt;p&gt;The protection against these attacks is really a big topic. But primarily two headers are helpful:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP&quot;&gt;content-security-policy&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection&quot;&gt;X-XSS-Protection&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 </content>
  </entry>
  
