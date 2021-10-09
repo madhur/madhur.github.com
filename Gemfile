@@ -11,3 +11,4 @@ gem 'octokit'
 gem 'chronic'
 gem 'hashie'
 gem 'wdm'
+gem "webrick", "~> 1.7"
