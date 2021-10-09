@@ -245,13 +245,13 @@
 </code></pre></div></div>
 
 <p>After going through our code, I observed that in some cases, where response case was != 200, we weren’t consuming the response
-using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code> and that seemed to be the problem. This is because, we weren’t interested in the response if the status code indicated a failure. However, according to Apache HTTP documentation, the response must be consumed using <code class="highlighter-rouge">EntityUtils.toString(response.getEntity())</code>  or <code class="highlighter-rouge">EntityUtils.consumeQuietly(response.getEntity())</code>. The latter can be used when the client is not interested in the response, which can be the case for failure scenarios.</p>
+using <code class="language-plaintext highlighter-rouge">EntityUtils.toString(response.getEntity())</code> and that seemed to be the problem. This is because, we weren’t interested in the response if the status code indicated a failure. However, according to Apache HTTP documentation, the response must be consumed using <code class="language-plaintext highlighter-rouge">EntityUtils.toString(response.getEntity())</code>  or <code class="language-plaintext highlighter-rouge">EntityUtils.consumeQuietly(response.getEntity())</code>. The latter can be used when the client is not interested in the response, which can be the case for failure scenarios.</p>
 
 <h2 id="pool-statistics">Pool Statistics</h2>
 
 <p>There is a way to get more interesting information about using <a href="https://hc.apache.org/httpcomponents-core-ga/httpcore/apidocs/org/apache/http/pool/PoolStats.html">PoolStats</a></p>
 
-<p>As per this <a href="https://stackoverflow.com/questions/19112121/check-available-connections-in-poolingclientconnectionmanager">stackoverflow thread</a>, the stats of the <code class="highlighter-rouge">PoolingHttpClientConnectionManager</code> can be obtained through following method:</p>
+<p>As per this <a href="https://stackoverflow.com/questions/19112121/check-available-connections-in-poolingclientconnectionmanager">stackoverflow thread</a>, the stats of the <code class="language-plaintext highlighter-rouge">PoolingHttpClientConnectionManager</code> can be obtained through following method:</p>
 
 <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">createHttpInfo</span><span class="o">(</span><span class="nc">PoolingHttpClientConnectionManager</span> <span class="n">connectionManager</span><span class="o">)</span> <span class="o">{</span>
     <span class="nc">StringBuilder</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>

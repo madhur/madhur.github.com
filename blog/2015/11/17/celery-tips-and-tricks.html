@@ -229,7 +229,7 @@ Also, see <a href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing
     <p><a href="http://spring.io/blog/2011/04/01/routing-topologies-for-performance-and-scalability-with-rabbitmq/">http://spring.io/blog/2011/04/01/routing-topologies-for-performance-and-scalability-with-rabbitmq/</a></p>
   </li>
   <li>
-    <p>If you are looking for reliability, use <code class="highlighter-rouge">CELERY_ACKS_LATE = True</code></p>
+    <p>If you are looking for reliability, use <code class="language-plaintext highlighter-rouge">CELERY_ACKS_LATE = True</code></p>
 
     <p>What does it do? Well, as the docs says</p>
 
@@ -244,16 +244,16 @@ Also, see <a href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing
     <p>This also requires that the tasks can be restarted from middle without any side effects. This might require using transactions if the task is involved in db operations.</p>
   </li>
   <li>
-    <p><a href="http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers"><code class="highlighter-rouge">CELERY_TASK_SERIALIZER='json'</code></a></p>
+    <p><a href="http://docs.celeryproject.org/en/latest/userguide/calling.html#calling-serializers"><code class="language-plaintext highlighter-rouge">CELERY_TASK_SERIALIZER='json'</code></a></p>
 
     <p>Using JSON as the serializer enables easy debugging as you can inspect stored messages in the AMQP broker easily. However, it comes with the disadvantage of being around 34% larger than an encoding which supports native binary types.</p>
   </li>
   <li>
     <p>Logically separate queues for your tasks</p>
 
-    <p>By default celery will create just one queue <code class="highlighter-rouge">celery</code> for all your tasks. This is undesirable when you are especially targeting for scale. Logically separating your tasks into queues will allow you to separately dedicate different number of workers for each queue.</p>
+    <p>By default celery will create just one queue <code class="language-plaintext highlighter-rouge">celery</code> for all your tasks. This is undesirable when you are especially targeting for scale. Logically separating your tasks into queues will allow you to separately dedicate different number of workers for each queue.</p>
 
-    <p><code class="highlighter-rouge">celery -A tasks worker -Q github,email -B</code></p>
+    <p><code class="language-plaintext highlighter-rouge">celery -A tasks worker -Q github,email -B</code></p>
   </li>
   <li>
     <p>Run Celery beat scheduler as a separate service than running it with worker. This is documented on celery page:</p>
@@ -275,7 +275,7 @@ are more predictable if tasks takes different amount of time to execute.)</p>
   </li>
 </ol>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I have seen developers blindly putting `try` `except` block with a `retry` statement and then showing off that how `safe` their code is from failures. This is not a good idea. For example, consider the simple task below, which fails because of division by zero in some case (where random no. zero is generated)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I have seen developers blindly putting `try` `except` block with a `retry` statement and then showing off that how `safe` their code is from failures. This is not a good idea. For example, consider the simple task below, which fails because of division by zero in some case (where random no. zero is generated)
 </code></pre></div></div>
 
 <figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
@@ -286,7 +286,7 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 	<span class="k">print</span> <span class="n">c</span>
 	<span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
-<p>We can blindly put the <code class="highlighter-rouge">except</code> block with a retry logic, but this is a terrible idea. The tasks will now go into infinite retry loop causing waste of CPU resources unless <a href="https://en.wikipedia.org/wiki/Exponential_backoff">back off</a> is used</p>
+<p>We can blindly put the <code class="language-plaintext highlighter-rouge">except</code> block with a retry logic, but this is a terrible idea. The tasks will now go into infinite retry loop causing waste of CPU resources unless <a href="https://en.wikipedia.org/wiki/Exponential_backoff">back off</a> is used</p>
 
 <figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">divbad_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -309,7 +309,7 @@ are more predictable if tasks takes different amount of time to execute.)</p>
 	<span class="k">print</span> <span class="n">d</span>
 	<span class="k">return</span> <span class="n">c</span></code></pre></figure>
 
-<p>Here the variable <code class="highlighter-rouge">d</code> is getting printed without getting defined. The <code class="highlighter-rouge">except</code> and <code class="highlighter-rouge">retry</code> logic below is also unnecessary. The better solution is to resolve the programming error.</p>
+<p>Here the variable <code class="language-plaintext highlighter-rouge">d</code> is getting printed without getting defined. The <code class="language-plaintext highlighter-rouge">except</code> and <code class="language-plaintext highlighter-rouge">retry</code> logic below is also unnecessary. The better solution is to resolve the programming error.</p>
 
 <figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">task</span><span class="p">(</span><span class="n">default_retry_delay</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bind</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">max_retries</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">codebad_retry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

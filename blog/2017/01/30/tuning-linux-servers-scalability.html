@@ -215,9 +215,9 @@
 
 <h2 id="open-files">Open files</h2>
 
-<p>We need to keep our file limit high for any linux production server. Check the current value using <code class="highlighter-rouge">ulimit -a</code></p>
+<p>We need to keep our file limit high for any linux production server. Check the current value using <code class="language-plaintext highlighter-rouge">ulimit -a</code></p>
 
-<p>We can configure this limit using <code class="highlighter-rouge">/etc/security/limits.conf</code></p>
+<p>We can configure this limit using <code class="language-plaintext highlighter-rouge">/etc/security/limits.conf</code></p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">* hard nofile 300000
 * soft nofile 300000
@@ -234,23 +234,23 @@ tomcat soft nofile 300000</code></pre></figure>
 Max open files            30000</code></pre></figure>
 
 <h2 id="ephemeral-ports">Ephemeral Ports</h2>
-<p>Increase the number of ephemeal ports availabl to your application. The default value is <code class="highlighter-rouge">32768 - 61000</code>.</p>
+<p>Increase the number of ephemeal ports availabl to your application. The default value is <code class="language-plaintext highlighter-rouge">32768 - 61000</code>.</p>
 
 <h2 id="time_wait-state">TIME_WAIT state</h2>
 
-<p>TCP connections go through lot of states, last of them is <code class="highlighter-rouge">TIME_WAIT</code> state.
-The default <code class="highlighter-rouge">TIME_WAIT</code> timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.</p>
+<p>TCP connections go through lot of states, last of them is <code class="language-plaintext highlighter-rouge">TIME_WAIT</code> state.
+The default <code class="language-plaintext highlighter-rouge">TIME_WAIT</code> timeout is for 2 minutes, Which means you’ll run out of available ports if you receive more than about 400 requests a second, or if we look back to how nginx does proxies, this actually translates to 200 requests per second.</p>
 
-<p>These parameters can be tuned using these settings in <code class="highlighter-rouge">/etc/sysctl.conf</code></p>
+<p>These parameters can be tuned using these settings in <code class="language-plaintext highlighter-rouge">/etc/sysctl.conf</code></p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">net.ipv4.ip_local_port_range = 18000    65535
 net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1</code></pre></figure>
 
 <h2 id="connection-tracking">Connection Tracking</h2>
 
-<p>The next parameter we looked at was Connection Tracking. This is a side effect of using <code class="highlighter-rouge">iptables</code>. Since <code class="highlighter-rouge">iptables</code> needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.</p>
+<p>The next parameter we looked at was Connection Tracking. This is a side effect of using <code class="language-plaintext highlighter-rouge">iptables</code>. Since <code class="language-plaintext highlighter-rouge">iptables</code> needs to allow two-way communication between established HTTP and ssh connections, it needs to keep track of which connections are established, and it puts these into a connection tracking table. This table grows. And grows. And grows.</p>
 
-<p>You can see the current size of this table using <code class="highlighter-rouge">sysctl net.netfilter.nf_conntrack_count</code> and its limit using <code class="highlighter-rouge">sysctl net.nf_conntrack_max</code>. If count crosses max, your linux system will stop accepting new TCP connections and you’ll never know about this. The only indication that this has happened is a single line hidden somewhere in <code class="highlighter-rouge">/var/log/syslog</code> saying that you’re out of connection tracking entries. One line, once, when it first happens.</p>
+<p>You can see the current size of this table using <code class="language-plaintext highlighter-rouge">sysctl net.netfilter.nf_conntrack_count</code> and its limit using <code class="language-plaintext highlighter-rouge">sysctl net.nf_conntrack_max</code>. If count crosses max, your linux system will stop accepting new TCP connections and you’ll never know about this. The only indication that this has happened is a single line hidden somewhere in <code class="language-plaintext highlighter-rouge">/var/log/syslog</code> saying that you’re out of connection tracking entries. One line, once, when it first happens.</p>
 
 <p>A better indication is if count is always very close to max. You might think, “Hey, we’ve set max exactly right.”, but you’d be wrong.</p>
 
@@ -270,7 +270,7 @@ net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1</code></pre></figure>
 
 <p>This kernel parameter is the size of the backlog of TCP connections waiting to be accepted by the application. If a connection indication arrives when the queue is full, the connection is refused. The default value for this parameters is 128 on most modern operating systems.</p>
 
-<p>Bumping up this limit in <code class="highlighter-rouge">/etc/sysctl.conf</code> helped us get rid of the “connection refused” issues on our Linux machines.</p>
+<p>Bumping up this limit in <code class="language-plaintext highlighter-rouge">/etc/sysctl.conf</code> helped us get rid of the “connection refused” issues on our Linux machines.</p>
 
 <h2 id="jvm-thread-count">JVM thread count</h2>
 
@@ -282,7 +282,7 @@ net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait = 1</code></pre></figure>
 
 <p>The answer, as always, is fun. It’s interesting to discuss how available memory limits the number of threads that can be created on a JVM. The stack size of a thread determines the memory available for static memory allocation. Thus, the absolute theoretical maximum number of threads is a process’s user address space divided by the thread stack size. However, the reality is that the JVM also uses memory for dynamic allocation on the heap. With a few quick tests with a small Java process, we could verify that as more memory is allocated for the heap, less is available for the stack. Thus, the limit on the number of threads decreases with increasing heap size.</p>
 
-<p>To summarize, you can increase the thread count limit by decreasing the stack size per thread <code class="highlighter-rouge">(-Xss)</code> or by decreasing the memory allocated to the heap <code class="highlighter-rouge">(-Xms, -Xmx).</code></p>
+<p>To summarize, you can increase the thread count limit by decreasing the stack size per thread <code class="language-plaintext highlighter-rouge">(-Xss)</code> or by decreasing the memory allocated to the heap <code class="language-plaintext highlighter-rouge">(-Xms, -Xmx).</code></p>
 
 
 			<footer>

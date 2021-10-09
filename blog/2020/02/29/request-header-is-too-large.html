@@ -215,28 +215,28 @@
 
 <p>Interestingly, the occurrence of these errors in the logs were very few but I was seeing lot of failures in our availability dashboards. That’s where I observed this note in the exception:</p>
 
-<p><code class="highlighter-rouge"> Note: further occurrences of HTTP header parsing errors will be logged at DEBUG level.</code></p>
+<p>` Note: further occurrences of HTTP header parsing errors will be logged at DEBUG level.`</p>
 
-<p>The way tomcat works is that for certain type of errors such as above, it will only log the error once with the <code class="highlighter-rouge">INFO</code> level, and then further occurrences are logged only at the <code class="highlighter-rouge">DEBUG</code> level.</p>
+<p>The way tomcat works is that for certain type of errors such as above, it will only log the error once with the <code class="language-plaintext highlighter-rouge">INFO</code> level, and then further occurrences are logged only at the <code class="language-plaintext highlighter-rouge">DEBUG</code> level.</p>
 
 <p>This change in log level is an in memory change and hence is retained until the tomcat is restarted.</p>
 
 <p>You can see that in the source code here on line 1144:<br />
 <a href="https://github.com/apache/tomcat/blob/7.0.x/java/org/apache/coyote/http11/AbstractHttp11Processor.java">https://github.com/apache/tomcat/blob/7.0.x/java/org/apache/coyote/http11/AbstractHttp11Processor.java</a></p>
 
-<p>To get this error log emitted for each event, <code class="highlighter-rouge">DEBUG</code> log needs to be enabled. For this add
-<code class="highlighter-rouge">org.apache.coyote.level = FINE</code>  in <code class="highlighter-rouge">tomcat/conf/logging.properties</code></p>
+<p>To get this error log emitted for each event, <code class="language-plaintext highlighter-rouge">DEBUG</code> log needs to be enabled. For this add
+<code class="language-plaintext highlighter-rouge">org.apache.coyote.level = FINE</code>  in <code class="language-plaintext highlighter-rouge">tomcat/conf/logging.properties</code></p>
 
 <h2 id="why-is-this-problem-caused">Why is this problem caused?</h2>
 
 <p>HTTP specification does not enforce any size limit on the size of headers. However, modern browsers and application servers such as Tomcat enforce this limit. By default 4 KB is the limit on Tomcat, which is more than enough. However, if you are adding lot of headers or using cookies extensively, this limit can be breached.</p>
 
-<p>To solve this, I needed to add <code class="highlighter-rouge">maxHttpHeaderSize</code> in <code class="highlighter-rouge">$TOMCAT_HOME/conf/server.xml</code></p>
+<p>To solve this, I needed to add <code class="language-plaintext highlighter-rouge">maxHttpHeaderSize</code> in <code class="language-plaintext highlighter-rouge">$TOMCAT_HOME/conf/server.xml</code></p>
 
 <div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;Connector</span> <span class="na">port=</span><span class="s">"8080"</span> <span class="na">maxHttpHeaderSize=</span><span class="s">"65536"</span> <span class="na">protocol=</span><span class="s">"HTTP/1.1"</span> <span class="err">...</span> <span class="nt">/&gt;</span>
 </code></pre></div></div>
 
-<p>In case, you are using Spring Boot, add the following in <code class="highlighter-rouge">application.properties</code></p>
+<p>In case, you are using Spring Boot, add the following in <code class="language-plaintext highlighter-rouge">application.properties</code></p>
 
 <div class="language-properties highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">server.max-http-header-size</span><span class="p">=</span><span class="s">65536 </span>
 </code></pre></div></div>

@@ -230,7 +230,7 @@ at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144) [Raw rea
 
 <p>This is one of the peculiar problem which happens with Java 7, due to the mismatch of ciphers between Java 7 and the destination webserver.</p>
 
-<p>In order to debug this in Java, we need to add the parameter <code class="highlighter-rouge">-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p>
+<p>In order to debug this in Java, we need to add the parameter <code class="language-plaintext highlighter-rouge">-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p>
 
 <figure class="highlight"><pre><code class="language-text" data-lang="text">main, READ: TLSv1.2 Handshake, length = 333
 *** ECDH ServerKeyExchange
@@ -318,19 +318,19 @@ verify_data:  { 23, 158, 68, 25, 66, 210, 127, 41, 116, 127, 102, 168 }
 
 <p>If that is the case, this is easy to fix in Java by adding following command line parameters</p>
 
-<p><code class="highlighter-rouge">JAVACMD="$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\
+<p><code class="language-plaintext highlighter-rouge">JAVACMD="$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\
 deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true"</code></p>
 
 <p>or even this</p>
 
-<p><code class="highlighter-rouge">-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p>
+<p><code class="language-plaintext highlighter-rouge">-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p>
 
 <p>However, some of the webservers can force the clients to use very strong ciphers which are not available in Java 7. They are only available in Java 8.</p>
 
 <p>The list of ciphers supported by SSL site can be found through 
 <a href="https://www.ssllabs.com/index.html">https://www.ssllabs.com/index.html</a></p>
 
-<p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html and replace the two JARs (<code class="highlighter-rouge">local_policy.jar, US_export_policy.jar</code>) under your JRE’s <code class="highlighter-rouge">lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p>
+<p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html and replace the two JARs (<code class="language-plaintext highlighter-rouge">local_policy.jar, US_export_policy.jar</code>) under your JRE’s <code class="language-plaintext highlighter-rouge">lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p>
 
 <p>For reference, here are the ciphersuites available in Java 7 (1.7.0_79):</p>
 

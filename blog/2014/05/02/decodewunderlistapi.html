@@ -206,17 +206,17 @@ use <a href="http://backbonejs.org/">backbone.js</a> along with <a href="http://
 <p><img src="/images/Blog/screenshot.1.png" alt="" /></p>
 
 <p>Now, lets head over to the browser to inspect the HTTPS traffic and see if we can get some information about their API. What I am going to do is login to Wunderlist website with my credentials and record the 
-HTTPS traffic in the Chrome inspector. I have also turned on the button for <code class="highlighter-rouge">Preserve log upon Navigation</code></p>
+HTTPS traffic in the Chrome inspector. I have also turned on the button for <code class="language-plaintext highlighter-rouge">Preserve log upon Navigation</code></p>
 
 <p><img src="/images/Blog/screenshot.2.png" alt="" />
 <img src="/images/Blog/screenshot.3.png" alt="" /></p>
 
-<p>If we filter by requests of type XML HTTP Request(XHR), we will see a <code class="highlighter-rouge">POST</code> request <code class="highlighter-rouge">/login</code> to the host <code class="highlighter-rouge">api.wunderlist.com</code>. In the request payload, I also see my username and password in cleartext. Although
+<p>If we filter by requests of type XML HTTP Request(XHR), we will see a <code class="language-plaintext highlighter-rouge">POST</code> request <code class="language-plaintext highlighter-rouge">/login</code> to the host <code class="language-plaintext highlighter-rouge">api.wunderlist.com</code>. In the request payload, I also see my username and password in cleartext. Although
 I do not have anything to worry since this is transmitted over SSL</p>
 
 <p><img src="/images/Blog/screenshot.4.png" alt="" /></p>
 
-<p>If we just scroll few lines down, I see another request <code class="highlighter-rouge">/batch</code> to <code class="highlighter-rouge">api.wunderlist.com</code> with this JSON payload and the response is a considerable JSON response. I could the names of lists and tasks in the JSON response.</p>
+<p>If we just scroll few lines down, I see another request <code class="language-plaintext highlighter-rouge">/batch</code> to <code class="language-plaintext highlighter-rouge">api.wunderlist.com</code> with this JSON payload and the response is a considerable JSON response. I could the names of lists and tasks in the JSON response.</p>
 
 <p><img src="/images/Blog/screenshot.5.png" alt="" /></p>
 
@@ -233,11 +233,11 @@ I do not have anything to worry since this is transmitted over SSL</p>
 </span><span class="p">{</span><span class="nl">"method"</span><span class="p">:</span><span class="s2">"get"</span><span class="p">,</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"/me/quota"</span><span class="p">,</span><span class="nl">"params"</span><span class="p">:{}}],</span><span class="w">
 </span><span class="nl">"sequential"</span><span class="p">:</span><span class="kc">true</span><span class="p">}</span></code></pre></figure>
 
-<p>Great, it seems that we have just discovered a bunch of REST API calls. These are batched together in single HTTP request for optimization. We also know the method <code class="highlighter-rouge">GET</code> or <code class="highlighter-rouge">POST</code> of these requests and also the parameters some of them. The next step is to take this request individually and test it one by one. But how do we do it?</p>
+<p>Great, it seems that we have just discovered a bunch of REST API calls. These are batched together in single HTTP request for optimization. We also know the method <code class="language-plaintext highlighter-rouge">GET</code> or <code class="language-plaintext highlighter-rouge">POST</code> of these requests and also the parameters some of them. The next step is to take this request individually and test it one by one. But how do we do it?</p>
 
 <p>For this purpose, I am using an excellent Chrome extension called <a href="https://chrome.google.com/webstore/detail/dev-http-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en">Dev HTTP Client</a></p>
 
-<p>First, lets authenticate ourselves using the <code class="highlighter-rouge">/login</code> API. This will be a post request containing the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> for the Wunderlist.</p>
+<p>First, lets authenticate ourselves using the <code class="language-plaintext highlighter-rouge">/login</code> API. This will be a post request containing the <code class="language-plaintext highlighter-rouge">username</code> and <code class="language-plaintext highlighter-rouge">password</code> for the Wunderlist.</p>
 
 <p><a href="/images/Blog/screenshot.7.png"><img src="/images/Blog/screenshot.7.png" alt="" /></a></p>
 
@@ -298,7 +298,7 @@ I do not have anything to worry since this is transmitted over SSL</p>
 </span><span class="nl">"web_uuid"</span><span class="p">:</span><span class="s2">"d45186f5-0699-4986-906d-c6ad3f88c180"</span><span class="w">
 </span><span class="p">}</span></code></pre></figure>
 
-<p>This piece of information is very important for us in JSON response: <code class="highlighter-rouge">token:8758a4a0f983177a427a879a30b144d92bc2f01e</code>. This is the token which we need to send in 
+<p>This piece of information is very important for us in JSON response: <code class="language-plaintext highlighter-rouge">token:8758a4a0f983177a427a879a30b144d92bc2f01e</code>. This is the token which we need to send in 
 any of the other REST API requests otherwise you will get this error in response:</p>
 
 <figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
@@ -309,7 +309,7 @@ any of the other REST API requests otherwise you will get this error in response
 	</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span></code></pre></figure>
 
-<p>Let’s try to retrieve the lists using the <code class="highlighter-rouge">/lists</code> API and the token:</p>
+<p>Let’s try to retrieve the lists using the <code class="language-plaintext highlighter-rouge">/lists</code> API and the token:</p>
 
 <p><a href="/images/Blog/screenshot.8.png"><img src="/images/Blog/screenshot.8.png" alt="" /></a></p>
 
@@ -338,22 +338,22 @@ any of the other REST API requests otherwise you will get this error in response
 
 <p>Using a similar approach, we can invoke the following REST API’s and get their responses in JSON:</p>
 
-<p><code class="highlighter-rouge">/me/settings</code><br />
-<code class="highlighter-rouge">/me</code><br />
-<code class="highlighter-rouge">/me/contacts</code><br />
-<code class="highlighter-rouge">/me/services</code><br />
-<code class="highlighter-rouge">/me/lists</code><br />
-<code class="highlighter-rouge">/me/tasks</code><br />
-<code class="highlighter-rouge">/me/reminders</code><br />
-<code class="highlighter-rouge">/me/shares</code><br />
-<code class="highlighter-rouge">/me/events</code><br />
-<code class="highlighter-rouge">/me/quota</code></p>
+<p><code class="language-plaintext highlighter-rouge">/me/settings</code><br />
+<code class="language-plaintext highlighter-rouge">/me</code><br />
+<code class="language-plaintext highlighter-rouge">/me/contacts</code><br />
+<code class="language-plaintext highlighter-rouge">/me/services</code><br />
+<code class="language-plaintext highlighter-rouge">/me/lists</code><br />
+<code class="language-plaintext highlighter-rouge">/me/tasks</code><br />
+<code class="language-plaintext highlighter-rouge">/me/reminders</code><br />
+<code class="language-plaintext highlighter-rouge">/me/shares</code><br />
+<code class="language-plaintext highlighter-rouge">/me/events</code><br />
+<code class="language-plaintext highlighter-rouge">/me/quota</code></p>
 
 <h2 id="a-note-about-authentication">A note about authentication</h2>
 
 <p>At this moment, there is no OAuth implementation for the authorization on this API and probably this is the reason the API is not public yet.
-This means, the token we recieve in response <code class="highlighter-rouge">/login</code> call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,
-it is sufficient to assume that we need to re-authenticate using the <code class="highlighter-rouge">username</code> and <code class="highlighter-rouge">password</code> once the token expires.</p>
+This means, the token we recieve in response <code class="language-plaintext highlighter-rouge">/login</code> call will have some expiry date attached to it. Hence, if we plan to build some functionality based on this information,
+it is sufficient to assume that we need to re-authenticate using the <code class="language-plaintext highlighter-rouge">username</code> and <code class="language-plaintext highlighter-rouge">password</code> once the token expires.</p>
 
 <p>In the part II of this blog post, I am going to share a partial implementation of this API in java using <a href="http://square.github.io/retrofit/">Retrofit</a></p>
 

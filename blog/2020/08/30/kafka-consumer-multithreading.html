@@ -234,7 +234,7 @@ management becomes very tricky in this case.</p>
 achieved using Spring Kafka as shown below.</p>
 
 <p>It’s very easy to configure spring to spawn multiple threads to connect to
-Kafka. Let’s see how the behavior differs. We have a single topic <code class="highlighter-rouge">test-topic</code>
+Kafka. Let’s see how the behavior differs. We have a single topic <code class="language-plaintext highlighter-rouge">test-topic</code>
 with 10 partitions and a single VM running spring application with single
 concurrency.</p>
 
@@ -274,10 +274,10 @@ spring kafka listener</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>We are using consumer group <code class="highlighter-rouge">spring-group</code> to listen to this partition.
+<p>We are using consumer group <code class="language-plaintext highlighter-rouge">spring-group</code> to listen to this partition.
 Following is the behavior with single concurrency:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
 spring-group    test-topic      8          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
 spring-group    test-topic      2          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
 spring-group    test-topic      1          consumer-1-01a5779b-940b-44cf-b8c6-2e414aa38eb1 /172.22.0.1     consumer-1
@@ -296,7 +296,7 @@ connected to all the partitions.</p>
 
 <p>Now, let’s see the output, when concurrency is increased to 2,</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
 spring-group    test-topic      8          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
 spring-group    test-topic      5          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
 spring-group    test-topic      6          consumer-2-8ab0213d-683c-4f92-b3c8-767701905994 /172.22.0.1     consumer-2
@@ -317,8 +317,8 @@ partitions equally among the threads belonging to same consumer group. If we
 spawn, 10 concurrency, we will have a dedicated thread for each partition.</p>
 
 <p>It’s interesting to study this behavior when there are multiple topics to
-consumer from. So now, let’s create two more topics, <code class="highlighter-rouge">test-topic2</code> and
-<code class="highlighter-rouge">test-topic3</code> with 10 partitions each.</p>
+consumer from. So now, let’s create two more topics, <code class="language-plaintext highlighter-rouge">test-topic2</code> and
+<code class="language-plaintext highlighter-rouge">test-topic3</code> with 10 partitions each.</p>
 
 <p>This has an interesting behaviour the way consumers are written within spring.</p>
 
@@ -332,7 +332,7 @@ consumer from. So now, let’s create two more topics, <code class="highlighter-
 
 <p>We get a single thread listening from all the 30 partitions of 3 topics combined</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
 spring-group    test-topic3     7          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
 spring-group    test-topic3     0          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
 spring-group    test-topic      2          consumer-1-51ce4005-ce57-472f-bfe4-4419e1fb8d43 /172.22.0.1     consumer-1
@@ -386,7 +386,7 @@ spring-group    test-topic3     9          consumer-1-51ce4005-ce57-472f-bfe4-44
 <p>Spring will automatically spawn a thread for each listener even though we have
 provided the concurrency as one</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GROUP           TOPIC           PARTITION  CONSUMER-ID                                     HOST            CLIENT-ID
 spring-group    test-topic3     6          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
 spring-group    test-topic3     7          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
 spring-group    test-topic3     0          consumer-1-edd9ef42-6a06-4289-925b-f97cb489e8c7 /172.22.0.1     consumer-1
@@ -423,9 +423,9 @@ spring-group    test-topic      0          consumer-2-18796186-831a-468a-b3c4-b3
 applications to consume the heavy traffic from the topics without any lag.</p>
 
 <p>So what we understand is that the method
-<a href="https://docs.spring.io/spring-kafka/api/org/springframework/kafka/listener/ConcurrentMessageListenerContainer.html#setConcurrency-int-"><code class="highlighter-rouge">setConcurrency</code></a>
+<a href="https://docs.spring.io/spring-kafka/api/org/springframework/kafka/listener/ConcurrentMessageListenerContainer.html#setConcurrency-int-"><code class="language-plaintext highlighter-rouge">setConcurrency</code></a>
 is per instance of
-<a href="https://docs.spring.io/spring-kafka/api/org/springframework/kafka/config/KafkaListenerContainerFactory.html"><code class="highlighter-rouge">KafkaListener</code></a></p>
+<a href="https://docs.spring.io/spring-kafka/api/org/springframework/kafka/config/KafkaListenerContainerFactory.html"><code class="language-plaintext highlighter-rouge">KafkaListener</code></a></p>
 
 <p>It is also important to understand that there is no point creating more threads
 than there are number of partitions as those will be left idle.</p>

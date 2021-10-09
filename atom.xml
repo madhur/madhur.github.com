@@ -3,13 +3,37 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-08-20T21:57:25+05:30</updated>
+ <updated>2021-10-09T13:57:19+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>zsh Autocomplete</title>
+   <link href="https://madhur.co.in/blog/2021/10/09/zsh-autocomplete.html"/>
+   <updated>2021-10-09T00:00:00+05:30</updated>
+   <id>id:/blog/2021/10/09/zsh-autocomplete</id>
+   <content type="html">&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;zsh&lt;/code&gt; shell by default does not come with auto suggestions facility unlike fish shell.&lt;/p&gt;
+
+&lt;p&gt;If you are looking for auto suggestions similar to fish, have a look at https://github.com/zsh-users/zsh-autosuggestions&lt;/p&gt;
+
+&lt;p&gt;For MAC OS, following steps are required to install&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.zshrc&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;plugins=( 
+    # other plugins...
+    zsh-autosuggestions
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Designing Change Data Capture</title>
@@ -101,7 +125,7 @@
 
 &lt;p&gt;An important point to be noted is&lt;/p&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt; Liveness probes do not wait for readiness probes to succeed. If you want to wait before executing a liveness probe you should use initialDelaySeconds or a startupProbe.&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;` Liveness probes do not wait for readiness probes to succeed. If you want to wait before executing a liveness probe you should use initialDelaySeconds or a startupProbe.`&lt;/p&gt;
 
 &lt;p&gt;Which means that liveness probe and readiness probes have no dependency on each other. Some people assume that liveness probe start only after readiness probe is successful. This is misconception and is incorrect.&lt;/p&gt;
 
@@ -148,9 +172,9 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &lt;p&gt;As the name suggests, At-most-once means the message will be delivered at-most once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically committing the last offset used.&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to true&lt;/li&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
-  &lt;li&gt;Since &lt;code class=&quot;highlighter-rouge&quot;&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
+  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to true&lt;/li&gt;
+  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
+  &lt;li&gt;Since &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Note that it is also possible to have at-lest-once scenario with the same configuration. Let’s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.&lt;/p&gt;
@@ -161,8 +185,8 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &lt;p&gt;At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt; OR&lt;/li&gt;
-  &lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
+  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;false&lt;/code&gt; OR&lt;/li&gt;
+  &lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Let’s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.&lt;/p&gt;
@@ -174,9 +198,9 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &lt;p&gt;In this case offset needs to be manually managed.&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to false&lt;/li&gt;
-  &lt;li&gt;Do not make call to &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Implement a &lt;code class=&quot;highlighter-rouge&quot;&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code class=&quot;highlighter-rouge&quot;&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
+  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to false&lt;/li&gt;
+  &lt;li&gt;Do not make call to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Implement a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
   &lt;li&gt;While processing the messages, get hold of the offset of each message. Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
 &lt;/ul&gt;
 </content>
@@ -193,7 +217,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 
 &lt;p&gt;Figured out that it was indeed a browser redirect using 301 status code.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ curl https://tinyurl.com/madhur25 -vvv
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ curl https://tinyurl.com/madhur25 -vvv
 * STATE: INIT =&amp;gt; CONNECT handle 0x600057310; line 1407 (connection #-5000)
 * Added connection 0. The cache now contains 1 members
 *   Trying 104.20.138.65...
@@ -225,7 +249,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 *  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
 *  start date: Jul  3 00:00:00 2021 GMT
 *  expire date: Jul  2 23:59:59 2022 GMT
-*  subjectAltName: host &quot;tinyurl.com&quot; matched cert's &quot;tinyurl.com&quot;
+*  subjectAltName: host &quot;tinyurl.com&quot; matched cert&apos;s &quot;tinyurl.com&quot;
 *  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
 *  SSL certificate verify ok.
 * STATE: PROTOCONNECT =&amp;gt; DO handle 0x600057310; line 1602 (connection #0)
@@ -238,39 +262,39 @@ For example, in our case pod takes around 15 seconds in all different environmen
 * STATE: DO_DONE =&amp;gt; WAITPERFORM handle 0x600057310; line 1791 (connection #0)
 * STATE: WAITPERFORM =&amp;gt; PERFORM handle 0x600057310; line 1801 (connection #0)
 * HTTP 1.1 or later with persistent connection, pipelining supported
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;301&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Moved&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Permanently&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Date:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Sun&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;11&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Jul&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;2021&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;04:11:01&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;GMT&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Content-Type:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;charset=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;UTF-8&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Transfer-Encoding:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;chunked&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Connection:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;keep-alive&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;X-Powered-By:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;PHP&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;28&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Location:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;https:&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;www&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;madhur&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;co&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;/&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Cache-Control:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;0,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;public&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;s-max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;900,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;stale-if-error:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;86400&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Referrer-Policy:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;unsafe-url&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Strict-Transport-Security:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;31536000;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;includeSubDomains&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;preload&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;CF-Cache-Status:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;DYNAMIC&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Expect-CT:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;max-age=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;604800,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;report-uri=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Server&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cloudflare&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;blacklisted&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Server:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cloudflare&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;CF-RAY:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;66cf2f6e7e293c13-BLR&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alt-svc:&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-27=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-28=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3-29=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;h3=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;:443&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;ma=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;86400&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;&lt;/span&gt;
-&lt;span class=&quot;err&quot;&gt;&amp;lt;!&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;DOCTYPE&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;html&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;head&amp;gt;&lt;/span&gt;
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;charset=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;UTF-8&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;meta&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;http-equiv=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;refresh&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;content=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0;url='https://www.madhur.co.in/'&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&amp;lt; HTTP/1.1 301 Moved Permanently
+&amp;lt; Date: Sun, 11 Jul 2021 04:11:01 GMT
+&amp;lt; Content-Type: text/html; charset=UTF-8
+&amp;lt; Transfer-Encoding: chunked
+&amp;lt; Connection: keep-alive
+&amp;lt; X-Powered-By: PHP/7.3.28
+&amp;lt; Location: https://www.madhur.co.in/
+&amp;lt; Cache-Control: max-age=0, public, s-max-age=900, stale-if-error: 86400
+&amp;lt; Referrer-Policy: unsafe-url
+&amp;lt; Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+&amp;lt; CF-Cache-Status: DYNAMIC
+&amp;lt; Expect-CT: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;
+* Server cloudflare is not blacklisted
+&amp;lt; Server: cloudflare
+&amp;lt; CF-RAY: 66cf2f6e7e293c13-BLR
+&amp;lt; alt-svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400, h3=&quot;:443&quot;; ma=86400
+&amp;lt;
+&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+    &amp;lt;head&amp;gt;
+        &amp;lt;meta charset=&quot;UTF-8&quot; /&amp;gt;
+        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&apos;https://www.madhur.co.in/&apos;&quot; /&amp;gt;
 
-        &lt;span class=&quot;nt&quot;&gt;&amp;lt;title&amp;gt;&lt;/span&gt;Redirecting to https://www.madhur.co.in/&lt;span class=&quot;nt&quot;&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
-        Redirecting to &lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://www.madhur.co.in/&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;https://www.madhur.co.in/&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;.
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+        &amp;lt;title&amp;gt;Redirecting to https://www.madhur.co.in/&amp;lt;/title&amp;gt;
+    &amp;lt;/head&amp;gt;
+    &amp;lt;body&amp;gt;
+        Redirecting to &amp;lt;a href=&quot;https://www.madhur.co.in/&quot;&amp;gt;https://www.madhur.co.in/&amp;lt;/a&amp;gt;.
+    &amp;lt;/body&amp;gt;
 * STATE: PERFORM =&amp;gt; DONE handle 0x600057310; line 1965 (connection #0)
 * multi_done
 * Curl_http_done: called premature == 0
 * Connection #0 to host tinyurl.com left intact
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&amp;lt;/html&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -550,7 +574,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;The requriement was to retrieve all the recods which has the phase &lt;code class=&quot;highlighter-rouge&quot;&gt;query.slots&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;elapsedTime&lt;/code&gt; is greater than some specified value, for example 1000 ms.&lt;/p&gt;
+&lt;p&gt;The requriement was to retrieve all the recods which has the phase &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;query.slots&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;elapsedTime&lt;/code&gt; is greater than some specified value, for example 1000 ms.&lt;/p&gt;
 
 &lt;p&gt;The query required unearthing some commands which I was unfamiliar with:&lt;/p&gt;
 
@@ -561,7 +585,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;p&gt;Here is the final query&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -575,22 +599,22 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;h2 id=&quot;login-into-the-one-of-the-pods-shell&quot;&gt;Login into the one of the pod’s shell&lt;/h2&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl exec --stdin --tty &amp;lt;&amp;lt;pod&amp;gt;&amp;gt; -- /bin/bash
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl exec --stdin --tty &amp;lt;&amp;lt;pod&amp;gt;&amp;gt; -- /bin/bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;view-services-from-all-namespaces&quot;&gt;View services from all namespaces&lt;/h2&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl get service --all-namespaces
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl get service --all-namespaces
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;change-the-current-namespace-context&quot;&gt;Change the current namespace context&lt;/h2&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl config set-context --current --namespace = &amp;lt;&amp;lt;namespace&amp;gt;&amp;gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl config set-context --current --namespace = &amp;lt;&amp;lt;namespace&amp;gt;&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;describe-a-pod&quot;&gt;Describe a pod&lt;/h2&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl describe &amp;lt;&amp;lt;pod&amp;gt;&amp;gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl describe &amp;lt;&amp;lt;pod&amp;gt;&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 </content>
@@ -628,7 +652,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 &lt;p&gt;In this case, there are two approaches to solve it:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Try to record this failed update status in DB and let a job scheduler pickup these kinds of records and do a refund to user. The FE error should indicate to the user that &lt;code class=&quot;highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Try to record this failed update status in DB and let a job scheduler pickup these kinds of records and do a refund to user. The FE error should indicate to the user that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;The problem with this approach is that since the database was unavailable intermittently, this database status update also is going to result in a failure in most probability.&lt;/p&gt;
@@ -640,7 +664,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow3.png&quot; /&gt;&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;One of the other solution is to make the operation 10. itself asynchronous. i.e. instead of the waiting for the response, the request will be queued by PaymentService and executed later. However, in this case, the user will always needs to be shown the message &lt;code class=&quot;highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;One of the other solution is to make the operation 10. itself asynchronous. i.e. instead of the waiting for the response, the request will be queued by PaymentService and executed later. However, in this case, the user will always needs to be shown the message &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow4.png&quot; /&gt;&lt;/p&gt;
@@ -663,7 +687,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;p&gt;One of the ways to solve it is to add the blur around the image.&lt;/p&gt;
 
-&lt;p&gt;This is how it can be done using the &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/CSS/::after&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;::after&lt;/code&gt;&lt;/a&gt; and &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/CSS/::before&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;::before&lt;/code&gt;&lt;/a&gt; CSS techniques.&lt;/p&gt;
+&lt;p&gt;This is how it can be done using the &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/CSS/::after&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;::after&lt;/code&gt;&lt;/a&gt; and &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/CSS/::before&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;::before&lt;/code&gt;&lt;/a&gt; CSS techniques.&lt;/p&gt;
 
 &lt;style&gt;
 .card-crop:before, .card-crop::after {
@@ -704,7 +728,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 }
 &lt;/style&gt;
 
-&lt;div class=&quot;card-crop inline-block&quot; style=&quot;background-image: url('/images/Blog/car.jpg'); height: 225px; width: 300px; display: flex; flex-direction: column; position:relative&quot;&gt;
+&lt;div class=&quot;card-crop inline-block&quot; style=&quot;background-image: url(&apos;/images/Blog/car.jpg&apos;); height: 225px; width: 300px; display: flex; flex-direction: column; position:relative&quot;&gt;
 &lt;/div&gt;
 
 &lt;p&gt;This is the end result&lt;/p&gt;
@@ -751,7 +775,7 @@ topics where multiple records will exist for same row.&lt;/p&gt;
   &lt;span class=&quot;nl&quot;&gt;position&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;absolute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&quot;card-crop inline-block&quot;&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&quot;background-image: url('/images/Blog/car.jpg'); height: 225px; width: 300px; display: flex; flex-direction: column; position:relative&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&quot;card-crop inline-block&quot;&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&quot;background-image: url(&apos;/images/Blog/car.jpg&apos;); height: 225px; width: 300px; display: flex; flex-direction: column; position:relative&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;&amp;lt;/&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
@@ -769,39 +793,6 @@ topics where multiple records will exist for same row.&lt;/p&gt;
   &lt;li&gt;&lt;a href=&quot;https://swimlane.github.io/ngx-charts/#/ngx-charts/bar-vertical&quot;&gt;NgxCharts&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;https://ng-bootstrap.github.io/#/home&quot;&gt;Ng Bootstrap&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>HashMap with TTL</title>
-   <link href="https://madhur.co.in/blog/2021/02/27/hashmap-with-ttl.html"/>
-   <updated>2021-02-27T00:00:00+05:30</updated>
-   <id>id:/blog/2021/02/27/hashmap-with-ttl</id>
-   <content type="html">&lt;p&gt;We were working on a proof of concept and for that I quickly needed a HashMap with a Time to Live (TTL). Basically, I wanted the keys to expire automatically after a certain time period.&lt;/p&gt;
-
-&lt;p&gt;Fortunatly, &lt;a href=&quot;https://github.com/google/guava&quot;&gt;Google Guava&lt;/a&gt; provides this out of the box in form of &lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/LoadingCache.html&quot;&gt;LoadingCache&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Here is how you would initialize it,&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LoadingCache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;newBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;maximumSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;MAX_VALUE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;expireAfterWrite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeUnit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;MINUTES&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheLoader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-                &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-                &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You can specify the maximum size of cache, after which the entries will be automatically evicted according to Least Recently Used (LRU) algorithm.&lt;/p&gt;
-
-&lt;p&gt;The TTL can be specified using &lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#expireAfterWrite(long,%20java.util.concurrent.TimeUnit)&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;expireAfterWrite&lt;/code&gt;&lt;/a&gt; method.&lt;/p&gt;
-
-&lt;p&gt;Note that when using this implementation, do not rely on the &lt;code class=&quot;highlighter-rouge&quot;&gt;size()&lt;/code&gt; property of the map since that might contain the expired entries as well. However, they will not be retrievable using the &lt;code class=&quot;highlighter-rouge&quot;&gt;get&lt;/code&gt; method.&lt;/p&gt;
-
-&lt;p&gt;The expired entires are removed after a certain time duration using a routine maintainence job.&lt;/p&gt;
-
 </content>
  </entry>
  

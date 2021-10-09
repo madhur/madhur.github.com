@@ -230,9 +230,9 @@ What are the advatages:</p>
   <li><a href="http://www.linuxmint.com/download.php">http://www.linuxmint.com/download.php</a></li>
 </ul>
 
-<p>Place it in any directory in your root partition. In my case I dropped them in  <code class="highlighter-rouge">~/isos/</code> as <code class="highlighter-rouge">kali.iso</code>, <code class="highlighter-rouge">mint17.iso</code> and <code class="highlighter-rouge">gparted-live.iso</code></p>
+<p>Place it in any directory in your root partition. In my case I dropped them in  <code class="language-plaintext highlighter-rouge">~/isos/</code> as <code class="language-plaintext highlighter-rouge">kali.iso</code>, <code class="language-plaintext highlighter-rouge">mint17.iso</code> and <code class="language-plaintext highlighter-rouge">gparted-live.iso</code></p>
 
-<p>Now, edit your grub configuration to add the custom entries. The file we are looking to edit is <code class="highlighter-rouge">/etc/grub.d/40_custom</code></p>
+<p>Now, edit your grub configuration to add the custom entries. The file we are looking to edit is <code class="language-plaintext highlighter-rouge">/etc/grub.d/40_custom</code></p>
 
 <p>Here is my configuration:</p>
 
@@ -273,22 +273,22 @@ menuentry "Kali" {
 <p>Some of the parameters deserve explanation:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">insmod ntfs</code> and <code class="highlighter-rouge">insmod iso9660</code> load the ntfs and iso kernel modules if they are not loaded</li>
-  <li><code class="highlighter-rouge">debug --verbose</code> will disable the splash screen and show the textual boot screen while loading. This can be helpful to see if something goes wrong.</li>
-  <li><code class="highlighter-rouge">nomodeset</code> will defer loading the Video drivers and will force fallback to BIOS for display. You might not need it. However, it was required in my case as my 
+  <li><code class="language-plaintext highlighter-rouge">insmod ntfs</code> and <code class="language-plaintext highlighter-rouge">insmod iso9660</code> load the ntfs and iso kernel modules if they are not loaded</li>
+  <li><code class="language-plaintext highlighter-rouge">debug --verbose</code> will disable the splash screen and show the textual boot screen while loading. This can be helpful to see if something goes wrong.</li>
+  <li><code class="language-plaintext highlighter-rouge">nomodeset</code> will defer loading the Video drivers and will force fallback to BIOS for display. You might not need it. However, it was required in my case as my 
  graphics card (Nvidia GeForce 750 Ti) was not detected.</li>
-  <li><code class="highlighter-rouge">(hd0, msdos2)</code> this needs to be changed to reflect the disk# and partition# of partition where ISO’s are located. Here <code class="highlighter-rouge">hd0</code> means the first hard disk and <code class="highlighter-rouge">msdos2</code> means second partition. Note that in grub disk numbering  starts from zero while partition numbering starts from 1. Weird.</li>
+  <li><code class="language-plaintext highlighter-rouge">(hd0, msdos2)</code> this needs to be changed to reflect the disk# and partition# of partition where ISO’s are located. Here <code class="language-plaintext highlighter-rouge">hd0</code> means the first hard disk and <code class="language-plaintext highlighter-rouge">msdos2</code> means second partition. Note that in grub disk numbering  starts from zero while partition numbering starts from 1. Weird.</li>
 </ul>
 
-<p>Once done with all the changes, fire <code class="highlighter-rouge">sudo update-grub</code> to update your <code class="highlighter-rouge">grub.cfg</code> with these changes.</p>
+<p>Once done with all the changes, fire <code class="language-plaintext highlighter-rouge">sudo update-grub</code> to update your <code class="language-plaintext highlighter-rouge">grub.cfg</code> with these changes.</p>
 
 <h3 id="troubleshooting">Troubleshooting</h3>
 <ul>
   <li>Note that you might not just get this right in first go. Things can go wrong and be prepared for it.</li>
-  <li>Take special care of <code class="highlighter-rouge">(hd0, msdos2)</code> to determine your correct configuration. It is not easy as /dev/sda1=(hd0, 1) and /dev/sdb1 = (hd1, 1). In my case /dev/sdc referred to hd0. Had hard time figuring out.</li>
-  <li>While booting from grub, you can press <code class="highlighter-rouge">e</code> to edit the command line on the fly and try out various options wuch as commenting out <code class="highlighter-rouge">nomodeset</code> and different combinations for <code class="highlighter-rouge">(hd#, msdos#)</code>. Once you have figured out the correct option, update the <code class="highlighter-rouge">40_custom</code> and execute <code class="highlighter-rouge">update-grub</code> again.</li>
-  <li>You can also press <code class="highlighter-rouge">c</code> on the grub screen to fall into grub terminal and execute command such as <code class="highlighter-rouge">ls (hd0, msdos2) /</code> to see if that works.</li>
-  <li>Different distros have their specific command line options. Peek into the ISO file to look at <code class="highlighter-rouge">grub.cfg</code> or <code class="highlighter-rouge">entries.cfg</code> to determine the corrent command line boot options.</li>
+  <li>Take special care of <code class="language-plaintext highlighter-rouge">(hd0, msdos2)</code> to determine your correct configuration. It is not easy as /dev/sda1=(hd0, 1) and /dev/sdb1 = (hd1, 1). In my case /dev/sdc referred to hd0. Had hard time figuring out.</li>
+  <li>While booting from grub, you can press <code class="language-plaintext highlighter-rouge">e</code> to edit the command line on the fly and try out various options wuch as commenting out <code class="language-plaintext highlighter-rouge">nomodeset</code> and different combinations for <code class="language-plaintext highlighter-rouge">(hd#, msdos#)</code>. Once you have figured out the correct option, update the <code class="language-plaintext highlighter-rouge">40_custom</code> and execute <code class="language-plaintext highlighter-rouge">update-grub</code> again.</li>
+  <li>You can also press <code class="language-plaintext highlighter-rouge">c</code> on the grub screen to fall into grub terminal and execute command such as <code class="language-plaintext highlighter-rouge">ls (hd0, msdos2) /</code> to see if that works.</li>
+  <li>Different distros have their specific command line options. Peek into the ISO file to look at <code class="language-plaintext highlighter-rouge">grub.cfg</code> or <code class="language-plaintext highlighter-rouge">entries.cfg</code> to determine the corrent command line boot options.</li>
 </ul>
 
 
