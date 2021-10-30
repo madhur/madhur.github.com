@@ -3,13 +3,72 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-10-23T17:39:44+05:30</updated>
+ <updated>2021-10-30T13:40:31+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Backup and Restore specific cassandra tables</title>
+   <link href="https://madhur.co.in/blog/2021/10/30/backup-and-restore-specific-cassandra-tables.html"/>
+   <updated>2021-10-30T00:00:00+05:30</updated>
+   <id>id:/blog/2021/10/30/backup-and-restore-specific-cassandra-tables</id>
+   <content type="html">&lt;p&gt;Recently, we had to make alterations directly to production cassandra tables due to an urgent bug fix and required to backup and restore specific cassandra tables so that we could roll back incase something gone wrong.&lt;/p&gt;
+
+&lt;p&gt;Backup and restoring tables is seamless using &lt;a href=&quot;https://cassandra.apache.org/doc/latest/cassandra/tools/nodetool/nodetool.html&quot;&gt;nodetool&lt;/a&gt; and &lt;a href=&quot;https://cassandra.apache.org/doc/latest/cassandra/tools/sstable/sstableloader.html&quot;&gt;sstableloader&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;cassandra-table-backup-steps&quot;&gt;Cassandra table backup steps&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Login to Casandra Box&lt;/li&gt;
+  &lt;li&gt;Execute the following commands from the cassandra bin directory&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;   ./nodetool snapshot -cf &amp;lt;tablename&amp;gt; &amp;lt;keyspace&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Repeat the same for any other table to be backed up&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;This will create snapshots in the data directory at following locations:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cassandra/data/data/&amp;lt;keyspace&amp;gt;/&amp;lt;table&amp;gt;-&amp;lt;UID&amp;gt;/snapshots/&amp;lt;epoch&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;cassandra-table-restore-steps&quot;&gt;Cassandra table restore steps&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Login to cassandra box&lt;/li&gt;
+  &lt;li&gt;Navigate to following folder&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cassandra/data/data/f&amp;lt;keyspace&amp;gt;/&amp;lt;table&amp;gt;-&amp;lt;UID&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Execute following command&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cp snapshots/&amp;lt;epoch&amp;gt;/*.* .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Repeat the same for any other table to be restored&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Once all the snapshots have been copied to data directory, run following commands in sequence:&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  ./nodetool refresh &amp;lt;keyspace&amp;gt; &amp;lt;table&amp;gt;;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Using sshpass to skip entering passwords for SSH</title>
@@ -722,58 +781,6 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kubectl describe &amp;lt;&amp;lt;pod&amp;gt;&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Handling Distributed transactions rollback</title>
-   <link href="https://madhur.co.in/blog/2021/05/16/handling-distributed-transactions-rollback.html"/>
-   <updated>2021-05-16T00:00:00+05:30</updated>
-   <id>id:/blog/2021/05/16/handling-distributed-transactions-rollback</id>
-   <content type="html">&lt;p&gt;Distributed transactions rollback are a tough beast. There are many patterns to solve this such as:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Two-phase_commit_protocol&quot;&gt;Two-phase commit&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://microservices.io/patterns/data/saga.html&quot;&gt;Saga pattern&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In this post, we will look at one of the example of a problem and how to solve it using the Saga pattern.&lt;/p&gt;
-
-&lt;p&gt;Let’s say, we are an e-commerce platform and building a backend service for taking and submitting orders.&lt;/p&gt;
-
-&lt;p&gt;A typical flow would like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow1.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, Just assume, what would happen if an intermittent database failure is to happen during operation no. 8, i.e. while updating the order details to database. We have already captured the payment from user’s card. If the user retries the failed operation, we will end up double charging the user. Even if the user doesn’t retries, we have charged the user and because of unsuccessful DB operation, the order most probably won’t be fulfilled because the details are not captured itself.&lt;/p&gt;
-
-&lt;p&gt;This can be handled as follows:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow2.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;In the modified flow above, what we are doing is after detecting the database failure, we are calling the payment service and canelling the charge, whatever was made before the failure. This way, even though, the overall operation failed, we havn’t charged the user extra money.&lt;/p&gt;
-
-&lt;p&gt;Things become interesting, when you see what would happen if operation no. 10 also fails. We are in same problem again. We have failed to return the money to user card probably because payment gateway was down, or there was a service timeout etc.&lt;/p&gt;
-
-&lt;p&gt;In this case, there are two approaches to solve it:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Try to record this failed update status in DB and let a job scheduler pickup these kinds of records and do a refund to user. The FE error should indicate to the user that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The problem with this approach is that since the database was unavailable intermittently, this database status update also is going to result in a failure in most probability.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The other solution is to drop a message after operation 10 into a kafka queue, where this message would be picked up by a consumer and would try to retry operation 10 after some delay. If the operation succeeds, the asynchronous notification to be sent to the user that the money has been refunded.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow3.png&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;One of the other solution is to make the operation 10. itself asynchronous. i.e. instead of the waiting for the response, the request will be queued by PaymentService and executed later. However, in this case, the user will always needs to be shown the message &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;There was an error while submitting order. If you are charged, you will be refunded in few minutes.&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/orderflow4.png&quot; /&gt;&lt;/p&gt;
 
 </content>
  </entry>
