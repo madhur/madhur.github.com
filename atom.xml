@@ -3,13 +3,59 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-11-06T22:15:37+05:30</updated>
+ <updated>2021-11-13T18:56:20+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Conventional Commits</title>
+   <link href="https://madhur.co.in/blog/2021/11/13/conventional-commits.html"/>
+   <updated>2021-11-13T00:00:00+05:30</updated>
+   <id>id:/blog/2021/11/13/conventional-commits</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;https://www.conventionalcommits.org/en/v1.0.0/#specification&quot;&gt;Conventional Commits&lt;/a&gt; is a an effort to standardizing writing better git commit messages.&lt;/p&gt;
+
+&lt;p&gt;As per it, a commit message should be structured as follows&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;type&amp;gt;[optional scope]: &amp;lt;description&amp;gt;
+
+[optional body]
+
+[optional footer(s)]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We recently standardized writing commit messages in our team according to this spec. This can be even forced through &lt;a href=&quot;https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks&quot;&gt;git commit hooks&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;commit_regex_normal&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;(((feat|docs|style|refactor|perf|test|build|ci|chore|revert)(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\w&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;{0,15})&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;)?))(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.*&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\S&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.*)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;commit_regex_bug_fix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;(((Fix)(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\w&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;{0,15})&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;)?))(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;)([A-Z]+-[0-9]+:)(.*&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\S&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;.*)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;commit_regex_auto_gen&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;(Merge.*)|(Revert.*)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;|&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$commit_regex_normal$o$commit_regex_bug_fix$o$commit_regex_auto_gen&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;       /‾‾‾‾‾‾‾‾
+    &amp;lt;  Please use semantic commit messages(see https://www.conventionalcommits.org/en/v1.0.0 )
+       \________
+
+  &amp;lt;type&amp;gt;[&amp;lt;scope&amp;gt;]: &amp;lt;short summary&amp;gt;
+     │     |              │
+     │   (optional)       └─&amp;gt; Summary in present tense. Not capitalized. No period at the end.
+     │
+     └─&amp;gt; Type: chore, docs, feat, fix, refactor, style, or test.
+    fix[&amp;lt;scope&amp;gt;]: ABC-1234 summary (Jira id mandatory for type -fix)
+
+&apos;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-iqE&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
+    &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&amp;amp;2
+    &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;1
+&lt;span class=&quot;k&quot;&gt;fi&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Querying AWS ALB Logs using Athena</title>
@@ -747,49 +793,6 @@ topics where multiple records will exist for same row.&lt;/p&gt;
 
 &lt;p&gt;In our case, it took almost 4 hrs to complete the migration including bootstrap and change feed process for around 3 million rows in couple of tables and fewer records in other tables.&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Fun with Splunk</title>
-   <link href="https://madhur.co.in/blog/2021/05/30/fun-with-splunk.html"/>
-   <updated>2021-05-30T00:00:00+05:30</updated>
-   <id>id:/blog/2021/05/30/fun-with-splunk</id>
-   <content type="html">&lt;p&gt;Many organizations aggregate their logs on &lt;a href=&quot;https://www.splunk.com/en_us/software.html&quot;&gt;Splunk&lt;/a&gt;, which is a popular product for data ingestion and building intelligence on top of it.&lt;/p&gt;
-
-&lt;p&gt;I too have been playing with data hosted on Splunk in last few weeks. Recently, I encountered a problem, where-in the data needs to be extracted based on some specified condition within a JSON array.&lt;/p&gt;
-
-&lt;p&gt;For example, the splunk record was as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Test Name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;id&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ac646022-fa55-4e04-9856-a25a41b30014&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;phases&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;query.slots&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;elapsedTime&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;2000.0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;viewPage&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-            &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;elapsedTime&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;565.0&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-        &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The requriement was to retrieve all the recods which has the phase &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;query.slots&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;elapsedTime&lt;/code&gt; is greater than some specified value, for example 1000 ms.&lt;/p&gt;
-
-&lt;p&gt;The query required unearthing some commands which I was unfamiliar with:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://docs.splunk.com/Documentation/SplunkCloud/latest/SearchReference/mvexpand&quot;&gt;mvexpand&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://docs.splunk.com/Documentation/Splunk/8.2.0/SearchReference/MultivalueEvalFunctions&quot;&gt;mvzip&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Here is the final query&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;phases{}.name&quot;=&quot;query.slots&quot; | rename phases{}.elapsedTime as eTime, phases{}.name as name | eval temp=mvzip(eTime,name) | mvexpand temp | eval eTimeParsed=mvindex(split(temp,&quot;,&quot;),0),nameParsed=mvindex(split(temp,&quot;,&quot;),1)  | search nameParsed=&quot;query.slots&quot; eTimeParsed &amp;gt; 2000 | table nameParsed, eTimeParsed
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
