@@ -3,13 +3,103 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-11-13T18:56:20+05:30</updated>
+ <updated>2021-11-20T13:10:37+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Offload IO Intensive tasks to worker threads</title>
+   <link href="https://madhur.co.in/blog/2021/11/20/offload-io-intensive-tasks-to-threads.html"/>
+   <updated>2021-11-20T00:00:00+05:30</updated>
+   <id>id:/blog/2021/11/20/offload-io-intensive-tasks-to-threads</id>
+   <content type="html">&lt;p&gt;In most of the modern web REST implementations, much of the task is spent waiting on IO, for example waiting for data to be fetched from database or through remote REST service.&lt;/p&gt;
+
+&lt;p&gt;When the application receives high traffic on a thread based application server, such as Tomcat, much of its threads are just waiting for data to come from database or remote REST service.&lt;/p&gt;
+
+&lt;p&gt;This is inefficient because, you cannot increase the number of threads vertically in a single compute. Theoretically you can, but its just pure inefficient because most of those threads will be just blocked.&lt;/p&gt;
+
+&lt;p&gt;Thus, in order to scale such applications, the better model is to offload this waiting to pool of worker threads. This will free up the Tomcat http worker threads(“http-nio-n”) to recieve more incoming requests.&lt;/p&gt;
+
+&lt;p&gt;This can be easily achieved using &lt;a href=&quot;https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/request/async/DeferredResult.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeferredResult&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;A typical implementation in Java / Spring looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@GetMapping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/deferred&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getDeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;CompletableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResultService&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getDelayedResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;thenAccept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hasResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;OK&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;exceptionally&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeferredResultService&lt;/code&gt; instead of returning the actual result, just returns the future, whose actual implementation happens in a worker thread&lt;/p&gt;
+
+&lt;p&gt;If we run benchmark this API using &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;ab&lt;/a&gt; by firing 100 requests concurrently, we see that it consumers only ~30 http-nio-n threads.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\apache\Apache24\bin&amp;gt; ./ab -n 100 -c 100 http://localhost:8080/deferred
+This is ApacheBench, Version 2.3 &amp;lt;$Revision: 1879490 $&amp;gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient).....done
+
+
+Server Software:
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /deferred
+Document Length:        8 bytes
+
+Concurrency Level:      100
+Time taken for tests:   20.030 seconds
+Complete requests:      100
+Failed requests:        0
+Total transferred:      14000 bytes
+HTML transferred:       800 bytes
+Requests per second:    4.99 [#/sec] (mean)
+Time per request:       20029.525 [ms] (mean)
+Time per request:       200.295 [ms] (mean, across all concurrent requests)
+Transfer rate:          0.68 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.3      0       1
+Processing: 10008 10014   3.9  10015   10022
+Waiting:    10004 10014   4.0  10015   10022
+Total:      10008 10014   3.9  10015   10022
+
+Percentage of the requests served within a certain time (ms)
+  50%  10015
+  66%  10016
+  75%  10017
+  80%  10017
+  90%  10020
+  95%  10021
+  98%  10022
+  99%  10022
+ 100%  10022 (longest request)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/threads.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Check out the demo project in my &lt;a href=&quot;https://github.com/madhur/deferred-result&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Conventional Commits</title>
@@ -734,65 +824,6 @@ As shown above, we don’t want to call Seller and Asset service when addToCart 
 &lt;p&gt;In nutshell, that’s how our architecture looks like:&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;/images/Blog/responsegroup.png&quot;&gt;&lt;img src=&quot;/images/Blog/responsegroup.png&quot; width=&quot;825px&quot; height=&quot;428px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Migrating from SQL to No-SQL without downtime</title>
-   <link href="https://madhur.co.in/blog/2021/06/05/migrating-from-sql-nosql.html"/>
-   <updated>2021-06-05T00:00:00+05:30</updated>
-   <id>id:/blog/2021/06/05/migrating-from-sql-nosql</id>
-   <content type="html">&lt;p&gt;Recently, we migrated a large MySQL database containing GB’s of data, millions of rows in few tables to CosmosDB.&lt;/p&gt;
-
-&lt;p&gt;This was done without downtime. I want to lay down the approach we took in this post.&lt;/p&gt;
-
-&lt;p&gt;Our intention was to setup both the database active - active and incrementally shift the traffic point to Service v1 (which was reading/writing to MySQL) towards 
-Service v2 (which was reading/writing to CosmosDB)&lt;/p&gt;
-
-&lt;p&gt;The first challenge was doing the initial data migration (called as bootstrap) and then set up a replication pipeline (called as change feed) so that any updates/inserts/deletes
-happening on live MySQL DB are replicated to CosmosDB asynchronously.&lt;/p&gt;
-
-&lt;p&gt;For this, we made use of Kafka.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;The Bootstrap process consisted of reading the table from MySQL and dumping its content into a corresponding Kafka topic. That means, we had a corresponding Kafka topic for each
-table within MySQL. There are products within market such as &lt;a href=&quot;https://www.continuent.com/products/tungsten-replicator&quot;&gt;this&lt;/a&gt; which can do this as well.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;The change feed process consisted of having another set of parallel kafka topics which would contain the change feed, i.e. inserts / deletes / updates happening on the MySQL database.
-This was tricky because setting it up requires modifying the service layer to publish this feeds to Kafka.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The point to note above is that bootstrap is a one time process and Change feed is an ongoing process. Also, bootstrap must be executed after the change feed process is up and running, so 
-as to not miss any record.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/migration.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Now comes the consumer part,
-The consumer application will connect to these kafka topics and store the data in Cosmos DB. We used bulk insertion in batches of 4000 records/batch to speed up the insertions.&lt;/p&gt;
-
-&lt;p&gt;Here, the bootstrap kafka topics must be first completely consumed and written to target database before starting with ChangeFeed kafka topics.&lt;/p&gt;
-
-&lt;p&gt;As the change feed kafka topics lag becomes closer to zero (it will never be zero, since data is always being written to change feed topics), the databases are considered active active.&lt;/p&gt;
-
-&lt;p&gt;Few notes about Kafka:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Use Kafka partitions to scale up bootstrap and consumption process horizontally. The partition key can be primary key of the table. This is especially important in change feed 
-topics where multiple records will exist for same row.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;The consumer application must handle errors gracefully. If there is an error during the batch writes, the entire batch might fail.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Use the &lt;a href=&quot;https://en.wikipedia.org/wiki/Blue-green_deployment&quot;&gt;blue green&lt;/a&gt; deployment methodology&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;In our case, it took almost 4 hrs to complete the migration including bootstrap and change feed process for around 3 million rows in couple of tables and fewer records in other tables.&lt;/p&gt;
-
 </content>
  </entry>
  
