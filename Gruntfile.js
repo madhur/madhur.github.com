@@ -132,7 +132,7 @@ module.exports = function(grunt) {
         gitcommit: {
             task: {
                 options: {
-                    message: 'Repository updated on ' + grunt.template.today(),
+                    message: 'docs: Repository updated on ' + grunt.template.today(),
                     allowEmpty: true,
                     cwd: '../site/'
                 }
