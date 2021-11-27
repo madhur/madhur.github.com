@@ -3,13 +3,31 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-11-20T13:10:37+05:30</updated>
+ <updated>2021-11-28T00:04:34+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Kernel Panic with AMD Ryzen 5600x on CentOS 7</title>
+   <link href="https://madhur.co.in/blog/2021/11/27/linux-kernel-panic.html"/>
+   <updated>2021-11-27T00:00:00+05:30</updated>
+   <id>id:/blog/2021/11/27/linux-kernel-panic</id>
+   <content type="html">&lt;p&gt;Recently, I upgraded my personal computer CPU from &lt;a href=&quot;https://ark.intel.com/content/www/us/en/ark/products/52214/intel-core-i72600k-processor-8m-cache-up-to-3-80-ghz.html&quot;&gt;Intel Core i7 2600K (SandyBridge)&lt;/a&gt; to &lt;a href=&quot;https://www.amd.com/en/products/cpu/amd-ryzen-5-5600x&quot;&gt;AMD Ryzen 5600x&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The older processor was a decade old and the accompanying board didn’t support new age SSDs such as &lt;a href=&quot;https://www.samsung.com/us/computing/memory-storage/solid-state-drives/980-pro-pcie-4-0-nvme-ssd-1tb-mz-v8p1t0b-am/&quot;&gt;Nvme PCI 4 SSD&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;However, post upgradation, as soon as I booted my existing system running CentOS 7, I recieved a dreaded &lt;a href=&quot;https://en.wikipedia.org/wiki/Kernel_panic&quot;&gt;kernel panic&lt;/a&gt; very similar to &lt;a href=&quot;https://en.wikipedia.org/wiki/Blue_screen_of_death&quot;&gt;BSOD in Windows&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/kernel-panic.jpg&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Turns out that latest AMD processors are not supported on Kernel 3.x which comes with CentOS 7. I had to upgrade it to Cent OS 8 which comes with Kernel 4.x&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Offload IO Intensive tasks to worker threads</title>
@@ -746,84 +764,6 @@ to individiual channel kafka queues. We wanted to have individual channel queues
 &lt;p&gt;The final design looked like this:&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;/images/Blog/comm_service.png&quot;&gt;&lt;img src=&quot;/images/Blog/comm_service.png&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>API Response Group Pattern - Improving latencies using GraphQL</title>
-   <link href="https://madhur.co.in/blog/2021/06/13/api-response-group-pattern.html"/>
-   <updated>2021-06-13T00:00:00+05:30</updated>
-   <id>id:/blog/2021/06/13/api-response-group-pattern</id>
-   <content type="html">&lt;p&gt;In a complex multiple microservices architecture, especially where in one microservice ends up calling a chain of other microservices, the API latency can become a concern.&lt;/p&gt;
-
-&lt;p&gt;This is because there is network hop at each microservice layer, which adds to the latency in addition to the actual logic executed by the microservice itself.&lt;/p&gt;
-
-&lt;p&gt;For example, in an e-commerce application, an Add to Cart API request might end up calling multiple downstream microservices such as Pricing Service, Availability Service etc.&lt;/p&gt;
-
-&lt;p&gt;In a complex architecture, where multiple clients are involved such as Mobile Apps and web browsers, the data needed by clients can differ depending upon the situation.&lt;/p&gt;
-
-&lt;p&gt;For example, if the user is adding an item to cart from the homepage, the client might not need pricing details as it might have that data already cached.&lt;/p&gt;
-
-&lt;p&gt;In other scenario, if the user is just increasing the quantity of the item, there might not be need to call the availability service as the front end might have called it when user initially called it 
-and front end could cache the availability data of the item for some time (lets say 15 minutes).&lt;/p&gt;
-
-&lt;p&gt;To achieve the best API performance, it is important to recognize these patterns and incorporate into the API design.&lt;/p&gt;
-
-&lt;p&gt;So instead of creating a separate API for each of these use cases, its better incorporate this by using
-the &lt;em&gt;Response Group Pattern&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;For example, in our hypothetical case, we might come up with following response groups:&lt;/p&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Response Group&lt;/th&gt;
-      &lt;th&gt;Pricing Service&lt;/th&gt;
-      &lt;th&gt;Seller Service&lt;/th&gt;
-      &lt;th&gt;Asset Service&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;full&lt;/td&gt;
-      &lt;td&gt;✓&lt;/td&gt;
-      &lt;td&gt;✓&lt;/td&gt;
-      &lt;td&gt;✓&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;basic&lt;/td&gt;
-      &lt;td&gt;✓&lt;/td&gt;
-      &lt;td&gt;x&lt;/td&gt;
-      &lt;td&gt;x&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;summary&lt;/td&gt;
-      &lt;td&gt;x&lt;/td&gt;
-      &lt;td&gt;✓&lt;/td&gt;
-      &lt;td&gt;x&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;&lt;br /&gt;
-As shown above, we don’t want to call Seller and Asset service when addToCart is invoked with response group basic, for example&lt;/p&gt;
-
-&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/addToCart?responseGroup=basic
-
-/addToCart?responseGroup=full
-
-/addToCart?responseGroup=summary
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The next problem to solve is, who will send this response group.&lt;/p&gt;
-
-&lt;p&gt;In ideal situation, the client should not be worried about the response group, hardcoding these response group at the client side is maintainence nightmare and possible bugs. As the feature evolve, the client would have to worry about the appropriate response group to call all the time.&lt;/p&gt;
-
-&lt;p&gt;That’s where &lt;a href=&quot;https://graphql.org/&quot;&gt;GraphQL&lt;/a&gt; comes into the picture. The client should just pass the fields it requires to a GraphQL service, call the appropriate &lt;a href=&quot;https://graphql.org/learn/queries/&quot;&gt;mutation&lt;/a&gt; and graphQL layer should have logic to determine the response and pass it to backend service.&lt;/p&gt;
-
-&lt;p&gt;In nutshell, that’s how our architecture looks like:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/Blog/responsegroup.png&quot;&gt;&lt;img src=&quot;/images/Blog/responsegroup.png&quot; width=&quot;825px&quot; height=&quot;428px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
