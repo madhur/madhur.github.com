@@ -3,13 +3,34 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-11-28T00:04:34+05:30</updated>
+ <updated>2021-12-12T09:24:44+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Proxy nodejs requests through Proxy Server</title>
+   <link href="https://madhur.co.in/blog/2021/12/12/proxy-nodejs-requests.html"/>
+   <updated>2021-12-12T00:00:00+05:30</updated>
+   <id>id:/blog/2021/12/12/proxy-nodejs-requests</id>
+   <content type="html">&lt;p&gt;If you want to proxy all Nodejs HTTP requests through a  proxy server, just like JVM’s&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8888
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here is the quickest solution, without modifying the application source code&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm i global-agent
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GLOBAL_AGENT_HTTP_PROXY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;http://127.0.0.1:8888
+node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;global-agent/bootstrap&apos;&lt;/span&gt; app.js
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This will enable you to proxy all requests through proxy server running at 127.0.0.1 on port 8888, which could be &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; or &lt;a href=&quot;https://portswigger.net/burp/communitydownload&quot;&gt;Burp&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Kernel Panic with AMD Ryzen 5600x on CentOS 7</title>
@@ -713,57 +734,6 @@ Each page has 20 tweets&lt;/p&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Total ~= 35GB/s&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Simple Design of Communication Service</title>
-   <link href="https://madhur.co.in/blog/2021/06/20/simple-design-of-communication-service.html"/>
-   <updated>2021-06-20T00:00:00+05:30</updated>
-   <id>id:/blog/2021/06/20/simple-design-of-communication-service</id>
-   <content type="html">&lt;p&gt;Few months back, I had to make some changes to design of Communication Service.&lt;/p&gt;
-
-&lt;p&gt;It was quite a complex architecture overall and I thought of documenting this in blogpost to outline my thought process.&lt;/p&gt;
-
-&lt;p&gt;A communication service is responsible for reliably delivering the customer notification to the end user via any channel.&lt;/p&gt;
-
-&lt;p&gt;In our case, the channels were email, SMS and push notification.&lt;/p&gt;
-
-&lt;p&gt;The communication service was divided into multiple microservices:&lt;/p&gt;
-
-&lt;h2 id=&quot;communication-services&quot;&gt;Communication Services&lt;/h2&gt;
-&lt;p&gt;This was the main service which recieved payloads from other microservices whenever they had to send out a communication.&lt;/p&gt;
-
-&lt;p&gt;The payload was json and interaction was via kafka queue.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Key points:&lt;/strong&gt;
-We had to make sure we monitor the kafka queue for lag very closely. As any lag can potentially delay the communication to the end user.&lt;/p&gt;
-
-&lt;p&gt;The communication service did the enrichment to the payload such as creating the email template, SMS template from its template database and pushed the enriched payload
-to individiual channel kafka queues. We wanted to have individual channel queues for independently scaling them. For instance, our traffic on email was much higher compared to SMS and push notification. That way, we could scale the partitions on email kafka and queue.&lt;/p&gt;
-
-&lt;p&gt;The communication service also generates a unique uuid for each request and persists into cassandra database. This serves as a single point of lookup for&lt;/p&gt;
-
-&lt;h2 id=&quot;email--sms--push-service&quot;&gt;Email / SMS / Push Service&lt;/h2&gt;
-&lt;p&gt;These are individual micro services listening to each of the channel queues. They make a rest call to the provider to actually deliver the email. Once the rest call is successfully made, we push the status message on a feedback kafka queue dedicated for each channel.The feedback kafka queues are again channel independent to allow them to independently scale.&lt;/p&gt;
-
-&lt;p&gt;These services also contain webhook listeners. Typically, when you delivery a email / SMS / push via a vendor, vendor will send the feedback via webhook weather the mail / SMS / push was successfully delivered, or if it bounced or if it went to spam etc.&lt;/p&gt;
-
-&lt;p&gt;It is important to have circuit breaker in these services as vendor services might go down any moment. Thus, it is important to have a dead letter queue, which would retry the failed pushes later.&lt;/p&gt;
-
-&lt;p&gt;These feedbacks are also sent to the same feedback queues as updates.&lt;/p&gt;
-
-&lt;p&gt;We could have had a separate service for feedback altogether, but I believe it didn’t require a separate microservice altogether which would expanded our monitoring footprint.&lt;/p&gt;
-
-&lt;h2 id=&quot;feedback-service&quot;&gt;Feedback Service&lt;/h2&gt;
-
-&lt;p&gt;This is the main services which receives all the updates w.r.t. each communication. These updates are consumed via feedback queues. It is important to scale this service sufficiently as we didn’t had a separate feedback service for each channel in order to have lesser complexity. Our email feedback kakfa topic had 200 partitions and there were 20 computes each running 10 threads to consume from these partitions.&lt;/p&gt;
-
-&lt;p&gt;The job of the feedback service is to receive the feedback and push it to cassandra database. It asynchronously also pushes the feedback to analytics channel mainly an elasticsearch database for analytics purpose, since cassandra is not suited for doing analytics.&lt;/p&gt;
-
-&lt;p&gt;The final design looked like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/Blog/comm_service.png&quot;&gt;&lt;img src=&quot;/images/Blog/comm_service.png&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
