@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Provision Redis cluster through Vagrant and Ansible &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Provision Redis cluster through Vagrant and Ansible" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Provision Redis cluster through Vagrant and Ansible</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2022-01-01 00:00:00 +0530" pubdate="pubdate"
+            >01 January 2022</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>If you want to provision a test redis cluster for yourself, I recently created an automated solution using <a href="https://www.vagrantup.com/">Vagrant</a> and <a href="https://www.ansible.com/">Ansible</a></p>
+
+<p>Git clone the repository <a href="https://github.com/madhur/redis-cluster-vagrant">https://github.com/madhur/redis-cluster-vagrant</a> and use <code class="language-plaintext highlighter-rouge">vagrant up</code> command to bring up the five Centos 7 nodes.</p>
+
+<p>Once the nodes are up, the ansible playbook <code class="language-plaintext highlighter-rouge">setup-redis.yml</code> can be executed which will install redis on all the five nodes.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ansible-playbook playbooks/setup-redis.yml
+</code></pre></div></div>
+
+<p>The ansible playbook provisions four redis process on each node running on different ports.</p>
+
+<p>Once the redis is setup, the execute the below command by sshing into any of the nodes (ex <code class="language-plaintext highlighter-rouge">vagrant ssh redis1</code>) to form the cluster</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis-cli --cluster create 192.168.56.10:7000 192.168.56.10:7001 192.168.56.11:7002 192.168.56.11:7003 192.168.56.12:7004 192.168.56.12:7005 192.168.56.13:7006 192.168.56.13:7007 192.168.56.14:7008 192.168.56.14:7009 192.168.56.10:6008 192.168.56.10:6009 192.168.56.11:6000 192.168.56.11:6001 192.168.56.12:6006 192.168.56.12:6007 192.168.56.13:6004 192.168.56.13:6005 192.168.56.14:6002 192.168.56.14:6003  --cluster-replicas 1
+</code></pre></div></div>
+
+<p>Cluster info and nodes output</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[vagrant@redis1 ~]$ redis-cli -c -p 7000
+127.0.0.1:7000&gt; cluster info
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:20
+cluster_size:10
+cluster_current_epoch:26
+cluster_my_epoch:1
+cluster_stats_messages_ping_sent:21962
+cluster_stats_messages_pong_sent:21933
+cluster_stats_messages_fail_sent:19
+cluster_stats_messages_auth-ack_sent:6
+cluster_stats_messages_update_sent:4
+cluster_stats_messages_sent:43924
+cluster_stats_messages_ping_received:21914
+cluster_stats_messages_pong_received:21920
+cluster_stats_messages_meet_received:19
+cluster_stats_messages_fail_received:51
+cluster_stats_messages_auth-req_received:6
+cluster_stats_messages_received:43910
+127.0.0.1:7000&gt; cluster nodes
+6e5264f6eb7430bf17255019d826a5e4358f6295 192.168.56.10:7001@17001 master - 0 1638032107272 2 connected 8192-9829
+00073613e6b6227e63c503012846b89b9644d57e 192.168.56.10:6008@16008 master - 0 1638032106770 25 connected 14746-16383
+cbf1264f74e929815df87cb83db7a68400a5bb6f 192.168.56.11:6001@16001 slave 6e5264f6eb7430bf17255019d826a5e4358f6295 0 1638032107000 2 connected
+5ed583e52a38b5e7a01adf24b3048b18f5e03732 192.168.56.11:6000@16000 slave be3a72b4386d4c235717d11ae6d5cf456d9ae3cf 0 1638032107272 1 connected
+1dab38a32885b6edaa84939ba1a8f21eb3b0756e 192.168.56.12:7004@17004 master - 0 1638032107675 5 connected 3277-4914
+be3a72b4386d4c235717d11ae6d5cf456d9ae3cf 192.168.56.10:7000@17000 myself,master - 0 1638032102000 1 connected 0-1637
+cc0bf33f88da4c0a987040c0abb61de9274e4c2e 192.168.56.11:7003@17003 master - 0 1638032107000 4 connected 9830-11468
+d937a08e1ad1e81743a83a47d14d391aaf322cda 192.168.56.14:6003@16003 slave aa1fcb5c0660937662f0c70b89dfb09186ea0f4f 0 1638032106256 8 connected
+996e270ea827c7a40aab9ec17713e10e80534d92 192.168.56.13:6005@16005 slave 38bda2c495194da1bc8db1d3f3aa5316a0c31332 0 1638032106971 6 connected
+7e610c0b0ab6fc8a14cb618da205c587d6a451ca 192.168.56.11:7002@17002 master - 0 1638032106770 3 connected 1638-3276
+0606dd06e50bc023d5c961de12ab9420ad2319bf 192.168.56.12:6007@16007 slave cc0bf33f88da4c0a987040c0abb61de9274e4c2e 0 1638032107675 4 connected
+6ca58a8fd1a2b5418d60447f96101acc7dc229e1 192.168.56.13:6004@16004 slave 1dab38a32885b6edaa84939ba1a8f21eb3b0756e 0 1638032106669 5 connected
+aa1fcb5c0660937662f0c70b89dfb09186ea0f4f 192.168.56.13:7007@17007 master - 0 1638032106465 8 connected 13107-14745
+38bda2c495194da1bc8db1d3f3aa5316a0c31332 192.168.56.12:7005@17005 master - 0 1638032107675 6 connected 11469-13106
+c53eb727d619d127336382736dae2f36b519ed1a 192.168.56.14:7009@17009 slave 00073613e6b6227e63c503012846b89b9644d57e 0 1638032107172 25 connected
+8644049d5adb32c8570768d61186b6ea9307ca7a 192.168.56.10:6009@16009 master - 0 1638032107776 26 connected 6554-8191
+45493186df74aea9ae31aa6d84421bbf1b0b18f1 192.168.56.14:7008@17008 slave 8644049d5adb32c8570768d61186b6ea9307ca7a 0 1638032106000 26 connected
+5ba3d4ce175967027c23e48e884ca549222206b6 192.168.56.13:7006@17006 master - 0 1638032107172 7 connected 4915-6553
+915aa483535504cc8ca4662bba40adbfabf95d95 192.168.56.12:6006@16006 slave 7e610c0b0ab6fc8a14cb618da205c587d6a451ca 0 1638032107172 3 connected
+6f8ab10161f974f37a97b2e18a52d91878dc799d 192.168.56.14:6002@16002 slave 5ba3d4ce175967027c23e48e884ca549222206b6 0 1638032107776 7 connected
+</code></pre></div></div>
+
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/redis">Redis</a> |
+					
+						<a href="/blog/tags/ansible">Ansible</a> |
+					
+						<a href="/blog/tags/vagrant">Vagrant</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2022/01/01/redis-cluster-ansible/';
+  var disqus_title = 'Provision Redis cluster through Vagrant and Ansible';
+  var disqus_url = 'https://madhur.co.in/blog/2022/01/01/redis-cluster-ansible.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2022 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

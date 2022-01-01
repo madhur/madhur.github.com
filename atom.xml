@@ -3,13 +3,85 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2021-12-12T09:24:44+05:30</updated>
+ <updated>2022-01-01T12:18:30+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Provision Redis cluster through Vagrant and Ansible</title>
+   <link href="https://madhur.co.in/blog/2022/01/01/redis-cluster-ansible.html"/>
+   <updated>2022-01-01T00:00:00+05:30</updated>
+   <id>id:/blog/2022/01/01/redis-cluster-ansible</id>
+   <content type="html">&lt;p&gt;If you want to provision a test redis cluster for yourself, I recently created an automated solution using &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; and &lt;a href=&quot;https://www.ansible.com/&quot;&gt;Ansible&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Git clone the repository &lt;a href=&quot;https://github.com/madhur/redis-cluster-vagrant&quot;&gt;https://github.com/madhur/redis-cluster-vagrant&lt;/a&gt; and use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vagrant up&lt;/code&gt; command to bring up the five Centos 7 nodes.&lt;/p&gt;
+
+&lt;p&gt;Once the nodes are up, the ansible playbook &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setup-redis.yml&lt;/code&gt; can be executed which will install redis on all the five nodes.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ansible-playbook playbooks/setup-redis.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The ansible playbook provisions four redis process on each node running on different ports.&lt;/p&gt;
+
+&lt;p&gt;Once the redis is setup, the execute the below command by sshing into any of the nodes (ex &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vagrant ssh redis1&lt;/code&gt;) to form the cluster&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;redis-cli --cluster create 192.168.56.10:7000 192.168.56.10:7001 192.168.56.11:7002 192.168.56.11:7003 192.168.56.12:7004 192.168.56.12:7005 192.168.56.13:7006 192.168.56.13:7007 192.168.56.14:7008 192.168.56.14:7009 192.168.56.10:6008 192.168.56.10:6009 192.168.56.11:6000 192.168.56.11:6001 192.168.56.12:6006 192.168.56.12:6007 192.168.56.13:6004 192.168.56.13:6005 192.168.56.14:6002 192.168.56.14:6003  --cluster-replicas 1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Cluster info and nodes output&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[vagrant@redis1 ~]$ redis-cli -c -p 7000
+127.0.0.1:7000&amp;gt; cluster info
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:20
+cluster_size:10
+cluster_current_epoch:26
+cluster_my_epoch:1
+cluster_stats_messages_ping_sent:21962
+cluster_stats_messages_pong_sent:21933
+cluster_stats_messages_fail_sent:19
+cluster_stats_messages_auth-ack_sent:6
+cluster_stats_messages_update_sent:4
+cluster_stats_messages_sent:43924
+cluster_stats_messages_ping_received:21914
+cluster_stats_messages_pong_received:21920
+cluster_stats_messages_meet_received:19
+cluster_stats_messages_fail_received:51
+cluster_stats_messages_auth-req_received:6
+cluster_stats_messages_received:43910
+127.0.0.1:7000&amp;gt; cluster nodes
+6e5264f6eb7430bf17255019d826a5e4358f6295 192.168.56.10:7001@17001 master - 0 1638032107272 2 connected 8192-9829
+00073613e6b6227e63c503012846b89b9644d57e 192.168.56.10:6008@16008 master - 0 1638032106770 25 connected 14746-16383
+cbf1264f74e929815df87cb83db7a68400a5bb6f 192.168.56.11:6001@16001 slave 6e5264f6eb7430bf17255019d826a5e4358f6295 0 1638032107000 2 connected
+5ed583e52a38b5e7a01adf24b3048b18f5e03732 192.168.56.11:6000@16000 slave be3a72b4386d4c235717d11ae6d5cf456d9ae3cf 0 1638032107272 1 connected
+1dab38a32885b6edaa84939ba1a8f21eb3b0756e 192.168.56.12:7004@17004 master - 0 1638032107675 5 connected 3277-4914
+be3a72b4386d4c235717d11ae6d5cf456d9ae3cf 192.168.56.10:7000@17000 myself,master - 0 1638032102000 1 connected 0-1637
+cc0bf33f88da4c0a987040c0abb61de9274e4c2e 192.168.56.11:7003@17003 master - 0 1638032107000 4 connected 9830-11468
+d937a08e1ad1e81743a83a47d14d391aaf322cda 192.168.56.14:6003@16003 slave aa1fcb5c0660937662f0c70b89dfb09186ea0f4f 0 1638032106256 8 connected
+996e270ea827c7a40aab9ec17713e10e80534d92 192.168.56.13:6005@16005 slave 38bda2c495194da1bc8db1d3f3aa5316a0c31332 0 1638032106971 6 connected
+7e610c0b0ab6fc8a14cb618da205c587d6a451ca 192.168.56.11:7002@17002 master - 0 1638032106770 3 connected 1638-3276
+0606dd06e50bc023d5c961de12ab9420ad2319bf 192.168.56.12:6007@16007 slave cc0bf33f88da4c0a987040c0abb61de9274e4c2e 0 1638032107675 4 connected
+6ca58a8fd1a2b5418d60447f96101acc7dc229e1 192.168.56.13:6004@16004 slave 1dab38a32885b6edaa84939ba1a8f21eb3b0756e 0 1638032106669 5 connected
+aa1fcb5c0660937662f0c70b89dfb09186ea0f4f 192.168.56.13:7007@17007 master - 0 1638032106465 8 connected 13107-14745
+38bda2c495194da1bc8db1d3f3aa5316a0c31332 192.168.56.12:7005@17005 master - 0 1638032107675 6 connected 11469-13106
+c53eb727d619d127336382736dae2f36b519ed1a 192.168.56.14:7009@17009 slave 00073613e6b6227e63c503012846b89b9644d57e 0 1638032107172 25 connected
+8644049d5adb32c8570768d61186b6ea9307ca7a 192.168.56.10:6009@16009 master - 0 1638032107776 26 connected 6554-8191
+45493186df74aea9ae31aa6d84421bbf1b0b18f1 192.168.56.14:7008@17008 slave 8644049d5adb32c8570768d61186b6ea9307ca7a 0 1638032106000 26 connected
+5ba3d4ce175967027c23e48e884ca549222206b6 192.168.56.13:7006@17006 master - 0 1638032107172 7 connected 4915-6553
+915aa483535504cc8ca4662bba40adbfabf95d95 192.168.56.12:6006@16006 slave 7e610c0b0ab6fc8a14cb618da205c587d6a451ca 0 1638032107172 3 connected
+6f8ab10161f974f37a97b2e18a52d91878dc799d 192.168.56.14:6002@16002 slave 5ba3d4ce175967027c23e48e884ca549222206b6 0 1638032107776 7 connected
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Proxy nodejs requests through Proxy Server</title>
@@ -25,7 +97,7 @@
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm i global-agent
 &lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GLOBAL_AGENT_HTTP_PROXY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;http://127.0.0.1:8888
-node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;global-agent/bootstrap&apos;&lt;/span&gt; app.js
+node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'global-agent/bootstrap'&lt;/span&gt; app.js
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This will enable you to proxy all requests through proxy server running at 127.0.0.1 on port 8888, which could be &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; or &lt;a href=&quot;https://portswigger.net/burp/communitydownload&quot;&gt;Burp&lt;/a&gt;&lt;/p&gt;
@@ -166,7 +238,7 @@ Percentage of the requests served within a certain time (ms)
 &lt;span class=&quot;nv&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;|&quot;&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$commit_regex_normal$o$commit_regex_bug_fix$o$commit_regex_auto_gen&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;       /‾‾‾‾‾‾‾‾
+&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'       /‾‾‾‾‾‾‾‾
     &amp;lt;  Please use semantic commit messages(see https://www.conventionalcommits.org/en/v1.0.0 )
        \________
 
@@ -177,7 +249,7 @@ Percentage of the requests served within a certain time (ms)
      └─&amp;gt; Type: chore, docs, feat, fix, refactor, style, or test.
     fix[&amp;lt;scope&amp;gt;]: ABC-1234 summary (Jira id mandatory for type -fix)
 
-&apos;&lt;/span&gt;
+'&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-iqE&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
     &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&amp;amp;2
     &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;1
@@ -213,13 +285,13 @@ Percentage of the requests served within a certain time (ms)
 
 &lt;h3 id=&quot;find-url-and-times-it-was-called-within-the-specified-time-period&quot;&gt;Find url and times it was called within the specified time period&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
-&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:37:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:38:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:37:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:38:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;find-p95-latency-by-url&quot;&gt;Find p95 Latency by url&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:43:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:44:00.000000Z&apos;&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:43:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:44:00.000000Z'&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -314,7 +386,7 @@ $ sshpass -p your_password ssh user@hostname
    <content type="html">&lt;p&gt;Assuming you have spark downloaded on machine, you would run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.master.Master&lt;/code&gt; to run the Spark Master controller&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt;  ./spark-class org.apache.spark.deploy.master.Master
-Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:53:02 INFO Master: Started daemon with process name: 4804@DESKTOP-QCP2G4K
 21/10/16 09:53:02 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:53:02 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -323,10 +395,10 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:53:02 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:53:03 INFO Utils: Successfully started service &apos;sparkMaster&apos; on port 7077.
+21/10/16 09:53:03 INFO Utils: Successfully started service 'sparkMaster' on port 7077.
 21/10/16 09:53:03 INFO Master: Starting Spark master at spark://172.21.128.1:7077
 21/10/16 09:53:03 INFO Master: Running Spark version 3.1.2
-21/10/16 09:53:03 INFO Utils: Successfully started service &apos;MasterUI&apos; on port 8080.
+21/10/16 09:53:03 INFO Utils: Successfully started service 'MasterUI' on port 8080.
 21/10/16 09:53:03 INFO MasterWebUI: Bound MasterWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8080
 21/10/16 09:53:03 INFO Master: I have been elected leader! New state: ALIVE
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -336,7 +408,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 &lt;p&gt;Now, we want to run the spark executor using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077&lt;/code&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt; ./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077
-Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:56:12 INFO Worker: Started daemon with process name: 8800@DESKTOP-QCP2G4K
 21/10/16 09:56:12 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:56:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -345,7 +417,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:56:12 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:56:12 INFO Utils: Successfully started service &apos;sparkWorker&apos; on port 57088.
+21/10/16 09:56:12 INFO Utils: Successfully started service 'sparkWorker' on port 57088.
 21/10/16 09:56:12 INFO Worker: Worker decommissioning not enabled, SIGPWR will result in exiting.
 21/10/16 09:56:13 INFO Worker: Starting Spark worker 172.21.128.1:57088 with 12 cores, 30.9 GiB RAM
 21/10/16 09:56:13 INFO Worker: Running Spark version 3.1.2
@@ -353,7 +425,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
 21/10/16 09:56:13 INFO ResourceUtils: No custom resources configured for spark.worker.
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
-21/10/16 09:56:13 INFO Utils: Successfully started service &apos;WorkerUI&apos; on port 8081.
+21/10/16 09:56:13 INFO Utils: Successfully started service 'WorkerUI' on port 8081.
 21/10/16 09:56:13 INFO WorkerWebUI: Bound WorkerWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8081
 21/10/16 09:56:13 INFO Worker: Connecting to master 172.21.128.1:7077...
 21/10/16 09:56:13 INFO TransportClientFactory: Successfully created connection to /172.21.128.1:7077 after 21 ms (0 ms spent in bootstraps)
@@ -627,7 +699,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 *  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
 *  start date: Jul  3 00:00:00 2021 GMT
 *  expire date: Jul  2 23:59:59 2022 GMT
-*  subjectAltName: host &quot;tinyurl.com&quot; matched cert&apos;s &quot;tinyurl.com&quot;
+*  subjectAltName: host &quot;tinyurl.com&quot; matched cert's &quot;tinyurl.com&quot;
 *  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
 *  SSL certificate verify ok.
 * STATE: PROTOCONNECT =&amp;gt; DO handle 0x600057310; line 1602 (connection #0)
@@ -661,7 +733,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &amp;lt;html&amp;gt;
     &amp;lt;head&amp;gt;
         &amp;lt;meta charset=&quot;UTF-8&quot; /&amp;gt;
-        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&apos;https://www.madhur.co.in/&apos;&quot; /&amp;gt;
+        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url='https://www.madhur.co.in/'&quot; /&amp;gt;
 
         &amp;lt;title&amp;gt;Redirecting to https://www.madhur.co.in/&amp;lt;/title&amp;gt;
     &amp;lt;/head&amp;gt;
@@ -689,51 +761,6 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &lt;h2 id=&quot;base64-encoding&quot;&gt;Base64 Encoding&lt;/h2&gt;
 
 &lt;p&gt;Base64 character encodes 6 bits of the hash value. So if we use base64 encoding of above value, it will contain 21 characters&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Capacity Estimation Examples</title>
-   <link href="https://madhur.co.in/blog/2021/06/27/capacity-estimation.html"/>
-   <updated>2021-06-27T00:00:00+05:30</updated>
-   <id>id:/blog/2021/06/27/capacity-estimation</id>
-   <content type="html">&lt;p&gt;Capacity estimation is one of the most important exercises in design.&lt;/p&gt;
-
-&lt;p&gt;Twitter Example&lt;/p&gt;
-
-&lt;p&gt;1B Total Users
-200 M DAU
-100 M new tweets everyday
-Each user follows 200 people avg&lt;/p&gt;
-
-&lt;p&gt;How many favorites per day?
-Each user 5 favorite per day
-200M *5 = 1B favorite&lt;/p&gt;
-
-&lt;p&gt;Total tweet views
-A User visits their timeline 2 times a day and visits 5 other people pages
-Each page has 20 tweets&lt;/p&gt;
-
-&lt;p&gt;200M &lt;em&gt;(2+5)&lt;/em&gt;20 = 28B / day&lt;/p&gt;
-
-&lt;p&gt;Storage&lt;/p&gt;
-
-&lt;p&gt;140 characters ~ 280 bytes
-100M*(280+30) bytes =&amp;gt; 30 GB / day&lt;/p&gt;
-
-&lt;p&gt;Not all tweets will have media, let’s assume that on average every fifth tweet has a photo and every tenth has a video. Let’s also assume on average a photo is 200KB and a video is 2MB. This will lead us to have 24TB of new media every day.
-(100M/5 photos * 200KB) + (100M/10 videos * 2MB) ~= 24TB/day&lt;/p&gt;
-
-&lt;p&gt;Bandwidth Estimates Since total ingress is 24TB per day, this would translate into 290MB/sec.&lt;/p&gt;
-
-&lt;p&gt;Remember that we have 28B tweet views per day. We must show the photo of every tweet (if it has a photo), but let’s assume that the users watch every 3rd video they see in their timeline. So, total egress will be:
-(28B * 280 bytes) / 86400s of text =&amp;gt; 93MB/s&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;(28B/5 * 200KB ) / 86400s of photos =&amp;gt; 13GB/S&lt;/li&gt;
-  &lt;li&gt;(28B/10/3 * 2MB ) / 86400s of Videos =&amp;gt; 22GB/s&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Total ~= 35GB/s&lt;/p&gt;
 </content>
  </entry>
  
