@@ -3,13 +3,48 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-01-01T12:18:30+05:30</updated>
+ <updated>2022-01-09T13:37:17+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Forbidden error while accessing AWS services on Kubernetes</title>
+   <link href="https://madhur.co.in/blog/2022/01/09/forbidden-aws-eks.html"/>
+   <updated>2022-01-09T00:00:00+05:30</updated>
+   <id>id:/blog/2022/01/09/forbidden-aws-eks</id>
+   <content type="html">&lt;p&gt;If you have recently moved towards Kubernetes from EC2 and getting forbidden error while accessing AWS services make sure to have aws-sts in classpath.&lt;/p&gt;
+
+&lt;p&gt;In nutshell, the following dependency must be present&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sts --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.amazonaws&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;aws-java-sdk-sts&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.12.136&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The corresponding dependency for the AWS SDK v2 will be&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sts --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;software.amazon.awssdk&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;sts&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;2.16.24&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;scope&amp;gt;&lt;/span&gt;test&lt;span class=&quot;nt&quot;&gt;&amp;lt;/scope&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is because the credential provider which is concerned with loading the credentials from EKS role lies in sts module&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/aws/aws-sdk-java/blob/7bf0fbec42de8a7d54875510f27fb363ca2d19f5/aws-java-sdk-sts/src/main/java/com/amazonaws/services/securitytoken/internal/STSProfileCredentialsService.java&quot;&gt;https://github.com/aws/aws-sdk-java/blob/7bf0fbec42de8a7d54875510f27fb363ca2d19f5/aws-java-sdk-sts/src/main/java/com/amazonaws/services/securitytoken/internal/STSProfileCredentialsService.java&lt;/a&gt;&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Provision Redis cluster through Vagrant and Ansible</title>
@@ -97,7 +132,7 @@ c53eb727d619d127336382736dae2f36b519ed1a 192.168.56.14:7009@17009 slave 00073613
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm i global-agent
 &lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GLOBAL_AGENT_HTTP_PROXY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;http://127.0.0.1:8888
-node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'global-agent/bootstrap'&lt;/span&gt; app.js
+node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;global-agent/bootstrap&apos;&lt;/span&gt; app.js
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This will enable you to proxy all requests through proxy server running at 127.0.0.1 on port 8888, which could be &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; or &lt;a href=&quot;https://portswigger.net/burp/communitydownload&quot;&gt;Burp&lt;/a&gt;&lt;/p&gt;
@@ -238,7 +273,7 @@ Percentage of the requests served within a certain time (ms)
 &lt;span class=&quot;nv&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;|&quot;&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$commit_regex_normal$o$commit_regex_bug_fix$o$commit_regex_auto_gen&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'       /‾‾‾‾‾‾‾‾
+&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;       /‾‾‾‾‾‾‾‾
     &amp;lt;  Please use semantic commit messages(see https://www.conventionalcommits.org/en/v1.0.0 )
        \________
 
@@ -249,7 +284,7 @@ Percentage of the requests served within a certain time (ms)
      └─&amp;gt; Type: chore, docs, feat, fix, refactor, style, or test.
     fix[&amp;lt;scope&amp;gt;]: ABC-1234 summary (Jira id mandatory for type -fix)
 
-'&lt;/span&gt;
+&apos;&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-iqE&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
     &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&amp;amp;2
     &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;1
@@ -285,13 +320,13 @@ Percentage of the requests served within a certain time (ms)
 
 &lt;h3 id=&quot;find-url-and-times-it-was-called-within-the-specified-time-period&quot;&gt;Find url and times it was called within the specified time period&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
-&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:37:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:38:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:37:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:38:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;find-p95-latency-by-url&quot;&gt;Find p95 Latency by url&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:43:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:44:00.000000Z'&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:43:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:44:00.000000Z&apos;&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -386,7 +421,7 @@ $ sshpass -p your_password ssh user@hostname
    <content type="html">&lt;p&gt;Assuming you have spark downloaded on machine, you would run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.master.Master&lt;/code&gt; to run the Spark Master controller&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt;  ./spark-class org.apache.spark.deploy.master.Master
-Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:53:02 INFO Master: Started daemon with process name: 4804@DESKTOP-QCP2G4K
 21/10/16 09:53:02 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:53:02 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -395,10 +430,10 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:53:02 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:53:03 INFO Utils: Successfully started service 'sparkMaster' on port 7077.
+21/10/16 09:53:03 INFO Utils: Successfully started service &apos;sparkMaster&apos; on port 7077.
 21/10/16 09:53:03 INFO Master: Starting Spark master at spark://172.21.128.1:7077
 21/10/16 09:53:03 INFO Master: Running Spark version 3.1.2
-21/10/16 09:53:03 INFO Utils: Successfully started service 'MasterUI' on port 8080.
+21/10/16 09:53:03 INFO Utils: Successfully started service &apos;MasterUI&apos; on port 8080.
 21/10/16 09:53:03 INFO MasterWebUI: Bound MasterWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8080
 21/10/16 09:53:03 INFO Master: I have been elected leader! New state: ALIVE
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -408,7 +443,7 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 &lt;p&gt;Now, we want to run the spark executor using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077&lt;/code&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt; ./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077
-Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:56:12 INFO Worker: Started daemon with process name: 8800@DESKTOP-QCP2G4K
 21/10/16 09:56:12 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:56:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -417,7 +452,7 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:56:12 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:56:12 INFO Utils: Successfully started service 'sparkWorker' on port 57088.
+21/10/16 09:56:12 INFO Utils: Successfully started service &apos;sparkWorker&apos; on port 57088.
 21/10/16 09:56:12 INFO Worker: Worker decommissioning not enabled, SIGPWR will result in exiting.
 21/10/16 09:56:13 INFO Worker: Starting Spark worker 172.21.128.1:57088 with 12 cores, 30.9 GiB RAM
 21/10/16 09:56:13 INFO Worker: Running Spark version 3.1.2
@@ -425,7 +460,7 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
 21/10/16 09:56:13 INFO ResourceUtils: No custom resources configured for spark.worker.
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
-21/10/16 09:56:13 INFO Utils: Successfully started service 'WorkerUI' on port 8081.
+21/10/16 09:56:13 INFO Utils: Successfully started service &apos;WorkerUI&apos; on port 8081.
 21/10/16 09:56:13 INFO WorkerWebUI: Bound WorkerWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8081
 21/10/16 09:56:13 INFO Worker: Connecting to master 172.21.128.1:7077...
 21/10/16 09:56:13 INFO TransportClientFactory: Successfully created connection to /172.21.128.1:7077 after 21 ms (0 ms spent in bootstraps)
@@ -699,7 +734,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 *  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
 *  start date: Jul  3 00:00:00 2021 GMT
 *  expire date: Jul  2 23:59:59 2022 GMT
-*  subjectAltName: host &quot;tinyurl.com&quot; matched cert's &quot;tinyurl.com&quot;
+*  subjectAltName: host &quot;tinyurl.com&quot; matched cert&apos;s &quot;tinyurl.com&quot;
 *  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
 *  SSL certificate verify ok.
 * STATE: PROTOCONNECT =&amp;gt; DO handle 0x600057310; line 1602 (connection #0)
@@ -733,7 +768,7 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &amp;lt;html&amp;gt;
     &amp;lt;head&amp;gt;
         &amp;lt;meta charset=&quot;UTF-8&quot; /&amp;gt;
-        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url='https://www.madhur.co.in/'&quot; /&amp;gt;
+        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&apos;https://www.madhur.co.in/&apos;&quot; /&amp;gt;
 
         &amp;lt;title&amp;gt;Redirecting to https://www.madhur.co.in/&amp;lt;/title&amp;gt;
     &amp;lt;/head&amp;gt;
@@ -746,21 +781,6 @@ For example, in our case pod takes around 15 seconds in all different environmen
 * Connection #0 to host tinyurl.com left intact
 &amp;lt;/html&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Encoding and Hashing</title>
-   <link href="https://madhur.co.in/blog/2021/07/06/encoding-and-hashing.html"/>
-   <updated>2021-07-06T00:00:00+05:30</updated>
-   <id>id:/blog/2021/07/06/encoding-and-hashing</id>
-   <content type="html">&lt;h2 id=&quot;md5&quot;&gt;MD5&lt;/h2&gt;
-
-&lt;p&gt;MD5 is hashing algorithm. It produces 128 bit value&lt;/p&gt;
-
-&lt;h2 id=&quot;base64-encoding&quot;&gt;Base64 Encoding&lt;/h2&gt;
-
-&lt;p&gt;Base64 character encodes 6 bits of the hash value. So if we use base64 encoding of above value, it will contain 21 characters&lt;/p&gt;
 </content>
  </entry>
  
