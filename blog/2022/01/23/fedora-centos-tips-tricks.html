@@ -4,11 +4,11 @@
 
 <head>
     <meta charset="utf-8" /> 
-    <title>Fedora / CentOS Tips & Tricks &#8211; Madhur Ahuja</title>
+    <title>Fedora / CentOS Tips & Tricks - running it as Desktop OS &#8211; Madhur Ahuja</title>
     
 
     <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Fedora / CentOS Tips & Tricks" />
+    <meta name="description" content=" Fedora / CentOS Tips & Tricks - running it as Desktop OS" />
 
     <link rel="start" href="/" />
 
@@ -122,7 +122,7 @@
 
 		<article id="blog-article" class="post col-md-12 clearfix">
 
-				<header><h1>Fedora / CentOS Tips & Tricks</h1></header>
+				<header><h1>Fedora / CentOS Tips & Tricks - running it as Desktop OS</h1></header>
 			
 					<!-- Place this tag where you want the +1 button to render -->
 <div class="row social hidden-xs">
@@ -198,34 +198,17 @@
 
 			 <p>Have been using Fedora as my desktop OS for quite some time now. Here are some of the thigns that has helped:</p>
 
-<ul>
-  <li>If you are using Wifi on these OS, there are some services which do not start until Wifi has come up. There will be a warning during startup</li>
-</ul>
+<h3 id="use-snap-and-flatpak">Use Snap and Flatpak</h3>
 
-<blockquote>
-  <p>A start job is running for wait for network to be configured</p>
-</blockquote>
-
-<p>In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl disable systemd-networkd-wait-online.service
-</code></pre></div></div>
-
-<ul>
-  <li>Use Snap and Flatpak</li>
-</ul>
-
-<p>My preferred way of installing applications is through <a href="https://snapcraft.io/docs/installing-snap-on-centos">Snap</a> and <a href="https://flatpak.org/">Flatpak</a> first and if they are not available in these channels, then only I revert to <a href="https://rpm.org/">rpm</a></p>
+<p>My preferred way of installing applications is through <a href="https://snapcraft.io/docs/installing-snap-on-centos">Snap</a>, <a href="https://flatpak.org/">Flatpak</a>, <a href="https://brew.sh/">Homebrew</a> first and if they are not available in these channels, then only I revert to <a href="https://rpm.org/">rpm</a></p>
 
 <ul>
   <li>Use Zsh</li>
 </ul>
 
-<p><a href="https://www.gnu.org/software/bash/">Bash</a> is the default shell in these OSes. If youo are using for daily use, <a href="https://www.zsh.org/">zsh</a> helps a lot</p>
+<p><a href="https://www.gnu.org/software/bash/">Bash</a> is the default shell in these OS. If youo are using for daily use, <a href="https://www.zsh.org/">zsh</a> helps a lot</p>
 
-<ul>
-  <li>Install better fonts</li>
-</ul>
+<h3 id="install-better-fonts">Install better fonts</h3>
 
 <p>The font rendering in linux is far behind from Mac / Windows. Use these fonts in terminal / code editors to have better experience. Its still lags behind Mac / Windows though.</p>
 
@@ -234,9 +217,7 @@
 <a href="https://docs.microsoft.com/en-us/typography/font-list/consolas">Consolas</a> <br />
 <a href="https://github.com/tonsky/FiraCode">Fira Code</a></p>
 
-<ul>
-  <li>Install latest kernel</li>
-</ul>
+<h3 id="install-latest-kernel">Install latest kernel</h3>
 
 <p>The default kernel is usually older. If you are using latest hardware, installing the latest kernel version really helpsp if you are facing some non-detected hardware issue such as Wifi. Installing latest kernel is as easy as following these steps:</p>
 
@@ -252,6 +233,77 @@ sudo reboot
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uname -r
 </code></pre></div></div>
 
+<h3 id="configure-display-scaling-and-text-scaling">Configure display scaling and text scaling</h3>
+
+<p>If you are using a high resolution 4k monitor, chance are that you will find text and icons too small for daily use. This is not just true for Linux, its true for Windows as well.
+Its just that Windows will act smart and automatically enable scaling to make display look sharp. In Linux, you will have to do it manually. There are two options: Display scaling and text scaling. It is important to understand the difference between two.</p>
+
+<p>Display scaling scales all the screen elements including the windows, icons and text by a fraction, whereas text scaling only scales the text.</p>
+
+<p>In my case, display scaling was resulting in icons looking blurry. Text scaling preserved the icon scaling but scaled only the text resuling in overall great display.</p>
+
+<p>I would leave upto you to determine what works best for you.</p>
+
+<p>Additional resources:<br />
+<a href="https://blogs.windows.com/windows-insider/2017/01/09/announcing-windows-10-insider-preview-build-15002-pc/#B4p617eIRYORoHM1.97">The perils of running Windows 10 on a 4K monitor</a><br />
+<a href="https://www.linuxmint.com/rel_ulyana_cinnamon_whatsnew.php">Display scaling introduced in Cinnamon</a></p>
+
+<h3 id="disable-selinux">Disable SELinux</h3>
+
+<p>SELinux is not really required for desktop linux. Its best to disable it.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vi /etc/sysconfig/selinux
+SELINUX=disabled
+</code></pre></div></div>
+
+<h3 id="disable-firewalld">Disable Firewalld</h3>
+
+<p>For pure desktop usage, firewall is not at all required. Though it depends upon the type of network you are using. For public wifi networks, it is definitely required.
+For home networks, it can be disabled.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl disable firewalld
+</code></pre></div></div>
+
+<h3 id="install-conky-for-system-monitoring">Install Conky for System monitoring</h3>
+
+<p>The default system monitor linux app is not at all comprehensive and is not the kind of app you would want to look at again and again.
+For system monitoring, I recommend <a href="https://github.com/brndnmtthws/conky">Conky</a></p>
+
+<p>It needs bit of configuration and tweaks depending upon the hardware installed. But once configured, it works beatifully.
+You can have a look at my <a href="https://github.com/madhur/awesome-conky">configuration here</a></p>
+
+<h3 id="install-imwheel-for-mouse-wheel-scroll-customization">Install imwheel for Mouse wheel scroll customization</h3>
+
+<p>Linux apart from all the advancements, lacks basic feature of customizing mouse wheel scroll length / sensitivity.</p>
+
+<p>Though <a href="https://kde.org/">KDE</a> has recently introduced this feature, other desktop still lack it.</p>
+
+<p>You can use <a href="https://github.com/app/imwheel">imwheel</a> for this. Its not perfect, but it gets the job done with some minor quirks.</p>
+
+<p>I use the following configuration in <code class="language-plaintext highlighter-rouge">~/.imwheelrc</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>".*"
+None,       Up,     Up,     9
+None,       Down,   Down,   9
+</code></pre></div></div>
+
+<h3 id="install-development-tools-and-multimedia-codecs">Install Development Tools and Multimedia codecs</h3>
+
+<p>This is something basic. If you want to become even an intermediate user in Linux, it will require knowledge of compiling and building source code.
+For that you will need dev tools such as <a href="https://gcc.gnu.org/">GCC</a>, <a href="https://mesonbuild.com/">Meson</a> and <a href="https://ninja-build.org/">Ninja</a></p>
+
+<h3 id="wifi-issues">Wifi Issues</h3>
+
+<p>If you are using Wifi on these OS, there are some services which do not start until Wifi has come up. There will be a warning during startup</p>
+
+<blockquote>
+  <p>A start job is running for wait for network to be configured</p>
+</blockquote>
+
+<p>In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl disable systemd-networkd-wait-online.service
+</code></pre></div></div>
 
 			<footer>
 				<div class="blocked tags">
@@ -283,7 +335,7 @@ sudo reboot
   var disqus_developer = 0; // developer mode is on
   var disqus_shortname = 'madhur';
   var disqus_identifier = '/2022/01/23/fedora-centos-trips-tricks/';
-  var disqus_title = 'Fedora / CentOS Tips & Tricks';
+  var disqus_title = 'Fedora / CentOS Tips & Tricks - running it as Desktop OS';
   var disqus_url = 'https://madhur.co.in/blog/2022/01/23/fedora-centos-tips-tricks.html';
   (function() {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
