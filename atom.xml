@@ -3,13 +3,91 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-01-09T13:37:17+05:30</updated>
+ <updated>2022-01-23T08:12:23+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Fedora / CentOS Tips & Tricks</title>
+   <link href="https://madhur.co.in/blog/2022/01/23/fedora-centos-tips-tricks.html"/>
+   <updated>2022-01-23T00:00:00+05:30</updated>
+   <id>id:/blog/2022/01/23/fedora-centos-tips-tricks</id>
+   <content type="html">&lt;p&gt;Have been using Fedora as my desktop OS for quite some time now. Here are some of the thigns that has helped:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;If you are using Wifi on these OS, there are some services which do not start until Wifi has come up. There will be a warning during startup&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A start job is running for wait for network to be configured&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable systemd-networkd-wait-online.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Use Snap and Flatpak&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;My preferred way of installing applications is through &lt;a href=&quot;https://snapcraft.io/docs/installing-snap-on-centos&quot;&gt;Snap&lt;/a&gt; and &lt;a href=&quot;https://flatpak.org/&quot;&gt;Flatpak&lt;/a&gt; first and if they are not available in these channels, then only I revert to &lt;a href=&quot;https://rpm.org/&quot;&gt;rpm&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Use Zsh&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.gnu.org/software/bash/&quot;&gt;Bash&lt;/a&gt; is the default shell in these OSes. If youo are using for daily use, &lt;a href=&quot;https://www.zsh.org/&quot;&gt;zsh&lt;/a&gt; helps a lot&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Install better fonts&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The font rendering in linux is far behind from Mac / Windows. Use these fonts in terminal / code editors to have better experience. Its still lags behind Mac / Windows though.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/adobe-fonts/source-code-pro&quot;&gt;Source Code Pro&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://www.jetbrains.com/lp/mono/&quot;&gt;JetBrains Mono&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://docs.microsoft.com/en-us/typography/font-list/consolas&quot;&gt;Consolas&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://github.com/tonsky/FiraCode&quot;&gt;Fira Code&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Install latest kernel&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The default kernel is usually older. If you are using latest hardware, installing the latest kernel version really helpsp if you are facing some non-detected hardware issue such as Wifi. Installing latest kernel is as easy as following these steps:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo dnf update -y
+sudo dnf -y install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
+# Install mainline kernels
+sudo dnf --enablerepo=elrepo-kernel install kernel-ml
+sudo dnf --enablerepo=elrepo-kernel install kernel-ml-{devel,headers}
+sudo reboot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify latest kernel&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uname -r
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Quickly Compare two MySQL databases</title>
+   <link href="https://madhur.co.in/blog/2022/01/16/quickly-compare-two-mysql-databases.html"/>
+   <updated>2022-01-16T00:00:00+05:30</updated>
+   <id>id:/blog/2022/01/16/quickly-compare-two-mysql-databases</id>
+   <content type="html">&lt;p&gt;A very nifty and quick way to compare two mysql databases is to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mysqldump&lt;/code&gt; command. This also works well if you just want to compare DDL&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysqldump -d --skip-comments --skip-extended-insert -u root -p -h mysql.host db1  &amp;gt; db1.sql   
+mysqldump -d --skip-comments --skip-extended-insert -u root -p -h mysql.host db2 &amp;gt; db2.sql   
+diff db1.sql db2.sql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Forbidden error while accessing AWS services on Kubernetes</title>
@@ -132,7 +210,7 @@ c53eb727d619d127336382736dae2f36b519ed1a 192.168.56.14:7009@17009 slave 00073613
 
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm i global-agent
 &lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GLOBAL_AGENT_HTTP_PROXY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;http://127.0.0.1:8888
-node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;global-agent/bootstrap&apos;&lt;/span&gt; app.js
+node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'global-agent/bootstrap'&lt;/span&gt; app.js
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This will enable you to proxy all requests through proxy server running at 127.0.0.1 on port 8888, which could be &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; or &lt;a href=&quot;https://portswigger.net/burp/communitydownload&quot;&gt;Burp&lt;/a&gt;&lt;/p&gt;
@@ -273,7 +351,7 @@ Percentage of the requests served within a certain time (ms)
 &lt;span class=&quot;nv&quot;&gt;o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;|&quot;&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$commit_regex_normal$o$commit_regex_bug_fix$o$commit_regex_auto_gen&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
 
-&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;       /‾‾‾‾‾‾‾‾
+&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'       /‾‾‾‾‾‾‾‾
     &amp;lt;  Please use semantic commit messages(see https://www.conventionalcommits.org/en/v1.0.0 )
        \________
 
@@ -284,7 +362,7 @@ Percentage of the requests served within a certain time (ms)
      └─&amp;gt; Type: chore, docs, feat, fix, refactor, style, or test.
     fix[&amp;lt;scope&amp;gt;]: ABC-1234 summary (Jira id mandatory for type -fix)
 
-&apos;&lt;/span&gt;
+'&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-iqE&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;commit_regex&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$1&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;then
     &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;error_msg&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&amp;amp;2
     &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;1
@@ -320,13 +398,13 @@ Percentage of the requests served within a certain time (ms)
 
 &lt;h3 id=&quot;find-url-and-times-it-was-called-within-the-specified-time-period&quot;&gt;Find url and times it was called within the specified time period&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
-&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:37:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:38:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:37:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:38:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;find-p95-latency-by-url&quot;&gt;Find p95 Latency by url&lt;/h3&gt;
 
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;2021&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;10&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;24&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:43:00.000000Z&apos;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&apos;2021-10-24T13:44:00.000000Z&apos;&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:43:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:44:00.000000Z'&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -421,7 +499,7 @@ $ sshpass -p your_password ssh user@hostname
    <content type="html">&lt;p&gt;Assuming you have spark downloaded on machine, you would run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.master.Master&lt;/code&gt; to run the Spark Master controller&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt;  ./spark-class org.apache.spark.deploy.master.Master
-Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:53:02 INFO Master: Started daemon with process name: 4804@DESKTOP-QCP2G4K
 21/10/16 09:53:02 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:53:02 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -430,10 +508,10 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:53:02 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:53:02 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:53:03 INFO Utils: Successfully started service &apos;sparkMaster&apos; on port 7077.
+21/10/16 09:53:03 INFO Utils: Successfully started service 'sparkMaster' on port 7077.
 21/10/16 09:53:03 INFO Master: Starting Spark master at spark://172.21.128.1:7077
 21/10/16 09:53:03 INFO Master: Running Spark version 3.1.2
-21/10/16 09:53:03 INFO Utils: Successfully started service &apos;MasterUI&apos; on port 8080.
+21/10/16 09:53:03 INFO Utils: Successfully started service 'MasterUI' on port 8080.
 21/10/16 09:53:03 INFO MasterWebUI: Bound MasterWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8080
 21/10/16 09:53:03 INFO Master: I have been elected leader! New state: ALIVE
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -443,7 +521,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 &lt;p&gt;Now, we want to run the spark executor using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077&lt;/code&gt;&lt;/p&gt;
 
 &lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\spark\spark\bin&amp;gt; ./spark-class org.apache.spark.deploy.worker.Worker spark://172.21.128.1:7077
-Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.properties
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 21/10/16 09:56:12 INFO Worker: Started daemon with process name: 8800@DESKTOP-QCP2G4K
 21/10/16 09:56:12 WARN Shell: Did not find winutils.exe: {}
 21/10/16 09:56:12 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
@@ -452,7 +530,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:56:12 INFO SecurityManager: Changing view acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: Changing modify acls groups to:
 21/10/16 09:56:12 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(user); groups with view permissions: Set(); users  with modify permissions: Set(user); groups with modify permissions: Set()
-21/10/16 09:56:12 INFO Utils: Successfully started service &apos;sparkWorker&apos; on port 57088.
+21/10/16 09:56:12 INFO Utils: Successfully started service 'sparkWorker' on port 57088.
 21/10/16 09:56:12 INFO Worker: Worker decommissioning not enabled, SIGPWR will result in exiting.
 21/10/16 09:56:13 INFO Worker: Starting Spark worker 172.21.128.1:57088 with 12 cores, 30.9 GiB RAM
 21/10/16 09:56:13 INFO Worker: Running Spark version 3.1.2
@@ -460,7 +538,7 @@ Using Spark&apos;s default log4j profile: org/apache/spark/log4j-defaults.proper
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
 21/10/16 09:56:13 INFO ResourceUtils: No custom resources configured for spark.worker.
 21/10/16 09:56:13 INFO ResourceUtils: ==============================================================
-21/10/16 09:56:13 INFO Utils: Successfully started service &apos;WorkerUI&apos; on port 8081.
+21/10/16 09:56:13 INFO Utils: Successfully started service 'WorkerUI' on port 8081.
 21/10/16 09:56:13 INFO WorkerWebUI: Bound WorkerWebUI to 0.0.0.0, and started at http://DESKTOP-QCP2G4K.mshome.net:8081
 21/10/16 09:56:13 INFO Worker: Connecting to master 172.21.128.1:7077...
 21/10/16 09:56:13 INFO TransportClientFactory: Successfully created connection to /172.21.128.1:7077 after 21 ms (0 ms spent in bootstraps)
@@ -641,146 +719,6 @@ For example, in our case pod takes around 15 seconds in all different environmen
 &lt;blockquote&gt;
   &lt;p&gt;Sometimes, you have to deal with legacy applications that might require an additional startup time on their first initialization. In &amp;gt; such cases, it can be tricky to set up liveness probe parameters without compromising the fast response to deadlocks that motivated such &amp;gt; a probe. The trick is to set up a startup probe with the same command, HTTP or TCP check, with a failureThreshold * periodSeconds long &amp;gt; enough to cover the worse case startup time.&lt;/p&gt;
 &lt;/blockquote&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Meaning of at-least once, at-most once and exactly-once delivery</title>
-   <link href="https://madhur.co.in/blog/2021/07/18/meaning-of-at-least-once-at-most-once-and-exactly-once-delivery.html"/>
-   <updated>2021-07-18T00:00:00+05:30</updated>
-   <id>id:/blog/2021/07/18/meaning-of-at-least-once-at-most-once-and-exactly-once-delivery</id>
-   <content type="html">&lt;p&gt;Ever since I have started working with Kafka, I have came across these terms very frequently, At-least once, At-most once and Exactly Once.&lt;/p&gt;
-
-&lt;p&gt;As an engineer, It is very important to understand these concepts.&lt;/p&gt;
-&lt;h2 id=&quot;at-most-once-configuration&quot;&gt;At-most once Configuration&lt;/h2&gt;
-
-&lt;p&gt;As the name suggests, At-most-once means the message will be delivered at-most once. Once delivered, there is no chance of delivering again. If the consumer is unable to handle the message due to some exception, the message is lost. This is because Kafka is automatically committing the last offset used.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to true&lt;/li&gt;
-  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto.commit.interval.ms&lt;/code&gt; to low value&lt;/li&gt;
-  &lt;li&gt;Since &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;auto.commit&lt;/code&gt; is set to true, there is no need to call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; from the consumer.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Note that it is also possible to have at-lest-once scenario with the same configuration. Let’s say consumer successfully processed the message successfully into its store and in the meantime before kafka could commit the offset, consumer was restarted. In this scenario, consumer would again get the same message.&lt;/p&gt;
-
-&lt;p&gt;Hence, even if using at-most once or at-least once configuration, consumer should be always prepared to handle the duplicates.&lt;/p&gt;
-
-&lt;h2 id=&quot;at-least-once-configuration&quot;&gt;At-least once configuration&lt;/h2&gt;
-&lt;p&gt;At-least once as the name suggests, message will be delivered atleast once. There is high chance that message will be delivered again as duplicate.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;false&lt;/code&gt; OR&lt;/li&gt;
-  &lt;li&gt;Consumer should now then take control of the message offset commits to Kafka by making the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt; call.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Let’s say consumer has processed the messages and committed the messages to its local store, but consumer crashes and did not get a chance to commit offset to Kafka before it has crashed. When consumer restarts, Kafka would deliver messages from the last offset, resulting in duplicates.&lt;/p&gt;
-
-&lt;h2 id=&quot;exactly-once-configuration&quot;&gt;Exactly-once configuration&lt;/h2&gt;
-
-&lt;p&gt;Exactly-once as the name suggests, there will be only one and once message delivery. It difficult to achieve in practice.&lt;/p&gt;
-
-&lt;p&gt;In this case offset needs to be manually managed.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enable.auto.commit&lt;/code&gt; to false&lt;/li&gt;
-  &lt;li&gt;Do not make call to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.commitSync()&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Implement a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ConsumerRebalanceListener&lt;/code&gt; and within the listener perform &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;consumer.seek(topicPartition,offset);&lt;/code&gt; to start reading from a specific offset of that topic/partition.&lt;/li&gt;
-  &lt;li&gt;While processing the messages, get hold of the offset of each message. Store the processed message’s offset in an atomic way along with the processed message using atomic-transaction. When data is stored in relational database atomicity is easier to implement. For non-relational data-store such as HDFS store or No-SQL store one way to achieve atomicity is as follows: Store the offset along with the message.&lt;/li&gt;
-&lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>How tinyUrl Does redirection</title>
-   <link href="https://madhur.co.in/blog/2021/07/11/how-tinyurl-does-redirection.html"/>
-   <updated>2021-07-11T00:00:00+05:30</updated>
-   <id>id:/blog/2021/07/11/how-tinyurl-does-redirection</id>
-   <content type="html">&lt;p&gt;I got curious about how tinyUrl does redirection for its Url. Is it standard browser redirect with 301/302 status code or something else?&lt;/p&gt;
-
-&lt;p&gt;With that created this tinyUrl &lt;a href=&quot;https://tinyurl.com/madhur25&quot;&gt;tinyurl.com/madhur25&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Figured out that it was indeed a browser redirect using 301 status code.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ curl https://tinyurl.com/madhur25 -vvv
-* STATE: INIT =&amp;gt; CONNECT handle 0x600057310; line 1407 (connection #-5000)
-* Added connection 0. The cache now contains 1 members
-*   Trying 104.20.138.65...
-* TCP_NODELAY set
-* STATE: CONNECT =&amp;gt; WAITCONNECT handle 0x600057310; line 1460 (connection #0)
-* Connected to tinyurl.com (104.20.138.65) port 443 (#0)
-* STATE: WAITCONNECT =&amp;gt; SENDPROTOCONNECT handle 0x600057310; line 1567 (connection #0)
-* Marked for [keep alive]: HTTP default
-* ALPN, offering http/1.1
-* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
-* successfully set certificate verify locations:
-*   CAfile: /usr/ssl/certs/ca-bundle.crt
-  CApath: none
-* TLSv1.2 (OUT), TLS header, Certificate Status (22):
-* TLSv1.2 (OUT), TLS handshake, Client hello (1):
-* STATE: SENDPROTOCONNECT =&amp;gt; PROTOCONNECT handle 0x600057310; line 1581 (connection #0)
-* TLSv1.2 (IN), TLS handshake, Server hello (2):
-* TLSv1.2 (IN), TLS handshake, Certificate (11):
-* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
-* TLSv1.2 (IN), TLS handshake, Server finished (14):
-* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
-* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
-* TLSv1.2 (OUT), TLS handshake, Finished (20):
-* TLSv1.2 (IN), TLS change cipher, Client hello (1):
-* TLSv1.2 (IN), TLS handshake, Finished (20):
-* SSL connection using TLSv1.2 / ECDHE-ECDSA-AES128-GCM-SHA256
-* ALPN, server accepted to use http/1.1
-* Server certificate:
-*  subject: C=US; ST=California; L=San Francisco; O=Cloudflare, Inc.; CN=sni.cloudflaressl.com
-*  start date: Jul  3 00:00:00 2021 GMT
-*  expire date: Jul  2 23:59:59 2022 GMT
-*  subjectAltName: host &quot;tinyurl.com&quot; matched cert&apos;s &quot;tinyurl.com&quot;
-*  issuer: C=US; O=Cloudflare, Inc.; CN=Cloudflare Inc ECC CA-3
-*  SSL certificate verify ok.
-* STATE: PROTOCONNECT =&amp;gt; DO handle 0x600057310; line 1602 (connection #0)
-&amp;gt; GET /madhur25 HTTP/1.1
-&amp;gt; Host: tinyurl.com
-&amp;gt; User-Agent: curl/7.51.0
-&amp;gt; Accept: */*
-&amp;gt;
-* STATE: DO =&amp;gt; DO_DONE handle 0x600057310; line 1664 (connection #0)
-* STATE: DO_DONE =&amp;gt; WAITPERFORM handle 0x600057310; line 1791 (connection #0)
-* STATE: WAITPERFORM =&amp;gt; PERFORM handle 0x600057310; line 1801 (connection #0)
-* HTTP 1.1 or later with persistent connection, pipelining supported
-&amp;lt; HTTP/1.1 301 Moved Permanently
-&amp;lt; Date: Sun, 11 Jul 2021 04:11:01 GMT
-&amp;lt; Content-Type: text/html; charset=UTF-8
-&amp;lt; Transfer-Encoding: chunked
-&amp;lt; Connection: keep-alive
-&amp;lt; X-Powered-By: PHP/7.3.28
-&amp;lt; Location: https://www.madhur.co.in/
-&amp;lt; Cache-Control: max-age=0, public, s-max-age=900, stale-if-error: 86400
-&amp;lt; Referrer-Policy: unsafe-url
-&amp;lt; Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-&amp;lt; CF-Cache-Status: DYNAMIC
-&amp;lt; Expect-CT: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;
-* Server cloudflare is not blacklisted
-&amp;lt; Server: cloudflare
-&amp;lt; CF-RAY: 66cf2f6e7e293c13-BLR
-&amp;lt; alt-svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400, h3=&quot;:443&quot;; ma=86400
-&amp;lt;
-&amp;lt;!DOCTYPE html&amp;gt;
-&amp;lt;html&amp;gt;
-    &amp;lt;head&amp;gt;
-        &amp;lt;meta charset=&quot;UTF-8&quot; /&amp;gt;
-        &amp;lt;meta http-equiv=&quot;refresh&quot; content=&quot;0;url=&apos;https://www.madhur.co.in/&apos;&quot; /&amp;gt;
-
-        &amp;lt;title&amp;gt;Redirecting to https://www.madhur.co.in/&amp;lt;/title&amp;gt;
-    &amp;lt;/head&amp;gt;
-    &amp;lt;body&amp;gt;
-        Redirecting to &amp;lt;a href=&quot;https://www.madhur.co.in/&quot;&amp;gt;https://www.madhur.co.in/&amp;lt;/a&amp;gt;.
-    &amp;lt;/body&amp;gt;
-* STATE: PERFORM =&amp;gt; DONE handle 0x600057310; line 1965 (connection #0)
-* multi_done
-* Curl_http_done: called premature == 0
-* Connection #0 to host tinyurl.com left intact
-&amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
