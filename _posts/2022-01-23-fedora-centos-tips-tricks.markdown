@@ -15,7 +15,7 @@ Have been using Fedora as my desktop OS for quite some time now. Here are some o
 
 My preferred way of installing applications is through [Snap](https://snapcraft.io/docs/installing-snap-on-centos), [Flatpak](https://flatpak.org/), [Homebrew](https://brew.sh/) first and if they are not available in these channels, then only I revert to [rpm](https://rpm.org/)
 
-* Use Zsh
+### Use Zsh
 
 [Bash](https://www.gnu.org/software/bash/) is the default shell in these OS. If youo are using for daily use, [zsh](https://www.zsh.org/) helps a lot
 
@@ -120,5 +120,5 @@ If you are using Wifi on these OS, there are some services which do not start un
 In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use 
 
 ```
-systemctl disable systemd-networkd-wait-online.service
+systemctl disable NetworkManager-wait-online
 ```
