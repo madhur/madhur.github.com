@@ -3,13 +3,44 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-01-23T13:40:19+05:30</updated>
+ <updated>2022-01-30T11:31:46+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Increase Grub2 Resolution in CentOS / Fedora</title>
+   <link href="https://madhur.co.in/blog/2022/01/30/increase-grub2-resolution-centos.html"/>
+   <updated>2022-01-30T00:00:00+05:30</updated>
+   <id>id:/blog/2022/01/30/increase-grub2-resolution-centos</id>
+   <content type="html">&lt;p&gt;Quick tip to increase your boot loader resolution in Grub2.&lt;/p&gt;
+
+&lt;p&gt;The key is to set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GRUB_TERMINAL_OUTPUT&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gfxterm&lt;/code&gt; and provide some resolution modes appropriate for your monitor in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GRUB_GFXMODE&lt;/code&gt; parameter.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;GRUB_TIMEOUT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;5
+&lt;span class=&quot;nv&quot;&gt;GRUB_DISTRIBUTOR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sed&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s, release .*$,,g'&lt;/span&gt; /etc/system-release&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;GRUB_DEFAULT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;saved
+&lt;span class=&quot;nv&quot;&gt;GRUB_DISABLE_SUBMENU&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GRUB_TERMINAL_OUTPUT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;gfxterm&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;GRUB_CMDLINE_LINUX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;crashkernel=512m selinux=0&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;GRUB_DISABLE_RECOVERY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;true&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;GRUB_ENABLE_BLSCFG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;GRUB_GFXMODE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;3840x2160,2560x1440,1920x1080x16
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Optionally, you can also provide a custom font using&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;GRUB_FONT&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/boot/grub2/unicode.pf2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There are other solutions on the internet suggesting to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vbeinfo&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;videoinfo&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;These solutions do not seem to work for newer systems which boot using &lt;a href=&quot;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&quot;&gt;EFI&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Fedora / CentOS Tips & Tricks - running it as Desktop OS</title>
@@ -22,9 +53,7 @@
 
 &lt;p&gt;My preferred way of installing applications is through &lt;a href=&quot;https://snapcraft.io/docs/installing-snap-on-centos&quot;&gt;Snap&lt;/a&gt;, &lt;a href=&quot;https://flatpak.org/&quot;&gt;Flatpak&lt;/a&gt;, &lt;a href=&quot;https://brew.sh/&quot;&gt;Homebrew&lt;/a&gt; first and if they are not available in these channels, then only I revert to &lt;a href=&quot;https://rpm.org/&quot;&gt;rpm&lt;/a&gt;&lt;/p&gt;
 
-&lt;ul&gt;
-  &lt;li&gt;Use Zsh&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&quot;use-zsh&quot;&gt;Use Zsh&lt;/h3&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.gnu.org/software/bash/&quot;&gt;Bash&lt;/a&gt; is the default shell in these OS. If youo are using for daily use, &lt;a href=&quot;https://www.zsh.org/&quot;&gt;zsh&lt;/a&gt; helps a lot&lt;/p&gt;
 
@@ -122,7 +151,7 @@ For that you will need dev tools such as &lt;a href=&quot;https://gcc.gnu.org/&q
 
 &lt;p&gt;In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use&lt;/p&gt;
 
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable systemd-networkd-wait-online.service
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable NetworkManager-wait-online
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
@@ -707,70 +736,6 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 &lt;/blockquote&gt;
 
 &lt;p&gt;&lt;img src=&quot;/images/Blog/cdc.png&quot; /&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Liveness and Readiness Probes</title>
-   <link href="https://madhur.co.in/blog/2021/08/14/liveness-and-readiness-probes.html"/>
-   <updated>2021-08-14T00:00:00+05:30</updated>
-   <id>id:/blog/2021/08/14/liveness-and-readiness-probes</id>
-   <content type="html">&lt;p&gt;When working with Kubernetes, &lt;a href=&quot;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&quot;&gt;Liveness and Readiness Probes&lt;/a&gt; are very important concepts to understand.&lt;/p&gt;
-
-&lt;h2 id=&quot;readiness-probe&quot;&gt;Readiness Probe&lt;/h2&gt;
-
-&lt;p&gt;Kubernetes fires readiness probe to the pod to determine if the pod is ready to serve traffic or not.&lt;/p&gt;
-
-&lt;p&gt;It can simply be defined as&lt;/p&gt;
-
-&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;readinessProbe&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cat&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/tmp/healthy&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;initialDelaySeconds&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;periodSeconds&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We can also provide readiness probe as HTTP or TCP commands&lt;/p&gt;
-
-&lt;h2 id=&quot;liveness-probe&quot;&gt;Liveness Probe&lt;/h2&gt;
-
-&lt;p&gt;Kubernetes fires readiness probe to the pod to determine if the pod is alive. If the pod is not alive, Kubernetes will restart the pod.&lt;/p&gt;
-
-&lt;p&gt;An important point to be noted is&lt;/p&gt;
-
-&lt;p&gt;` Liveness probes do not wait for readiness probes to succeed. If you want to wait before executing a liveness probe you should use initialDelaySeconds or a startupProbe.`&lt;/p&gt;
-
-&lt;p&gt;Which means that liveness probe and readiness probes have no dependency on each other. Some people assume that liveness probe start only after readiness probe is successful. This is misconception and is incorrect.&lt;/p&gt;
-
-&lt;h3 id=&quot;how-to-determine-the-value-of-these-probes&quot;&gt;How to determine the value of these probes&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Determine the max start-up time taken by the application server to successfully start accepting http connections.
-For example, in our case pod takes around 15 seconds in all different environments.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Assuming a buffer of about 15 seconds we set the liveness probe to 30 seconds, with the default retry of 3 times and time difference between each retry as 5 seconds (these default value are set in periodSeconds and failureThreshold for each probe).&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;This leads to liveness probe being successful in the worst case scenario up to 45 seconds.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;With another buffer of 15 seconds we set the readiness probe for 60 seconds.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;startup-probes&quot;&gt;Startup Probes&lt;/h2&gt;
-
-&lt;p&gt;Kubernetes introduced a new type of probe called startup probe to introduce the delay for liveness probes.&lt;/p&gt;
-
-&lt;p&gt;As per kubernetes&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Sometimes, you have to deal with legacy applications that might require an additional startup time on their first initialization. In &amp;gt; such cases, it can be tricky to set up liveness probe parameters without compromising the fast response to deadlocks that motivated such &amp;gt; a probe. The trick is to set up a startup probe with the same command, HTTP or TCP check, with a failureThreshold * periodSeconds long &amp;gt; enough to cover the worse case startup time.&lt;/p&gt;
-&lt;/blockquote&gt;
 </content>
  </entry>
  
