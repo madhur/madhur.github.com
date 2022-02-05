@@ -3,13 +3,41 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-01-30T11:31:46+05:30</updated>
+ <updated>2022-02-05T15:43:46+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>CentOS is dead</title>
+   <link href="https://madhur.co.in/blog/2022/02/05/centos-is-dead.html"/>
+   <updated>2022-02-05T00:00:00+05:30</updated>
+   <id>id:/blog/2022/02/05/centos-is-dead</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;https://www.redhat.com/en&quot;&gt;Red Hat&lt;/a&gt; has finally pulled the plug on the &lt;a href=&quot;https://www.centos.org/&quot;&gt;CentOS&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.centos.org/news-and-events/1322-october-centos-dojo-videos/&quot;&gt;Announcement: CentOS Linux 8 is EOL of December 31st 2021&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;CentOS which has been backbone of all the major servers, there are alternatives now out there such as &lt;a href=&quot;https://rockylinux.org/&quot;&gt;Rocky Linux&lt;/a&gt; and &lt;a href=&quot;https://almalinux.org/&quot;&gt;Alma Linux&lt;/a&gt; which claim 1:1 binary compatibility with &lt;a href=&quot;https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux&quot;&gt;RHEL&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If you are a desktop user such as me, its better to migrate to &lt;a href=&quot;https://getfedora.org/&quot;&gt;Fedora&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, if you are getting error such as&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Failed to download metadata for repo 'appstream'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;CentOS team has moved all their packages from mirrorlist.centos.org to vault.centos.org&lt;/p&gt;
+
+&lt;p&gt;Running below commands should solve the problem&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Increase Grub2 Resolution in CentOS / Fedora</title>
@@ -676,66 +704,6 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
     zsh-autosuggestions
 )
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Designing Change Data Capture</title>
-   <link href="https://madhur.co.in/blog/2021/08/20/design-change-data-capture.html"/>
-   <updated>2021-08-20T00:00:00+05:30</updated>
-   <id>id:/blog/2021/08/20/design-change-data-capture</id>
-   <content type="html">&lt;p&gt;Change Data Capture (CDC) is a very important topic for any backend developer to understand. Lot of systems backbone is based on Change data capture.&lt;/p&gt;
-
-&lt;p&gt;When I started my career as a backend developer, I did not have any understand of CDC. It is only after talking to some of the industry experts, I realized how important this topic is.&lt;/p&gt;
-
-&lt;p&gt;In this post, we will try to understand what is CDC and its practical usages:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Change Data Capture is a software process that identifies and tracks changes to data in a source database. The source database can be relational or any database for that matter. CDC provides real time or near real time movement of data by moving and processing data continuously as new database events occur.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;One of the example of CDC is Microsoft’s Cosmos DB Change Feed&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;a href=&quot;https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed&quot;&gt;Change feed in Azure Cosmos DB&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;a href=&quot;https://debezium.io/&quot;&gt;Debezium&lt;/a&gt; is another solution which provides CDC for the databases such as MySQL&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;change-data-capture-methods&quot;&gt;Change data capture Methods&lt;/h2&gt;
-
-&lt;h3 id=&quot;audit-columns&quot;&gt;Audit Columns&lt;/h3&gt;
-
-&lt;p&gt;By using columns such as LAST_UPDATED, DATE_MODIFIED columns. The application can query the rows which have modified that changed since data was last extracted and publish into the stream.&lt;/p&gt;
-
-&lt;h3 id=&quot;trigger-based-cdc&quot;&gt;Trigger Based CDC&lt;/h3&gt;
-
-&lt;p&gt;Defining database triggers that fire after INSERT, UPDATE OR DELETE commands are another method use to create a change log. Some databases have native support for triggers.&lt;/p&gt;
-
-&lt;h3 id=&quot;log-based-cdc&quot;&gt;Log based CDC&lt;/h3&gt;
-
-&lt;p&gt;Databases support transaction logs that store all database events. With log based CDC, new database transactions are read from source database native transaction logs.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The changes are captured without making application level changes and without having to &amp;gt; scan operational tables, both of which add additional workload and reduce source &amp;gt; systems’ performance.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&quot;using-cdc-to-implement-the-outbox-pattern&quot;&gt;Using CDC to implement the Outbox Pattern&lt;/h2&gt;
-
-&lt;p&gt;Content taken from https://debezium.io/blog/2020/02/10/event-sourcing-vs-cdc/&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;The primary goal of the Outbox Pattern is to ensure that updates to the application  state (stored in tables) and publishing of the respective domain event is done within a  single transaction. This involves creating an Outbox table in the database to collect  those domain events as part of a transaction. Having transactional guarantees around the  domain events and their propagation via the Outbox is important for data consistency  across a system.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;After the transaction completes, the domain events are then picked up by a CDC  connector and forwarded to interested consumers using a reliable message broker (see  Figure 5). Those consumers may then use the domain events to materialize their own  aggregates (see above per Event Sourcing)&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/cdc.png&quot; /&gt;&lt;/p&gt;
 </content>
  </entry>
  
