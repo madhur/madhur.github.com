@@ -3,13 +3,154 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-02-05T15:43:46+05:30</updated>
+ <updated>2022-02-20T10:18:52+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Useful Systemd commands</title>
+   <link href="https://madhur.co.in/blog/2022/02/20/useful-systemd-commands.html"/>
+   <updated>2022-02-20T00:00:00+05:30</updated>
+   <id>id:/blog/2022/02/20/useful-systemd-commands</id>
+   <content type="html">&lt;h3 id=&quot;find-the-time-taking-services-during-system-boot&quot;&gt;Find the time taking services during system boot&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemd-analyze blame
+
+7.239s libvirtd.service
+4.528s systemd-udev-settle.service
+2.829s dracut-initqueue.service
+2.043s plymouth-quit-wait.service
+1.541s vboxdrv.service
+1.435s udisks2.service
+1.149s sssd.service
+1.066s gssproxy.service
+1.065s zookeeper.service
+632ms lvm2-monitor.service
+411ms lightdm.service
+410ms systemd-logind.service
+238ms initrd-switch-root.service
+172ms accounts-daemon.service
+137ms polkit.service
+121ms sysroot.mount
+106ms gpd.service
+99ms systemd-fsck@dev-disk-by\x2duuid-BE47\x2d662D.service
+92ms systemd-tmpfiles-clean.service
+82ms upower.service
+81ms rtkit-daemon.service
+79ms chronyd.service
+79ms lm_sensors.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-total-time-to-boot&quot;&gt;Find total time to boot&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemd-analyze
+
+Startup finished in 8.359s (firmware) + 5.486s (loader) + 2.499s (kernel) + 3.289s (initrd) + 14.384s (userspace) = 34.018s
+graphical.target reached after 14.380s in userspace
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-the-dependencies-of-service&quot;&gt;Find the dependencies of service&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-dependencies --reverse plymouth-quit-wait.service
+
+plymouth-quit-wait.service
+● └─multi-user.target
+●   └─graphical.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-the-reverse-dependencies-of-service&quot;&gt;Find the reverse dependencies of service&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-dependencies  docker.service 
+
+docker.service
+● ├─containerd.service
+● ├─docker.socket
+● ├─system.slice
+● ├─network-online.target
+● └─sysinit.target
+●   ├─dev-hugepages.mount
+●   ├─dev-mqueue.mount
+●   ├─dracut-shutdown.service
+●   ├─import-state.service
+●   ├─iscsi-onboot.service
+●   ├─kmod-static-nodes.service
+●   ├─ldconfig.service
+●   ├─loadmodules.service
+●   ├─lvm2-lvmpolld.socket
+●   ├─lvm2-monitor.service
+●   ├─multipathd.service
+●   ├─nis-domainname.service
+●   ├─plymouth-read-write.service
+●   ├─plymouth-start.service
+●   ├─proc-sys-fs-binfmt_misc.automount
+●   ├─selinux-autorelabel-mark.service
+●   ├─sys-fs-fuse-connections.mount
+●   ├─sys-kernel-config.mount
+●   ├─sys-kernel-debug.mount
+●   ├─systemd-ask-password-console.path
+●   ├─systemd-binfmt.service
+●   ├─systemd-firstboot.service
+●   ├─systemd-hwdb-update.service
+●   ├─systemd-journal-catalog-update.service
+●   ├─systemd-journal-flush.service
+●   ├─systemd-journald.service
+●   ├─systemd-machine-id-commit.service
+●   ├─systemd-modules-load.service
+●   ├─systemd-random-seed.service
+●   ├─systemd-sysctl.service
+●   ├─systemd-sysusers.service
+●   ├─systemd-tmpfiles-setup-dev.service
+●   ├─systemd-tmpfiles-setup.service
+●   ├─systemd-udev-trigger.service
+●   ├─systemd-udevd.service
+●   ├─systemd-update-done.service
+●   ├─systemd-update-utmp.service
+●   ├─cryptsetup.target
+●   ├─local-fs.target
+●   │ ├─-.mount
+●   │ ├─boot-efi.mount
+●   │ ├─boot.mount
+●   │ ├─ostree-remount.service
+●   │ └─systemd-remount-fs.service
+●   └─swap.target
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-active-services&quot;&gt;Find Active Services&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-units --type=service --state=active
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-running-services&quot;&gt;Find Running Services&lt;/h3&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-units --type=service --state=running
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-enabled-units&quot;&gt;Find Enabled Units&lt;/h3&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-unit-files --state=enabled
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;find-loaded-services&quot;&gt;Find Loaded Services&lt;/h3&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl list-units --type=service --state=loaded
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;view-last-boot-log&quot;&gt;View last boot log&lt;/h3&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;journalctl -b
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;view-errors-in-services&quot;&gt;View errors in services&lt;/h3&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;journalctl -xe
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;view-kernel-logs&quot;&gt;View kernel logs&lt;/h3&gt;
+&lt;p&gt;```
+journalctl -k&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>CentOS is dead</title>
@@ -679,30 +820,6 @@ Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
         &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>zsh Autocomplete</title>
-   <link href="https://madhur.co.in/blog/2021/10/09/zsh-autocomplete.html"/>
-   <updated>2021-10-09T00:00:00+05:30</updated>
-   <id>id:/blog/2021/10/09/zsh-autocomplete</id>
-   <content type="html">&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;zsh&lt;/code&gt; shell by default does not come with auto suggestions facility unlike fish shell.&lt;/p&gt;
-
-&lt;p&gt;If you are looking for auto suggestions similar to fish, have a look at https://github.com/zsh-users/zsh-autosuggestions&lt;/p&gt;
-
-&lt;p&gt;For MAC OS, following steps are required to install&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Add into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.zshrc&lt;/code&gt;&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;plugins=( 
-    # other plugins...
-    zsh-autosuggestions
-)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>

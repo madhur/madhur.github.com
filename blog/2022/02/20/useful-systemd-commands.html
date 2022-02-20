@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Useful Systemd commands &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Useful Systemd commands" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Useful Systemd commands</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2022-02-20 00:00:00 +0530" pubdate="pubdate"
+            >20 February 2022</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <h3 id="find-the-time-taking-services-during-system-boot">Find the time taking services during system boot</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemd-analyze blame
+
+7.239s libvirtd.service
+4.528s systemd-udev-settle.service
+2.829s dracut-initqueue.service
+2.043s plymouth-quit-wait.service
+1.541s vboxdrv.service
+1.435s udisks2.service
+1.149s sssd.service
+1.066s gssproxy.service
+1.065s zookeeper.service
+632ms lvm2-monitor.service
+411ms lightdm.service
+410ms systemd-logind.service
+238ms initrd-switch-root.service
+172ms accounts-daemon.service
+137ms polkit.service
+121ms sysroot.mount
+106ms gpd.service
+99ms systemd-fsck@dev-disk-by\x2duuid-BE47\x2d662D.service
+92ms systemd-tmpfiles-clean.service
+82ms upower.service
+81ms rtkit-daemon.service
+79ms chronyd.service
+79ms lm_sensors.service
+</code></pre></div></div>
+
+<h3 id="find-total-time-to-boot">Find total time to boot</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemd-analyze
+
+Startup finished in 8.359s (firmware) + 5.486s (loader) + 2.499s (kernel) + 3.289s (initrd) + 14.384s (userspace) = 34.018s
+graphical.target reached after 14.380s in userspace
+</code></pre></div></div>
+
+<h3 id="find-the-dependencies-of-service">Find the dependencies of service</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-dependencies --reverse plymouth-quit-wait.service
+
+plymouth-quit-wait.service
+● └─multi-user.target
+●   └─graphical.target
+</code></pre></div></div>
+
+<h3 id="find-the-reverse-dependencies-of-service">Find the reverse dependencies of service</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-dependencies  docker.service 
+
+docker.service
+● ├─containerd.service
+● ├─docker.socket
+● ├─system.slice
+● ├─network-online.target
+● └─sysinit.target
+●   ├─dev-hugepages.mount
+●   ├─dev-mqueue.mount
+●   ├─dracut-shutdown.service
+●   ├─import-state.service
+●   ├─iscsi-onboot.service
+●   ├─kmod-static-nodes.service
+●   ├─ldconfig.service
+●   ├─loadmodules.service
+●   ├─lvm2-lvmpolld.socket
+●   ├─lvm2-monitor.service
+●   ├─multipathd.service
+●   ├─nis-domainname.service
+●   ├─plymouth-read-write.service
+●   ├─plymouth-start.service
+●   ├─proc-sys-fs-binfmt_misc.automount
+●   ├─selinux-autorelabel-mark.service
+●   ├─sys-fs-fuse-connections.mount
+●   ├─sys-kernel-config.mount
+●   ├─sys-kernel-debug.mount
+●   ├─systemd-ask-password-console.path
+●   ├─systemd-binfmt.service
+●   ├─systemd-firstboot.service
+●   ├─systemd-hwdb-update.service
+●   ├─systemd-journal-catalog-update.service
+●   ├─systemd-journal-flush.service
+●   ├─systemd-journald.service
+●   ├─systemd-machine-id-commit.service
+●   ├─systemd-modules-load.service
+●   ├─systemd-random-seed.service
+●   ├─systemd-sysctl.service
+●   ├─systemd-sysusers.service
+●   ├─systemd-tmpfiles-setup-dev.service
+●   ├─systemd-tmpfiles-setup.service
+●   ├─systemd-udev-trigger.service
+●   ├─systemd-udevd.service
+●   ├─systemd-update-done.service
+●   ├─systemd-update-utmp.service
+●   ├─cryptsetup.target
+●   ├─local-fs.target
+●   │ ├─-.mount
+●   │ ├─boot-efi.mount
+●   │ ├─boot.mount
+●   │ ├─ostree-remount.service
+●   │ └─systemd-remount-fs.service
+●   └─swap.target
+</code></pre></div></div>
+
+<h3 id="find-active-services">Find Active Services</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-units --type=service --state=active
+</code></pre></div></div>
+
+<h3 id="find-running-services">Find Running Services</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-units --type=service --state=running
+
+</code></pre></div></div>
+
+<h3 id="find-enabled-units">Find Enabled Units</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-unit-files --state=enabled
+</code></pre></div></div>
+
+<h3 id="find-loaded-services">Find Loaded Services</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl list-units --type=service --state=loaded
+</code></pre></div></div>
+
+<h3 id="view-last-boot-log">View last boot log</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>journalctl -b
+</code></pre></div></div>
+
+<h3 id="view-errors-in-services">View errors in services</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>journalctl -xe
+</code></pre></div></div>
+
+<h3 id="view-kernel-logs">View kernel logs</h3>
+<p>```
+journalctl -k</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/systemd">Systemd</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2022/02/20/useful-systemd-commands/';
+  var disqus_title = 'Useful Systemd commands';
+  var disqus_url = 'https://madhur.co.in/blog/2022/02/20/useful-systemd-commands.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2022 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script>  <script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-23769089-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script> 
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
