@@ -3,13 +3,31 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-03-06T12:06:10+05:30</updated>
+ <updated>2022-03-13T14:38:22+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Setup Cassandra Cluster using Ansible and Vagrant</title>
+   <link href="https://madhur.co.in/blog/2022/03/13/setup-cassandra-cluster-using-ansible-vagrant.html"/>
+   <updated>2022-03-13T00:00:00+05:30</updated>
+   <id>id:/blog/2022/03/13/setup-cassandra-cluster-using-ansible-vagrant</id>
+   <content type="html">&lt;p&gt;If you want to provision a test &lt;a href=&quot;https://cassandra.apache.org/_/index.html&quot;&gt;Apache Cassandra&lt;/a&gt; cluster for yourself, I recently created an automated solution using &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; and &lt;a href=&quot;https://www.ansible.com/&quot;&gt;Ansible&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Git clone the repository &lt;a href=&quot;https://github.com/madhur/vagrant-cassandra-ansible&quot;&gt;https://github.com/madhur/vagrant-cassandra-ansible&lt;/a&gt; and use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vagrant up&lt;/code&gt; command to bring up the five Ubuntu 18.0 nodes.&lt;/p&gt;
+
+&lt;p&gt;This is a fork of original &lt;a href=&quot;https://github.com/apkan/vagrant-cassandra-ansible&quot;&gt;https://github.com/apkan/vagrant-cassandra-ansible&lt;/a&gt;, however it had couple of issues:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;It was using old version of Ubuntu which did not had &lt;a href=&quot;https://systemd.io/&quot;&gt;systemd&lt;/a&gt; but instead used &lt;a href=&quot;https://upstart.ubuntu.com/&quot;&gt;upstart&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Had 3 node cluster&lt;/li&gt;
+&lt;/ul&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Parental Control Softwares for Windows and Linux</title>
@@ -48,7 +66,7 @@
 
 &lt;p&gt;Even with Linux, its best to have parental control softwares.&lt;/p&gt;
 
-&lt;p&gt;For linux, I found it best to have &lt;a href=&quot;http://e2guardian.org/cms/index.php&quot;&gt;http://e2guardian.org/cms/index.php&lt;/a&gt; and &lt;a href=&quot;https://www.privoxy.org/&quot;&gt;Privoxy&lt;/a&gt;. Once installed, you need to just enable proxy in your browser to enable them.&lt;/p&gt;
+&lt;p&gt;For linux, I found it best to have &lt;a href=&quot;http://e2guardian.org/cms/index.php&quot;&gt;E2guardian Web filtering&lt;/a&gt; and &lt;a href=&quot;https://www.privoxy.org/&quot;&gt;Privoxy&lt;/a&gt;. Once installed, you need to just enable proxy in your browser to enable them.&lt;/p&gt;
 
 &lt;p&gt;The list of blocked sites can simply be entered in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/e2guardian/lists/bannedsitelist&lt;/code&gt; and restart the service using&lt;/p&gt;
 
@@ -755,65 +773,6 @@ Percentage of the requests served within a certain time (ms)
 &lt;h3 id=&quot;find-p95-latency-by-url&quot;&gt;Find p95 Latency by url&lt;/h3&gt;
 
 &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;95&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&amp;lt;alb_name&amp;gt;&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'2021'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'10'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'24'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:43:00.000000Z'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_creation_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2021-10-24T13:44:00.000000Z'&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p95&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;limit&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Backup and Restore specific cassandra tables</title>
-   <link href="https://madhur.co.in/blog/2021/10/30/backup-and-restore-specific-cassandra-tables.html"/>
-   <updated>2021-10-30T00:00:00+05:30</updated>
-   <id>id:/blog/2021/10/30/backup-and-restore-specific-cassandra-tables</id>
-   <content type="html">&lt;p&gt;Recently, we had to make alterations directly to production cassandra tables due to an urgent bug fix and required to backup and restore specific cassandra tables so that we could roll back incase something gone wrong.&lt;/p&gt;
-
-&lt;p&gt;Backup and restoring tables is seamless using &lt;a href=&quot;https://cassandra.apache.org/doc/latest/cassandra/tools/nodetool/nodetool.html&quot;&gt;nodetool&lt;/a&gt; and &lt;a href=&quot;https://cassandra.apache.org/doc/latest/cassandra/tools/sstable/sstableloader.html&quot;&gt;sstableloader&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;cassandra-table-backup-steps&quot;&gt;Cassandra table backup steps&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Login to Casandra Box&lt;/li&gt;
-  &lt;li&gt;Execute the following commands from the cassandra bin directory&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;   ./nodetool snapshot -cf &amp;lt;tablename&amp;gt; &amp;lt;keyspace&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Repeat the same for any other table to be backed up&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;This will create snapshots in the data directory at following locations:&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cassandra/data/data/&amp;lt;keyspace&amp;gt;/&amp;lt;table&amp;gt;-&amp;lt;UID&amp;gt;/snapshots/&amp;lt;epoch&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;cassandra-table-restore-steps&quot;&gt;Cassandra table restore steps&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Login to cassandra box&lt;/li&gt;
-  &lt;li&gt;Navigate to following folder&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cassandra/data/data/f&amp;lt;keyspace&amp;gt;/&amp;lt;table&amp;gt;-&amp;lt;UID&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;Execute following command&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  cp snapshots/&amp;lt;epoch&amp;gt;/*.* .
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Repeat the same for any other table to be restored&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Once all the snapshots have been copied to data directory, run following commands in sequence:&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  ./nodetool refresh &amp;lt;keyspace&amp;gt; &amp;lt;table&amp;gt;;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
