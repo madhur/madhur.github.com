@@ -41,7 +41,7 @@ Other than that, [Fedora Labs Astronomy edition](https://labs.fedoraproject.org/
 
 Even with Linux, its best to have parental control softwares.
 
-For linux, I found it best to have [http://e2guardian.org/cms/index.php](http://e2guardian.org/cms/index.php) and [Privoxy](https://www.privoxy.org/). Once installed, you need to just enable proxy in your browser to enable them.
+For linux, I found it best to have [E2guardian Web filtering](http://e2guardian.org/cms/index.php) and [Privoxy](https://www.privoxy.org/). Once installed, you need to just enable proxy in your browser to enable them.
 
 The list of blocked sites can simply be entered in `/etc/e2guardian/lists/bannedsitelist` and restart the service using
 
