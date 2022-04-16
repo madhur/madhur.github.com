@@ -3,13 +3,57 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-03-20T00:25:54+05:30</updated>
+ <updated>2022-04-16T17:22:24+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Difference between upper90 and mean90</title>
+   <link href="https://madhur.co.in/blog/2022/04/16/difference-betweeen-upper90-mean90.html"/>
+   <updated>2022-04-16T00:00:00+05:30</updated>
+   <id>id:/blog/2022/04/16/difference-betweeen-upper90-mean90</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/statsd/statsd&quot;&gt;StatsD&lt;/a&gt; which is an excellent metrics aggregator, which can send aggregate and send metrics to variety of backends such as &lt;a href=&quot;https://graphiteapp.org/&quot;&gt;Graphite&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;One of the aggregations which StatsD is generate an upper_99 and mean_99 for series of metrics. It is important to understand the differences between two. This is because if you are just measuring mean_99 , you might be missing on certain outliers which are important to understand the overall picture in the system.&lt;/p&gt;
+
+&lt;p&gt;For example, if the latencies reported by system are&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0 
+5 
+10 
+15 
+20 
+25 
+30 
+35 
+40 
+45 
+50 
+55 
+60 
+65 
+70 
+75 
+80 
+85 
+90 
+95
+---
+
+
+mean_90 = 42.5 (mean of 0 - 85)
+upper_90 = 85
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you are plotting &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_90&lt;/code&gt; , in the dashboard to monitor the latencies, it would give a very wrong picture, as the 90th percentile of dataset is actually 85.5. Looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mean_90&lt;/code&gt;, completely distorts the picture.&lt;/p&gt;
+
+&lt;p&gt;Hence, always opt for looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;upper_99&lt;/code&gt; metrics while at important system metrics such as latencies.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Execute a transaction in etherum using ganache</title>
@@ -730,96 +774,6 @@ node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&qu
 &lt;p&gt;&lt;img src=&quot;/images/kernel-panic.jpg&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Turns out that latest AMD processors are not supported on Kernel 3.x which comes with CentOS 7. I had to upgrade it to Cent OS 8 which comes with Kernel 4.x&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Offload IO Intensive tasks to worker threads</title>
-   <link href="https://madhur.co.in/blog/2021/11/20/offload-io-intensive-tasks-to-threads.html"/>
-   <updated>2021-11-20T00:00:00+05:30</updated>
-   <id>id:/blog/2021/11/20/offload-io-intensive-tasks-to-threads</id>
-   <content type="html">&lt;p&gt;In most of the modern web REST implementations, much of the task is spent waiting on IO, for example waiting for data to be fetched from database or through remote REST service.&lt;/p&gt;
-
-&lt;p&gt;When the application receives high traffic on a thread based application server, such as Tomcat, much of its threads are just waiting for data to come from database or remote REST service.&lt;/p&gt;
-
-&lt;p&gt;This is inefficient because, you cannot increase the number of threads vertically in a single compute. Theoretically you can, but its just pure inefficient because most of those threads will be just blocked.&lt;/p&gt;
-
-&lt;p&gt;Thus, in order to scale such applications, the better model is to offload this waiting to pool of worker threads. This will free up the Tomcat http worker threads(“http-nio-n”) to recieve more incoming requests.&lt;/p&gt;
-
-&lt;p&gt;This can be easily achieved using &lt;a href=&quot;https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/context/request/async/DeferredResult.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeferredResult&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;A typical implementation in Java / Spring looks like this:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@GetMapping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/deferred&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getDeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;CompletableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResultService&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getDelayedResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DeferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;thenAccept&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;hasResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ResponseEntity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpStatus&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;OK&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;completableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;exceptionally&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;deferredResult&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DeferredResultService&lt;/code&gt; instead of returning the actual result, just returns the future, whose actual implementation happens in a worker thread&lt;/p&gt;
-
-&lt;p&gt;If we run benchmark this API using &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;ab&lt;/a&gt; by firing 100 requests concurrently, we see that it consumers only ~30 http-nio-n threads.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PS D:\apache\Apache24\bin&amp;gt; ./ab -n 100 -c 100 http://localhost:8080/deferred
-This is ApacheBench, Version 2.3 &amp;lt;$Revision: 1879490 $&amp;gt;
-Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
-Licensed to The Apache Software Foundation, http://www.apache.org/
-
-Benchmarking localhost (be patient).....done
-
-
-Server Software:
-Server Hostname:        localhost
-Server Port:            8080
-
-Document Path:          /deferred
-Document Length:        8 bytes
-
-Concurrency Level:      100
-Time taken for tests:   20.030 seconds
-Complete requests:      100
-Failed requests:        0
-Total transferred:      14000 bytes
-HTML transferred:       800 bytes
-Requests per second:    4.99 [#/sec] (mean)
-Time per request:       20029.525 [ms] (mean)
-Time per request:       200.295 [ms] (mean, across all concurrent requests)
-Transfer rate:          0.68 [Kbytes/sec] received
-
-Connection Times (ms)
-              min  mean[+/-sd] median   max
-Connect:        0    0   0.3      0       1
-Processing: 10008 10014   3.9  10015   10022
-Waiting:    10004 10014   4.0  10015   10022
-Total:      10008 10014   3.9  10015   10022
-
-Percentage of the requests served within a certain time (ms)
-  50%  10015
-  66%  10016
-  75%  10017
-  80%  10017
-  90%  10020
-  95%  10021
-  98%  10022
-  99%  10022
- 100%  10022 (longest request)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/threads.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Check out the demo project in my &lt;a href=&quot;https://github.com/madhur/deferred-result&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
 
 </content>
  </entry>
