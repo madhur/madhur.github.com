@@ -3,13 +3,74 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-04-16T17:22:24+05:30</updated>
+ <updated>2022-05-15T09:25:06+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Redis Node moving out of cluster repeatedly</title>
+   <link href="https://madhur.co.in/blog/2022/05/15/redis-node-moving-out-cluster-repeatedly.html"/>
+   <updated>2022-05-15T00:00:00+05:30</updated>
+   <id>id:/blog/2022/05/15/redis-node-moving-out-cluster-repeatedly</id>
+   <content type="html">&lt;p&gt;Recently, we noticed a production issue where some of the redis slave nodes were repeatedly being kicked out of the cluster. This was interesting since that redis cluster had been running without any issues for almost 3  years.&lt;/p&gt;
+
+&lt;p&gt;The logs were repeatedly filled with slave trying to get full sync from master nodes again and again.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Connection with master lost.
+* Caching the disconnected master state.
+* Connecting to MASTER x.x.x.x:6379
+* MASTER &amp;lt;-&amp;gt; SLAVE sync started
+* Non blocking connect for SYNC fired the event.
+* Master replied to PING, replication can continue...
+* Trying a partial resynchronization (request 7cbefe20e13fffe4deddc4191479e95a2e9c39e5:2723884887862).
+* Full resync from master: 7cbefe20e13fffe4deddc4191479e95a2e9c39e5:2724002738232
+* Discarding previously cached master state.
+* MASTER &amp;lt;-&amp;gt; SLAVE sync: receiving 1438631551 bytes from master
+# I/O error trying to sync with MASTER: connection lost
+* Connecting to MASTER x.x.x.x:6379
+* MASTER &amp;lt;-&amp;gt; SLAVE sync started
+* Non blocking connect for SYNC fired the event.
+* Master replied to PING, replication can continue...
+* Partial resynchronization not possible (no cached master)
+* Full resync from master: 7cbefe20e13fffe4deddc4191479e95a2e9c39e5:2724138480914
+* MASTER &amp;lt;-&amp;gt; SLAVE sync: receiving 1439249094 bytes from master
+# I/O error trying to sync with MASTER: connection lost
+* Connecting to MASTER x.x.x.x:6379
+* MASTER &amp;lt;-&amp;gt; SLAVE sync started
+* Non blocking connect for SYNC fired the event.
+* Master replied to PING, replication can continue...
+* FAIL message received from 485f5d069279fe4690faa4e92a121d85c894050e about 680a7c6ae885094d806206522ce639e3527e9dbf
+# Cluster state changed: fail
+* Partial resynchronization not possible (no cached master)
+* Full resync from master: 7cbefe20e13fffe4deddc4191479e95a2e9c39e5:2724269765637
+# Cluster state changed: ok
+* Clear FAIL state for node 680a7c6ae885094d806206522ce639e3527e9dbf: master without slots is reachable again.
+* MASTER &amp;lt;-&amp;gt; SLAVE sync: receiving 1440022343 bytes from master
+# I/O error trying to sync with MASTER: connection lost
+* Connecting to MASTER x.x.x.x:6379
+* MASTER &amp;lt;-&amp;gt; SLAVE sync started
+* Non blocking connect for SYNC fired the event.
+* Master replied to PING, replication can continue...
+* Partial resynchronization not possible (no cached master)
+* Full resync from master: 7cbefe20e13fffe4deddc4191479e95a2e9c39e5:2724405468825
+* MASTER &amp;lt;-&amp;gt; SLAVE sync: receiving 1440902610 bytes from master
+# I/O error trying to sync with MASTER: connection lost
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The offending nodes had lower &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client-output-buffer-limit&lt;/code&gt; value (256mb) which caused the replication process to go into infinite loop. The reason for this is documented in 
+&lt;a href=&quot;https://redis.com/blog/the-endless-redis-replication-loop-what-why-and-how-to-solve-it/&quot;&gt;Redis blog: The Endless Redis Replication Loop: What, Why and How to Solve It&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;We bumped up the value to recommended 512mb value and problem went away.&lt;/p&gt;
+
+&lt;p&gt;The question is, why did the slave disconnect from the master in the first place?&lt;/p&gt;
+
+&lt;p&gt;Well, that will be covered in the next post.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Difference between upper90 and mean90</title>
@@ -757,24 +818,6 @@ node &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;s1&qu
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This will enable you to proxy all requests through proxy server running at 127.0.0.1 on port 8888, which could be &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt; or &lt;a href=&quot;https://portswigger.net/burp/communitydownload&quot;&gt;Burp&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Kernel Panic with AMD Ryzen 5600x on CentOS 7</title>
-   <link href="https://madhur.co.in/blog/2021/11/27/linux-kernel-panic.html"/>
-   <updated>2021-11-27T00:00:00+05:30</updated>
-   <id>id:/blog/2021/11/27/linux-kernel-panic</id>
-   <content type="html">&lt;p&gt;Recently, I upgraded my personal computer CPU from &lt;a href=&quot;https://ark.intel.com/content/www/us/en/ark/products/52214/intel-core-i72600k-processor-8m-cache-up-to-3-80-ghz.html&quot;&gt;Intel Core i7 2600K (SandyBridge)&lt;/a&gt; to &lt;a href=&quot;https://www.amd.com/en/products/cpu/amd-ryzen-5-5600x&quot;&gt;AMD Ryzen 5600x&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The older processor was a decade old and the accompanying board didn’t support new age SSDs such as &lt;a href=&quot;https://www.samsung.com/us/computing/memory-storage/solid-state-drives/980-pro-pcie-4-0-nvme-ssd-1tb-mz-v8p1t0b-am/&quot;&gt;Nvme PCI 4 SSD&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;However, post upgradation, as soon as I booted my existing system running CentOS 7, I recieved a dreaded &lt;a href=&quot;https://en.wikipedia.org/wiki/Kernel_panic&quot;&gt;kernel panic&lt;/a&gt; very similar to &lt;a href=&quot;https://en.wikipedia.org/wiki/Blue_screen_of_death&quot;&gt;BSOD in Windows&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/kernel-panic.jpg&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Turns out that latest AMD processors are not supported on Kernel 3.x which comes with CentOS 7. I had to upgrade it to Cent OS 8 which comes with Kernel 4.x&lt;/p&gt;
-
 </content>
  </entry>
  
