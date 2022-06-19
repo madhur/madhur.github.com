@@ -76,7 +76,7 @@ await new web3.eth.Contract(abi).deploy({data: bytecode, arguments: []})
 ```javascript
 function random() public view returns (uint) {
        return uint(keccak256(block.difficulty, block.timestamp, players));
-    }
+}
 ```
 
 to 
@@ -84,7 +84,7 @@ to
 ```javascript
 function random() public view returns (uint) {
        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players)));
-    }
+}
 ```
 
 * The constructor function is now written with name `constructor` instead of function with name of contract
