@@ -3,13 +3,68 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-06-19T20:15:40+05:30</updated>
+ <updated>2022-07-10T12:43:11+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Gracefully shutting down JVM applications</title>
+   <link href="https://madhur.co.in/blog/2022/07/10/gracefully-shutting-down-jvm-applications.html"/>
+   <updated>2022-07-10T00:00:00+05:30</updated>
+   <id>id:/blog/2022/07/10/gracefully-shutting-down-jvm-applications</id>
+   <content type="html">&lt;p&gt;When writing applications for JVM which are long running such as application servers and web servers, it is very important to make sure that they shut down cleanly as and when required.&lt;/p&gt;
+
+&lt;p&gt;This is very important in cloud computing, as cloud technologies such as Kubernetes might kill the pod due to low resources or as part of scale up  / scale down processes.&lt;/p&gt;
+
+&lt;p&gt;Similarly, applications deployed on VMs in AWS, Azure or GCE can be terminated due to underlying hardware issues.&lt;/p&gt;
+
+&lt;p&gt;These technologies typically send a &lt;a href=&quot;https://man7.org/linux/man-pages/man7/signal.7.html&quot;&gt;SIGTERM&lt;/a&gt; signal to the running task to ensure it is able to clean up gracefully and finally after some threshold, the process is sent a &lt;a href=&quot;https://man7.org/linux/man-pages/man7/signal.7.html&quot;&gt;SIGKILL&lt;/a&gt; signal to terminate the container.&lt;/p&gt;
+
+&lt;p&gt;In JVM, we can register a hook to be executed whenever processes recieves SIGTERM signal&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nc&quot;&gt;Runtime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getRuntime&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;addShutdownHook&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Thread&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// shutdown gracefully&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When running containerized applications, it is important to ensure that whenever a pod / container is sent SIGTERM, our JVM process recieves it.&lt;/p&gt;
+
+&lt;p&gt;This can be done by ensuring that our JVM process is the root process inside the container.&lt;/p&gt;
+
+&lt;p&gt;For example when writing &lt;a href=&quot;https://docs.docker.com/engine/reference/builder/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dockerfile&lt;/code&gt;&lt;/a&gt; for our container:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ENTRYPOINT &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;java&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;-jar&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;/message-server-1.0.0.jar&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Will ensure that our java process is the root process.&lt;/p&gt;
+
+&lt;p&gt;There could be few instances, where the entry point needs to execute some complex logic upon startup, such as when using shell scripts as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ENTRYPOINT &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;/startup.sh&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In those cases, it is important to use &lt;a href=&quot;https://stackoverflow.com/questions/18351198/what-are-the-uses-of-the-exec-command-in-shell-scripts&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exec&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exec&lt;/code&gt; replaces the current program in the current process, without forking a new process, ensuring that our java program remains the root process in the container.&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;java &lt;span class=&quot;nt&quot;&gt;-jar&lt;/span&gt; message-server-1.0.0.jar
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Quick tip: How do we know if our process recieved any signal?&lt;/p&gt;
+
+&lt;p&gt;We can monitor the signals sent to any process through &lt;a href=&quot;https://man7.org/linux/man-pages/man1/strace.1.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;strace&lt;/code&gt;&lt;/a&gt; as follows&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;strace &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'trace=!all'&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 128278                                                                                                           
+strace: Process 128278 attached
+&lt;span class=&quot;nt&quot;&gt;---&lt;/span&gt; SIGTERM &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;si_signo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;SIGTERM, &lt;span class=&quot;nv&quot;&gt;si_code&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;SI_USER, &lt;span class=&quot;nv&quot;&gt;si_pid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;103440, &lt;span class=&quot;nv&quot;&gt;si_uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1000&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;---&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Web3 ethereum development breaking changes</title>
@@ -856,41 +911,6 @@ For that you will need dev tools such as &lt;a href=&quot;https://gcc.gnu.org/&q
 mysqldump -d --skip-comments --skip-extended-insert -u root -p -h mysql.host db2 &amp;gt; db2.sql   
 diff db1.sql db2.sql
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Forbidden error while accessing AWS services on Kubernetes</title>
-   <link href="https://madhur.co.in/blog/2022/01/09/forbidden-aws-eks.html"/>
-   <updated>2022-01-09T00:00:00+05:30</updated>
-   <id>id:/blog/2022/01/09/forbidden-aws-eks</id>
-   <content type="html">&lt;p&gt;If you have recently moved towards Kubernetes from EC2 and getting forbidden error while accessing AWS services make sure to have aws-sts in classpath.&lt;/p&gt;
-
-&lt;p&gt;In nutshell, the following dependency must be present&lt;/p&gt;
-
-&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sts --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;com.amazonaws&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;aws-java-sdk-sts&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;1.12.136&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The corresponding dependency for the AWS SDK v2 will be&lt;/p&gt;
-
-&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sts --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;software.amazon.awssdk&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;sts&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;2.16.24&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;scope&amp;gt;&lt;/span&gt;test&lt;span class=&quot;nt&quot;&gt;&amp;lt;/scope&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This is because the credential provider which is concerned with loading the credentials from EKS role lies in sts module&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/aws/aws-sdk-java/blob/7bf0fbec42de8a7d54875510f27fb363ca2d19f5/aws-java-sdk-sts/src/main/java/com/amazonaws/services/securitytoken/internal/STSProfileCredentialsService.java&quot;&gt;https://github.com/aws/aws-sdk-java/blob/7bf0fbec42de8a7d54875510f27fb363ca2d19f5/aws-java-sdk-sts/src/main/java/com/amazonaws/services/securitytoken/internal/STSProfileCredentialsService.java&lt;/a&gt;&lt;/p&gt;
-
 </content>
  </entry>
  
