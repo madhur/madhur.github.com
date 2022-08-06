@@ -3,13 +3,87 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-07-10T12:43:11+05:30</updated>
+ <updated>2022-08-06T20:02:29+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Fedora Tips & Tricks</title>
+   <link href="https://madhur.co.in/blog/2022/08/06/fedora-tips.html"/>
+   <updated>2022-08-06T00:00:00+05:30</updated>
+   <id>id:/blog/2022/08/06/fedora-tips</id>
+   <content type="html">&lt;p&gt;This is a followup post to &lt;a href=&quot;/blog/2022/01/23/fedora-centos-tips-tricks.html&quot;&gt;ealier post on Fedora&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Mount folders without requiring passwords&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Usually, mount folder permission is only available to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; user. In order to allow this for normal user, we need to add a policy rule for
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Polkit&quot;&gt;polkit&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo vi /etc/polkit-1/localauthority/50-local.d/10-mount-without-password.pkla
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[storage group mount override]&lt;/span&gt; 
+&lt;span class=&quot;py&quot;&gt;Identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;unix-user:madhur &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;org.freedesktop.udisks2.filesystem-mount;org.freedesktop.udisks2.filesystem-mount-system &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ResultAny&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ResultInactive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ResultActive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Similarly, if you want to allow normal user to manage &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd&lt;/code&gt; units&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/etc/polkit-1/localauthority/50-local.d/service-auth.pkla
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[Allow yourname to start/stop/restart services]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;unix-user:madhur &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;org.freedesktop.systemd1.manage-units &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ResultActive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;yes&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Set a default font in Fedora Linux&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;match&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;target=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;pattern&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;&amp;lt;test&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;family&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;qual=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;any&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;monospace&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;&amp;lt;/test&amp;gt;&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;&amp;lt;edit&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;binding=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;strong&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;mode=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;prepend&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;family&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;JetBrains Mono&lt;span class=&quot;nt&quot;&gt;&amp;lt;/string&amp;gt;&lt;/span&gt;
+   &lt;span class=&quot;nt&quot;&gt;&amp;lt;/edit&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/match&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Change the &lt;a href=&quot;https://wiki.archlinux.org/title/CPU_frequency_scaling&quot;&gt;CPU governor policy&lt;/a&gt; for maximum performance&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;performance&quot; | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Auto login user through &lt;a href=&quot;https://wiki.archlinux.org/title/LightDM#Greeter&quot;&gt;LightDM&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/etc/lightdm/lightdm.conf.d/12-autologin.conf
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[SeatDefaults]&lt;/span&gt; 
+&lt;span class=&quot;py&quot;&gt;autologin-user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;madhur&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Gracefully shutting down JVM applications</title>
@@ -896,20 +970,6 @@ For that you will need dev tools such as &lt;a href=&quot;https://gcc.gnu.org/&q
 &lt;p&gt;In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use&lt;/p&gt;
 
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable NetworkManager-wait-online
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Quickly Compare two MySQL databases</title>
-   <link href="https://madhur.co.in/blog/2022/01/16/quickly-compare-two-mysql-databases.html"/>
-   <updated>2022-01-16T00:00:00+05:30</updated>
-   <id>id:/blog/2022/01/16/quickly-compare-two-mysql-databases</id>
-   <content type="html">&lt;p&gt;A very nifty and quick way to compare two mysql databases is to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mysqldump&lt;/code&gt; command. This also works well if you just want to compare DDL&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mysqldump -d --skip-comments --skip-extended-insert -u root -p -h mysql.host db1  &amp;gt; db1.sql   
-mysqldump -d --skip-comments --skip-extended-insert -u root -p -h mysql.host db2 &amp;gt; db2.sql   
-diff db1.sql db2.sql
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
