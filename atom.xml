@@ -3,13 +3,57 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2022-08-06T20:02:29+05:30</updated>
+ <updated>2022-09-03T23:12:14+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Adding HTTP Proxy to Spring WebFlux Client</title>
+   <link href="https://madhur.co.in/blog/2022/09/03/adding-http-proxy-spring-webflux-client.html"/>
+   <updated>2022-09-03T00:00:00+05:30</updated>
+   <id>id:/blog/2022/09/03/adding-http-proxy-spring-webflux-client</id>
+   <content type="html">&lt;p&gt;What’s the normal way to add http proxy in JVM?&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;JAVA_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Dhttp&lt;/span&gt;.proxyHost&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;127.0.0.1 &lt;span class=&quot;nt&quot;&gt;-Dhttp&lt;/span&gt;.proxyPort&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8888
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Similarly, for https&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;JAVA_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Dhttps&lt;/span&gt;.proxyHost&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;127.0.0.1 &lt;span class=&quot;nt&quot;&gt;-Dhttps&lt;/span&gt;.proxyPort&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8888
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, these properties do not work if you are using Spring Webflux Client&lt;/p&gt;
+
+&lt;p&gt;There is a bug logged for the same&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/reactor/reactor-netty/issues/887#issuecomment-549439355&quot;&gt;https://github.com/reactor/reactor-netty/issues/887#issuecomment-549439355&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The proxy support in Spring Webflux client code can only be added through code.&lt;/p&gt;
+
+&lt;p&gt;Here is the snippet:&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;kd&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;webClient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;builder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;errorHandlingFilter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;clientConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ReactorClientHttpConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;())).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;httpClient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;HttpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;tcpConfiguration&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tcpClient&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;
+                        &lt;span class=&quot;n&quot;&gt;tcpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;proxy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;ProxyProvider&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;Proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;127.0.0.1&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8888&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;httpClient&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Fedora Tips & Tricks</title>
@@ -857,120 +901,6 @@ sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /
 &lt;p&gt;There are other solutions on the internet suggesting to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vbeinfo&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;videoinfo&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;These solutions do not seem to work for newer systems which boot using &lt;a href=&quot;https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface&quot;&gt;EFI&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Fedora / CentOS Tips & Tricks - running it as Desktop OS</title>
-   <link href="https://madhur.co.in/blog/2022/01/23/fedora-centos-tips-tricks.html"/>
-   <updated>2022-01-23T00:00:00+05:30</updated>
-   <id>id:/blog/2022/01/23/fedora-centos-tips-tricks</id>
-   <content type="html">&lt;p&gt;Have been using Fedora as my desktop OS for quite some time now. Here are some of the thigns that has helped:&lt;/p&gt;
-
-&lt;h3 id=&quot;use-snap-and-flatpak&quot;&gt;Use Snap and Flatpak&lt;/h3&gt;
-
-&lt;p&gt;My preferred way of installing applications is through &lt;a href=&quot;https://snapcraft.io/docs/installing-snap-on-centos&quot;&gt;Snap&lt;/a&gt;, &lt;a href=&quot;https://flatpak.org/&quot;&gt;Flatpak&lt;/a&gt;, &lt;a href=&quot;https://brew.sh/&quot;&gt;Homebrew&lt;/a&gt; first and if they are not available in these channels, then only I revert to &lt;a href=&quot;https://rpm.org/&quot;&gt;rpm&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;use-zsh&quot;&gt;Use Zsh&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.gnu.org/software/bash/&quot;&gt;Bash&lt;/a&gt; is the default shell in these OS. If youo are using for daily use, &lt;a href=&quot;https://www.zsh.org/&quot;&gt;zsh&lt;/a&gt; helps a lot&lt;/p&gt;
-
-&lt;h3 id=&quot;install-better-fonts&quot;&gt;Install better fonts&lt;/h3&gt;
-
-&lt;p&gt;The font rendering in linux is far behind from Mac / Windows. Use these fonts in terminal / code editors to have better experience. Its still lags behind Mac / Windows though.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/adobe-fonts/source-code-pro&quot;&gt;Source Code Pro&lt;/a&gt; &lt;br /&gt;
-&lt;a href=&quot;https://www.jetbrains.com/lp/mono/&quot;&gt;JetBrains Mono&lt;/a&gt; &lt;br /&gt;
-&lt;a href=&quot;https://docs.microsoft.com/en-us/typography/font-list/consolas&quot;&gt;Consolas&lt;/a&gt; &lt;br /&gt;
-&lt;a href=&quot;https://github.com/tonsky/FiraCode&quot;&gt;Fira Code&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;install-latest-kernel&quot;&gt;Install latest kernel&lt;/h3&gt;
-
-&lt;p&gt;The default kernel is usually older. If you are using latest hardware, installing the latest kernel version really helpsp if you are facing some non-detected hardware issue such as Wifi. Installing latest kernel is as easy as following these steps:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo dnf update -y
-sudo dnf -y install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
-# Install mainline kernels
-sudo dnf --enablerepo=elrepo-kernel install kernel-ml
-sudo dnf --enablerepo=elrepo-kernel install kernel-ml-{devel,headers}
-sudo reboot
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Verify latest kernel&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;uname -r
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;configure-display-scaling-and-text-scaling&quot;&gt;Configure display scaling and text scaling&lt;/h3&gt;
-
-&lt;p&gt;If you are using a high resolution 4k monitor, chance are that you will find text and icons too small for daily use. This is not just true for Linux, its true for Windows as well.
-Its just that Windows will act smart and automatically enable scaling to make display look sharp. In Linux, you will have to do it manually. There are two options: Display scaling and text scaling. It is important to understand the difference between two.&lt;/p&gt;
-
-&lt;p&gt;Display scaling scales all the screen elements including the windows, icons and text by a fraction, whereas text scaling only scales the text.&lt;/p&gt;
-
-&lt;p&gt;In my case, display scaling was resulting in icons looking blurry. Text scaling preserved the icon scaling but scaled only the text resuling in overall great display.&lt;/p&gt;
-
-&lt;p&gt;I would leave upto you to determine what works best for you.&lt;/p&gt;
-
-&lt;p&gt;Additional resources:&lt;br /&gt;
-&lt;a href=&quot;https://blogs.windows.com/windows-insider/2017/01/09/announcing-windows-10-insider-preview-build-15002-pc/#B4p617eIRYORoHM1.97&quot;&gt;The perils of running Windows 10 on a 4K monitor&lt;/a&gt;&lt;br /&gt;
-&lt;a href=&quot;https://www.linuxmint.com/rel_ulyana_cinnamon_whatsnew.php&quot;&gt;Display scaling introduced in Cinnamon&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;disable-selinux&quot;&gt;Disable SELinux&lt;/h3&gt;
-
-&lt;p&gt;SELinux is not really required for desktop linux. Its best to disable it.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vi /etc/sysconfig/selinux
-SELINUX=disabled
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;disable-firewalld&quot;&gt;Disable Firewalld&lt;/h3&gt;
-
-&lt;p&gt;For pure desktop usage, firewall is not at all required. Though it depends upon the type of network you are using. For public wifi networks, it is definitely required.
-For home networks, it can be disabled.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable firewalld
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;install-conky-for-system-monitoring&quot;&gt;Install Conky for System monitoring&lt;/h3&gt;
-
-&lt;p&gt;The default system monitor linux app is not at all comprehensive and is not the kind of app you would want to look at again and again.
-For system monitoring, I recommend &lt;a href=&quot;https://github.com/brndnmtthws/conky&quot;&gt;Conky&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;It needs bit of configuration and tweaks depending upon the hardware installed. But once configured, it works beatifully.
-You can have a look at my &lt;a href=&quot;https://github.com/madhur/awesome-conky&quot;&gt;configuration here&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;install-imwheel-for-mouse-wheel-scroll-customization&quot;&gt;Install imwheel for Mouse wheel scroll customization&lt;/h3&gt;
-
-&lt;p&gt;Linux apart from all the advancements, lacks basic feature of customizing mouse wheel scroll length / sensitivity.&lt;/p&gt;
-
-&lt;p&gt;Though &lt;a href=&quot;https://kde.org/&quot;&gt;KDE&lt;/a&gt; has recently introduced this feature, other desktop still lack it.&lt;/p&gt;
-
-&lt;p&gt;You can use &lt;a href=&quot;https://github.com/app/imwheel&quot;&gt;imwheel&lt;/a&gt; for this. Its not perfect, but it gets the job done with some minor quirks.&lt;/p&gt;
-
-&lt;p&gt;I use the following configuration in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.imwheelrc&lt;/code&gt;&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;.*&quot;
-None,       Up,     Up,     9
-None,       Down,   Down,   9
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;install-development-tools-and-multimedia-codecs&quot;&gt;Install Development Tools and Multimedia codecs&lt;/h3&gt;
-
-&lt;p&gt;This is something basic. If you want to become even an intermediate user in Linux, it will require knowledge of compiling and building source code.
-For that you will need dev tools such as &lt;a href=&quot;https://gcc.gnu.org/&quot;&gt;GCC&lt;/a&gt;, &lt;a href=&quot;https://mesonbuild.com/&quot;&gt;Meson&lt;/a&gt; and &lt;a href=&quot;https://ninja-build.org/&quot;&gt;Ninja&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;wifi-issues&quot;&gt;Wifi Issues&lt;/h3&gt;
-
-&lt;p&gt;If you are using Wifi on these OS, there are some services which do not start until Wifi has come up. There will be a warning during startup&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A start job is running for wait for network to be configured&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;In that case, to disable the wait-online service to prevent the system from waiting on a network connection, and use&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl disable NetworkManager-wait-online
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
