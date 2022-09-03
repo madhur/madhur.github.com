@@ -2,7 +2,7 @@
 layout: blog-post
 title: "Fedora Tips & Tricks"
 excerpt: "Fedora Tips & Tricks"
-disqus_id: /2022/07/10/fedora-tips-tricks/
+disqus_id: /2022/08/06/fedora-tips-tricks/
 tags:    
     - Fedora
 ---
