@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Adding HTTP Proxy to Spring WebFlux Client"
-excerpt: "Adding HTTP Proxy to Spring WebFlux Client"
+title: "Linux Tips and Tricks"
+excerpt: "Linux Tips and Tricks"
 disqus_id: /2022/11/20/linux-tips-tricks/
 tags:
     - Linux
