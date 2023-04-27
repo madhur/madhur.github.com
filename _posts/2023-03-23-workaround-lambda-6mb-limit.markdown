@@ -5,7 +5,7 @@ excerpt: "Workaround AWS Lambda 6 MB Response size limit"
 disqus_id: /2023/03/23/workaround-lambda-6mb-limit/
 tags:
     - AWS
-	- NodeJs
+    - NodeJs
 ---
 
 [AWS Lambda](https://aws.amazon.com/lambda/) is a great way to build serverless applications.
