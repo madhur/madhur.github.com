@@ -62,6 +62,6 @@ Exception in thread "main" java.lang.IndexOutOfBoundsException: bad SID 0
 
 ```
 
-It seems this is a known issue filed here https://bugs.openjdk.org/browse/JDK-8237544
+It seems this is a known issue filed here [https://bugs.openjdk.org/browse/JDK-8237544](https://bugs.openjdk.org/browse/JDK-8237544)
 
 If anyone knows the resolution for this other than upgrading the JVM version, please let me know in the comments.
