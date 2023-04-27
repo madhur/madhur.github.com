@@ -3,7 +3,7 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-04-27T11:22:52+05:30</updated>
+ <updated>2023-04-27T11:33:12+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -12,10 +12,73 @@
  
  
  <entry>
-   <title></title>
-   <link href="https://madhur.co.in/blog/2023/04/27/2023-03-23-workaround-lambda-6mb-limit.html"/>
-   <updated>2023-04-27T11:22:52+05:30</updated>
-   <id>id:/blog/2023/04/27/2023-03-23-workaround-lambda-6mb-limit</id>
+   <title>Taking memory dump of JVM Applications</title>
+   <link href="https://madhur.co.in/blog/2023/04/23/taking-memory-dump-jvm.html"/>
+   <updated>2023-04-23T00:00:00+05:30</updated>
+   <id>id:/blog/2023/04/23/taking-memory-dump-jvm</id>
+   <content type="html">&lt;p&gt;It seems taking memory dump of JVM applications have changed in recent versions.&lt;/p&gt;
+
+&lt;p&gt;Pre java11, heap dump was takn using the jmap command as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ ~/.sdkman/candidates/java/11.0.12-open/bin/jmap -dump:live, format=b,file=dump.hprof 169213                                                                                                                                                           
+Error: More than one non-option argument
+Cannot connect to core dump or remote debug server. Use jhsdb jmap instea
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;However, it doesn’t work in Java11. The new command is:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ ~/.jdks/corretto-11.0.13/bin/jhsdb jmap --binaryheap --dumpfile heap.hprof --pid 169213                                                                                                                  
+Attaching to process ID 169213, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 11.0.13+8-LTS
+heap written to heap.hprof
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;There is another error which we have faced while taking heap dump of JVM11 applications&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Attaching to process ID 226420, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 11.0.19+7-LTS
+Exception in thread &quot;main&quot; java.lang.IndexOutOfBoundsException: bad SID 0
+	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.vmSymbols.symbolAt(vmSymbols.java:58)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.InstanceKlass.getFieldName(InstanceKlass.java:353)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.InstanceKlass.&amp;lt;init&amp;gt;(InstanceKlass.java:153)
+	at jdk.internal.reflect.GeneratedConstructorAccessor3.newInstance(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:490)
+	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.VMObjectFactory.newObject(VMObjectFactory.java:58)
+	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.VirtualBaseConstructor.instantiateWrapperFor(VirtualBaseConstructor.java:104)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.Metadata.instantiateWrapperFor(Metadata.java:73)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.java_lang_Class.asKlass(java_lang_Class.java:67)
+	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.HeapHprofBinWriter.writeClass(HeapHprofBinWriter.java:611)
+	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.AbstractHeapGraphWriter$1.doObj(AbstractHeapGraphWriter.java:82)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.ObjectHeap.iterateLiveRegions(ObjectHeap.java:356)
+	at jdk.hotspot.agent/sun.jvm.hotspot.oops.ObjectHeap.iterate(ObjectHeap.java:174)
+	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.AbstractHeapGraphWriter.write(AbstractHeapGraphWriter.java:51)
+	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.HeapHprofBinWriter.write(HeapHprofBinWriter.java:443)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.writeHeapHprofBin(JMap.java:182)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.run(JMap.java:97)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.startInternal(Tool.java:260)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.start(Tool.java:223)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.execute(Tool.java:118)
+	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.main(JMap.java:176)
+	at jdk.hotspot.agent/sun.jvm.hotspot.SALauncher.runJMAP(SALauncher.java:369)
+	at jdk.hotspot.agent/sun.jvm.hotspot.SALauncher.main(SALauncher.java:538)
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It seems this is a known issue filed here &lt;a href=&quot;https://bugs.openjdk.org/browse/JDK-8237544&quot;&gt;https://bugs.openjdk.org/browse/JDK-8237544&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If anyone knows the resolution for this other than upgrading the JVM version, please let me know in the comments.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Workaround AWS Lambda 6 MB Response size limit</title>
+   <link href="https://madhur.co.in/blog/2023/03/23/workaround-lambda-6mb-limit.html"/>
+   <updated>2023-03-23T00:00:00+05:30</updated>
+   <id>id:/blog/2023/03/23/workaround-lambda-6mb-limit</id>
    <content type="html">&lt;p&gt;&lt;a href=&quot;https://aws.amazon.com/lambda/&quot;&gt;AWS Lambda&lt;/a&gt; is a great way to build serverless applications.&lt;/p&gt;
 
 &lt;p&gt;However, there lot of limitations imposed by AWS Lambda.&lt;/p&gt;
@@ -82,69 +145,6 @@
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Taking memory dump of JVM Applications</title>
-   <link href="https://madhur.co.in/blog/2023/04/23/taking-memory-dump-jvm.html"/>
-   <updated>2023-04-23T00:00:00+05:30</updated>
-   <id>id:/blog/2023/04/23/taking-memory-dump-jvm</id>
-   <content type="html">&lt;p&gt;It seems taking memory dump of JVM applications have changed in recent versions.&lt;/p&gt;
-
-&lt;p&gt;Pre java11, heap dump was takn using the jmap command as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ ~/.sdkman/candidates/java/11.0.12-open/bin/jmap -dump:live, format=b,file=dump.hprof 169213                                                                                                                                                           
-Error: More than one non-option argument
-Cannot connect to core dump or remote debug server. Use jhsdb jmap instea
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;However, it doesn’t work in Java11. The new command is:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;➜ ~/.jdks/corretto-11.0.13/bin/jhsdb jmap --binaryheap --dumpfile heap.hprof --pid 169213                                                                                                                  
-Attaching to process ID 169213, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 11.0.13+8-LTS
-heap written to heap.hprof
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;There is another error which we have faced while taking heap dump of JVM11 applications&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Attaching to process ID 226420, please wait...
-Debugger attached successfully.
-Server compiler detected.
-JVM version is 11.0.19+7-LTS
-Exception in thread &quot;main&quot; java.lang.IndexOutOfBoundsException: bad SID 0
-	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.vmSymbols.symbolAt(vmSymbols.java:58)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.InstanceKlass.getFieldName(InstanceKlass.java:353)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.InstanceKlass.&amp;lt;init&amp;gt;(InstanceKlass.java:153)
-	at jdk.internal.reflect.GeneratedConstructorAccessor3.newInstance(Unknown Source)
-	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
-	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:490)
-	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.VMObjectFactory.newObject(VMObjectFactory.java:58)
-	at jdk.hotspot.agent/sun.jvm.hotspot.runtime.VirtualBaseConstructor.instantiateWrapperFor(VirtualBaseConstructor.java:104)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.Metadata.instantiateWrapperFor(Metadata.java:73)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.java_lang_Class.asKlass(java_lang_Class.java:67)
-	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.HeapHprofBinWriter.writeClass(HeapHprofBinWriter.java:611)
-	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.AbstractHeapGraphWriter$1.doObj(AbstractHeapGraphWriter.java:82)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.ObjectHeap.iterateLiveRegions(ObjectHeap.java:356)
-	at jdk.hotspot.agent/sun.jvm.hotspot.oops.ObjectHeap.iterate(ObjectHeap.java:174)
-	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.AbstractHeapGraphWriter.write(AbstractHeapGraphWriter.java:51)
-	at jdk.hotspot.agent/sun.jvm.hotspot.utilities.HeapHprofBinWriter.write(HeapHprofBinWriter.java:443)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.writeHeapHprofBin(JMap.java:182)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.run(JMap.java:97)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.startInternal(Tool.java:260)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.start(Tool.java:223)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.Tool.execute(Tool.java:118)
-	at jdk.hotspot.agent/sun.jvm.hotspot.tools.JMap.main(JMap.java:176)
-	at jdk.hotspot.agent/sun.jvm.hotspot.SALauncher.runJMAP(SALauncher.java:369)
-	at jdk.hotspot.agent/sun.jvm.hotspot.SALauncher.main(SALauncher.java:538)
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;It seems this is a known issue filed here &lt;a href=&quot;https://bugs.openjdk.org/browse/JDK-8237544&quot;&gt;https://bugs.openjdk.org/browse/JDK-8237544&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;If anyone knows the resolution for this other than upgrading the JVM version, please let me know in the comments.&lt;/p&gt;
 </content>
  </entry>
  
