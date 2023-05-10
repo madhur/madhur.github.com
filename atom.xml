@@ -3,13 +3,55 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-04-27T11:33:12+05:30</updated>
+ <updated>2023-05-10T21:38:38+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>zsh and /etc/profile</title>
+   <link href="https://madhur.co.in/blog/2023/05/10/zsh-and-etc-profile.html"/>
+   <updated>2023-05-10T00:00:00+05:30</updated>
+   <id>id:/blog/2023/05/10/zsh-and-etc-profile</id>
+   <content type="html">&lt;p&gt;I just upgraded from zsh v5.5 to zsh v5.9 and some of my applications broke.&lt;/p&gt;
+
+&lt;p&gt;It seems the environment variable &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt; was blanked out in the process.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html#introduction&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt;&lt;/a&gt; holds the location of directories which can contain &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.desktop&lt;/code&gt; files.
+The &lt;a href=&quot;https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.desktop&lt;/code&gt; files&lt;/a&gt; are basically application shortcuts in the Linux desktop world.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt; and several such variables are initialized by scripts placed in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profiles.d&lt;/code&gt; folder. This folder is executed by the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; script.&lt;/p&gt;
+
+&lt;p&gt;Now, the twist is that the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; is only invoked by &lt;a href=&quot;https://en.wikipedia.org/wiki/Bash_(Unix_shell)&quot;&gt;bash shell&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;zsh uses its own set of configuration files:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zshrc&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zlogin&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zshenv&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Most modern distros will have a mechanism where in /etc/zsh/zprofile will invoke the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; which in turn will invoke all the scripts placed inside &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profiles.d&lt;/code&gt; folder.&lt;/p&gt;
+
+&lt;p&gt;However, if you are using the older distro or a non-Desktop distros such as &lt;a href=&quot;https://www.centos.org/&quot;&gt;CentOS&lt;/a&gt;, &lt;a href=&quot;https://www.redhat.com/en&quot;&gt;RedHat&lt;/a&gt;, this might not be the case.&lt;/p&gt;
+
+&lt;p&gt;In that case, you need to setup that linkage manually. In my case, I created the file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt; with the contents&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;emulate sh -c 'source /etc/profile'
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One other thing I found that some distros might invoke &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zprofile&lt;/code&gt; , instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In that case, you might want to symlink the files with&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ln -s /etc/zsh/zprofile /etc/zprofile  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Taking memory dump of JVM Applications</title>
@@ -826,56 +868,6 @@ DirectMap1G:    13631488 kB
 &lt;p&gt;to take effect.&lt;/p&gt;
 
 &lt;p&gt;Make sure that you don’t give &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo&lt;/code&gt; access to your kid to enable him to override these settings. Kids these days are very smart.&lt;/p&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Linux GUI Tips</title>
-   <link href="https://madhur.co.in/blog/2022/02/27/linux-gui-tips.html"/>
-   <updated>2022-02-27T00:00:00+05:30</updated>
-   <id>id:/blog/2022/02/27/linux-gui-tips</id>
-   <content type="html">&lt;h3 id=&quot;show-hidden-files-in-file-chooser-dialog-boxes&quot;&gt;Show hidden files in file chooser dialog boxes&lt;/h3&gt;
-
-&lt;p&gt;By Default, Linux Desktop enviornments such as Gnome, Cinnamon, Xfce do not display hidden files in file chooser dialog boxes. I found it to be really inconvienent.&lt;/p&gt;
-
-&lt;p&gt;The fix depends on the GTK version used by the application.&lt;/p&gt;
-
-&lt;p&gt;For GTK 3.0&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gsettings set org.gtk.Settings.FileChooser show-hidden true
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;For GTK 2.0, enter the following in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.config/gtk-2.0/gtkfilechooser.ini&lt;/code&gt;&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ShowHidden=true
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;setting-up-default-session-for-user&quot;&gt;Setting up default session for User&lt;/h3&gt;
-&lt;p&gt;If the user has multiple DE’s installed such as Gnone, Xfce, Cinnamon etc, the default environment is configured in&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/var/lib/AccountsService/users
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[com.redhat.AccountsServiceUser.System]
-id='centos'
-version-id='8'
-
-[org.freedesktop.DisplayManager.AccountsService]
-BackgroundFile='/home/madhur/Desktop/1r1kk9qi00961.png'
-
-[User]
-Language=en_US.utf8
-Session=xfce
-XSession=bspwm
-Icon=/usr/share/cinnamon/faces/2_10.png
-SystemAccount=false
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This is atleast the case for Redhat based systems such as Fedora.&lt;/p&gt;
-
-&lt;p&gt;If you want the user to get the option to choose the session before logging in, better install the greeter such as &lt;a href=&quot;https://github.com/Xubuntu/lightdm-gtk-greeter&quot;&gt;lightdm-gtk-greeter&lt;/a&gt; for &lt;a href=&quot;https://github.com/canonical/lightdm&quot;&gt;LightDM&lt;/a&gt; display manager.
-There are others available similarly for &lt;a href=&quot;https://wiki.gnome.org/Projects/GDM&quot;&gt;GDM&lt;/a&gt; display manager&lt;/p&gt;
-
-&lt;p&gt;There are various suggestions to user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.xinitrc&lt;/code&gt; . Note that this file is not used in case of interactive graphical login. It is only used when starting from terminal such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;startx&lt;/code&gt;&lt;/p&gt;
 
 </content>
  </entry>
