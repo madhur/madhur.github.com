@@ -3,7 +3,7 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-05-21T14:33:36+05:30</updated>
+ <updated>2023-05-28T09:11:51+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
@@ -200,6 +200,233 @@ Exception in thread &quot;main&quot; java.lang.IndexOutOfBoundsException: bad SI
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
+</content>
+ </entry>
+ 
+ <entry>
+   <title>A nifty Apache Benchmark alternative - hey</title>
+   <link href="https://madhur.co.in/blog/2023/02/23/apache-benchmark-alternative-hey.html"/>
+   <updated>2023-02-23T00:00:00+05:30</updated>
+   <id>id:/blog/2023/02/23/apache-benchmark-alternative-hey</id>
+   <content type="html">&lt;p&gt;If you have been reading my posts, I am a big fan of &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;Apache Benchmark&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Apache benchmark allows you to quickly run a small load test on a single machine.&lt;/p&gt;
+
+&lt;p&gt;You can specify various options like number of request and the concurrency of those requests.&lt;/p&gt;
+
+&lt;p&gt;For example, I can send 10 million requests with a concurrency of 1000 as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ab -n 10000000 -c 1000 &quot;http://localhost:8080&quot;  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Once the ab is finished benchmarking:&lt;/p&gt;
+
+&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Server Software:        
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /
+Document Length:        53 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   332.363 seconds
+Complete requests:      10000000
+Failed requests:        4301677
+   (Connect: 0, Receive: 0, Length: 4301677, Exceptions: 0)
+Total transferred:      1621642574 bytes
+HTML transferred:       571642574 bytes
+Requests per second:    30087.60 [#/sec] (mean)
+Time per request:       33.236 [ms] (mean)
+Time per request:       0.033 [ms] (mean, across all concurrent requests)
+Transfer rate:          4764.78 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   15  21.8     14    1047
+Processing:     0   18   3.9     17      53
+Waiting:        0   13   3.2     12      41
+Total:          1   33  22.2     32    1076
+
+Percentage of the requests served within a certain time (ms)
+  50%     32
+  66%     34
+  75%     35
+  80%     36
+  90%     39
+  95%     42
+  98%     46
+  99%     49
+ 100%   1076 (longest request)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One of the things missing in ab is the ability to send requests at a specified requests/seconds&lt;/p&gt;
+
+&lt;p&gt;The ability to specify requests/seconds is very useful when testing for things such as cache evictions etc&lt;/p&gt;
+
+&lt;p&gt;That is when I stumbled upon &lt;a href=&quot;https://github.com/rakyll/hey&quot;&gt;hey&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/rakyll/hey&quot;&gt;hey&lt;/a&gt; is a dropin replacement for &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;ab&lt;/a&gt; with the ability to specify requests/seconds&lt;/p&gt;
+
+&lt;p&gt;For example, If I want to run the load for one minute at 100 requests/seconds, I can sepcify&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hey -z 1m -q 2 &quot;http://localhost:8080/&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;q&lt;/code&gt; parameter specifies the requests per second per worker. The default number of workers are 50 (can be overriden via -c parameter)&lt;/p&gt;
+
+&lt;p&gt;I also like the way the results are presented&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Summary:
+  Total:	60.0033 secs
+  Slowest:	0.3025 secs
+  Fastest:	0.0001 secs
+  Average:	0.0033 secs
+  Requests/sec:	99.9945
+  
+
+Response time histogram:
+  0.000 [1]	|
+  0.030 [5949]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.061 [0]	|
+  0.091 [0]	|
+  0.121 [0]	|
+  0.151 [0]	|
+  0.182 [0]	|
+  0.212 [0]	|
+  0.242 [0]	|
+  0.272 [0]	|
+  0.303 [50]	|
+
+
+Latency distribution:
+  10% in 0.0005 secs
+  25% in 0.0006 secs
+  50% in 0.0008 secs
+  75% in 0.0010 secs
+  90% in 0.0012 secs
+  95% in 0.0013 secs
+  99% in 0.0016 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:	0.0000 secs, 0.0001 secs, 0.3025 secs
+  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0013 secs
+  req write:	0.0000 secs, 0.0000 secs, 0.0008 secs
+  resp wait:	0.0032 secs, 0.0001 secs, 0.3013 secs
+  resp read:	0.0000 secs, 0.0000 secs, 0.0011 secs
+
+Status code distribution:
+  [202]	6000 responses
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Monitoring Guava Cache Statistics</title>
+   <link href="https://madhur.co.in/blog/2023/01/23/monitoring-guava-cache-statistics.html"/>
+   <updated>2023-01-23T00:00:00+05:30</updated>
+   <id>id:/blog/2023/01/23/monitoring-guava-cache-statistics</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/google/guava/wiki/CachesExplained&quot;&gt;Guava Cache&lt;/a&gt; is one of the most extensive in memory caching library for JVM.&lt;/p&gt;
+
+&lt;p&gt;Any high throughput application would not only employ &lt;a href=&quot;https://en.wikipedia.org/wiki/Distributed_cache&quot;&gt;distributed cache&lt;/a&gt; such as &lt;a href=&quot;https://redis.io/&quot;&gt;Redis&lt;/a&gt; but also in memory local caching.&lt;/p&gt;
+
+&lt;p&gt;The applications I have worked on extensively used &lt;a href=&quot;https://github.com/google/guava/wiki/CachesExplained&quot;&gt;Guava Cache&lt;/a&gt; to serve thousands of requests per seconds.&lt;/p&gt;
+
+&lt;p&gt;One of the problems I have faced in the past is monitoring the performance of the local cache itself. For example, the following metrics are very important to monitor for any cache:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Hit Rate&lt;/li&gt;
+  &lt;li&gt;Miss Rate&lt;/li&gt;
+  &lt;li&gt;No. of entries in the cache&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In addition, since Guava is a &lt;a href=&quot;https://stackoverflow.com/questions/43993731/what-is-a-loadingcache&quot;&gt;Loading Cache&lt;/a&gt;, it is also very important to monitor &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;The time the cache has spent loading new values&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;That is when I was looking to solution to these problems, I came across that solution is built itself in Guava Cache through 
+&lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#recordStats()&quot;&gt;recordstats&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;As per the documentation of &lt;a href=&quot;https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#recordStats()&quot;&gt;recordstats&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Enable the accumulation of CacheStats during the operation of the cache. Without this Cache.stats()will return zero for all statistics. Note that recording stats requires bookkeeping to be performed with each operation, and thus imposes a performance penalty on cache operation.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Since there is a performance overhead of this operation, I recommend that you have a &lt;a href=&quot;https://www.atlassian.com/continuous-delivery/principles/feature-flags&quot;&gt;feature flag&lt;/a&gt; to enable this functionality and turn it off after collecting the performance statistics for any high throughput application in production.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-to-enable-record-stats&quot;&gt;How to enable record stats?&lt;/h3&gt;
+
+&lt;p&gt;Simply use the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;recordStats()&lt;/code&gt; function while building the cache&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;n&quot;&gt;localCache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheBuilder&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;newBuilder&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;expireAfterWrite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;TimeUnit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;SECONDS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;refreshAfterWrite&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;TimeUnit&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;SECONDS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;maximumSize&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;recordStats&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CacheLoader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MatchListDO&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ListenableFuture&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;reload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Integer&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MatchListDO&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;oldValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            
+        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;how-do-i-visualize-the-data&quot;&gt;How do I visualize the data?&lt;/h3&gt;
+
+&lt;p&gt;The best way to visualize the Guava cache statistics is through &lt;a href=&quot;https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator&quot;&gt;Spring boot Actuator&lt;/a&gt; -&amp;gt; &lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt; -&amp;gt; &lt;a href=&quot;https://grafana.com/&quot;&gt;Grafana&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;First ensure that Spring boot actuator is enabled for your project.  It can be done by adding the dependency&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;org.springframework.boot&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;spring-boot-starter-actuator&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And adding the relevant properties in the configuration&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;management&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;metrics&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;export&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;prometheus&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;enable.jvm&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+
+    &lt;span class=&quot;na&quot;&gt;distribution&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;percentiles-histogram&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;endpoints&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;web&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;exposure&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;include&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;health, prometheus, loggers, metrics, scheduledtasks, threaddump, info&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, we enable prometheus monitoring in our application, by adding the &lt;a href=&quot;https://micrometer.io/&quot;&gt;micrometer dependency&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.micrometer&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;micrometer-registry-prometheus&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally we hookup our cache with micrometer using the &lt;a href=&quot;https://www.javadoc.io/static/io.micrometer/micrometer-core/1.1.0/index.html?io/micrometer/core/instrument/binder/cache/GuavaCacheMetrics.html&quot;&gt;GuavaCacheMetrics&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;nc&quot;&gt;GuavaCacheMetrics&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;monitor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;meterRegistry&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;localCache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;localCache&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I created a Guava cache monitoring dashboard in Grafana:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/guava_cache.png&quot;&gt;&lt;img src=&quot;/images/guava_cache.png&quot; width=&quot;600px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I have uploaded this &lt;a href=&quot;https://github.com/madhur/guava-cache-metrics-monitoring&quot;&gt;sample application on github&lt;/a&gt; along with the &lt;a href=&quot;https://github.com/madhur/guava-cache-metrics-monitoring/blob/master/grafana-dashboard.json&quot;&gt;Grafana dashboard&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
@@ -727,111 +954,6 @@ upper_90 = 85
 &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;serializedTransaction&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;transaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;serialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 &lt;span class=&quot;nx&quot;&gt;web3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;eth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sendSignedTransaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;serializedTransaction&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Clear buffer memory on Linux</title>
-   <link href="https://madhur.co.in/blog/2022/03/18/clear-buffer-memory-linux.html"/>
-   <updated>2022-03-18T00:00:00+05:30</updated>
-   <id>id:/blog/2022/03/18/clear-buffer-memory-linux</id>
-   <content type="html">&lt;p&gt;Recently, few of our production server running Redis was exhibiting high memory usage. Strangely, redis was consuming very low memory, but the overall system usage was pretty high (&amp;gt; 70 %).&lt;/p&gt;
-
-&lt;p&gt;One of the things which was common having this issue was that uptime of those systems was relatively higher than others. They were running without reboot for over 3 years.&lt;/p&gt;
-
-&lt;p&gt;That’s when someone indicated that its the buffer memeory which might be full.&lt;/p&gt;
-
-&lt;p&gt;What actually happens is that linux borrows memory for disk caching. Once the buffer which is kept in memory is actually written to disk, the buffer memory is not released immediately and instead kept for reuse. Overtime, what can happen is that lot of memory can be occupied in buffer memory.&lt;/p&gt;
-
-&lt;p&gt;This is not a cause of concern and once the applications demand the memory actually will be given from othe buffer memory pool, however this can be a concern if you have the alerts setup for memory usage. The buffer memory usage is not excluded from OS memory usage calculations and will cause the alarms to trigger.&lt;/p&gt;
-
-&lt;p&gt;The details of memory can be seen through:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ cat /proc meminfo                                                                                                                                                                                                                                                                                                  
-MemTotal:       32291324 kB
-MemFree:        18888628 kB
-MemAvailable:   24967520 kB
-Buffers:               0 kB
-Cached:          6619108 kB
-SwapCached:            0 kB
-Active:          2897464 kB
-Inactive:        9542004 kB
-Active(anon):      48104 kB
-Inactive(anon):  6022228 kB
-Active(file):    2849360 kB
-Inactive(file):  3519776 kB
-Unevictable:          48 kB
-Mlocked:              48 kB
-SwapTotal:      16850940 kB
-SwapFree:       16850940 kB
-Dirty:               876 kB
-Writeback:             0 kB
-AnonPages:       5616548 kB
-Mapped:          1052904 kB
-Shmem:            252404 kB
-KReclaimable:     146152 kB
-Slab:             339892 kB
-SReclaimable:     146152 kB
-SUnreclaim:       193740 kB
-KernelStack:       22464 kB
-PageTables:        96620 kB
-NFS_Unstable:          0 kB
-Bounce:                0 kB
-WritebackTmp:          0 kB
-CommitLimit:    32996600 kB
-Committed_AS:   22143820 kB
-VmallocTotal:   34359738367 kB
-VmallocUsed:      103880 kB
-VmallocChunk:          0 kB
-Percpu:            34176 kB
-HardwareCorrupted:     0 kB
-AnonHugePages:   1886208 kB
-ShmemHugePages:        0 kB
-ShmemPmdMapped:        0 kB
-FileHugePages:         0 kB
-FilePmdMapped:         0 kB
-HugePages_Total:       0
-HugePages_Free:        0
-HugePages_Rsvd:        0
-HugePages_Surp:        0
-Hugepagesize:       2048 kB
-Hugetlb:               0 kB
-DirectMap4k:      948848 kB
-DirectMap2M:    18917376 kB
-DirectMap1G:    13631488 kB
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SRreclaimable&lt;/code&gt; is the memory which can be reclaimed by clearing the buffer memory area.&lt;/p&gt;
-
-&lt;p&gt;The buffer memory can be clared by givng the command&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo 3 | sudo tee /proc/sys/vm/drop_caches
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;References:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.linuxatemyram.com/&quot;&gt;https://www.linuxatemyram.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://serverfault.com/questions/561350/unusually-high-dentry-cache-usage&quot;&gt;https://serverfault.com/questions/561350/unusually-high-dentry-cache-usage&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Setup Cassandra Cluster using Ansible and Vagrant</title>
-   <link href="https://madhur.co.in/blog/2022/03/13/setup-cassandra-cluster-using-ansible-vagrant.html"/>
-   <updated>2022-03-13T00:00:00+05:30</updated>
-   <id>id:/blog/2022/03/13/setup-cassandra-cluster-using-ansible-vagrant</id>
-   <content type="html">&lt;p&gt;If you want to provision a test &lt;a href=&quot;https://cassandra.apache.org/_/index.html&quot;&gt;Apache Cassandra&lt;/a&gt; cluster for yourself, I recently created an automated solution using &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; and &lt;a href=&quot;https://www.ansible.com/&quot;&gt;Ansible&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Git clone the repository &lt;a href=&quot;https://github.com/madhur/vagrant-cassandra-ansible&quot;&gt;https://github.com/madhur/vagrant-cassandra-ansible&lt;/a&gt; and use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vagrant up&lt;/code&gt; command to bring up the five Ubuntu 18.0 nodes.&lt;/p&gt;
-
-&lt;p&gt;This is a fork of original &lt;a href=&quot;https://github.com/apkan/vagrant-cassandra-ansible&quot;&gt;https://github.com/apkan/vagrant-cassandra-ansible&lt;/a&gt;, however it had couple of issues:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;It was using old version of Ubuntu which did not had &lt;a href=&quot;https://systemd.io/&quot;&gt;systemd&lt;/a&gt; but instead used &lt;a href=&quot;https://upstart.ubuntu.com/&quot;&gt;upstart&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Had 3 node cluster&lt;/li&gt;
-&lt;/ul&gt;
-
 </content>
  </entry>
  

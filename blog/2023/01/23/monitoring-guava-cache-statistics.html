@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Monitoring Guava Cache Statistics &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Monitoring Guava Cache Statistics" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Monitoring Guava Cache Statistics</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2023-01-23 00:00:00 +0530" pubdate="pubdate"
+            >23 January 2023</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p><a href="https://github.com/google/guava/wiki/CachesExplained">Guava Cache</a> is one of the most extensive in memory caching library for JVM.</p>
+
+<p>Any high throughput application would not only employ <a href="https://en.wikipedia.org/wiki/Distributed_cache">distributed cache</a> such as <a href="https://redis.io/">Redis</a> but also in memory local caching.</p>
+
+<p>The applications I have worked on extensively used <a href="https://github.com/google/guava/wiki/CachesExplained">Guava Cache</a> to serve thousands of requests per seconds.</p>
+
+<p>One of the problems I have faced in the past is monitoring the performance of the local cache itself. For example, the following metrics are very important to monitor for any cache:</p>
+
+<ul>
+  <li>Hit Rate</li>
+  <li>Miss Rate</li>
+  <li>No. of entries in the cache</li>
+</ul>
+
+<p>In addition, since Guava is a <a href="https://stackoverflow.com/questions/43993731/what-is-a-loadingcache">Loading Cache</a>, it is also very important to monitor <code class="language-plaintext highlighter-rouge">The time the cache has spent loading new values</code></p>
+
+<p>That is when I was looking to solution to these problems, I came across that solution is built itself in Guava Cache through 
+<a href="https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#recordStats()">recordstats</a></p>
+
+<p>As per the documentation of <a href="https://guava.dev/releases/19.0/api/docs/com/google/common/cache/CacheBuilder.html#recordStats()">recordstats</a></p>
+
+<blockquote>
+  <p>Enable the accumulation of CacheStats during the operation of the cache. Without this Cache.stats()will return zero for all statistics. Note that recording stats requires bookkeeping to be performed with each operation, and thus imposes a performance penalty on cache operation.</p>
+</blockquote>
+
+<p>Since there is a performance overhead of this operation, I recommend that you have a <a href="https://www.atlassian.com/continuous-delivery/principles/feature-flags">feature flag</a> to enable this functionality and turn it off after collecting the performance statistics for any high throughput application in production.</p>
+
+<h3 id="how-to-enable-record-stats">How to enable record stats?</h3>
+
+<p>Simply use the <code class="language-plaintext highlighter-rouge">recordStats()</code> function while building the cache</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">localCache</span> <span class="o">=</span> <span class="nc">CacheBuilder</span>
+    <span class="o">.</span><span class="na">newBuilder</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">expireAfterWrite</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">refreshAfterWrite</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span>
+            <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">maximumSize</span><span class="o">(</span><span class="mi">5</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">recordStats</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">build</span><span class="o">(</span><span class="k">new</span> <span class="nc">CacheLoader</span><span class="o">&lt;&gt;()</span> <span class="o">{</span>
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">MatchListDO</span> <span class="nf">load</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+            
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">ListenableFuture</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">reload</span><span class="o">(</span><span class="nc">Integer</span> <span class="n">key</span><span class="o">,</span> <span class="nc">MatchListDO</span> <span class="n">oldValue</span><span class="o">)</span> <span class="o">{</span>
+            
+        <span class="o">}</span>
+    <span class="o">});</span>
+</code></pre></div></div>
+
+<h3 id="how-do-i-visualize-the-data">How do I visualize the data?</h3>
+
+<p>The best way to visualize the Guava cache statistics is through <a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator">Spring boot Actuator</a> -&gt; <a href="https://prometheus.io/">Prometheus</a> -&gt; <a href="https://grafana.com/">Grafana</a></p>
+
+<p>First ensure that Spring boot actuator is enabled for your project.  It can be done by adding the dependency</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-actuator<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<p>And adding the relevant properties in the configuration</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">management</span><span class="pi">:</span>
+  <span class="na">metrics</span><span class="pi">:</span>
+    <span class="na">export</span><span class="pi">:</span>
+      <span class="na">prometheus</span><span class="pi">:</span>
+        <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">enable.jvm</span><span class="pi">:</span> <span class="no">true</span>
+
+    <span class="na">distribution</span><span class="pi">:</span>
+      <span class="na">percentiles-histogram</span><span class="pi">:</span>
+        <span class="na">http</span><span class="pi">:</span>
+          <span class="na">server</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span> <span class="no">true</span>
+
+  <span class="na">endpoints</span><span class="pi">:</span>
+    <span class="na">web</span><span class="pi">:</span>
+      <span class="na">exposure</span><span class="pi">:</span>
+        <span class="na">include</span><span class="pi">:</span> <span class="s">health, prometheus, loggers, metrics, scheduledtasks, threaddump, info</span>
+</code></pre></div></div>
+
+<p>Then, we enable prometheus monitoring in our application, by adding the <a href="https://micrometer.io/">micrometer dependency</a></p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;dependency&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>io.micrometer<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>micrometer-registry-prometheus<span class="nt">&lt;/artifactId&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div></div>
+
+<p>Finally we hookup our cache with micrometer using the <a href="https://www.javadoc.io/static/io.micrometer/micrometer-core/1.1.0/index.html?io/micrometer/core/instrument/binder/cache/GuavaCacheMetrics.html">GuavaCacheMetrics</a></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nc">GuavaCacheMetrics</span><span class="o">.</span><span class="na">monitor</span><span class="o">(</span><span class="n">meterRegistry</span><span class="o">,</span> <span class="n">localCache</span><span class="o">,</span> <span class="s">"localCache"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>I created a Guava cache monitoring dashboard in Grafana:</p>
+
+<p><a href="/images/guava_cache.png"><img src="/images/guava_cache.png" width="600px" /></a></p>
+
+<p>I have uploaded this <a href="https://github.com/madhur/guava-cache-metrics-monitoring">sample application on github</a> along with the <a href="https://github.com/madhur/guava-cache-metrics-monitoring/blob/master/grafana-dashboard.json">Grafana dashboard</a></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/guava">guava</a> |
+					
+						<a href="/blog/tags/prometheus">Prometheus</a> |
+					
+						<a href="/blog/tags/grafana">Grafana</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2023/01/23/monitoring-guava-cache-statistics/';
+  var disqus_title = 'Monitoring Guava Cache Statistics';
+  var disqus_url = 'https://madhur.co.in/blog/2023/01/23/monitoring-guava-cache-statistics.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2023 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
