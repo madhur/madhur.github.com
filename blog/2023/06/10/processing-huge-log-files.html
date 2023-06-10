@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Process huge log files &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Process huge log files" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Process huge log files</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2023-06-10 00:00:00 +0530" pubdate="pubdate"
+            >10 June 2023</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>Recently, I was faced with a situation where I had to process huge (in order of several gigabytes) log files.</p>
+
+<p>The log files consisted of either <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV format</a> or <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html">AWS ALB logs format</a></p>
+
+<p>Here the process means, I had to process each row to either filter it or store the valuable information from it for later analysis.</p>
+
+<p>First, I attempted with python to parse it with the simple logic</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">file_name</span> <span class="o">=</span> <span class="n">home</span> <span class="o">+</span> <span class="s">'/Downloads/huge_file.csv'</span>
+<span class="n">filtered_rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'./filtered.csv'</span><span class="p">,</span> <span class="s">'w'</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s">''</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+     <span class="n">dict_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="p">[</span><span class="s">"client_ip"</span><span class="p">,</span> <span class="s">"target_processing_time"</span><span class="p">,</span> <span class="s">"target_status_code"</span><span class="p">,</span> <span class="s">"received_bytes"</span><span class="p">,</span> <span class="s">"request_url"</span><span class="p">,</span> <span class="s">"request_creation_time"</span><span class="p">,</span> <span class="s">"ssl_protocol"</span><span class="p">,</span> <span class="s">"trace_id"</span> <span class="p">])</span>
+     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
+        <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+        <span class="n">line_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_reader</span><span class="p">:</span>
+            <span class="c1"># Do some processing
+</span>            <span class="n">filtered_rows</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">dict_writer</span><span class="p">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The above program reads the CSV line by line and optionally writes few columns of it to another file.</p>
+
+<p>This was done on a 12 GB CSV file and it took 4-5 hours.</p>
+
+<p>I was not satisfied with it as I had to do multiple iterations on multiple such files. There had to be a better way.</p>
+
+<p>Turned to <a href="https://go.dev/">Go</a> due to its concurrency features</p>
+
+<p>There is a <a href="https://pkg.go.dev/encoding/csv">encoding/csv</a> package in go which can help read the CSV files. However, it is signle threaded and does not make use of multiple goroutines.</p>
+
+<p>Came across another package <a href="https://github.com/actforgood/bigcsvreader">github.com/actforgood/bigcsvreader</a> which can help read the big CSV files with the use of multiple routines.</p>
+
+<p>Quickly wrote a program which reads the bunch of huge CSV files in a folder and applies processing logic to it. Below is the sample snippet:</p>
+
+<p>The below program reads the folder of log files and processes each one after another. However, since the reading is done using multiple goroutines, the below program can process 12 GB of ALB log file in matter of few seconds. The log files in my case was the list of ALB log files from AWS. Note that ALB log files are space character separated.</p>
+
+<p>Also, if the files are huge, we need to increase the buffer space in library so that its heap memory does not runs out.</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsDelimiter</span> <span class="o">=</span> <span class="sc">' '</span>
+<span class="n">bigCSV</span><span class="o">.</span><span class="n">BufferSize</span> <span class="o">=</span> <span class="m">81920</span>
+
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">processRow()</code> function receives each row and based on the process / filtering criteria publishes the data of type <code class="language-plaintext highlighter-rouge">ALBLog</code> on the <code class="language-plaintext highlighter-rouge">resultChan</code> channel.</p>
+
+<p>There is another inline goroutine which reads all the data from <code class="language-plaintext highlighter-rouge">resultChan</code> channel and writes it to <code class="language-plaintext highlighter-rouge">filtered.csv</code></p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"context"</span>
+	<span class="s">"encoding/csv"</span>
+	<span class="s">"fmt"</span>
+	<span class="s">"log"</span>
+	<span class="s">"os"</span>
+	<span class="s">"strings"</span>
+	<span class="s">"sync"</span>
+	<span class="s">"sync/atomic"</span>
+	<span class="s">"github.com/actforgood/bigcsvreader"</span>
+	<span class="s">"net/url"</span>
+<span class="p">)</span>
+
+<span class="k">const</span> <span class="n">noOfColumns</span> <span class="o">=</span> <span class="m">29</span>
+<span class="k">var</span> <span class="n">rowCount</span> <span class="o">=</span> <span class="m">0</span>
+
+<span class="k">type</span> <span class="n">ALBLog</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ClientIP</span>             <span class="kt">string</span>
+	<span class="n">TargetProcessingTime</span> <span class="kt">string</span>
+	<span class="n">TargetStatusCode</span>     <span class="kt">string</span>
+	<span class="n">ReceivedBytes</span>        <span class="kt">string</span>
+	<span class="n">RequestUrl</span>           <span class="kt">string</span>
+	<span class="n">RequestCreationTime</span>  <span class="kt">string</span>
+	<span class="n">SSLProtocol</span>          <span class="kt">string</span>
+	<span class="n">TraceID</span>              <span class="kt">string</span>
+	<span class="n">RawRow</span>               <span class="p">[]</span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">count32</span> <span class="kt">int32</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">inc</span><span class="p">()</span> <span class="kt">int32</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">atomic</span><span class="o">.</span><span class="n">AddInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">),</span> <span class="m">1</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">get</span><span class="p">()</span> <span class="kt">int32</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">atomic</span><span class="o">.</span><span class="n">LoadInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">))</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">reset</span><span class="p">()</span>  <span class="p">{</span>
+	<span class="n">atomic</span><span class="o">.</span><span class="n">StoreInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">),</span> <span class="m">0</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="k">var</span> <span class="n">counter</span> <span class="n">count32</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+
+	<span class="n">homedir</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">UserHomeDir</span><span class="p">()</span>
+	<span class="n">csvLocation</span> <span class="o">:=</span> <span class="n">homedir</span> <span class="o">+</span> <span class="s">"/logs/"</span>
+	<span class="n">entries</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">ReadDir</span><span class="p">(</span><span class="n">csvLocation</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="n">log</span><span class="o">.</span><span class="n">Fatal</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="k">var</span> <span class="n">TotalProcessRows</span> <span class="kt">int32</span>
+	<span class="k">var</span> <span class="n">FilteredProcessedRows</span> <span class="kt">int</span>
+	
+	<span class="n">f</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"filtered.csv"</span><span class="p">)</span>
+	<span class="n">w</span> <span class="o">:=</span> <span class="n">csv</span><span class="o">.</span><span class="n">NewWriter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+	<span class="n">w</span><span class="o">.</span><span class="n">Write</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span><span class="s">"request_url"</span><span class="p">,</span> <span class="s">"target_processing_time"</span><span class="p">})</span>
+	<span class="n">w</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
+	<span class="n">f</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">e</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">entries</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">strings</span><span class="o">.</span><span class="n">HasSuffix</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">Name</span><span class="p">(),</span> <span class="s">".log"</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">totalRows</span><span class="p">,</span> <span class="n">filteredRows</span> <span class="o">:=</span> <span class="n">processFile</span><span class="p">(</span><span class="n">csvLocation</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">Name</span><span class="p">())</span>
+			<span class="n">TotalProcessRows</span> <span class="o">=</span> <span class="n">TotalProcessRows</span> <span class="o">+</span> <span class="n">totalRows</span>
+			<span class="n">FilteredProcessedRows</span> <span class="o">=</span> <span class="n">FilteredProcessedRows</span> <span class="o">+</span> <span class="n">filteredRows</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">"Total Rows: %d Filtered Rows: %d"</span><span class="p">,</span> <span class="n">TotalProcessRows</span><span class="p">,</span> <span class="n">FilteredProcessedRows</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">processFile</span><span class="p">(</span><span class="n">csvLocation</span> <span class="kt">string</span><span class="p">,</span> <span class="n">fileName</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="kt">int32</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+
+	<span class="n">counter</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+	<span class="c">// initialize the big csv reader</span>
+	<span class="n">bigCSV</span> <span class="o">:=</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">New</span><span class="p">()</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">SetFilePath</span><span class="p">(</span><span class="n">csvLocation</span> <span class="o">+</span> <span class="n">fileName</span><span class="p">)</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsCount</span> <span class="o">=</span> <span class="n">noOfColumns</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">MaxGoroutinesNo</span> <span class="o">=</span> <span class="m">16</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">BufferSize</span> <span class="o">=</span> <span class="m">81920</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">FileHasHeader</span> <span class="o">=</span> <span class="no">true</span>
+	<span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsDelimiter</span> <span class="o">=</span> <span class="sc">' '</span>
+
+	<span class="n">ctx</span><span class="p">,</span> <span class="n">cancelCtx</span> <span class="o">:=</span> <span class="n">context</span><span class="o">.</span><span class="n">WithCancel</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">Background</span><span class="p">())</span>
+	<span class="k">defer</span> <span class="n">cancelCtx</span><span class="p">()</span>
+	<span class="k">var</span> <span class="n">wg</span> <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
+	<span class="k">var</span> <span class="n">filteredRows</span> <span class="kt">int</span>
+	<span class="c">// start multi-thread reading</span>
+	<span class="n">rowsChans</span><span class="p">,</span> <span class="n">errsChan</span> <span class="o">:=</span> <span class="n">bigCSV</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+	<span class="n">resultChan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="n">ALBLog</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">rowsChans</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+		<span class="k">go</span> <span class="n">rowWorker</span><span class="p">(</span><span class="n">rowsChans</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">wg</span><span class="p">,</span> <span class="n">resultChan</span><span class="p">)</span>
+	<span class="p">}</span>
+
+	<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">errWorker</span><span class="p">(</span><span class="n">errsChan</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wg</span><span class="p">)</span>
+
+	<span class="k">var</span> <span class="n">writeCSVWaitGroup</span> <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
+	<span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+		<span class="k">var</span> <span class="n">result</span> <span class="p">[]</span><span class="n">ALBLog</span>
+		<span class="k">for</span> <span class="n">filteredLog</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">resultChan</span> <span class="p">{</span>
+			<span class="n">result</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">filteredLog</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">"%s Filtered rows %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+		<span class="n">filteredRows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+		<span class="n">f</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">OpenFile</span><span class="p">(</span><span class="s">"filtered.csv"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">O_APPEND</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">O_WRONLY</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">O_CREATE</span><span class="p">,</span> <span class="m">0600</span><span class="p">)</span>
+		<span class="k">defer</span> <span class="n">f</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">Fatalln</span><span class="p">(</span><span class="s">"failed to open file"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="n">w</span> <span class="o">:=</span> <span class="n">csv</span><span class="o">.</span><span class="n">NewWriter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+		<span class="k">defer</span> <span class="n">w</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
+
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="n">log</span><span class="o">.</span><span class="n">Fatal</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">result</span> <span class="p">{</span>
+			<span class="n">w</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">RawRow</span><span class="p">)</span>
+		<span class="p">}</span>
+
+		<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+
+	<span class="p">}()</span>
+
+	<span class="n">wg</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
+	<span class="nb">close</span><span class="p">(</span><span class="n">resultChan</span><span class="p">)</span>
+
+	<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">" %s Total rows: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">counter</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+
+	<span class="k">return</span> <span class="n">counter</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">filteredRows</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">rowWorker</span><span class="p">(</span><span class="n">rowsChan</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">RowsChan</span><span class="p">,</span> <span class="n">waitGr</span> <span class="o">*</span><span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span><span class="p">,</span> <span class="n">resultChan</span> <span class="k">chan</span><span class="o">&lt;-</span> <span class="n">ALBLog</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">row</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">rowsChan</span> <span class="p">{</span>
+		<span class="n">processRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">resultChan</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="n">waitGr</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">errWorker</span><span class="p">(</span><span class="n">errsChan</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">ErrsChan</span><span class="p">,</span> <span class="n">waitGr</span> <span class="o">*</span><span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">err</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">errsChan</span> <span class="p">{</span>
+		<span class="n">handleError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="n">waitGr</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c">// processRow can be used to implement business logic</span>
+<span class="c">// like validation / converting to a struct / persisting row into a storage.</span>
+<span class="k">func</span> <span class="n">processRow</span><span class="p">(</span><span class="n">row</span> <span class="p">[]</span><span class="kt">string</span><span class="p">,</span> <span class="n">resultChan</span> <span class="k">chan</span><span class="o">&lt;-</span> <span class="n">ALBLog</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">clientIP</span> <span class="o">:=</span> <span class="n">strings</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="m">3</span><span class="p">],</span> <span class="s">":"</span><span class="p">)[</span><span class="m">0</span><span class="p">]</span>
+	<span class="n">requestUrl</span> <span class="o">:=</span> <span class="n">strings</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="m">12</span><span class="p">],</span> <span class="s">" "</span><span class="p">)[</span><span class="m">1</span><span class="p">]</span>
+	<span class="n">urlObject</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">url</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">requestUrl</span><span class="p">)</span>
+
+	<span class="n">counter</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
+
+	<span class="n">RawRow</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span><span class="n">urlObject</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="m">6</span><span class="p">]}</span>
+	<span class="n">alblog</span> <span class="o">:=</span> <span class="n">ALBLog</span><span class="p">{</span>
+		<span class="n">ClientIP</span><span class="o">:</span>             <span class="n">clientIP</span><span class="p">,</span>
+		<span class="n">TargetProcessingTime</span><span class="o">:</span> <span class="n">row</span><span class="p">[</span><span class="m">6</span><span class="p">],</span>
+		<span class="n">TargetStatusCode</span><span class="o">:</span>     <span class="n">row</span><span class="p">[</span><span class="m">9</span><span class="p">],</span>
+		<span class="n">ReceivedBytes</span><span class="o">:</span>        <span class="n">row</span><span class="p">[</span><span class="m">10</span><span class="p">],</span>
+		<span class="n">RequestUrl</span><span class="o">:</span>           <span class="n">row</span><span class="p">[</span><span class="m">12</span><span class="p">],</span>
+		<span class="n">RequestCreationTime</span><span class="o">:</span>  <span class="n">row</span><span class="p">[</span><span class="m">21</span><span class="p">],</span>
+		<span class="n">RawRow</span><span class="o">:</span>               <span class="n">RawRow</span><span class="p">,</span>
+	<span class="p">}</span>
+	
+	<span class="k">if</span> <span class="n">doSomeFiltering</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">resultChan</span> <span class="o">&lt;-</span> <span class="n">alblog</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c">// handleError handles the error.</span>
+<span class="c">// errors can be fatal like file does not exist, or row related like a given row could not be parsed, etc...</span>
+<span class="k">func</span> <span class="n">handleError</span><span class="p">(</span><span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"error"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/go">Go</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2023/06/10/processing-huge-log-files/';
+  var disqus_title = 'Process huge log files';
+  var disqus_url = 'https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2023 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
