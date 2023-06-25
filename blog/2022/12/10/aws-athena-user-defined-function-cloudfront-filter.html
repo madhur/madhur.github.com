@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena Logs &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena Logs" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena Logs</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2022-12-10 00:00:00 +0530" pubdate="pubdate"
+            >10 December 2022</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>Recently, I was faced with a situation where I had to query <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html">AWS ALB Logs</a> for the rows not coming from the <a href="https://aws.amazon.com/cloudfront/">cloudfront</a> IP as the source.</p>
+
+<p>To give some perspective, we use <a href="https://aws.amazon.com/cloudfront/">cloudfront CDN</a> in front of our ALB, however, some of our traffic was also coming to <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html">ALB</a> directly.</p>
+
+<p>I wanted to query the traffic directly coming from users in <a href="https://www.amazonaws.cn/en/athena/">AWS Athena</a> and there was no easy way to do that.</p>
+
+<p>That’s where I decided to write <a href="https://docs.aws.amazon.com/athena/latest/ug/querying-udf.html">User defined function (UDFS)</a></p>
+
+<p>All the AWS IP ranges are mentioned in this url <a href="https://ip-ranges.amazonaws.com/ip-ranges.json">https://ip-ranges.amazonaws.com/ip-ranges.json</a></p>
+
+<p>What we can do is simply write a function, which will query the row and filter it out if the source IP Address lies in this range.</p>
+
+<p>Here is the simple snippet for the same:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CloudFrontFilterUDFS</span> <span class="kd">extends</span> <span class="nc">UserDefinedFunctionHandler</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">SOURCE_TYPE</span> <span class="o">=</span> <span class="s">"Custom"</span><span class="o">;</span>
+    <span class="kd">static</span> <span class="nc">ObjectMapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">();</span>
+    <span class="kd">static</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">SubnetUtils</span><span class="o">.</span><span class="na">SubnetInfo</span><span class="o">&gt;</span> <span class="n">subnetUtils</span><span class="o">;</span>
+
+    <span class="kd">static</span> <span class="o">{</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="na">configure</span><span class="o">(</span><span class="nc">DeserializationFeature</span><span class="o">.</span><span class="na">FAIL_ON_UNKNOWN_PROPERTIES</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="nc">InputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getContextClassLoader</span><span class="o">().</span><span class="na">getResourceAsStream</span><span class="o">(</span><span class="s">"cloudfront.json"</span><span class="o">);</span>
+        <span class="nc">CloudFront</span> <span class="n">cloudfront</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">cloudfront</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">(</span><span class="n">in</span><span class="o">,</span> <span class="nc">CloudFront</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">subnetUtils</span> <span class="o">=</span> <span class="n">cloudfront</span><span class="o">.</span><span class="na">getPrefixes</span><span class="o">().</span><span class="na">stream</span><span class="o">().</span><span class="na">map</span><span class="o">(</span><span class="n">prefix</span> <span class="o">-&gt;</span> <span class="k">new</span> <span class="nc">SubnetUtils</span><span class="o">(</span><span class="n">prefix</span><span class="o">.</span><span class="na">getIp_prefix</span><span class="o">()).</span><span class="na">getInfo</span><span class="o">()).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nf">CloudFrontFilterUDFS</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="no">SOURCE_TYPE</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">iscloudfrontip</span><span class="o">(</span><span class="nc">String</span> <span class="n">ipAddress</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span><span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">ipAddress</span><span class="o">))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">subnetUtils</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">anyMatch</span><span class="o">(</span><span class="n">s</span><span class="o">-&gt;</span> <span class="n">s</span><span class="o">.</span><span class="na">isInRange</span><span class="o">(</span><span class="n">ipAddress</span><span class="o">)));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>All needs to be done is, package this in a jar file and deploy it to <a href="https://aws.amazon.com/lambda/">AWS Lambda</a> as a function.</p>
+
+<p>Once its deployed, its easy to query AWS athena as follows:</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">USING</span> <span class="k">EXTERNAL</span> <span class="k">FUNCTION</span> <span class="n">IsCloudFrontIP</span><span class="p">(</span><span class="n">ip</span> <span class="nb">varchar</span><span class="p">)</span>
+<span class="k">RETURNS</span> <span class="nb">varchar</span>
+<span class="n">LAMBDA</span> <span class="s1">'cloudfront-filter-udfs'</span>
+<span class="k">SELECT</span>  <span class="n">request_url</span><span class="p">,</span> <span class="n">approx_percentile</span><span class="p">(</span><span class="n">target_processing_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">99</span><span class="p">)</span> <span class="k">as</span> <span class="n">p99</span>
+<span class="k">FROM</span> <span class="nv">"alb_logs"</span><span class="p">.</span><span class="nv">"alb_ext_logs"</span>
+<span class="k">where</span> <span class="nb">year</span> <span class="o">=</span> <span class="s1">'2023'</span>
+	<span class="k">and</span> <span class="k">month</span> <span class="o">=</span> <span class="s1">'06'</span>
+	<span class="k">and</span> <span class="k">day</span> <span class="o">=</span> <span class="s1">'14'</span>
+	<span class="k">and</span> <span class="n">IsCloudFrontIP</span><span class="p">(</span><span class="n">client_ip</span><span class="p">)</span><span class="o">=</span><span class="s1">'false'</span>
+    <span class="k">and</span> <span class="n">target_status_code</span><span class="o">=</span><span class="s1">'200'</span>
+	<span class="k">group</span> <span class="k">by</span> <span class="n">request_url</span> <span class="k">order</span> <span class="k">by</span> <span class="n">p99</span> <span class="k">desc</span>
+</code></pre></div></div>
+
+<p>In the above query, <code class="language-plaintext highlighter-rouge">cloudfront-filter-udfs</code> is the exact name of the lambda function which is deployed.</p>
+
+<p>You can checkout the entire the UDFS code in <a href="https://github.com/madhur/cloudfront-filter-udfs">my github repository</a></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/athena">Athena</a> |
+					
+						<a href="/blog/tags/java">Java</a> |
+					
+						<a href="/blog/tags/lambda">Lambda</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2022/12/10/aws-athena-user-defined-function-cloudfront-filter/';
+  var disqus_title = 'User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena Logs';
+  var disqus_url = 'https://madhur.co.in/blog/2022/12/10/aws-athena-user-defined-function-cloudfront-filter.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2023 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
