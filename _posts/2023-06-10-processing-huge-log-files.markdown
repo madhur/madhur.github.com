@@ -39,7 +39,7 @@ I was not satisfied with it as I had to do multiple iterations on multiple such 
 
 Turned to [Go](https://go.dev/) due to its concurrency features
 
-There is a [encoding/csv](https://pkg.go.dev/encoding/csv) package in go which can help read the CSV files. However, it is signle threaded and does not make use of multiple goroutines.
+There is a [encoding/csv](https://pkg.go.dev/encoding/csv) package in go which can help read the CSV files. However, it is single threaded and does not make use of multiple goroutines.
 
 Came across another package [github.com/actforgood/bigcsvreader](https://github.com/actforgood/bigcsvreader) which can help read the big CSV files with the use of multiple routines.
 
