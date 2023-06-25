@@ -5,8 +5,8 @@ excerpt: "User Defined function(UDF) to filter cloudfront IP Addresses from AWS 
 disqus_id: /2022/12/10/aws-athena-user-defined-function-cloudfront-filter/
 tags:
     - Athena
-	- Java
-	- Lambda
+    - Java
+    - Lambda
 ---
 
 Recently, I was faced with a situation where I had to query [AWS ALB Logs](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html) for the rows not coming from the [cloudfront](https://aws.amazon.com/cloudfront/) IP as the source.
