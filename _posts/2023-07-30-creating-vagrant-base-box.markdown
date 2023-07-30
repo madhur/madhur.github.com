@@ -38,7 +38,7 @@ Recently, I had such a scenario and found some important tips when creating own 
 
 * The official guidelines for creating base box for [Virtualbox](https://www.virtualbox.org/)  [https://developer.hashicorp.com/vagrant/docs/providers/virtualbox/boxes](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox/boxes) recommends installing [Virtual Box guest additions](https://www.virtualbox.org/manual/ch04.html) in the basebox. Infact, it has been listed as a must.
 
-> VirtualBox Guest Additions must be installed so that things such as shared folders can function. Installing guest additions also usually improves performance since the guest OS can make some optimizations by knowing it is > running within VirtualBox.
+> VirtualBox Guest Additions must be installed so that things such as shared folders can function. Installing guest additions also usually improves performance since the guest OS can make some optimizations by knowing it is running within VirtualBox.
 
 This is one of the most illogical and idiotic advice according to me. Because, VirtualBox Guest additions package is tied to specific version of VirtualBox. Once you install VirtualBox Guest additions package and later upgrade or downgrade VirtualBox version, it is of no use. This creates a tight coupling between the consumer (developer) and the Vagrant Base box. According to me, installing Virtual Box Guest Additions package is best avoided unless you really need fancy two way synchronizations between host and guest folders, which I believe no serious sysadmin should care about.
 
