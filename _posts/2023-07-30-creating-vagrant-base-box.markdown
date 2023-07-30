@@ -25,7 +25,7 @@ Any sysadmin, who manages such infrastructure would find Vagrant an incredibly u
 
 For example, someone testing out the Cassandra DB cluster upgrade, can test it out in Vagrant environment before doing it in staging / production environment. This can help save cost.
 
-There are [Vagrant boxes](https://app.vagrantup.com/boxes/search) available for each and every popular Operating systems such as [CentOS 7])(https://app.vagrantup.com/centos/boxes/7), [CentOS 8](https://app.vagrantup.com/generic/boxes/centos8) and [Debian](https://app.vagrantup.com/debian/boxes/jessie64)
+There are [Vagrant boxes](https://app.vagrantup.com/boxes/search) available for each and every popular Operating systems such as [CentOS 7](https://app.vagrantup.com/centos/boxes/7), [CentOS 8](https://app.vagrantup.com/generic/boxes/centos8) and [Debian](https://app.vagrantup.com/debian/boxes/jessie64)
 
 
 [Github](https://github.com/search?q=vagrant+mysql&type=repositories) is full of open source scripts to provision any type of server with Vagrant.
