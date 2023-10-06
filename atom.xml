@@ -3,13 +3,107 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-09-02T14:11:15+05:30</updated>
+ <updated>2023-10-06T23:04:42+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Recovering from Arch Boot failure</title>
+   <link href="https://madhur.co.in/blog/2023/09/30/recovering-from-arch-boot.html"/>
+   <updated>2023-09-30T00:00:00+05:30</updated>
+   <id>id:/blog/2023/09/30/recovering-from-arch-boot</id>
+   <content type="html">&lt;p&gt;Recently I faced boot failure after upgrading my &lt;a href=&quot;https://archlinux.org/&quot;&gt;Arch Linux&lt;/a&gt; system.&lt;/p&gt;
+
+&lt;p&gt;The error was&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ERROR: device &lt;span class=&quot;s1&quot;&gt;'UUID=1dd743ed-e0a5-4b0c-80ee-186e89eea401'&lt;/span&gt; not found. Skipping fsck.
+mount: /new_root: can&lt;span class=&quot;s1&quot;&gt;'t find UUID=1dd743ed-e0a5-4b0c-80ee-186e89eea401.
+ERROR: failed to mount '&lt;/span&gt;1dd743ed-e0a5-4b0c-80ee-186e89eea401&lt;span class=&quot;s1&quot;&gt;' on real root
+You are now being dropped into an emergency shell.
+sh: can'&lt;/span&gt;t access &lt;span class=&quot;nb&quot;&gt;tty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; job control turned off
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rootfs ~]# _
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This could happen while building errorneous &lt;a href=&quot;https://en.wikipedia.org/wiki/Initial_ramdisk&quot;&gt;initramfs&lt;/a&gt; image&lt;/p&gt;
+
+&lt;p&gt;It was evident from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/log/pacman.log&lt;/code&gt; logs&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[2023-10-04T20:36:26+0530] [ALPM] running '90-mkinitcpio-install.hook'...
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Building image from preset: /etc/mkinitcpio.d/linux.preset: 'default'
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Using configuration file: '/etc/mkinitcpio.conf'
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g /boot/initramfs-linux.img
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Starting build: '6.5.2-arch1-1'
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [base]
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [udev]
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [autodetect]
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] sort: cannot read: '/sys/devices/pci0000:00/0000:00:08.1/0000:08:00.3/usb3/3-1/3-1.2/3-1.2:1.2/ep_04/uevent': No such file or directory
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] modprobe: ERROR: missing parameters. See -h.
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [modconf]
+[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [block]
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keyboard]
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keymap]
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [consolefont]
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: consolefont: no font found in configuration
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [filesystems]
+[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [fsck]
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Generating module dependencies
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Creating zstd-compressed initcpio image: '/boot/initramfs-linux.img'
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Image generation successful
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Building image from preset: /etc/mkinitcpio.d/linux.preset: 'fallback'
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Using configuration file: '/etc/mkinitcpio.conf'
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g /boot/initramfs-linux-fallback.img -S autodetect
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Starting build: '6.5.2-arch1-1'
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [base]
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [udev]
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [modconf]
+[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [block]
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qed'
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'bfa'
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qla2xxx'
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'aic94xx'
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'wd719x'
+[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qla1280'
+[2023-10-04T20:36:30+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'xhci_pci'
+[2023-10-04T20:36:31+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keyboard]
+[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keymap]
+[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [consolefont]
+[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: consolefont: no font found in configuration
+[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [filesystems]
+[2023-10-04T20:36:33+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [fsck]
+[2023-10-04T20:36:34+0530] [ALPM-SCRIPTLET] ==&amp;gt; Generating module dependencies
+[2023-10-04T20:36:34+0530] [ALPM-SCRIPTLET] ==&amp;gt; Creating zstd-compressed initcpio image: '/boot/initramfs-linux-fallback.img'
+[2023-10-04T20:36:35+0530] [ALPM-SCRIPTLET] ==&amp;gt; Image generation successful
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The line which caused the issue during image generation:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] sort: cannot read: '/sys/devices/pci0000:00/0000:00:08.1/0000:08:00.3/usb3/3-1/3-1.2/3-1.2:1.2/ep_04/uevent': No such file or directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The solution to recover was to boot to another OS. I run CentOS Steam 8 as a dual boot. And then mount the root file system of arch on path &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/run/media/madhur/arch&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Run the following commands&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mount &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; proc /proc proc/
+mount &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; sysfs /sys sys/
+mount &lt;span class=&quot;nt&quot;&gt;--rbind&lt;/span&gt; /dev dev/
+mount &lt;span class=&quot;nt&quot;&gt;--rbind&lt;/span&gt; /sys/firmware/efi/efivars sys/firmware/efi/efivars/
+&lt;span class=&quot;nb&quot;&gt;chroot&lt;/span&gt; /run/media/madhur/arch
+mikinitcpio &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; linux
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The final command will generate the new initramfs image&lt;/p&gt;
+
+&lt;p&gt;More information about this issue can be found in this &lt;a href=&quot;https://bbs.archlinux.org/viewtopic.php?id=289336&quot;&gt;thread&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Ansible roles for installing and configuring Vitess</title>
@@ -1119,96 +1213,6 @@ Status code distribution:
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;strace &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'trace=!all'&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 128278                                                                                                           
 strace: Process 128278 attached
 &lt;span class=&quot;nt&quot;&gt;---&lt;/span&gt; SIGTERM &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;si_signo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;SIGTERM, &lt;span class=&quot;nv&quot;&gt;si_code&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;SI_USER, &lt;span class=&quot;nv&quot;&gt;si_pid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;103440, &lt;span class=&quot;nv&quot;&gt;si_uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1000&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;---&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Web3 ethereum development breaking changes</title>
-   <link href="https://madhur.co.in/blog/2022/06/19/web3-ethereum-development-breaking-changes.html"/>
-   <updated>2022-06-19T00:00:00+05:30</updated>
-   <id>id:/blog/2022/06/19/web3-ethereum-development-breaking-changes</id>
-   <content type="html">&lt;p&gt;Web3 development scene is changing very fast with lot of breaking changes getting introduced every few months.
-This makes it very difficult to follow any online tutorial which was written few months back.&lt;/p&gt;
-
-&lt;p&gt;This post itself will become obsolete after few months. As of this writing, I am using Solidity compiler version 0.8.15&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pragma solidity ^0.8.4;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;In this post, I will outline few of the breaking changes I have encountered when working with web3 and ethereum:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;address&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;address payable&lt;/code&gt; are two different data types.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;address public manager;
-address payable[] public players;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;You can call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;transfer&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;send&lt;/code&gt; function only on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;address payable&lt;/code&gt; and not on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;address&lt;/code&gt;.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Compiling the solidity contract&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Compiling the solidity contract has changed in recent versions.&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;solc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;solc&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;inboxPath&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;resolve&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__dirname&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;contracts&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery.sol&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;source&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;readFileSync&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;inboxPath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;utf8&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Solidity&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;sources&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery.sol&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;settings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;outputSelection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-      &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
-      &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;solc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;compile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stringify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;abi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;contracts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery.sol&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;abi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bytecode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;contracts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery.sol&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Lottery&lt;/span&gt;&lt;span class=&quot;dl&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;evm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bytecode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;object&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;In order to deploy this contract:&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;await&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;web3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;eth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Contract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;abi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;deploy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;bytecode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;arguments&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]})&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;keccak256&lt;/code&gt; now takes only one argument&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-       &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keccak256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;difficulty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;players&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;to&lt;/p&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;view&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-       &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keccak256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;abi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;encodePacked&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;difficulty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;timestamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;players&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The constructor function is now written with name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;constructor&lt;/code&gt; instead of function with name of contract&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;constructor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-       &lt;span class=&quot;nx&quot;&gt;manager&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sender&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
