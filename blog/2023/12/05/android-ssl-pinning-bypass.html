@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Android SSL Pinning Bypass &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Android SSL Pinning Bypass" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="/files/css/jquery.fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+    <div class="navbar-header">
+
+     <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile" placeholder="Search" />
+                    </div>
+                </form>
+        </div>
+
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <!--  <a class="navbar-brand " href="/">Home</a> -->
+    </div>
+
+    <div class="collapse navbar-collapse" id="mainmenu">
+        <ul id="nav" class="nav navbar-nav">
+            
+            <li><a class="home" href="/">Home</a>
+            </li>
+            <li><a class="blog" href="/blog">Blog</a>
+            </li>
+            <!--<li><a class="work" href="/work">Resume</a></li>-->
+            <li><a class="code" href="/projects">Work</a>
+            </li>
+            <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+            <li><a class="info" href="/info">About</a>
+            </li>
+            <li><a class="contact" href="/contact">Contact</a>
+            </li>
+
+        </ul>
+
+        <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+            <li>
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q1" name="q" value="" class="form-control desktop" placeholder="Search" />
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+
+        <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+            <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+            </li>
+            <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+            </li>
+            <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+            </li>
+        </ul>
+
+
+    </div>
+
+</div>
+</nav>
+
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+		<!--<aside class="postmeta col-md-3 hidden-print visible-md visible-lg">
+
+			
+
+		</aside>-->
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+				<header><h1>Android SSL Pinning Bypass</h1></header>
+			
+					<!-- Place this tag where you want the +1 button to render -->
+<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2023-12-05 00:00:00 +0530" pubdate="pubdate"
+            >05 December 2023</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <script src="https://platform.linkedin.com/in.js" type="text/javascript">lang: en_US</script>
+        <script type="IN/Share" data-counter="right"></script>
+    </div>
+
+    <!-- <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="http://bufferapp.com/add"
+            class="buffer-add-button"
+            data-count="horizontal"
+            >Buffer</a
+        >
+        <script
+            type="text/javascript"
+            src="https://d389zggrogs7qo.cloudfront.net/js/button.js"
+        ></script>
+    </div> -->
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+    <!-- <div class="social-icon col-md-2 col-sm-2">
+        <script
+            type="text/javascript"
+            src="//www.redditstatic.com/button/button1.js"
+        ></script>
+    </div> -->
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			 <p>I have always been a tinkerer and loved to explore internal of applications.</p>
+
+<p>Android has always fascinated me from the beginning partly because its mostly open source and allows you to customize. Other aspect of Android which has been useful is <a href="https://en.wikipedia.org/wiki/Rooting_(Android)">Rooting</a></p>
+
+<p>Rooting allows you to take complete control over the application and customize some of the aspects which are not possible in non-rooted Android.</p>
+
+<p>One area where rooting helps is capturing SSL network traffic of the applications. This helps in debugging and learning more about how networks works. In this post, we will see how can we capture the network traffic for inspection in Android. This is mostly for debugging and learning purpose.</p>
+
+<h3 id="apk-mitm"><a href="https://github.com/shroudedcode/apk-mitm">Apk-mitm</a></h3>
+<hr />
+
+<p>APK mitm tools modified the original Android application to disable the SSL Pinning. This tool relies on <a href="https://apktool.org/">apktool</a> heavily.</p>
+
+<p>This tool always doesn’t work. Recently there has been lot of <a href="https://github.com/shroudedcode/apk-mitm/issues/141">issues</a> which have no solutions.</p>
+
+<p>However, if it works, this is the most easiest and straightforward way as the modified app can be installed on non-rooted device and just inspected through proxy such as <a href="https://www.charlesproxy.com/">Charles</a></p>
+
+<h3 id="android-unpinner"><a href="https://github.com/mitmproxy/android-unpinner">Android Unpinner</a></h3>
+<hr />
+
+<p>This tool is different from Apk Mitm in a way that it bypasses the SSL pinning code only at runtime. Thus, you no longer have to disassemble and repackage the application.</p>
+
+<p>This tool relies heavily on <a href="https://github.com/frida/frida-tools">Frida tools</a> for its job.</p>
+
+<p>Again, this tool is not gauranteed to work 100% of the time.</p>
+
+<h3 id="rooting"><a href="https://en.wikipedia.org/wiki/Rooting_(Android)">Rooting</a></h3>
+<hr />
+
+<p>If you can root your device, it is very easy to capture network traffic even if its from SSL pinned app. However, rooting can destroy warranty.</p>
+
+<p>These days, most of the Android apps, will refuse to start if they detect that they are running on a rooted software.</p>
+
+<p>Hence, this option is only viable if you have a spare device.</p>
+
+<h3 id="rooted-avd"><a href="https://gitlab.com/newbit/rootAVD">Rooted AVD</a></h3>
+<hr />
+
+<p>This is my most preferred method and mostly always works. Since the purpose of network inspection is mostly debugging and learning, we can do it on AVD instead of actual device.</p>
+
+<p><a href="https://gitlab.com/newbit/rootAVD">rootAVD</a> allows you to seemlessly root the running AVD device, using the simple command</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./rootAVD.sh system-images/android-33/google_apis_playstore/x86_64/ramdisk.img
+
+</code></pre></div></div>
+
+<p>where <code class="language-plaintext highlighter-rouge">system-images/android-33/google_apis_playstore/x86_64/ramdisk.img</code> is the path of AVD devices relative to <code class="language-plaintext highlighter-rouge">$ANDROID_HOME</code></p>
+
+<p>Next step, would be to install <a href="https://github.com/NVISOsecurity/MagiskTrustUserCerts">MagiskTrustUserCerts</a> module of <a href="https://github.com/topjohnwu/Magisk">Magisk</a></p>
+
+<blockquote>
+  <p>This module makes all installed user certificates part of the system certificate store, so that they will 
+automatically be used when building the trust chain. This module makes it unnecessary to add the 
+network_security_config property to an application’s manifest.</p>
+</blockquote>
+
+<p>Once installed, your Magisk modules section should look like this</p>
+
+<p><img src="/images/magisk.png" height="600px" /></p>
+
+<p>Now, the only step remaining is enabling proxy to intercept traffic. I use <a href="https://www.charlesproxy.com/">Charles proxy</a> and this opens the port 8888 for listening to traffic.</p>
+
+<p>Enabling proxy on AVD is as simple as executing:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adb shell settings put global http_proxy 192.168.1.252:8888 
+
+</code></pre></div></div>
+
+<p>where <code class="language-plaintext highlighter-rouge">192.168.1.252</code> is the local IP address of the host machine.</p>
+
+<p>Disabling proxy can be done using:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>adb shell settings put global http_proxy :0
+</code></pre></div></div>
+<hr />
+
+<p>If you guys have been using more preferred way to inspect SSL traffic. Let me know in the comments.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+					
+						<a href="/blog/tags/android">Android</a> |
+					
+					</p>
+				</div>
+			</footer>
+			
+			<br/>
+		
+			
+			
+			<div class="hr"></div>
+
+		
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2023/12/05/android-ssl-pinning-bypass/';
+  var disqus_title = 'Android SSL Pinning Bypass';
+  var disqus_url = 'https://madhur.co.in/blog/2023/12/05/android-ssl-pinning-bypass.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+			
+			
+			
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+	
+</section>
+ 
+<div class="c">&nbsp;</div>
+
+
+  
+
+ 
+
+ 
+
+
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2023 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
