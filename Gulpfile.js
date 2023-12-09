@@ -71,24 +71,30 @@ gulp.task('watch', async function() {
    
 });
 
-gulp.task('gitadd', function () {
-    return gulp.src('../site/**/*')
-        .pipe(git.add({ args: '-A' }));
+gulp.task('gitadd',  function (cb) {
+    console.log("Adding to git")
+    gulp.src('../site/*')
+        .pipe(git.add({ cwd: '../site/' }));
+        cb();
 });
 
-gulp.task('gitcommit', function () {
+gulp.task('gitcommit',  function (cb) {
     let message = 'docs: Repository updated on ' + new Date().toISOString();
-    return gulp.src('../site/**/*')
+    console.log(message)
+    gulp.src('../site/*')
         .pipe(git.commit(message, {
-            args: '-a',
+            cwd: '../site/', 
             disableMessageRequirement: true
         }));
+        cb();
 });
 
-gulp.task('gitpush', function () {
-    git.push('origin', 'master', { args: " ../site/" }, function (err) {
+gulp.task('gitpush',  function (cb) {
+    console.log("Git push")
+     git.push('origin', 'master', {cwd: '../site/'}, function (err) {
         if (err) throw err;
-    });
+     });
+     cb();
 });
 
 gulp.task('nojekyll', async function (cb) {
@@ -97,21 +103,13 @@ gulp.task('nojekyll', async function (cb) {
 
 //gulp.task('git', ['gitadd', 'gitcommit', 'gitpush']);
 // gulp task to commit and push data on git
-gulp.task('git', function () {
-    return gulp.series('gitadd', 'gitcommit', 'gitpush');
-});
-gulp.task('lessCopy', function () {
-    return gulp.series('less', 'copy');
-});
-gulp.task('default', async function () {
-    return gulp.series('connect', 'watch');
-});
-gulp.task('jekyll', function () {
-    return gulp.series('connect');
-});
-gulp.task('deploy', function () {
-    return gulp.series('shell', 'uglify', 'cssmin', 'nojekyll');
-});
-gulp.task('pushdeploy', function () {
-    return gulp.series('shell', 'uglify', 'cssmin', 'nojekyll', 'git');
-});
+gulp.task('git', gulp.series('gitadd', 'gitcommit', 'gitpush'));
+
+gulp.task('lessCopy', gulp.series('less', 'copy'));
+
+gulp.task('default', gulp.series('connect', 'watch'));
+
+gulp.task('jekyll', gulp.series('connect'));
+
+gulp.task('deploy', gulp.series('shell', 'uglify', 'cssmin', 'nojekyll'));
+gulp.task('pushdeploy', gulp.series('shell', 'uglify', 'cssmin', 'nojekyll', 'git'));
