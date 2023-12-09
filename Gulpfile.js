@@ -7,9 +7,9 @@ const less = require('gulp-less');
 const shell = require('gulp-shell');
 const git = require('gulp-git');
 const fs = require('fs');
-const browserSync  = require('browser-sync').create();
+const browserSync = require('browser-sync').create();
 
-gulp.task('connect', async function () {
+gulp.task('connect', function () {
     return connect.server({
         root: '../site/',
         port: 4000,
@@ -17,19 +17,22 @@ gulp.task('connect', async function () {
     });
 });
 
-gulp.task('copy', async function () {
-    return gulp.src('files/css/styles.css')
+gulp.task('copy', function (cb) {
+    gulp.src('files/css/styles.css')
         .pipe(copy('_site/files/css/', { prefix: 3 }));
+    cb();
 });
 
-gulp.task('uglify', async function () {
-    return gulp.src(['../site/files/js/app.js', '../site/files/js/main.js'])
+gulp.task('uglify', function (cb) {
+    gulp.src(['../site/files/js/app.js', '../site/files/js/main.js'])
         .pipe(uglify())
         .pipe(gulp.dest('../site/files/js/'));
+
+    cb();
 });
 
-gulp.task('cssmin', function () {
-    return gulp.src([
+gulp.task('cssmin', function (cb) {
+    gulp.src([
         '../site/files/css/print.css',
         '../site/files/css/styles.css',
         '../site/files/css/searchresults.css',
@@ -38,23 +41,26 @@ gulp.task('cssmin', function () {
     ])
         .pipe(cssmin())
         .pipe(gulp.dest('../site/files/css/'));
+
+    cb();
 });
 
 gulp.task('shell', shell.task([
     'jekyll build',
-    'jekyll serve'
 ]));
 
-gulp.task('less', function () {
-    return gulp.src([
+gulp.task('less', function (cb) {
+    gulp.src([
         'files/css/styles.less',
         'files/css/searchresults.less'
     ])
         .pipe(less())
         .pipe(gulp.dest('files/css/'));
+
+    cb();
 });
 
-gulp.task('watch', async function() {
+gulp.task('watch', function (cb) {
 
     browserSync.init({
         server: {
@@ -62,43 +68,41 @@ gulp.task('watch', async function() {
         },
         open: true
     });
-    gulp.task('watch', function() {
+    gulp.task('watch', function () {
         gulp.watch('*.html', gulp.series('styles'));
         gulp.watch('layouts/*.*', gulp.series('scripts'));
         gulp.watch('_pages/*.*', gulp.series('images'));
-      });
+    });
+    cb();
 
-   
 });
 
-gulp.task('gitadd',  function (cb) {
-    console.log("Adding to git")
+gulp.task('gitadd', function (cb) {
     gulp.src('../site/*')
         .pipe(git.add({ cwd: '../site/' }));
-        cb();
+    cb();
 });
 
-gulp.task('gitcommit',  function (cb) {
+gulp.task('gitcommit', function (cb) {
     let message = 'docs: Repository updated on ' + new Date().toISOString();
-    console.log(message)
     gulp.src('../site/*')
         .pipe(git.commit(message, {
-            cwd: '../site/', 
+            cwd: '../site/',
             disableMessageRequirement: true
         }));
-        cb();
+    cb();
 });
 
-gulp.task('gitpush',  function (cb) {
-    console.log("Git push")
-     git.push('origin', 'master', {cwd: '../site/'}, function (err) {
+gulp.task('gitpush', function (cb) {
+    git.push('origin', 'master', { cwd: '../site/' }, function (err) {
         if (err) throw err;
-     });
-     cb();
+    });
+    cb();
 });
 
-gulp.task('nojekyll', async function (cb) {
+gulp.task('nojekyll', function (cb) {
     fs.writeFile('../site/.nojekyll', '', cb);
+    cb();
 });
 
 //gulp.task('git', ['gitadd', 'gitcommit', 'gitpush']);
