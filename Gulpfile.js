@@ -78,8 +78,8 @@ gulp.task('watch', function (cb) {
 });
 
 gulp.task('gitadd', function (cb) {
-    gulp.src('../site/*')
-        .pipe(git.add({ cwd: '../site/', quiet: false, }));
+   
+    git.add({ cwd: '../site/', quiet: false, });
     cb();
 });
 
@@ -105,8 +105,6 @@ gulp.task('nojekyll', function (cb) {
     cb();
 });
 
-//gulp.task('git', ['gitadd', 'gitcommit', 'gitpush']);
-// gulp task to commit and push data on git
 gulp.task('git', gulp.series('gitadd', 'gitcommit', 'gitpush'));
 
 gulp.task('lessCopy', gulp.series('less', 'copy'));
