@@ -9,7 +9,7 @@ const git = require('gulp-git');
 const fs = require('fs');
 const browserSync = require('browser-sync').create();
 
-gulp.task('connect', async function () {
+gulp.task('connect', function () {
     return connect.server({
         root: '../site/',
         port: 4000,
@@ -50,7 +50,7 @@ gulp.task('shell', shell.task([
 ]));
 
 gulp.task('less', function (cb) {
-    return gulp.src([
+    gulp.src([
         'files/css/styles.less',
         'files/css/searchresults.less'
     ])
@@ -78,7 +78,6 @@ gulp.task('watch', function (cb) {
 });
 
 gulp.task('gitadd', function (cb) {
-    console.log("Adding to git")
     gulp.src('../site/*')
         .pipe(git.add({ cwd: '../site/' }));
     cb();
@@ -86,7 +85,6 @@ gulp.task('gitadd', function (cb) {
 
 gulp.task('gitcommit', function (cb) {
     let message = 'docs: Repository updated on ' + new Date().toISOString();
-    console.log(message)
     gulp.src('../site/*')
         .pipe(git.commit(message, {
             cwd: '../site/',
@@ -96,7 +94,6 @@ gulp.task('gitcommit', function (cb) {
 });
 
 gulp.task('gitpush', function (cb) {
-    console.log("Git push")
     git.push('origin', 'master', { cwd: '../site/' }, function (err) {
         if (err) throw err;
     });
