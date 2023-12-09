@@ -79,7 +79,7 @@ gulp.task('watch', function (cb) {
 
 gulp.task('gitadd', function (cb) {
     gulp.src('../site/*')
-        .pipe(git.add({ cwd: '../site/' }));
+        .pipe(git.add({ cwd: '../site/', quiet: false, }));
     cb();
 });
 
@@ -88,13 +88,13 @@ gulp.task('gitcommit', function (cb) {
     gulp.src('../site/*')
         .pipe(git.commit(message, {
             cwd: '../site/',
-            disableMessageRequirement: true
+            quiet: false
         }));
     cb();
 });
 
 gulp.task('gitpush', function (cb) {
-    git.push('origin', 'master', { cwd: '../site/' }, function (err) {
+    git.push('origin', 'master', { cwd: '../site/', quiet: false }, function (err) {
         if (err) throw err;
     });
     cb();

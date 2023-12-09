@@ -4,7 +4,7 @@ title: "Object Oriented Programming in JavaScript"
 excerpt: "Object Oriented Programming in JavaScript"
 disqus_id: /2020/09/27/oop-javascript/
 tags:
-    - JavaScript
+    - Javascript
 ---
 
 I have been always fascinated by Object oriented programming in JavaScript. Its
