@@ -87,9 +87,10 @@ gulp.task('gitcommit', function () {
         }));
 });
 
-gulp.task('gitpush', function () {
+gulp.task('gitpush', function (cb) {
     return git.push('origin', 'master', { cwd: '../site/', quiet: false }, function (err) {
         if (err) throw err;
+        cb();
     });
 });
 
