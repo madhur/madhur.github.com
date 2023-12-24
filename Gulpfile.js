@@ -17,22 +17,20 @@ gulp.task('connect', function () {
     });
 });
 
-gulp.task('copy', function (cb) {
-    gulp.src('files/css/styles.css')
+gulp.task('copy', function () {
+    return gulp.src('files/css/styles.css')
         .pipe(copy('_site/files/css/', { prefix: 3 }));
-    cb();
 });
 
-gulp.task('uglify', function (cb) {
-    gulp.src(['../site/files/js/app.js', '../site/files/js/main.js'])
+gulp.task('uglify', function () {
+    return gulp.src(['../site/files/js/app.js', '../site/files/js/main.js'])
         .pipe(uglify())
         .pipe(gulp.dest('../site/files/js/'));
 
-    cb();
 });
 
-gulp.task('cssmin', function (cb) {
-    gulp.src([
+gulp.task('cssmin', function () {
+    return gulp.src([
         '../site/files/css/print.css',
         '../site/files/css/styles.css',
         '../site/files/css/searchresults.css',
@@ -42,25 +40,23 @@ gulp.task('cssmin', function (cb) {
         .pipe(cssmin())
         .pipe(gulp.dest('../site/files/css/'));
 
-    cb();
 });
 
 gulp.task('shell', shell.task([
     'jekyll build',
 ]));
 
-gulp.task('less', function (cb) {
-    gulp.src([
+gulp.task('less', function () {
+    return gulp.src([
         'files/css/styles.less',
         'files/css/searchresults.less'
     ])
         .pipe(less())
         .pipe(gulp.dest('files/css/'));
 
-    cb();
 });
 
-gulp.task('watch', function (cb) {
+gulp.task('watch', function () {
 
     browserSync.init({
         server: {
@@ -68,41 +64,37 @@ gulp.task('watch', function (cb) {
         },
         open: true
     });
-    gulp.task('watch', function () {
+    return gulp.task('watch', function () {
         gulp.watch('*.html', gulp.series('styles'));
         gulp.watch('layouts/*.*', gulp.series('scripts'));
         gulp.watch('_pages/*.*', gulp.series('images'));
     });
-    cb();
 
 });
 
-gulp.task('gitadd', function (cb) {
-   
-    git.add({ cwd: '../site/', quiet: false, });
-    cb();
+gulp.task('gitadd', function () {
+    //return git.add({ cwd: '../site/', quiet: false, });
+    return gulp.src('../site/*')
+    .pipe(git.add({ cwd: '../site/', quiet: false, }));
 });
 
-gulp.task('gitcommit', function (cb) {
+gulp.task('gitcommit', function () {
     let message = 'docs: Repository updated on ' + new Date().toISOString();
-    gulp.src('../site/*')
+    return gulp.src('../site/*')
         .pipe(git.commit(message, {
             cwd: '../site/',
             quiet: false
         }));
-    cb();
 });
 
-gulp.task('gitpush', function (cb) {
-    git.push('origin', 'master', { cwd: '../site/', quiet: false }, function (err) {
+gulp.task('gitpush', function () {
+    return git.push('origin', 'master', { cwd: '../site/', quiet: false }, function (err) {
         if (err) throw err;
     });
-    cb();
 });
 
 gulp.task('nojekyll', function (cb) {
     fs.writeFile('../site/.nojekyll', '', cb);
-    cb();
 });
 
 gulp.task('git', gulp.series('gitadd', 'gitcommit', 'gitpush'));
