@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const connect = require('gulp-connect');
 const copy = require('gulp-copy');
 const uglify = require('gulp-uglify');
 const cssmin = require('gulp-cssmin');
@@ -8,14 +7,6 @@ const shell = require('gulp-shell');
 const git = require('gulp-git');
 const fs = require('fs');
 const browserSync = require('browser-sync').create();
-
-gulp.task('connect', function () {
-    return connect.server({
-        root: '../site/',
-        port: 4000,
-        livereload: true
-    });
-});
 
 gulp.task('copy', function () {
     return gulp.src('files/css/styles.css')
@@ -42,7 +33,7 @@ gulp.task('cssmin', function () {
 
 });
 
-gulp.task('shell', shell.task([
+gulp.task('build', shell.task([
     'jekyll build',
 ]));
 
@@ -56,26 +47,26 @@ gulp.task('less', function () {
 
 });
 
-gulp.task('watch', function () {
+gulp.task('reload', function (done) {
+     browserSync.reload();
+     done();
+});
 
+gulp.task('watch', function () {
     browserSync.init({
         server: {
             baseDir: '../site/'
         },
         open: true
     });
-    return gulp.task('watch', function () {
-        gulp.watch('*.html', gulp.series('styles'));
-        gulp.watch('layouts/*.*', gulp.series('scripts'));
-        gulp.watch('_pages/*.*', gulp.series('images'));
-    });
 
+    gulp.watch('**', gulp.series('build', 'reload'));
 });
 
 gulp.task('gitadd', function () {
     //return git.add({ cwd: '../site/', quiet: false, });
     return gulp.src('../site/*')
-    .pipe(git.add({ cwd: '../site/', quiet: false, }));
+        .pipe(git.add({ cwd: '../site/', quiet: false, }));
 });
 
 gulp.task('gitcommit', function () {
@@ -102,9 +93,6 @@ gulp.task('git', gulp.series('gitadd', 'gitcommit', 'gitpush'));
 
 gulp.task('lessCopy', gulp.series('less', 'copy'));
 
-gulp.task('default', gulp.series('connect', 'watch'));
-
-gulp.task('jekyll', gulp.series('connect'));
-
-gulp.task('deploy', gulp.series('shell', 'uglify', 'cssmin', 'nojekyll'));
-gulp.task('pushdeploy', gulp.series('shell', 'uglify', 'cssmin', 'nojekyll', 'git'));
+gulp.task('default', gulp.series('watch'));
+gulp.task('deploy', gulp.series('build', 'uglify', 'cssmin', 'nojekyll'));
+gulp.task('pushdeploy', gulp.series('build', 'uglify', 'cssmin', 'nojekyll', 'git'));
