@@ -3,13 +3,100 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-12-24T21:37:53+05:30</updated>
+ <updated>2023-12-28T11:13:18+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Using Kitty hints to parse maven output</title>
+   <link href="https://madhur.co.in/blog/2023/12/28/using-kitty-hints-parse-maven-output.html"/>
+   <updated>2023-12-28T00:00:00+05:30</updated>
+   <id>id:/blog/2023/12/28/using-kitty-hints-parse-maven-output</id>
+   <content type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/kovidgoyal/kitty&quot;&gt;Kitty&lt;/a&gt; is a very fast and feature rich terminal which has soon become my favourite.&lt;/p&gt;
+
+&lt;p&gt;One of the powerful features of Kitty is its customizability.&lt;/p&gt;
+
+&lt;p&gt;One such feature is &lt;a href=&quot;https://sw.kovidgoyal.net/kitty/kittens/hints/&quot;&gt;Kitty hints&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Kitty hints allows you to select text on terminal and perform an action through a shortcut key. It is completely customizeable.&lt;/p&gt;
+
+&lt;p&gt;Common kitty hints action include opening files, folders and opening web urls outputted in terminal.&lt;/p&gt;
+
+&lt;p&gt;One example where, I was able to customize it was to parse maven output and makes the file links clickable to land directly on the line numbers.&lt;/p&gt;
+
+&lt;p&gt;For example, consider this build output:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.618 s
+[INFO] Finished at: 2023-12-28T10:08:38+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project reactive-programming: Compilation failure: Compilation failure: 
+[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/FileService.java:[17,9] invalid method declaration; return type required
+[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/FileService.java:[17,20] illegal start of type
+[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/Lec08MonoRunnable.java:[15,54] ';' expected
+[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/Lec06SupplierRefactoring.java:[25,37] ';' expected
+[ERROR] -&amp;gt; [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Using kitty hints, we can make the file paths to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileService.java&lt;/code&gt; , &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lec08MonoRunnable.java&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lec06SupplierRefactoring.java&lt;/code&gt; clickable and land it directly on appropriate line numbers.&lt;/p&gt;
+
+&lt;p&gt;This required writing custom regex to parse this line and emitting two named capturing groups &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;path&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;line&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;This can be done in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kitty.conf&lt;/code&gt; as :&lt;/p&gt;
+
+&lt;div class=&quot;language-conf highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kitty_mod&lt;/span&gt;+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kitten&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hints&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt;=&lt;span class=&quot;s2&quot;&gt;&quot;(?&amp;lt;path&amp;gt;(?:\/[\w-_^ ]+)+\/?(?:[\w.])+[^.]):\[(?&amp;lt;line&amp;gt;\d+),\d+\].?&quot;&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;program&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;launch /home/madhur/scripts/editor.py&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;editor.py&lt;/code&gt; is a simple program which is invoked with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;path=...../FileService.java&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;line=17&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;In my case, I launch &lt;a href=&quot;https://github.com/neovim/neovim&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Neovim&lt;/code&gt;&lt;/a&gt; or &lt;a href=&quot;https://www.jetbrains.com/idea/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IntelliJ&lt;/code&gt;&lt;/a&gt; depending upon if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Intellij&lt;/code&gt; is previously running.&lt;/p&gt;
+
+&lt;p&gt;This can be simply done through following snippet:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env python3
+&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sys&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;subprocess&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sys&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'='&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;continue&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rstrip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Popen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ps'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'aux'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stdout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PIPE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;communicate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;list_ps&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'utf-8'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'intellij'&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list_ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'java'&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Intellij found&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;flatpak run com.jetbrains.IntelliJ-IDEA-Community &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Intellij not found&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;nvim &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'line'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Android SSL Pinning Bypass</title>
@@ -1179,45 +1266,6 @@ Status code distribution:
 &lt;p&gt;In the above query, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudfront-filter-udfs&lt;/code&gt; is the exact name of the lambda function which is deployed.&lt;/p&gt;
 
 &lt;p&gt;You can checkout the entire the UDFS code in &lt;a href=&quot;https://github.com/madhur/cloudfront-filter-udfs&quot;&gt;my github repository&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Linux Tips and Tricks</title>
-   <link href="https://madhur.co.in/blog/2022/11/20/linux-tips-tricks.html"/>
-   <updated>2022-11-20T00:00:00+05:30</updated>
-   <id>id:/blog/2022/11/20/linux-tips-tricks</id>
-   <content type="html">&lt;h2 id=&quot;unuseable-terminal-in-intellij-flatpak-apps&quot;&gt;Unuseable terminal in IntelliJ Flatpak apps&lt;/h2&gt;
-
-&lt;p&gt;If you have installed Intellij apps via Flatpak, the terminal doesn’t work  properly, i.e. it won’t load the default shell properly.&lt;/p&gt;
-
-&lt;p&gt;To work around this, Add the custom command in Settings -&amp;gt; Tools -&amp;gt; Terminal and set the Shell Path as (replace zsh with preferred shell)&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/usr/bin/flatpak-spawn &lt;span class=&quot;nt&quot;&gt;--host&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;TERM&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;xterm-256color zsh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;select-all-functionality-in-terminal&quot;&gt;Select all functionality in terminal&lt;/h2&gt;
-
-&lt;p&gt;One of my favorite functionality is to output lot of text in terminal and copy it to clipboard.&lt;/p&gt;
-
-&lt;p&gt;Sadly, many popular terminal softwares, lack the Select All functionality.&lt;/p&gt;
-
-&lt;p&gt;It can be achieved in one of my favorite terminals &lt;a href=&quot;https://sw.kovidgoyal.net/kitty/&quot;&gt;Kitty&lt;/a&gt; using the following configuration&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;map ctrl+a launch --type=clipboard  --stdin-source=@screen_scrollback
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;disable-screensaver-and-dpms-in-linux&quot;&gt;Disable screensaver and DPMS in linux&lt;/h2&gt;
-
-&lt;p&gt;To disable DMPS (Which turns the monitor off after specified time)&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;xset -dpms
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;To disable screensaver&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;xset s off
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
 </content>
  </entry>
  
