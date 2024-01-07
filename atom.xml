@@ -3,13 +3,85 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2023-12-28T11:13:18+05:30</updated>
+ <updated>2024-01-07T21:35:33+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Proxmox - Setting up user friendly urls</title>
+   <link href="https://madhur.co.in/blog/2024/01/07/proxmox-user-friendly-urls.html"/>
+   <updated>2024-01-07T00:00:00+05:30</updated>
+   <id>id:/blog/2024/01/07/proxmox-user-friendly-urls</id>
+   <content type="html">&lt;p&gt;I have been recently tinkering up with idea of setting up a &lt;a href=&quot;https://en.wikipedia.org/wiki/Home_server&quot;&gt;homelab&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/Self-hosting_(web_services)&quot;&gt;self hosting&lt;/a&gt; few services
+such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Name_server&quot;&gt;DNS Server&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/Media_server&quot;&gt;Media server&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/News_aggregator&quot;&gt;RSS Aggregator&lt;/a&gt; etc along with some standard monitoring tools.&lt;/p&gt;
+
+&lt;p&gt;I evaluated two products, &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;Proxmox&lt;/a&gt; and &lt;a href=&quot;https://unraid.net/&quot;&gt;Unraid&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;After evaluating both, I choose Proxmox primarily because it seemed to fit my needs more than Unraid. Unraid is primarily useful if you have lot of data which needs to be made available to multiple services.&lt;/p&gt;
+
+&lt;p&gt;Whereas, Proxmox seems more suitable to run independent services altogether, either in [Docker](https://en.wikipedia.org/wiki/Docker_(software), &lt;a href=&quot;https://en.wikipedia.org/wiki/Virtual_machine&quot;&gt;VMs&lt;/a&gt; or &lt;a href=&quot;https://en.wikipedia.org/wiki/LXC&quot;&gt;Linux Containers&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;For me, the size of the data was not going to be very much, atleast initially and I found the idea of running an open source software (Proxmox) more appealing than one I had to purchase (Unraid).&lt;/p&gt;
+
+&lt;p&gt;I had a spare 12 CORE / 32 GB machine on which I quickly setup Proxmox and I must say, I really like the way I was quickly able to run the following services in a day:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://jellyfin.org/&quot;&gt;Jellyfin&lt;/a&gt; - Media server&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/Athou/commafeed&quot;&gt;Commafeed&lt;/a&gt; - Open source RSS aggregator written in Java&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://pi-hole.net/&quot;&gt;PiHole&lt;/a&gt; - DNS Server with Ad Blocking&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.qbittorrent.org/&quot;&gt;qbittorrent&lt;/a&gt; - Torrent client&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://nginxproxymanager.com/&quot;&gt;Nginx Proxy Manager&lt;/a&gt; - A simple reverse proxy&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt; - Well known time series database&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://grafana.com/&quot;&gt;Grafana&lt;/a&gt; - Well known visualization platform&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The cool thing about &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;Proxmox&lt;/a&gt; is that it uses a &lt;a href=&quot;https://www.ibm.com/topics/hypervisors&quot;&gt;Type 1 Hypervisor&lt;/a&gt; called &lt;a href=&quot;https://ubuntu.com/blog/kvm-hyphervisor&quot;&gt;Kernel-based Virtual Machine (KVM)&lt;/a&gt; to run all the above mentioned services in &lt;a href=&quot;https://wiki.debian.org/LXC&quot;&gt;Linux Containers running on Debian Linux OS&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;What that essentially means is that all these services get their own unique IP Addresses on my LAN network as opposed to all running on a single IP Addresses and exposing on different ports. Type 1 Hypervisor means that they are able to directly access machine hardware and do not have the any additional layer or overhead of resource hungry VM’s.&lt;/p&gt;
+
+&lt;p&gt;Each LXC takes around 200 - 300 MB of disk space and around 512 MB of RAM , making them all fit in a single commodity machine.&lt;/p&gt;
+
+&lt;p&gt;One caveat of this approach is that now I have tons of IP addresses and ports for me to memorize to access these services when I require. Though I can bookmark them, I do not find it appealing.&lt;/p&gt;
+
+&lt;p&gt;Hence, I decided to setup a reverse proxy in nginx for each of them in order for me to reach them through a very user friendly url. Here is the screenshot of the setup:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/nginx.png&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The above setup requires some manual setup of setting up a &lt;a href=&quot;https://en.wikipedia.org/wiki/Hosts_(file)&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt;&lt;/a&gt; file with appropriate entries as follows&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Hosts for nginx proxy manager
+192.168.1.133 nginx
+192.168.1.133 plexui
+192.168.1.133 tui
+192.168.1.133 jellyfinui
+192.168.1.133 grafanaui
+192.168.1.133 promui
+192.168.1.133 zkui
+192.168.1.133 piholeui
+192.168.1.133 rssui
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.133&lt;/code&gt; is the IP Address of &lt;a href=&quot;https://github.com/NginxProxyManager/nginx-proxy-manager&quot;&gt;Nginx Proxy Manager&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;With the above setup I can reach my services in friendly urls such as:&lt;/p&gt;
+
+&lt;p&gt;http://plexui, http://tui, http://jellyfinui, http://grafanaui etc.&lt;/p&gt;
+
+&lt;h3 id=&quot;using-pihole-for-dns-records-instead-of-static-host-file&quot;&gt;Using Pihole for DNS Records instead of static host file&lt;/h3&gt;
+
+&lt;p&gt;One might argue that these hosts entries need to be done in each individiaul client that needs to access Proxmox containers and is not a scaleable approach.&lt;/p&gt;
+
+&lt;p&gt;That is correct, the reason I went with hosts file approach is that right now, I only have a single client - my desktop PC and I do not foresee running PiHole 24x7.&lt;/p&gt;
+
+&lt;p&gt;Incase, I choose PiHole as my permanent DNS resolver and AdBlocker, the scaleable way would be to add these entries in PiHole itself so that it becomes available to any client within my network.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Using Kitty hints to parse maven output</title>
@@ -1194,78 +1266,6 @@ Status code distribution:
 &lt;p&gt;&lt;a href=&quot;/images/guava_cache.png&quot;&gt;&lt;img src=&quot;/images/guava_cache.png&quot; width=&quot;600px&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;I have uploaded this &lt;a href=&quot;https://github.com/madhur/guava-cache-metrics-monitoring&quot;&gt;sample application on github&lt;/a&gt; along with the &lt;a href=&quot;https://github.com/madhur/guava-cache-metrics-monitoring/blob/master/grafana-dashboard.json&quot;&gt;Grafana dashboard&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena Logs</title>
-   <link href="https://madhur.co.in/blog/2022/12/10/aws-athena-user-defined-function-cloudfront-filter.html"/>
-   <updated>2022-12-10T00:00:00+05:30</updated>
-   <id>id:/blog/2022/12/10/aws-athena-user-defined-function-cloudfront-filter</id>
-   <content type="html">&lt;p&gt;Recently, I was faced with a situation where I had to query &lt;a href=&quot;https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html&quot;&gt;AWS ALB Logs&lt;/a&gt; for the rows not coming from the &lt;a href=&quot;https://aws.amazon.com/cloudfront/&quot;&gt;cloudfront&lt;/a&gt; IP as the source.&lt;/p&gt;
-
-&lt;p&gt;To give some perspective, we use &lt;a href=&quot;https://aws.amazon.com/cloudfront/&quot;&gt;cloudfront CDN&lt;/a&gt; in front of our ALB, however, some of our traffic was also coming to &lt;a href=&quot;https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html&quot;&gt;ALB&lt;/a&gt; directly.&lt;/p&gt;
-
-&lt;p&gt;I wanted to query the traffic directly coming from users in &lt;a href=&quot;https://www.amazonaws.cn/en/athena/&quot;&gt;AWS Athena&lt;/a&gt; and there was no easy way to do that.&lt;/p&gt;
-
-&lt;p&gt;That’s where I decided to write &lt;a href=&quot;https://docs.aws.amazon.com/athena/latest/ug/querying-udf.html&quot;&gt;User defined function (UDFS)&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;All the AWS IP ranges are mentioned in this url &lt;a href=&quot;https://ip-ranges.amazonaws.com/ip-ranges.json&quot;&gt;https://ip-ranges.amazonaws.com/ip-ranges.json&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;What we can do is simply write a function, which will query the row and filter it out if the source IP Address lies in this range.&lt;/p&gt;
-
-&lt;p&gt;Here is the simple snippet for the same:&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CloudFrontFilterUDFS&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;UserDefinedFunctionHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;SOURCE_TYPE&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Custom&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ObjectMapper&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ObjectMapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;List&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;SubnetUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;SubnetInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subnetUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;DeserializationFeature&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;FAIL_ON_UNKNOWN_PROPERTIES&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;InputStream&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Thread&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;currentThread&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getContextClassLoader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getResourceAsStream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;cloudfront.json&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;CloudFront&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cloudfront&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;cloudfront&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;readValue&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;in&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;CloudFront&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;RuntimeException&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;subnetUtils&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cloudfront&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getPrefixes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prefix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SubnetUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prefix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getIp_prefix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInfo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;collect&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Collectors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;());&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;CloudFrontFilterUDFS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;kd&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;SOURCE_TYPE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;iscloudfrontip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ipAddress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;StringUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isEmpty&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ipAddress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;valueOf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;valueOf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subnetUtils&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;stream&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;anyMatch&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isInRange&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ipAddress&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)));&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;All needs to be done is, package this in a jar file and deploy it to &lt;a href=&quot;https://aws.amazon.com/lambda/&quot;&gt;AWS Lambda&lt;/a&gt; as a function.&lt;/p&gt;
-
-&lt;p&gt;Once its deployed, its easy to query AWS athena as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;USING&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;EXTERNAL&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;FUNCTION&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IsCloudFrontIP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ip&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;RETURNS&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;varchar&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;LAMBDA&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'cloudfront-filter-udfs'&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;SELECT&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;approx_percentile&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target_processing_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;99&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p99&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;alb_logs&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;alb_ext_logs&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;where&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;year&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'2023'&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;month&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'06'&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;day&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'14'&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;IsCloudFrontIP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;client_ip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'false'&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target_status_code&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'200'&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;group&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;request_url&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;order&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p99&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;desc&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;In the above query, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudfront-filter-udfs&lt;/code&gt; is the exact name of the lambda function which is deployed.&lt;/p&gt;
-
-&lt;p&gt;You can checkout the entire the UDFS code in &lt;a href=&quot;https://github.com/madhur/cloudfront-filter-udfs&quot;&gt;my github repository&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
