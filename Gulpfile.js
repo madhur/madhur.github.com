@@ -48,12 +48,16 @@ gulp.task('less', function () {
 });
 
 gulp.task('reload', function (done) {
-     browserSync.reload();
-     done();
+    browserSync.reload();
+    done();
 });
 
 gulp.task('watch', function () {
     browserSync.init({
+        ui: {
+            port: 4001
+        },
+        port: 4000,
         server: {
             baseDir: '../site/'
         },
