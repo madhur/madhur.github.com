@@ -17,13 +17,16 @@ I also [code](/projects) and continue to do so whenever I get time.
 
 Work
 -----
-I previously worked as Consultant at Microsoft. I previously worked a lot on Microsoft technologies and had a technical blog on them:
-*  _[Code Articles Discussion on Microsoft Technologies](https://docs.microsoft.com/en-in/archive/blogs/mahuja/)_
-*  [First blog](http://madhurahuja.blogspot.in/)
+I have worked with multiple organizations and technologies. One thing which had remained constant is that I always blogged about those technologies. Below are my older technology blogs:
+
+* [http://madhur.netfirms.com](https://github.com/madhur/MyOldSite) - Jul 2004 - Dec 2005
+* [Code, Articles, Discussion on Microsoft Technologies](https://madhurahuja.blogspot.com/) - Dec 2005 - Mar 2008  
+* [MSDN Blog](https://learn.microsoft.com/en-in/archive/blogs/mahuja/) -  March 2008 - November 2010
+* [Current one](https://madhur.co.in/blog) - Jun 2011 - Present
+
 
 
   
-
 Contact
 --------
 Feel free to contact me through any of the below channels or through this [contact form](/contact)
