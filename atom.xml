@@ -3,13 +3,51 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-02-11T09:30:57+05:30</updated>
+ <updated>2024-03-08T22:33:22+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Building RediSearch module in Amazon Linux 2</title>
+   <link href="https://madhur.co.in/blog/2024/03/08/building-redisearch-module.html"/>
+   <updated>2024-03-08T00:00:00+05:30</updated>
+   <id>id:/blog/2024/03/08/building-redisearch-module</id>
+   <content type="html">&lt;p&gt;RediSearch is a &lt;a href=&quot;https://redis.io/&quot;&gt;Redis&lt;/a&gt; module that provides querying, secondary indexing, and full-text search for Redis. To use RediSearch, you first declare indexes on your Redis data. You can then use the RediSearch query language to query that data.&lt;/p&gt;
+
+&lt;p&gt;There is a very good &lt;a href=&quot;https://github.com/RediSearch/redisearch-getting-started&quot;&gt;RediSearch getting started&lt;/a&gt; tutorial on github.&lt;/p&gt;
+
+&lt;p&gt;There are several steps in bulding RediSearch module. The following steps worked on Amazon Linux 2 machine for us:&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;git perl perl-DateTime perl-JSON perl-Capture-Tiny
+git clone https://github.com/RediSearch/RediSearch.git
+wget https://github.com/linux-test-project/lcov/releases/download/v2.0/lcov-2.0-1.noarch.rpm
+rpm &lt;span class=&quot;nt&quot;&gt;-ivh&lt;/span&gt; /root/lcov-2.0-1.noarch.rpm
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;RediSearch
+make setup
+make build
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;At this point, the module should be built at the following location&lt;/p&gt;
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./RediSearch/bin/linux-x64-release/search/redisearch.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Copy it to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/redis&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; /root/RediSearch/bin/linux-x64-release/search/redisearch.so  /etc/redis/
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The module can be activated in redis conf as follows:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;loadmodule /etc/redis/redisearch.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Websocket - Close Status codes</title>
@@ -1209,123 +1247,6 @@ Exception in thread &quot;main&quot; java.lang.IndexOutOfBoundsException: bad SI
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>A nifty Apache Benchmark alternative - hey</title>
-   <link href="https://madhur.co.in/blog/2023/02/23/apache-benchmark-alternative-hey.html"/>
-   <updated>2023-02-23T00:00:00+05:30</updated>
-   <id>id:/blog/2023/02/23/apache-benchmark-alternative-hey</id>
-   <content type="html">&lt;p&gt;If you have been reading my posts, I am a big fan of &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;Apache Benchmark&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Apache benchmark allows you to quickly run a small load test on a single machine.&lt;/p&gt;
-
-&lt;p&gt;You can specify various options like number of request and the concurrency of those requests.&lt;/p&gt;
-
-&lt;p&gt;For example, I can send 10 million requests with a concurrency of 1000 as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ab -n 10000000 -c 1000 &quot;http://localhost:8080&quot;  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Once the ab is finished benchmarking:&lt;/p&gt;
-
-&lt;div class=&quot;language-text highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Server Software:        
-Server Hostname:        localhost
-Server Port:            8080
-
-Document Path:          /
-Document Length:        53 bytes
-
-Concurrency Level:      1000
-Time taken for tests:   332.363 seconds
-Complete requests:      10000000
-Failed requests:        4301677
-   (Connect: 0, Receive: 0, Length: 4301677, Exceptions: 0)
-Total transferred:      1621642574 bytes
-HTML transferred:       571642574 bytes
-Requests per second:    30087.60 [#/sec] (mean)
-Time per request:       33.236 [ms] (mean)
-Time per request:       0.033 [ms] (mean, across all concurrent requests)
-Transfer rate:          4764.78 [Kbytes/sec] received
-
-Connection Times (ms)
-              min  mean[+/-sd] median   max
-Connect:        0   15  21.8     14    1047
-Processing:     0   18   3.9     17      53
-Waiting:        0   13   3.2     12      41
-Total:          1   33  22.2     32    1076
-
-Percentage of the requests served within a certain time (ms)
-  50%     32
-  66%     34
-  75%     35
-  80%     36
-  90%     39
-  95%     42
-  98%     46
-  99%     49
- 100%   1076 (longest request)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;One of the things missing in ab is the ability to send requests at a specified requests/seconds&lt;/p&gt;
-
-&lt;p&gt;The ability to specify requests/seconds is very useful when testing for things such as cache evictions etc&lt;/p&gt;
-
-&lt;p&gt;That is when I stumbled upon &lt;a href=&quot;https://github.com/rakyll/hey&quot;&gt;hey&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/rakyll/hey&quot;&gt;hey&lt;/a&gt; is a dropin replacement for &lt;a href=&quot;https://httpd.apache.org/docs/2.4/programs/ab.html&quot;&gt;ab&lt;/a&gt; with the ability to specify requests/seconds&lt;/p&gt;
-
-&lt;p&gt;For example, If I want to run the load for one minute at 100 requests/seconds, I can sepcify&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;hey -z 1m -q 2 &quot;http://localhost:8080/&quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;q&lt;/code&gt; parameter specifies the requests per second per worker. The default number of workers are 50 (can be overriden via -c parameter)&lt;/p&gt;
-
-&lt;p&gt;I also like the way the results are presented&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Summary:
-  Total:	60.0033 secs
-  Slowest:	0.3025 secs
-  Fastest:	0.0001 secs
-  Average:	0.0033 secs
-  Requests/sec:	99.9945
-  
-
-Response time histogram:
-  0.000 [1]	|
-  0.030 [5949]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-  0.061 [0]	|
-  0.091 [0]	|
-  0.121 [0]	|
-  0.151 [0]	|
-  0.182 [0]	|
-  0.212 [0]	|
-  0.242 [0]	|
-  0.272 [0]	|
-  0.303 [50]	|
-
-
-Latency distribution:
-  10% in 0.0005 secs
-  25% in 0.0006 secs
-  50% in 0.0008 secs
-  75% in 0.0010 secs
-  90% in 0.0012 secs
-  95% in 0.0013 secs
-  99% in 0.0016 secs
-
-Details (average, fastest, slowest):
-  DNS+dialup:	0.0000 secs, 0.0001 secs, 0.3025 secs
-  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0013 secs
-  req write:	0.0000 secs, 0.0000 secs, 0.0008 secs
-  resp wait:	0.0032 secs, 0.0001 secs, 0.3013 secs
-  resp read:	0.0000 secs, 0.0000 secs, 0.0011 secs
-
-Status code distribution:
-  [202]	6000 responses
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
