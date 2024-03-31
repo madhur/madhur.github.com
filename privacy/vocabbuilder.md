@@ -1,3 +1,10 @@
+---
+layout: default
+title: Privacy Policy
+section: Info
+top: Vocab Builder
+---
+
 **Privacy Policy**
 
 This privacy policy applies to the Vocab Builder app (hereby referred to as "Application") for mobile devices that was created by Madhur Ahuja (hereby referred to as "Service Provider") as a Free service. This service is intended for use "AS IS".
