@@ -2,7 +2,7 @@
 layout: blog-post
 title: "My Homelab Update - Part I"
 excerpt: "My Homelab Update - Part I"
-disqus_id: /2025/05/01/my-homelab-update-part1/
+disqus_id: /2024/05/01/my-homelab-update-part1/
 tags:
     - Homelab
 ---
