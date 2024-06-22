@@ -3,13 +3,51 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-05-01T17:58:18+05:30</updated>
+ <updated>2024-06-22T10:24:10+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Rtkit Daemon flooding journalctl logs</title>
+   <link href="https://madhur.co.in/blog/2024/06/22/journalctl-rtkit-daemon.html"/>
+   <updated>2024-06-22T00:00:00+05:30</updated>
+   <id>id:/blog/2024/06/22/journalctl-rtkit-daemon</id>
+   <content type="html">&lt;p&gt;Recently I observed, &lt;a href=&quot;https://github.com/heftig/rtkit&quot;&gt;Rtkit daemon&lt;/a&gt; has been flooding the &lt;a href=&quot;https://www.freedesktop.org/software/systemd/man/latest/journalctl.html&quot;&gt;Journalctl&lt;/a&gt; logs&lt;/p&gt;
+
+&lt;p&gt;I frequently found logs such as below in the journalctl logs&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
+Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
+Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
+Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
+...
+Jun 12 23:48:39 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
+Jun 12 23:48:42 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
+Jun 12 23:48:44 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Not much aware about this daemon, however, it seems to be used by audio systems such as &lt;a href=&quot;https://wiki.archlinux.org/title/PulseAudio&quot;&gt;Pulseaudio&lt;/a&gt; and &lt;a href=&quot;https://wiki.archlinux.org/title/PipeWire&quot;&gt;Pipewire&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Fixing these logs is simple&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl edit rtkit-daemon
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add the following lines&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Service]
+LogLevelMax=warning
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And restart rtkit daemon using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl restart rtkit-daemon&lt;/code&gt;&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>My Homelab Update - Part I</title>
@@ -1168,48 +1206,6 @@ swapon &lt;span class=&quot;nv&quot;&gt;$swappart&lt;/span&gt;&lt;span class=&qu
 &lt;p&gt;Please download or update your already installed extension to get it working on Latest LeetCode UI.&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://chrome.google.com/webstore/detail/leetcode-format/imogghebhifnnlgogigikjecilkicfpp?hl=en&quot;&gt;Download here for Chrome&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>zsh and /etc/profile</title>
-   <link href="https://madhur.co.in/blog/2023/05/10/zsh-and-etc-profile.html"/>
-   <updated>2023-05-10T00:00:00+05:30</updated>
-   <id>id:/blog/2023/05/10/zsh-and-etc-profile</id>
-   <content type="html">&lt;p&gt;I just upgraded from zsh v5.5 to zsh v5.9 and some of my applications broke.&lt;/p&gt;
-
-&lt;p&gt;It seems the environment variable &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt; was blanked out in the process.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html#introduction&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt;&lt;/a&gt; holds the location of directories which can contain &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.desktop&lt;/code&gt; files.
-The &lt;a href=&quot;https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.desktop&lt;/code&gt; files&lt;/a&gt; are basically application shortcuts in the Linux desktop world.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$XDG_DATA_DIRS&lt;/code&gt; and several such variables are initialized by scripts placed in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profiles.d&lt;/code&gt; folder. This folder is executed by the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; script.&lt;/p&gt;
-
-&lt;p&gt;Now, the twist is that the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; is only invoked by &lt;a href=&quot;https://en.wikipedia.org/wiki/Bash_(Unix_shell)&quot;&gt;bash shell&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;zsh uses its own set of configuration files:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zshrc&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zlogin&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zshenv&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Most modern distros will have a mechanism where in /etc/zsh/zprofile will invoke the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profile&lt;/code&gt; which in turn will invoke all the scripts placed inside &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/profiles.d&lt;/code&gt; folder.&lt;/p&gt;
-
-&lt;p&gt;However, if you are using the older distro or a non-Desktop distros such as &lt;a href=&quot;https://www.centos.org/&quot;&gt;CentOS&lt;/a&gt;, &lt;a href=&quot;https://www.redhat.com/en&quot;&gt;RedHat&lt;/a&gt;, this might not be the case.&lt;/p&gt;
-
-&lt;p&gt;In that case, you need to setup that linkage manually. In my case, I created the file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt; with the contents&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;emulate sh -c 'source /etc/profile'
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;One other thing I found that some distros might invoke &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zprofile&lt;/code&gt; , instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/zsh/zprofile&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;In that case, you might want to symlink the files with&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo ln -s /etc/zsh/zprofile /etc/zprofile  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
