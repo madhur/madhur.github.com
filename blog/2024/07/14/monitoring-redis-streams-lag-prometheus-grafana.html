@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Monitoring Redis Streams lag in Prometheus and Grafana &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Monitoring Redis Streams lag in Prometheus and Grafana" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>Monitoring Redis Streams lag in Prometheus and Grafana</h1>
+			</header>
+
+			<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2024-07-14 00:00:00 +0530" pubdate="pubdate"
+            >14 July 2024</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<p>Monitoring Redis Streams lag in Prometheus and Grafana</p>
+
+<p>In this post, we will look at how we can measure redis streams lag from the application perspective.</p>
+
+<p>We would want to measure the lag and plot this in visual format using Prometheus in Grafana</p>
+
+<h3 id="assumptions">Assumptions</h3>
+
+<ul>
+  <li>
+    <p>We are going to assume that we have set of streams and set of consumer groups which are consuming from the stream. We are using consumer groups because we want high availability to consume via multiple nodes. We assume that each consumer within consumer groups are dynamic, for example if a consumer is running on a kubernetes node,  a node can be restarted, respawned.</p>
+  </li>
+  <li>
+    <p>We are also going to assume that we are trimming stream length to some constant number of messages at regular intervals to save memory. This is important in terms of monitoring since redis reports some metrics assuming that consumer group has been consuming from beginning of stream, which many a times is not the case.</p>
+  </li>
+  <li>
+    <p>We are also going to assume that there is some constant minimum rate of message publish on redis stream. Why do we need this assumption? Not enforcing this restriction makes the monitoring even more difficult. We will see why below.</p>
+  </li>
+  <li>
+    <p>In the examples below, we have streams named <code class="language-plaintext highlighter-rouge">ack0, ack1, ack2, ack3, ack4</code> consumed by consumer group <code class="language-plaintext highlighter-rouge">poker-coordinator-ack</code></p>
+  </li>
+</ul>
+
+<h3 id="how-do-we-define-lag">How do we define lag?</h3>
+
+<p>In terms of Redis streams, we are primarily interested in two metrics:</p>
+
+<ul>
+  <li>
+    <p>Undelivered messages: The messages which have been published on redis stream, but not yet have been consumed by the consumer group. This can happen if consumer group is taking a lot of time to process messages. This indicates that either we need to scale horizontally to increase the consumption rate or reduce the publish rate.</p>
+  </li>
+  <li>
+    <p>Pending messages: The message which have been consumed by the consumer group but yet not acknowledged. This is only applicable for redis streams consumer groups which have acknowledgement enabled. The messages which are not acknowledged, remain in <a href="https://redis.io/docs/latest/commands/xpending/">Pending Entries List</a> data structure. It is important to know the length of this data structure to determine if there were some messages in stream which were not acknowledged by the consumer.</p>
+  </li>
+</ul>
+
+<p>We will now examine each of the redis stream related command output below to determine if it can help in monitoring redis streams.</p>
+
+<h3 id="xinfo-groups-ack0-will-give-information-about-ack0-stream-consumer-groups">xinfo groups ack0, will give information about ack0 stream consumer groups.</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>127.0.0.1:6381&gt; xinfo groups ack3
+1)  1) "name"
+    2) "consumerGroup"
+    3) "consumers"
+    4) (integer) 2
+    5) "pending"
+    6) (integer) 0
+    7) "last-delivered-id"
+    8) "0-0"
+    9) "entries-read"
+   10) (nil)
+   11) "lag"
+   12) (integer) 8766
+2)  1) "name"
+    2) "poker-coordinator-ack"
+    3) "consumers"
+    4) (integer) 20
+    5) "pending"
+    6) (integer) 100
+    7) "last-delivered-id"
+    8) "1720934812760-0"
+    9) "entries-read"
+   10) (integer) 791553
+   11) "lag"
+   12) (integer) 11445
+</code></pre></div></div>
+
+<p>This output gives the number of consumer groups for stream <code class="language-plaintext highlighter-rouge">ack3</code>. Here, stream <code class="language-plaintext highlighter-rouge">ack3</code> has two consumer groups namely <code class="language-plaintext highlighter-rouge">consumerGroup</code> and <code class="language-plaintext highlighter-rouge">poker-coordinator-ack</code>.</p>
+
+<ul>
+  <li>
+    <p>The number of consumers in both groups are 2 and 20 respectively.</p>
+  </li>
+  <li>
+    <p>The pending messages in both groups are 0 and 100 respectively.</p>
+  </li>
+  <li>
+    <p>The last delivered id for both groups is <code class="language-plaintext highlighter-rouge">0-0</code> and <code class="language-plaintext highlighter-rouge">1720934812760-0</code> respectively. The first one indicates that its dead and is not running. This metric is useful in monitoring since it can tell us which was the last id which was delivered to this consumer group by redis stream.</p>
+  </li>
+  <li>
+    <p>The entries read for both groups are <code class="language-plaintext highlighter-rouge">nil</code> and <code class="language-plaintext highlighter-rouge">791553</code> respectively. This number is lifetime aggregate and is usually useless for monitoring purposes. This is because stream length can generally be trimmed at regular intervals for saving memory as I mentioned in the assumptions. Once the stream length is trimmed, this number in comparison to stream length is very large.</p>
+  </li>
+  <li>
+    <p>The lag for both groups is 8766 and 11445 respectively. The lag is important metric, however its important to understand it.</p>
+  </li>
+</ul>
+
+<blockquote>
+  <p>The lag of a given consumer group is the number of entries in the range between the group’s entries_read and the stream’s entries_added. Put differently, it is the number of entries that are yet to be delivered to the group’s consumers.</p>
+</blockquote>
+
+<p>It seems that this number is a good metric to monitor for monitoring. However, there is a caveat to it. The way redis calculates this number is by subtracting the total number of messages published on stream minus the number of messages read by consumer group since beginning. In real world, the consumer group might have been created later after the stream is created OR there might have been some messages which were trimmed or deleted from the stream which this consumer group might never receieve. In that case, this number will always report very large value which is not what we want.</p>
+
+<h3 id="xpending-ack3-poker-coordinator-ack-will-give-the-information-about-pending-messages-to-the-consumer-group">xpending ack3 poker-coordinator-ack will give the information about pending messages to the consumer group</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>127.0.0.1:6379&gt; xpending ack3 poker-coordinator-ack
+-&gt; Redirected to slot [15549] located at 127.0.0.1:6381
+1) (integer) 100
+2) "1720937728800-4"
+3) "1720937738803-1"
+4) 1) 1) "F8DD1276E0DF496C965EC775CA07397F"
+      2) "100"
+</code></pre></div></div>
+<p>This outputs that there are <code class="language-plaintext highlighter-rouge">100</code> pending messages. The smallest message id is <code class="language-plaintext highlighter-rouge">1720937728800-4</code> and largest message id is <code class="language-plaintext highlighter-rouge">1720937738803-1</code>. The consumer (within the group <code class="language-plaintext highlighter-rouge">poker-coordinator-ack</code>) which has pending messages 100 with id <code class="language-plaintext highlighter-rouge">F8DD1276E0DF496C965EC775CA07397F</code></p>
+
+<h3 id="xinfo-consumers-ack3-poker-coordinator-ack">xinfo consumers ack3 poker-coordinator-ack</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> 1) 1) "name"
+    2) "07A1A45C9BCD40238A54F773ECB47B82"
+    3) "pending"
+    4) (integer) 0
+    5) "idle"
+    6) (integer) 1463079
+    7) "inactive"
+    8) (integer) 1463079
+ 2) 1) "name"
+    2) "225EF592894744ADB4F0768797F608CE"
+    3) "pending"
+    4) (integer) 0
+    5) "idle"
+    6) (integer) 10170676
+    7) "inactive"
+    8) (integer) 10170676
+</code></pre></div></div>
+
+<p>The output above gives information about each unique consumer within a consumer group. Since our consumers are dynamic in a containerized infrastructure, the consumer group name is just a UUID. Once the container goes away, the unique consumer name is no longer relevant and we are not interested in the information. It is apparent that we are not interested in each consumer within a group. We want to make sure that a consumer group as a whole is healthy and consuming messages at healthy rate.</p>
+
+<h3 id="calculating-undelivered-messages">Calculating undelivered messages</h3>
+
+<p>The best way to calculate undelivered message is get the last delivered ID of the consumer group and the last delivered ID of the stream. Count the number of messages between them and report it as lag. Here is the pseudo code using <a href="https://github.com/redisson/redisson">Redisson</a> client in java.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.redisson.api.StreamMessageId</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.redisson.api.stream.StreamReadGroupArgs</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">updateStreamLagMetrics</span><span class="o">(</span><span class="nc">RedissonClient</span> <span class="n">redisson</span><span class="o">,</span> <span class="nc">String</span> <span class="n">streamName</span><span class="o">,</span> <span class="nc">String</span> <span class="n">groupName</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">RStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">redisson</span><span class="o">.</span><span class="na">getStream</span><span class="o">(</span><span class="n">streamName</span><span class="o">);</span>
+    
+    <span class="c1">// Get stream info</span>
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">streamInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">getInfo</span><span class="o">();</span>
+    <span class="nc">String</span> <span class="n">lastGeneratedId</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">streamInfo</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"lastGeneratedId"</span><span class="o">);</span>
+
+    <span class="c1">// Get group info</span>
+    <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">groupInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">listGroups</span><span class="o">().</span><span class="na">stream</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">group</span> <span class="o">-&gt;</span> <span class="n">group</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"name"</span><span class="o">).</span><span class="na">equals</span><span class="o">(</span><span class="n">groupName</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">findFirst</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">orElseThrow</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="k">new</span> <span class="nc">RuntimeException</span><span class="o">(</span><span class="s">"Group not found"</span><span class="o">));</span>
+
+    <span class="nc">String</span> <span class="n">lastDeliveredId</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">groupInfo</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"lastDeliveredId"</span><span class="o">);</span>
+
+    <span class="c1">// Get pending messages count</span>
+    <span class="nc">PendingResult</span> <span class="n">pendingInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">getPendingInfo</span><span class="o">(</span><span class="n">groupName</span><span class="o">);</span>
+    <span class="kt">long</span> <span class="n">pendingCount</span> <span class="o">=</span> <span class="n">pendingInfo</span><span class="o">.</span><span class="na">getTotal</span><span class="o">();</span>
+
+    <span class="c1">// Calculate undelivered messages</span>
+    <span class="kt">long</span> <span class="n">undeliveredMessages</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(!</span><span class="n">lastGeneratedId</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">lastDeliveredId</span><span class="o">))</span> <span class="o">{</span>
+        <span class="nc">StreamMessageId</span> <span class="n">lastDeliveredStreamId</span> <span class="o">=</span> <span class="n">parseStreamMessageId</span><span class="o">(</span><span class="n">lastDeliveredId</span><span class="o">);</span>
+        
+        <span class="c1">// Read all messages after the last delivered ID</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">StreamEntry</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;&gt;</span> <span class="n">undeliveredEntries</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">readGroup</span><span class="o">(</span><span class="n">groupName</span><span class="o">,</span> <span class="s">"temp-consumer"</span><span class="o">,</span> 
+            <span class="nc">StreamReadGroupArgs</span><span class="o">.</span><span class="na">neverDelivered</span><span class="o">().</span><span class="na">count</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">));</span>
+        
+        <span class="n">undeliveredMessages</span> <span class="o">=</span> <span class="n">undeliveredEntries</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+        
+        <span class="c1">// Remove the temporary consumer</span>
+        <span class="n">stream</span><span class="o">.</span><span class="na">removeConsumer</span><span class="o">(</span><span class="n">groupName</span><span class="o">,</span> <span class="s">"temp-consumer"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kt">long</span> <span class="n">totalLag</span> <span class="o">=</span> <span class="n">undeliveredMessages</span> <span class="o">+</span> <span class="n">pendingCount</span><span class="o">;</span>
+
+    <span class="c1">// Update Prometheus metrics</span>
+    <span class="no">UNDELIVERED_MESSAGES</span><span class="o">.</span><span class="na">labels</span><span class="o">(</span><span class="n">streamName</span><span class="o">,</span> <span class="n">groupName</span><span class="o">).</span><span class="na">set</span><span class="o">(</span><span class="n">undeliveredMessages</span><span class="o">);</span>
+    <span class="no">PENDING_MESSAGES</span><span class="o">.</span><span class="na">labels</span><span class="o">(</span><span class="n">streamName</span><span class="o">,</span> <span class="n">groupName</span><span class="o">).</span><span class="na">set</span><span class="o">(</span><span class="n">pendingCount</span><span class="o">);</span>
+    <span class="no">TOTAL_LAG</span><span class="o">.</span><span class="na">labels</span><span class="o">(</span><span class="n">streamName</span><span class="o">,</span> <span class="n">groupName</span><span class="o">).</span><span class="na">set</span><span class="o">(</span><span class="n">totalLag</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="kd">static</span> <span class="nc">StreamMessageId</span> <span class="nf">parseStreamMessageId</span><span class="o">(</span><span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">String</span><span class="o">[]</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">id</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"-"</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">parts</span><span class="o">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"Invalid stream ID format: "</span> <span class="o">+</span> <span class="n">id</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">StreamMessageId</span><span class="o">(</span><span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="n">parts</span><span class="o">[</span><span class="mi">0</span><span class="o">]),</span> <span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="n">parts</span><span class="o">[</span><span class="mi">1</span><span class="o">]));</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>However, note that counting the number of messages between two IDs is a very expensive operation which I do not recommend doing on a production cluster. Instead, what we can do is get the approximation of time difference between the two and report it as a metric. This is where the assumption that <code class="language-plaintext highlighter-rouge">there is some constant minimum rate of message publish on redis stream.</code> comes into picture. If the messages are sparingly published, this approach does not work.</p>
+
+<p>Here is the updated code based on the assumption</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="kd">public</span>  <span class="kt">void</span> <span class="nf">computeStreamLag</span><span class="o">(</span><span class="nc">RedissonClient</span> <span class="n">redisson</span><span class="o">,</span> <span class="nc">String</span> <span class="n">streamName</span><span class="o">,</span> <span class="nc">String</span> <span class="n">groupName</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">RStream</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">redisson</span><span class="o">.</span><span class="na">getStream</span><span class="o">(</span><span class="n">streamName</span><span class="o">);</span>
+
+        <span class="c1">// Get stream info</span>
+        <span class="nc">StreamInfo</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">streamInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">getInfo</span><span class="o">();</span>
+
+        <span class="nc">StreamMessageId</span> <span class="n">lastGeneratedId</span> <span class="o">=</span> <span class="n">streamInfo</span><span class="o">.</span><span class="na">getLastGeneratedId</span><span class="o">();</span>
+
+        <span class="c1">// Get group info</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">StreamGroup</span><span class="o">&gt;</span> <span class="n">groupsInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">listGroups</span><span class="o">();</span>
+        <span class="nc">StreamGroup</span> <span class="n">groupInfo</span> <span class="o">=</span> <span class="n">groupsInfo</span><span class="o">.</span><span class="na">stream</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">group</span> <span class="o">-&gt;</span> <span class="n">group</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">groupName</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">findFirst</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">orElseThrow</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="k">new</span> <span class="nc">RuntimeException</span><span class="o">(</span><span class="s">"Group not found"</span><span class="o">));</span>
+
+        <span class="nc">StreamMessageId</span> <span class="n">lastDeliveredId</span> <span class="o">=</span> <span class="n">groupInfo</span><span class="o">.</span><span class="na">getLastDeliveredId</span><span class="o">();</span>
+        <span class="c1">// Get pending messages count</span>
+        <span class="nc">PendingResult</span> <span class="n">pendingInfo</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="na">getPendingInfo</span><span class="o">(</span><span class="n">groupName</span><span class="o">);</span>
+        <span class="kt">long</span> <span class="n">pendingCount</span> <span class="o">=</span> <span class="n">pendingInfo</span><span class="o">.</span><span class="na">getTotal</span><span class="o">();</span>
+
+        <span class="c1">// Calculate lag</span>
+        <span class="c1">// Calculate undelivered messages</span>
+        <span class="kt">long</span> <span class="n">undeliveredMessages</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">lastGeneratedId</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">lastDeliveredId</span><span class="o">))</span> <span class="o">{</span>
+            <span class="c1">// If last generated ID is different from last delivered ID, there are undelivered messages</span>
+            <span class="n">undeliveredMessages</span> <span class="o">=</span> <span class="n">calculateIdDifference</span><span class="o">(</span><span class="n">lastGeneratedId</span><span class="o">,</span> <span class="n">lastDeliveredId</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">undeliveredMessages</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">undeliveredMessages</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="o">}</span>
+
+         <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Tag</span><span class="o">&gt;</span> <span class="n">undeliveredMessagesTag</span> <span class="o">=</span>
+                <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">singleton</span><span class="o">(</span><span class="nc">Tag</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"undeliveredMessages"</span><span class="o">)));</span>
+        <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Tag</span><span class="o">&gt;</span> <span class="n">pendingMessages</span> <span class="o">=</span>
+                <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">singleton</span><span class="o">(</span><span class="nc">Tag</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">"type"</span><span class="o">,</span> <span class="s">"pendingMessages"</span><span class="o">)));</span>
+
+        <span class="k">this</span><span class="o">.</span><span class="na">prometheusMetricWrapper</span><span class="o">.</span><span class="na">recordGaugeValue</span><span class="o">(</span><span class="n">streamName</span><span class="o">,</span> <span class="n">undeliveredMessagesTag</span><span class="o">,</span> <span class="n">undeliveredMessages</span><span class="o">);</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">prometheusMetricWrapper</span><span class="o">.</span><span class="na">recordGaugeValue</span><span class="o">(</span><span class="n">streamName</span><span class="o">,</span> <span class="n">pendingMessages</span><span class="o">,</span> <span class="n">pendingCount</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kt">long</span> <span class="nf">calculateIdDifference</span><span class="o">(</span><span class="nc">StreamMessageId</span> <span class="n">id1</span><span class="o">,</span> <span class="nc">StreamMessageId</span> <span class="n">id2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">long</span> <span class="n">timeDiff</span> <span class="o">=</span> <span class="n">id1</span><span class="o">.</span><span class="na">getId0</span><span class="o">()</span> <span class="o">-</span> <span class="n">id2</span><span class="o">.</span><span class="na">getId0</span><span class="o">();</span>
+        <span class="kt">long</span> <span class="n">seqDiff</span> <span class="o">=</span> <span class="n">id1</span><span class="o">.</span><span class="na">getId1</span><span class="o">()</span> <span class="o">-</span> <span class="n">id2</span><span class="o">.</span><span class="na">getId1</span><span class="o">();</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">timeDiff</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">seqDiff</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="c1">// This is an approximation. Actual difference might be slightly different</span>
+            <span class="k">return</span> <span class="o">(</span><span class="n">timeDiff</span><span class="o">)</span> <span class="o">+</span> <span class="n">seqDiff</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">StreamMessageId</span> <span class="nf">parseStreamMessageId</span><span class="o">(</span><span class="nc">String</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">id</span><span class="o">.</span><span class="na">split</span><span class="o">(</span><span class="s">"-"</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">parts</span><span class="o">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">"Invalid stream ID format: "</span> <span class="o">+</span> <span class="n">id</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">StreamMessageId</span><span class="o">(</span><span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="n">parts</span><span class="o">[</span><span class="mi">0</span><span class="o">]),</span> <span class="nc">Long</span><span class="o">.</span><span class="na">parseLong</span><span class="o">(</span><span class="n">parts</span><span class="o">[</span><span class="mi">1</span><span class="o">]));</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="what-about-measuring-reliable-processing-lag">What about measuring reliable processing Lag</h3>
+
+<p>We saw above that it is not possible to measure the redis streams lag (measured as count of mesasges) accurately if the rate of publish on the stream varies a lot.</p>
+
+<p>How did we end up solving this?</p>
+
+<p>One of the other ways of solving is to let publisher add the timestamp to the each of stream message. This way, when the message arrives at the consumer, you can calculate the difference and plot it as processing lag.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>In this article we saw how to monitor redis streams lag. Here is the final snapshot of the dashboard which came out as a result of this excercise.</p>
+
+<p><a href="/images/grafana_stream.png" data-fancybox="">
+<img src="/images/grafana_stream.png" width="1000px" />
+</a></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/java">Java</a> |
+						
+						<a href="/blog/tags/redis">Redis</a> |
+						
+						<a href="/blog/tags/grafana">Grafana</a> |
+						
+						<a href="/blog/tags/prometheus">Prometheus</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2024/07/14/monitoring-redis-streams-lag-prometheus-grafana/';
+  var disqus_title = 'Monitoring Redis Streams lag in Prometheus and Grafana';
+  var disqus_url = 'https://madhur.co.in/blog/2024/07/14/monitoring-redis-streams-lag-prometheus-grafana.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+
+
+
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2024 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
