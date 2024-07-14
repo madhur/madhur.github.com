@@ -3,42 +3,15 @@ layout: default
 top: Madhur Ahuja
 ---
 
-
 <div class="col-md-9">
-
-  <div id="cse" style="width: 100%;">Loading</div>
-  <script src="http://www.google.co.in/jsapi" type="text/javascript"></script>
-  <script type="text/javascript">
-    function parseQueryFromUrl() {
-      var queryParamName = "q";
-      var search = window.location.search.substr(1);
-      var parts = search.split('&');
-      for (var i = 0; i < parts.length; i++) {
-        var keyvaluepair = parts[i].split('=');
-        if (decodeURIComponent(keyvaluepair[0]) == queryParamName) {
-          return decodeURIComponent(keyvaluepair[1].replace(/\+/g, ' '));
-        }
-      }
-      return '';
-    }
-
-    google.load('search', '1', { style: google.loader.themes.MINIMALIST });
-    google.setOnLoadCallback(function () {
-      var customSearchControl = new google.search.CustomSearchControl(
-        'partner-pub-1657163894706869:5782583060');
-
-      customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-      var options = new google.search.DrawOptions();
-      options.enableSearchResultsOnly();
-      customSearchControl.draw('cse', options);
-      var queryFromUrl = parseQueryFromUrl();
-      if (queryFromUrl) {
-        customSearchControl.execute(queryFromUrl);
-      }
-    }, true);
-  </script>
+  <script async src="https://cse.google.com/cse.js?cx=partner-pub-1657163894706869:5782583060"></script>
+  
 
   {{ content }}
+
+  <div data-gname="gcse-searchresults-only" class="gcse-searchresults-only">
+
+  </div>
 
   <link rel="stylesheet" type="text/css" href="/files/css/searchresults.css" />
 </div>
@@ -48,3 +21,47 @@ top: Madhur Ahuja
 </div>
 
 <div class="c"></div>
+
+<script type="text/javascript">
+  // Define a global callback for when the Google CSE script is ready
+  window.__gcse = {
+    parsetags: 'explicit', // Prevent automatic parsing to ensure control over timing
+    callback: onGoogleCSELoaded
+  };
+
+  function onGoogleCSELoaded() {
+    // Now it's safe to use the google object
+    onDocumentReady();
+  }
+
+  function parseQueryFromUrl() {
+    var queryParamName = "q";
+    var search = window.location.search.substr(1);
+    var parts = search.split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var keyvaluepair = parts[i].split('=');
+      if (decodeURIComponent(keyvaluepair[0]) == queryParamName) {
+        return decodeURIComponent(keyvaluepair[1].replace(/\+/g, ' '));
+      }
+    }
+    return '';
+  }
+
+  function executeSearch() {
+    var queryFromUrl = parseQueryFromUrl();
+    if (queryFromUrl) {
+      var element = google.search.cse.element.getElement('gcse-searchresults-only');
+      if (element) {
+        element.execute(queryFromUrl);
+      }
+    }
+  }
+
+  function onDocumentReady(callback) {
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(executeSearch, 0);
+  } else {
+    document.addEventListener('DOMContentLoaded', executeSearch, { once: true });
+  }
+}
+</script>

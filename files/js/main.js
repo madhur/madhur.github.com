@@ -1,4 +1,4 @@
-define(["jquery", "bootstrap", "fancybox"], function ($, bootstrap, fancybox) {
+define(["jquery", "bootstrap", "fancybox", "typeahead","bloodhound"], function ($, bootstrap, fancybox, typeahead, Bloodhound) {
 
     var qs = (function (a) {
         if (a == "") return {};
@@ -87,6 +87,28 @@ define(["jquery", "bootstrap", "fancybox"], function ($, bootstrap, fancybox) {
         docprint.focus();
     }
 
+    var dataSource = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: {
+            url: "/search.json",
+           
+        },
+        remote: {
+            url: "/search.json"
+        }
+    });
+
+    dataSource.initialize();
+    $('#q1').typeahead({
+        highlight: true
+      }, {
+        display: 'value',
+        source: dataSource
+      });
+   
+    
+   
 
 
 });

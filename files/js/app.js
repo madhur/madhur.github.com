@@ -9,6 +9,8 @@ require.config(
         falsy: 'vendor/false.min',
         palnes: 'vendor/planes',
         fancybox: 'vendor/fancybox.umd',
+        typeahead: 'vendor/typeahead.min',
+        bloodhound: 'vendor/bloodhound.min',
         main:'main'
     },
     shim:
@@ -17,7 +19,17 @@ require.config(
         {
 
             deps: ["jquery"]
-        }
+        },
+        typeahead: {
+            deps: [ 'jquery' ],
+            init: function ($) {
+                return require.s.contexts._.registry['typeahead.js'].factory( $ );
+            }
+        },
+        bloodhound: {
+            deps: ['jquery'],
+            exports: 'Bloodhound'
+         }
 
     }
 });
@@ -39,5 +51,8 @@ if((dd ==15 && mm == 8) || (dd==26 && mm==1))
 
     });
 }
+
+
+
 
 
