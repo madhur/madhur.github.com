@@ -25,7 +25,7 @@ gulp.task('cssmin', function () {
         '../site/files/css/print.css',
         '../site/files/css/styles.css',
         '../site/files/css/searchresults.css',
-        '../site/files/css/jquery.fancybox.css',
+        '../site/files/css/fancybox.css',
         '../site/files/css/syntax.css'
     ])
         .pipe(cssmin())

@@ -95,11 +95,29 @@ module Jekyll
         years, months, days = Archive.archives(context.registers[:site])
         result = ""
         
-        months.each do |year, m|
-          m.each do |month, posts|
-            time = Time.new(year, month)
-            result.insert(0, %(<div class='archivemonth'><a href="/blog/#{time.strftime('/%Y/%m')}">#{time.strftime('%B %Y')}</a> (#{posts.length})<br /></div>)) # for reverse order
-          end
+        # months.each do |year, m|
+        #   m.each do |month, posts|
+        #     time = Time.new(year, month)
+        #     result.insert(0, %(<div class='archivemonth'><a href="/blog/#{time.strftime('/%Y/%m')}">#{time.strftime('%B %Y')}</a> (#{posts.length})<br /></div>)) # for reverse order
+        #   end
+        # end
+
+        # Step 1: Flatten the structure
+        flattened_months = months.flat_map do |year, months|
+          months.map { |month, posts| [year, month, posts] }
+        end
+
+        # Step 2: Sort the array in descending order by year and month
+        sorted_months = flattened_months.sort_by { |year, month, _posts| [year, month] }
+
+        # Step 3: Limit to top 24
+        latest_24_months = sorted_months.last(48)
+
+        # Step 4: Generate HTML
+        result = []
+        latest_24_months.each do |year, month, posts|
+          time = Time.new(year, month)
+          result.insert(0, %(<div class='archivemonth'><a href="/blog/#{time.strftime('/%Y/%m')}">#{time.strftime('%B %Y')}</a> (#{posts.length})<br /></div>))
         end
         
         result
