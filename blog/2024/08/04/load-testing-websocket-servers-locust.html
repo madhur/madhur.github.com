@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Load testing Websocket servers using Locust &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Load testing Websocket servers using Locust" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>Load testing Websocket servers using Locust</h1>
+			</header>
+
+			<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2024-08-04 00:00:00 +0530" pubdate="pubdate"
+            >04 August 2024</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<p>The entire code of this article is present on this <a href="https://github.com/madhur/load-test-websocket-locust">github repository</a></p>
+
+<p>Load testing WebSocket servers is crucial for ensuring their performance and scalability.</p>
+
+<p>This article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.</p>
+
+<p>We will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.</p>
+
+<p>The only message we will be handling is heartbeat requests for simplicity.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">start</span><span class="o">(</span><span class="nc">String</span> <span class="n">host</span><span class="o">,</span> <span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="nc">ServerConnector</span> <span class="n">socketConnector</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServerConnector</span><span class="o">(</span><span class="n">server</span><span class="o">);</span>
+        <span class="n">socketConnector</span><span class="o">.</span><span class="na">setPort</span><span class="o">(</span><span class="n">port</span><span class="o">);</span>
+        <span class="n">socketConnector</span><span class="o">.</span><span class="na">setHost</span><span class="o">(</span><span class="n">host</span><span class="o">);</span>
+        <span class="n">server</span><span class="o">.</span><span class="na">setConnectors</span><span class="o">(</span><span class="k">new</span> <span class="nc">Connector</span><span class="o">[]</span> <span class="o">{</span> <span class="n">socketConnector</span> <span class="o">});</span>
+        <span class="n">disableServerVersionHeader</span><span class="o">();</span>
+        <span class="nc">WebSocketHandler</span> <span class="n">webSocketHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">WebSocketHandler</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">WebSocketServletFactory</span> <span class="n">webSocketServletFactory</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">webSocketServletFactory</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="nc">WebSocketChannelHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+                <span class="n">webSocketServletFactory</span><span class="o">.</span><span class="na">getExtensionFactory</span><span class="o">().</span><span class="na">unregister</span><span class="o">(</span><span class="s">"permessage-deflate"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="n">server</span><span class="o">.</span><span class="na">setHandler</span><span class="o">(</span><span class="n">webSocketHandler</span><span class="o">);</span>
+        <span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">isRunning</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="na">isStarted</span><span class="o">();</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Websocket Jetty server started @- {}/{}"</span><span class="o">,</span> <span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">);</span>
+
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Unable to start the server on {}/{}"</span><span class="o">,</span> <span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+        <span class="n">isRunning</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">isRunning</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Here is a simple handler which handles heartbeat requests</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@OnWebSocketMessage</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">try</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"WS message received : {}"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
+        <span class="n">processMessage</span><span class="o">(</span><span class="n">session</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Exception in onMessage for session {} message {} due to {}"</span><span class="o">,</span> <span class="n">session</span><span class="o">,</span> <span class="n">message</span><span class="o">,</span>
+                <span class="n">e</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">processMessage</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">JSONObject</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JSONObject</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+    <span class="nc">String</span> <span class="n">messageType</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="na">optString</span><span class="o">(</span><span class="s">"type"</span><span class="o">).</span><span class="na">toLowerCase</span><span class="o">();</span>
+    <span class="n">processEventsBasedOnMessageType</span><span class="o">(</span><span class="n">session</span><span class="o">,</span> <span class="n">messageType</span><span class="o">,</span> <span class="n">json</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">processEventsBasedOnMessageType</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">messageType</span><span class="o">,</span> <span class="nc">JSONObject</span> <span class="n">json</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">switch</span> <span class="o">(</span><span class="n">messageType</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">case</span> <span class="s">"heartbeatreq"</span><span class="o">:</span>
+            <span class="nc">SystemFactory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getWebSocketMessageHandler</span><span class="o">().</span><span class="na">handleHeartBeatMessages</span><span class="o">(</span><span class="n">session</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+        <span class="k">default</span><span class="o">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Unknown message type received : {}"</span><span class="o">,</span> <span class="n">messageType</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>For the load testing part, we will use the popular <a href="https://locust.io/">Locust</a> load testing framework.</p>
+
+<p>We use <a href="https://github.com/websocket-client/websocket-client/">websocket-client</a> to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.</p>
+
+<p>Whenever we send the heartbeat request to server, we send a timestamp from the client side in the field <code class="language-plaintext highlighter-rouge">publishTimestamp</code>. The server then responds with the <code class="language-plaintext highlighter-rouge">heartbeatresp</code> and also includes the original timestamp <code class="language-plaintext highlighter-rouge">publishTimestamp</code> which was sent in the request in the response. The server also includes the <code class="language-plaintext highlighter-rouge">serverDelay</code> which represents the delay of server in processing the heartbeat response.</p>
+
+<p>Our contract looks like this:</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"heartbeatreq"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"userId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"publishTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1722758706760</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+
+</span><span class="p">{</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"heartbeatresp"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"userId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"serverDelay"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"clientPublishTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1722758706760</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>We can subtract the current time (the time we received the message in locust) and the <code class="language-plaintext highlighter-rouge">clientPublishTimestamp</code> in the <code class="language-plaintext highlighter-rouge">heartbeatresp</code> to calculate the end to end time of processing the heartbeat request message.</p>
+
+<p>When running the load test with Locust, it’s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.</p>
+
+<p>We run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.</p>
+
+<p>This means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.</p>
+
+<p><a href="/images/Blog/locust_start.png" data-fancybox="">
+<img src="/images/Blog/locust_start.png" width="1000px" />
+</a></p>
+
+<p>Locust will take some time to spawn all the 10K users. At this point, we can see that rate of <code class="language-plaintext highlighter-rouge">ws_connect</code> is 500 per second.</p>
+
+<p><a href="/images/Blog/locust_spawn.png" data-fancybox="">
+<img src="/images/Blog/locust_spawn.png" width="1000px" />
+</a></p>
+
+<p>Once the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.</p>
+
+<p><a href="/images/Blog/locust_running.png" data-fancybox="">
+<img src="/images/Blog/locust_running.png" width="1000px" />
+</a></p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.</p>
+
+<p>The entire code of this article is present on this <a href="https://github.com/madhur/load-test-websocket-locust">github repository</a></p>
+
+<p>Feel free to use this code or if you have any comments, add comment using the comment box below.</p>
+
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/java">Java</a> |
+						
+						<a href="/blog/tags/locust">Locust</a> |
+						
+						<a href="/blog/tags/websocket">Websocket</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2024/08/04/load-testing-websocket-servers-locust/';
+  var disqus_title = 'Load testing Websocket servers using Locust';
+  var disqus_url = 'https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+
+
+
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2024 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

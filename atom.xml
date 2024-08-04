@@ -3,13 +3,142 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-07-15T21:17:27+05:30</updated>
+ <updated>2024-08-04T14:20:57+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Load testing Websocket servers using Locust</title>
+   <link href="https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html"/>
+   <updated>2024-08-04T00:00:00+05:30</updated>
+   <id>id:/blog/2024/08/04/load-testing-websocket-servers-locust</id>
+   <content type="html">&lt;p&gt;The entire code of this article is present on this &lt;a href=&quot;https://github.com/madhur/load-test-websocket-locust&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Load testing WebSocket servers is crucial for ensuring their performance and scalability.&lt;/p&gt;
+
+&lt;p&gt;This article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.&lt;/p&gt;
+
+&lt;p&gt;We will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.&lt;/p&gt;
+
+&lt;p&gt;The only message we will be handling is heartbeat requests for simplicity.&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;ServerConnector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ServerConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setPort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setHost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Connector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;disableServerVersionHeader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;WebSocketHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webSocketHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebSocketHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebSocketServletFactory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebSocketChannelHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getExtensionFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;unregister&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;permessage-deflate&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;o&quot;&gt;};&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;webSocketHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isStarted&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Websocket Jetty server started @- {}/{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Unable to start the server on {}/{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here is a simple handler which handles heartbeat requests&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@OnWebSocketMessage&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;WS message received : {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;processMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Exception in onMessage for session {} message {} due to {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;processMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;optString&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toLowerCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;processEventsBasedOnMessageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;processEventsBasedOnMessageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;switch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;heartbeatreq&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;nc&quot;&gt;SystemFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getWebSocketMessageHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;handleHeartBeatMessages&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Unknown message type received : {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For the load testing part, we will use the popular &lt;a href=&quot;https://locust.io/&quot;&gt;Locust&lt;/a&gt; load testing framework.&lt;/p&gt;
+
+&lt;p&gt;We use &lt;a href=&quot;https://github.com/websocket-client/websocket-client/&quot;&gt;websocket-client&lt;/a&gt; to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.&lt;/p&gt;
+
+&lt;p&gt;Whenever we send the heartbeat request to server, we send a timestamp from the client side in the field &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;publishTimestamp&lt;/code&gt;. The server then responds with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;heartbeatresp&lt;/code&gt; and also includes the original timestamp &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;publishTimestamp&lt;/code&gt; which was sent in the request in the response. The server also includes the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;serverDelay&lt;/code&gt; which represents the delay of server in processing the heartbeat response.&lt;/p&gt;
+
+&lt;p&gt;Our contract looks like this:&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;heartbeatreq&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;userId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;publishTimestamp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1722758706760&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+
+
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;heartbeatresp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;userId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;serverDelay&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;clientPublishTimestamp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1722758706760&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can subtract the current time (the time we received the message in locust) and the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;clientPublishTimestamp&lt;/code&gt; in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;heartbeatresp&lt;/code&gt; to calculate the end to end time of processing the heartbeat request message.&lt;/p&gt;
+
+&lt;p&gt;When running the load test with Locust, it’s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.&lt;/p&gt;
+
+&lt;p&gt;We run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.&lt;/p&gt;
+
+&lt;p&gt;This means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_start.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/Blog/locust_start.png&quot; width=&quot;1000px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Locust will take some time to spawn all the 10K users. At this point, we can see that rate of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ws_connect&lt;/code&gt; is 500 per second.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_spawn.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/Blog/locust_spawn.png&quot; width=&quot;1000px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Once the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_running.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/Blog/locust_running.png&quot; width=&quot;1000px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.&lt;/p&gt;
+
+&lt;p&gt;The entire code of this article is present on this &lt;a href=&quot;https://github.com/madhur/load-test-websocket-locust&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Feel free to use this code or if you have any comments, add comment using the comment box below.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Monitoring Redis Streams lag in Prometheus and Grafana</title>
@@ -1198,158 +1327,6 @@ Checkout &lt;a href=&quot;https://vitess.io/&quot;&gt;Vitess website&lt;/a&gt; f
 &lt;p&gt;As part of working with Vitess, I have provisioned a &lt;a href=&quot;https://github.com/madhur/ansible-vitess&quot;&gt;set of Ansible roles&lt;/a&gt; which help in setting up Vitess in &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;vagrant&lt;/a&gt; / staging / production infrastructure.&lt;/p&gt;
 
 &lt;p&gt;Check out the &lt;a href=&quot;https://github.com/madhur/ansible-vitess&quot;&gt;github repo&lt;/a&gt; for more information.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Creating vagrant basebox</title>
-   <link href="https://madhur.co.in/blog/2023/07/30/creating-vagrant-base-box.html"/>
-   <updated>2023-07-30T00:00:00+05:30</updated>
-   <id>id:/blog/2023/07/30/creating-vagrant-base-box</id>
-   <content type="html">&lt;p&gt;For me, &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;Vagrant&lt;/a&gt; is the ultimate tool to simulate production like envrionments in the development machine.&lt;/p&gt;
-
-&lt;p&gt;Some people prefer &lt;a href=&quot;https://www.docker.com/&quot;&gt;Docker&lt;/a&gt; as an alternative to Vagrant, because of being lightweight and quick to provision.&lt;/p&gt;
-
-&lt;p&gt;However, I feel Docker and Vagrant have their own places and their responsibilities do not overlap. Let me explain why.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Docker is good for running application services. Ultimately, now a days, since production code is deployed in containers itself, docker provides good testing ground for testing out &lt;a href=&quot;https://docs.docker.com/engine/reference/builder/&quot;&gt;Dockerfile&lt;/a&gt; and &lt;a href=&quot;https://docs.docker.com/engine/reference/commandline/images/&quot;&gt;images&lt;/a&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Though application services are deployed on containers, the stateful sets have not really reached that maturity stage where the persistent stores are deployed in containers.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Organizations still prefer to run the &lt;a href=&quot;https://cassandra.apache.org/_/index.html&quot;&gt;Cassandra&lt;/a&gt;, &lt;a href=&quot;https://redis.io/&quot;&gt;Redis&lt;/a&gt;, &lt;a href=&quot;https://www.mongodb.com/&quot;&gt;MongoDB&lt;/a&gt;, &lt;a href=&quot;https://www.mysql.com/&quot;&gt;MySQL&lt;/a&gt; in the cloud VM’s  if those are self hosted, instead of the containers.&lt;/p&gt;
-
-&lt;p&gt;This is where Vagrant becomes a crucial tool for sysadmins.&lt;/p&gt;
-
-&lt;p&gt;Any sysadmin, who manages such infrastructure would find Vagrant an incredibly useful tool to replicate the entire setup on development environment and test out any changes in its development environment before proceeding to higher environments.&lt;/p&gt;
-
-&lt;p&gt;For example, someone testing out the Cassandra DB cluster upgrade, can test it out in Vagrant environment before doing it in staging / production environment. This can help save cost.&lt;/p&gt;
-
-&lt;p&gt;There are &lt;a href=&quot;https://app.vagrantup.com/boxes/search&quot;&gt;Vagrant boxes&lt;/a&gt; available for each and every popular Operating systems such as &lt;a href=&quot;https://app.vagrantup.com/centos/boxes/7&quot;&gt;CentOS 7&lt;/a&gt;, &lt;a href=&quot;https://app.vagrantup.com/generic/boxes/centos8&quot;&gt;CentOS 8&lt;/a&gt; and &lt;a href=&quot;https://app.vagrantup.com/debian/boxes/jessie64&quot;&gt;Debian&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://github.com/search?q=vagrant+mysql&amp;amp;type=repositories&quot;&gt;Github&lt;/a&gt; is full of open source scripts to provision any type of server with Vagrant.&lt;/p&gt;
-
-&lt;p&gt;Sometimes, it is helpful to create your own &lt;a href=&quot;https://developer.hashicorp.com/vagrant/docs/boxes/base&quot;&gt;Vagrant base box&lt;/a&gt; in order to avoid downloading big dependencies from package repositories such as &lt;a href=&quot;https://wiki.debian.org/apt-get#:~:text=apt%2Dget%20is%20a%20tool,part%20of%20the%20DebianPackageManagement%20system.&quot;&gt;apt&lt;/a&gt; or &lt;a href=&quot;https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/managing_software_with_the_dnf_tool/index&quot;&gt;dnf&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The dependencies can be packaged inside Vagrant basebox itself so that when the box is provisioned, there is no need to download these cut shorting the time to provision.&lt;/p&gt;
-
-&lt;p&gt;Recently, I had such a scenario and found some important tips when creating own vagrant boxes.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;The official guidelines for creating base box for &lt;a href=&quot;https://www.virtualbox.org/&quot;&gt;Virtualbox&lt;/a&gt;  &lt;a href=&quot;https://developer.hashicorp.com/vagrant/docs/providers/virtualbox/boxes&quot;&gt;https://developer.hashicorp.com/vagrant/docs/providers/virtualbox/boxes&lt;/a&gt; recommends installing &lt;a href=&quot;https://www.virtualbox.org/manual/ch04.html&quot;&gt;Virtual Box guest additions&lt;/a&gt; in the basebox. Infact, it has been listed as a must.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;VirtualBox Guest Additions must be installed so that things such as shared folders can function. Installing guest additions also usually improves performance since the guest OS can make some optimizations by knowing it is running within VirtualBox.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;This is one of the most illogical and idiotic advice according to me. Because, VirtualBox Guest additions package is tied to specific version of VirtualBox. Once you install VirtualBox Guest additions package and later upgrade or downgrade VirtualBox version, it is of no use. This creates a tight coupling between the consumer (developer) and the Vagrant Base box. According to me, installing Virtual Box Guest Additions package is best avoided unless you really need fancy two way synchronizations between host and guest folders, which I believe no serious sysadmin should care about.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;When you provision a Vagrant box, the folder in which &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Vagrantfile&lt;/code&gt; resides is mounted inside the guest machine as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/vagrant&lt;/code&gt;. Before executing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vagrant package --base basebox&lt;/code&gt;, which triggers the creation of basebox, make sure to delete the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/vagrant&lt;/code&gt; folder else it will be packaged as a regular folder inside the basebox which in most cases you don’t want.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;It is very important to keep the size of basebox as small as possible to make sure it does not occupy huge disk space when boxes are provisioned from the base box. Vagrant does the compression of the basebox, however it does the compression based on the binary analysis of the disk. If there has been lot of files in and out of the box, even after deleting those files, the space won’t be reclaimed by vagrant compression. Hence its best to zero out the empty space before initiating creation of box using&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Zero free space to aid VM compression&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Zero free space to aid VM compression&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/zero &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/EMPTY &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1M
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; /EMPTY
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;The above step should take care of filling the empty space with zeroes which vagrant would be able to compress out signifcantly.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;If you care about the space optimzation very deeply, there are certain files such as &lt;a href=&quot;https://www.kernel.org/doc/man-pages/&quot;&gt;man pages&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/Logging_(computing)&quot;&gt;log files&lt;/a&gt; which can be removed from Linux OS. Have a look at this &lt;a href=&quot;https://gist.github.com/carlessanagustin/2fb92e88f2068300a2ed&quot;&gt;gist&lt;/a&gt; for such tweaks to optimize. I am recopying the gist below incase gist is later unavailable:&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Credits to:&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#  - http://vstone.eu/reducing-vagrant-box-size/&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#  - https://github.com/mitchellh/vagrant/issues/343&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#  - https://gist.github.com/adrienbrault/3775253&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;## for vagrant related tasks, uncomment vagrant comments&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# vagrant: Unmount project&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#printf &quot;STEP: vagrant: Unmount project\n&quot;&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#umount /vagrant&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Remove APT cache&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Remove APT cache&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-apt-get clean &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
-apt-get autoclean &lt;span class=&quot;nt&quot;&gt;-y&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Zero free space to aid VM compression&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Zero free space to aid VM compression&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/zero &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/EMPTY &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1M
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; /EMPTY
- 
-&lt;span class=&quot;c&quot;&gt;# Remove APT files&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Zero free space to aid VM compression&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-find /var/lib/apt &lt;span class=&quot;nt&quot;&gt;-type&lt;/span&gt; f | xargs &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Remove documentation files&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Remove documentation files&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-find /var/lib/doc &lt;span class=&quot;nt&quot;&gt;-type&lt;/span&gt; f | xargs &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# vagrant: Remove Virtualbox specific files&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#printf &quot;STEP: vagrant: Remove Virtualbox specific files\n&quot;&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#rm -rf /usr/src/vboxguest* /usr/src/virtualbox-ose-guest*&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Remove Linux headers&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Remove Linux headers&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-rf&lt;/span&gt; /usr/src/linux-headers&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Remove Unused locales (edit for your needs, this keeps only en* and pt_BR)&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Remove Unused locales (edit for your needs, this keeps only en* and pt_BR)
-find&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; 
-find /usr/share/locale/&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;af,am,ar,as,ast,az,bal,be,bg,bn,bn_IN,br,bs,byn,ca,cr,cs,csb,cy,da,de,de_AT,dz,el,en_AU,en_CA,eo,es,et,et_EE,eu,fa,fi,fo,fr,fur,ga,gez,gl,gu,haw,he,hi,hr,hu,hy,id,is,it,ja,ka,kk,km,kn,ko,kok,ku,ky,lg,lt,lv,mg,mi,mk,ml,mn,mr,ms,mt,nb,ne,nl,nn,no,nso,oc,or,pa,pl,ps,qu,ro,ru,rw,si,sk,sl,so,sq,sr,sr&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;latin,sv,sw,ta,te,th,ti,tig,tk,tl,tr,tt,ur,urd,ve,vi,wa,wal,wo,xh,zh,zh_HK,zh_CN,zh_TW,zu&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-type&lt;/span&gt; d &lt;span class=&quot;nt&quot;&gt;-delete&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Remove bash history&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Remove bash history&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;unset &lt;/span&gt;HISTFILE
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; /root/.bash_history
-
-&lt;span class=&quot;c&quot;&gt;# vagrant: Remove bash history&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#printf &quot;STEP: vagrant: Remove bash history\n&quot;&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;#rm -f /home/vagrant/.bash_history&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Cleanup log files&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Cleanup log files&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-find /var/log &lt;span class=&quot;nt&quot;&gt;-type&lt;/span&gt; f | &lt;span class=&quot;k&quot;&gt;while &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;f&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-ne&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Whiteout root&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Whiteout root&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;df&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--sync&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-kP&lt;/span&gt; / | &lt;span class=&quot;nb&quot;&gt;tail&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-n1&lt;/span&gt;  | &lt;span class=&quot;nb&quot;&gt;awk&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-F&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{print $4}'&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$((&lt;/span&gt;count &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/zero &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/tmp/whitespace &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1024 &lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; /tmp/whitespace&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Whiteout /boot&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Whiteout /boot&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;df&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--sync&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-kP&lt;/span&gt; /boot | &lt;span class=&quot;nb&quot;&gt;tail&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-n1&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;awk&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-F&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{print $4}'&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$((&lt;/span&gt;count &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;))&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/zero &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/boot/whitespace &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1024 &lt;span class=&quot;nv&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; /boot/whitespace&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
- 
-&lt;span class=&quot;c&quot;&gt;# Whiteout swap &lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;STEP: Whiteout swap&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;swappart&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /proc/swaps | &lt;span class=&quot;nb&quot;&gt;tail&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-n1&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;awk&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-F&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{print $1}'&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
-swapoff &lt;span class=&quot;nv&quot;&gt;$swappart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/zero &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$swappart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-mkswap &lt;span class=&quot;nv&quot;&gt;$swappart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-swapon &lt;span class=&quot;nv&quot;&gt;$swappart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
