@@ -3,13 +3,61 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-08-04T14:20:57+05:30</updated>
+ <updated>2024-09-01T00:45:48+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Create local kubernetes cluster using Kind</title>
+   <link href="https://madhur.co.in/blog/2024/09/01/create-local-k8s-cluster-kind.html"/>
+   <updated>2024-09-01T00:00:00+05:30</updated>
+   <id>id:/blog/2024/09/01/create-local-k8s-cluster-kind</id>
+   <content type="html">&lt;p&gt;If you want to quickly spin up a local development environment of kubernets cluster, Kubernetes in docker aka &lt;a href=&quot;https://kind.sigs.k8s.io/&quot;&gt;Kind&lt;/a&gt; is the way to go&lt;/p&gt;
+
+&lt;p&gt;Kind runs the kubernetes inside a docker container as opposed to &lt;a href=&quot;https://minikube.sigs.k8s.io/docs/&quot;&gt;Minikube&lt;/a&gt; which used to run kubernetes inside a VM&lt;/p&gt;
+
+&lt;p&gt;Running Kind on linux requires to create a cluster configuration file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cluster.yaml&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is the sample configuration which would work for most of the cases:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;kind&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Cluster&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;apiVersion&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;kind.x-k8s.io/v1alpha4&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;nodes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;role&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;control-plane&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;kubeadmConfigPatches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;kind: InitConfiguration&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;nodeRegistration:&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;kubeletExtraArgs:&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;node-labels: &quot;ingress-ready=true&quot;&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;extraPortMappings:&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;- containerPort: 80&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;hostPort: 80&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;protocol: TCP&lt;/span&gt;
+     &lt;span class=&quot;s&quot;&gt;- containerPort: 443&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;hostPort: 443&lt;/span&gt;
+       &lt;span class=&quot;s&quot;&gt;protocol: TCP&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kind create cluster &lt;span class=&quot;nt&quot;&gt;--config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cluster.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Upon creating the cluster, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kubectl&lt;/code&gt; context is automatically set to point to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kind&lt;/code&gt; cluster.&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; kubectl cluster-info &lt;span class=&quot;nt&quot;&gt;--context&lt;/span&gt; kind-kind
+Kubernetes control plane is running at https://127.0.0.1:46251
+CoreDNS is running at https://127.0.0.1:46251/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use &lt;span class=&quot;s1&quot;&gt;'kubectl cluster-info dump'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Load testing Websocket servers using Locust</title>
@@ -1312,21 +1360,6 @@ mikinitcpio &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; linux
 &lt;p&gt;The final command will generate the new initramfs image&lt;/p&gt;
 
 &lt;p&gt;More information about this issue can be found in this &lt;a href=&quot;https://bbs.archlinux.org/viewtopic.php?id=289336&quot;&gt;thread&lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Ansible roles for installing and configuring Vitess</title>
-   <link href="https://madhur.co.in/blog/2023/08/30/ansible-vitess.html"/>
-   <updated>2023-08-30T00:00:00+05:30</updated>
-   <id>id:/blog/2023/08/30/ansible-vitess</id>
-   <content type="html">&lt;h3 id=&quot;what-is-vitess&quot;&gt;What is vitess?&lt;/h3&gt;
-&lt;p&gt;Vitess is a scaleable databases built on top of MySQL. One key feature of vitess is that it supports sharding.
-Checkout &lt;a href=&quot;https://vitess.io/&quot;&gt;Vitess website&lt;/a&gt; for more information&lt;/p&gt;
-
-&lt;p&gt;As part of working with Vitess, I have provisioned a &lt;a href=&quot;https://github.com/madhur/ansible-vitess&quot;&gt;set of Ansible roles&lt;/a&gt; which help in setting up Vitess in &lt;a href=&quot;https://www.vagrantup.com/&quot;&gt;vagrant&lt;/a&gt; / staging / production infrastructure.&lt;/p&gt;
-
-&lt;p&gt;Check out the &lt;a href=&quot;https://github.com/madhur/ansible-vitess&quot;&gt;github repo&lt;/a&gt; for more information.&lt;/p&gt;
 </content>
  </entry>
  
