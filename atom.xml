@@ -3,13 +3,63 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-09-01T00:45:48+05:30</updated>
+ <updated>2024-10-09T00:57:49+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>s3cmd Fast way to copy s3 data</title>
+   <link href="https://madhur.co.in/blog/2024/10/07/s5cmd-fastest-way-to-copy-s3-data.html"/>
+   <updated>2024-10-07T00:00:00+05:30</updated>
+   <id>id:/blog/2024/10/07/s5cmd-fastest-way-to-copy-s3-data</id>
+   <content type="html">&lt;p&gt;If you are looking to copy huge amount of data to/from &lt;a href=&quot;https://aws.amazon.com/s3/&quot;&gt;AWS S3&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Look no further than &lt;a href=&quot;https://github.com/peak/s5cmd&quot;&gt;s5cmd&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Download the entire s3 bucket to local&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;s5cmd cp  s3://bucket/ .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I was able to download almost 10 GB folder in couple of minutes, which is around 83MBps ~ 10 MB/s&lt;/p&gt;
+
+&lt;p&gt;Whereas &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;aws s3 cp --recursive  s3://bucket/ .&lt;/code&gt; was giving me around 500 KB/s&lt;/p&gt;
+
+</content>
+ </entry>
+ 
+ <entry>
+   <title>_class attribute in Spring data MongoDB_</title>
+   <link href="https://madhur.co.in/blog/2024/10/05/class-attribute-spring-data-mongodb.html"/>
+   <updated>2024-10-05T00:00:00+05:30</updated>
+   <id>id:/blog/2024/10/05/class-attribute-spring-data-mongodb</id>
+   <content type="html">&lt;p&gt;Spring data MongoDB adds a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_class&lt;/code&gt; attribute to every document written to &lt;a href=&quot;https://www.mongodb.com/&quot;&gt;MongoDB&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If we want to prvent adding Spring Data MongoDB from adding &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_class&lt;/code&gt; attribute, we can configure this behaviour through:&lt;/p&gt;
+
+&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@Configuration&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MongoConfig&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;AbstractMongoClientConfiguration&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;autoIndexCreation&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+    
+    &lt;span class=&quot;nd&quot;&gt;@Bean&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MappingMongoConverter&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;mappingMongoConverter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;MongoDatabaseFactory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;databaseFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MongoMappingContext&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mappingContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;DbRefResolver&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dbRefResolver&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DefaultDbRefResolver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;databaseFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nc&quot;&gt;MappingMongoConverter&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;converter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;MappingMongoConverter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dbRefResolver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mappingContext&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;converter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setTypeMapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;DefaultMongoTypeMapper&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;converter&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Create local kubernetes cluster using Kind</title>
@@ -1224,142 +1274,6 @@ network_security_config property to an application’s manifest.&lt;/p&gt;
 
 &lt;p&gt;Here the target computer needs to be on internet. It can done via ngrok tcp tunnel or a small EC2 instance.&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Intellij cannot launch because 'process 2' already running</title>
-   <link href="https://madhur.co.in/blog/2023/10/30/cannot-start-intellij.html"/>
-   <updated>2023-10-30T00:00:00+05:30</updated>
-   <id>id:/blog/2023/10/30/cannot-start-intellij</id>
-   <content type="html">&lt;p&gt;I have occasionally got the error while starting &lt;a href=&quot;https://www.jetbrains.com/idea/&quot;&gt;IntelliJ&lt;/a&gt;&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;IntelliJ cannot launch because 'process 2' already running
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The process ID sometimes changed, restarting or even re-installing Intellij doesn’t solve the problem.&lt;/p&gt;
-
-&lt;p&gt;I run the &lt;a href=&quot;https://flatpak.org/&quot;&gt;Flatpak&lt;/a&gt; version of &lt;a href=&quot;https://flathub.org/apps/com.jetbrains.IntelliJ-IDEA-Community&quot;&gt;IntelliJ&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;There are multiple threads for this online which suggest different solutions:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://intellij-support.jetbrains.com/hc/en-us/community/posts/13541697317906-Error-while-opening-intellij-Cannot-connect-to-already-running-IDE-instance-Exception-Process-2-837-is-still-running-&quot;&gt;https://intellij-support.jetbrains.com/hc/en-us/community/posts/13541697317906-Error-while-opening-intellij-Cannot-connect-to-already-running-IDE-instance-Exception-Process-2-837-is-still-running-&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://intellij-support.jetbrains.com/hc/en-us/community/posts/10865358461202-Intellij-cannot-launch-because-process-2-already-running&quot;&gt;https://intellij-support.jetbrains.com/hc/en-us/community/posts/10865358461202-Intellij-cannot-launch-because-process-2-already-running&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://askubuntu.com/questions/1462372/ubuntu-cannot-launch-intellij-anymore&quot;&gt;https://askubuntu.com/questions/1462372/ubuntu-cannot-launch-intellij-anymore&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.reddit.com/r/pycharm/comments/15esk6r/cannot_connect_to_already_running_ide_instance/&quot;&gt;https://www.reddit.com/r/pycharm/comments/15esk6r/cannot_connect_to_already_running_ide_instance/&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The root of the problem is the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.lock&lt;/code&gt; file which IntelliJ creates while starting up. If there is a unclean shutdown, there are chances that this file will exist and the product will throw the mentioned error.&lt;/p&gt;
-
-&lt;p&gt;Solution is to simply delete this file. This file resides in the preferences folder, which can be anywhere depending on the Operating System.&lt;/p&gt;
-
-&lt;p&gt;For me it resided in&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; ~/.var/app/com.jetbrains.IntelliJ-IDEA-Community/config/JetBrains/IdeaIC2023.2/.lock
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;simply deleting this file, solves the problem.&lt;/p&gt;
-
-&lt;p&gt;For Mac OS, this file would potentially reside in&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/Library/Application Support/JetBrains/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Recovering from Arch Boot failure</title>
-   <link href="https://madhur.co.in/blog/2023/09/30/recovering-from-arch-boot.html"/>
-   <updated>2023-09-30T00:00:00+05:30</updated>
-   <id>id:/blog/2023/09/30/recovering-from-arch-boot</id>
-   <content type="html">&lt;p&gt;Recently I faced boot failure after upgrading my &lt;a href=&quot;https://archlinux.org/&quot;&gt;Arch Linux&lt;/a&gt; system.&lt;/p&gt;
-
-&lt;p&gt;The error was&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ERROR: device &lt;span class=&quot;s1&quot;&gt;'UUID=1dd743ed-e0a5-4b0c-80ee-186e89eea401'&lt;/span&gt; not found. Skipping fsck.
-mount: /new_root: can&lt;span class=&quot;s1&quot;&gt;'t find UUID=1dd743ed-e0a5-4b0c-80ee-186e89eea401.
-ERROR: failed to mount '&lt;/span&gt;1dd743ed-e0a5-4b0c-80ee-186e89eea401&lt;span class=&quot;s1&quot;&gt;' on real root
-You are now being dropped into an emergency shell.
-sh: can'&lt;/span&gt;t access &lt;span class=&quot;nb&quot;&gt;tty&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; job control turned off
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rootfs ~]# _
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;This could happen while building errorneous &lt;a href=&quot;https://en.wikipedia.org/wiki/Initial_ramdisk&quot;&gt;initramfs&lt;/a&gt; image&lt;/p&gt;
-
-&lt;p&gt;It was evident from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/log/pacman.log&lt;/code&gt; logs&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[2023-10-04T20:36:26+0530] [ALPM] running '90-mkinitcpio-install.hook'...
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Building image from preset: /etc/mkinitcpio.d/linux.preset: 'default'
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Using configuration file: '/etc/mkinitcpio.conf'
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g /boot/initramfs-linux.img
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] ==&amp;gt; Starting build: '6.5.2-arch1-1'
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [base]
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [udev]
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [autodetect]
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] sort: cannot read: '/sys/devices/pci0000:00/0000:00:08.1/0000:08:00.3/usb3/3-1/3-1.2/3-1.2:1.2/ep_04/uevent': No such file or directory
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] modprobe: ERROR: missing parameters. See -h.
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [modconf]
-[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [block]
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keyboard]
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keymap]
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [consolefont]
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: consolefont: no font found in configuration
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [filesystems]
-[2023-10-04T20:36:27+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [fsck]
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Generating module dependencies
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Creating zstd-compressed initcpio image: '/boot/initramfs-linux.img'
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Image generation successful
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Building image from preset: /etc/mkinitcpio.d/linux.preset: 'fallback'
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Using configuration file: '/etc/mkinitcpio.conf'
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g /boot/initramfs-linux-fallback.img -S autodetect
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET] ==&amp;gt; Starting build: '6.5.2-arch1-1'
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [base]
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [udev]
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [modconf]
-[2023-10-04T20:36:28+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [block]
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qed'
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'bfa'
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qla2xxx'
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'aic94xx'
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'wd719x'
-[2023-10-04T20:36:29+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'qla1280'
-[2023-10-04T20:36:30+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: Possibly missing firmware for module: 'xhci_pci'
-[2023-10-04T20:36:31+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keyboard]
-[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [keymap]
-[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [consolefont]
-[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET] ==&amp;gt; WARNING: consolefont: no font found in configuration
-[2023-10-04T20:36:32+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [filesystems]
-[2023-10-04T20:36:33+0530] [ALPM-SCRIPTLET]   -&amp;gt; Running build hook: [fsck]
-[2023-10-04T20:36:34+0530] [ALPM-SCRIPTLET] ==&amp;gt; Generating module dependencies
-[2023-10-04T20:36:34+0530] [ALPM-SCRIPTLET] ==&amp;gt; Creating zstd-compressed initcpio image: '/boot/initramfs-linux-fallback.img'
-[2023-10-04T20:36:35+0530] [ALPM-SCRIPTLET] ==&amp;gt; Image generation successful
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The line which caused the issue during image generation:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[2023-10-04T20:36:26+0530] [ALPM-SCRIPTLET] sort: cannot read: '/sys/devices/pci0000:00/0000:00:08.1/0000:08:00.3/usb3/3-1/3-1.2/3-1.2:1.2/ep_04/uevent': No such file or directory
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The solution to recover was to boot to another OS. I run CentOS Steam 8 as a dual boot. And then mount the root file system of arch on path &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/run/media/madhur/arch&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Run the following commands&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mount &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; proc /proc proc/
-mount &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; sysfs /sys sys/
-mount &lt;span class=&quot;nt&quot;&gt;--rbind&lt;/span&gt; /dev dev/
-mount &lt;span class=&quot;nt&quot;&gt;--rbind&lt;/span&gt; /sys/firmware/efi/efivars sys/firmware/efi/efivars/
-&lt;span class=&quot;nb&quot;&gt;chroot&lt;/span&gt; /run/media/madhur/arch
-mikinitcpio &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; linux
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The final command will generate the new initramfs image&lt;/p&gt;
-
-&lt;p&gt;More information about this issue can be found in this &lt;a href=&quot;https://bbs.archlinux.org/viewtopic.php?id=289336&quot;&gt;thread&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  
