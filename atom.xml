@@ -3,13 +3,42 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2024-11-01T09:34:22+05:30</updated>
+ <updated>2024-12-25T17:52:04+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Qtile crash on Arch Linux</title>
+   <link href="https://madhur.co.in/blog/2024/12/25/qtile-crash-arch-linux.html"/>
+   <updated>2024-12-25T00:00:00+05:30</updated>
+   <id>id:/blog/2024/12/25/qtile-crash-arch-linux</id>
+   <content type="html">&lt;p&gt;I was playing around with &lt;a href=&quot;https://qtile.org/&quot;&gt;Qtile&lt;/a&gt; when it suddenly stopped working.&lt;/p&gt;
+
+&lt;p&gt;I tried everything to troubleshoot but wasn’t getting any clues.&lt;/p&gt;
+
+&lt;p&gt;There was nothing in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.local/share/qtile/qtile.log&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;I found this entry in systemd journal through &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;journalctl | grep qtile&lt;/code&gt;
+Here’s what the logs showed:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dec 24 09:14:45 madhur-b550mds3h systemd-coredump[26096]: Process 26057 (qtile) of user 1000 terminated abnormally with signal 11/SEGV, processing...
+Dec 24 09:14:45 madhur-b550mds3h systemd-coredump[26097]: Process 26057 (qtile) of user 1000 dumped core.
+Dec 24 09:19:53 madhur-b550mds3h kernel: qtile[3456]: segfault at 7ffc3f44dff8 ip 0000760e6dcbc2d5 sp 00007ffc3f44e000 error 6 in libc.so.6[ad2d5,760e6dc33000+171000] likely on CPU 4 (core 4, socket 0)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then I came across this &lt;a href=&quot;https://www.reddit.com/r/archlinux/comments/1gtgx9e/some_applications_dump_core_after_update/&quot;&gt;Reddit thread&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;According to this thread, installing &lt;a href=&quot;https://github.com/nwg-piotr/nwg-look&quot;&gt;nwg-look&lt;/a&gt; had modified the file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.icons/default/index.theme&lt;/code&gt; and this was causing the issue. I vaguely remembered installing this program a few days back.&lt;/p&gt;
+
+&lt;p&gt;I immediately ran &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pacman -R nwg-look&lt;/code&gt; to remove it since I didn’t need it anyway.&lt;/p&gt;
+
+&lt;p&gt;And voila! It solved the problem of loading Qtile. That’s one of the weirdest tech issues I have ever come across. If you’re experiencing similar crashes with Qtile on Arch Linux, it might be worth checking if you have nwg-look installed.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Resize disk in Proxmox VM</title>
@@ -1212,91 +1241,6 @@ such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Name_server&quot;&gt;DNS 
     &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Intellij not found&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;nvim &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'line'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Android SSL Pinning Bypass</title>
-   <link href="https://madhur.co.in/blog/2023/12/05/android-ssl-pinning-bypass.html"/>
-   <updated>2023-12-05T00:00:00+05:30</updated>
-   <id>id:/blog/2023/12/05/android-ssl-pinning-bypass</id>
-   <content type="html">&lt;p&gt;I have always been a tinkerer and loved to explore internal of applications.&lt;/p&gt;
-
-&lt;p&gt;Android has always fascinated me from the beginning partly because its mostly open source and allows you to customize. Other aspect of Android which has been useful is &lt;a href=&quot;https://en.wikipedia.org/wiki/Rooting_(Android)&quot;&gt;Rooting&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Rooting allows you to take complete control over the application and customize some of the aspects which are not possible in non-rooted Android.&lt;/p&gt;
-
-&lt;p&gt;One area where rooting helps is capturing SSL network traffic of the applications. This helps in debugging and learning more about how networks works. In this post, we will see how can we capture the network traffic for inspection in Android. This is mostly for debugging and learning purpose.&lt;/p&gt;
-
-&lt;h3 id=&quot;apk-mitm&quot;&gt;&lt;a href=&quot;https://github.com/shroudedcode/apk-mitm&quot;&gt;Apk-mitm&lt;/a&gt;&lt;/h3&gt;
-&lt;hr /&gt;
-
-&lt;p&gt;APK mitm tools modified the original Android application to disable the SSL Pinning. This tool relies on &lt;a href=&quot;https://apktool.org/&quot;&gt;apktool&lt;/a&gt; heavily.&lt;/p&gt;
-
-&lt;p&gt;This tool always doesn’t work. Recently there has been lot of &lt;a href=&quot;https://github.com/shroudedcode/apk-mitm/issues/141&quot;&gt;issues&lt;/a&gt; which have no solutions.&lt;/p&gt;
-
-&lt;p&gt;However, if it works, this is the most easiest and straightforward way as the modified app can be installed on non-rooted device and just inspected through proxy such as &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;android-unpinner&quot;&gt;&lt;a href=&quot;https://github.com/mitmproxy/android-unpinner&quot;&gt;Android Unpinner&lt;/a&gt;&lt;/h3&gt;
-&lt;hr /&gt;
-
-&lt;p&gt;This tool is different from Apk Mitm in a way that it bypasses the SSL pinning code only at runtime. Thus, you no longer have to disassemble and repackage the application.&lt;/p&gt;
-
-&lt;p&gt;This tool relies heavily on &lt;a href=&quot;https://github.com/frida/frida-tools&quot;&gt;Frida tools&lt;/a&gt; for its job.&lt;/p&gt;
-
-&lt;p&gt;Again, this tool is not gauranteed to work 100% of the time.&lt;/p&gt;
-
-&lt;h3 id=&quot;rooting&quot;&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Rooting_(Android)&quot;&gt;Rooting&lt;/a&gt;&lt;/h3&gt;
-&lt;hr /&gt;
-
-&lt;p&gt;If you can root your device, it is very easy to capture network traffic even if its from SSL pinned app. However, rooting can destroy warranty.&lt;/p&gt;
-
-&lt;p&gt;These days, most of the Android apps, will refuse to start if they detect that they are running on a rooted software.&lt;/p&gt;
-
-&lt;p&gt;Hence, this option is only viable if you have a spare device.&lt;/p&gt;
-
-&lt;h3 id=&quot;rooted-avd&quot;&gt;&lt;a href=&quot;https://gitlab.com/newbit/rootAVD&quot;&gt;Rooted AVD&lt;/a&gt;&lt;/h3&gt;
-&lt;hr /&gt;
-
-&lt;p&gt;This is my most preferred method and mostly always works. Since the purpose of network inspection is mostly debugging and learning, we can do it on AVD instead of actual device.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://gitlab.com/newbit/rootAVD&quot;&gt;rootAVD&lt;/a&gt; allows you to seemlessly root the running AVD device, using the simple command&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./rootAVD.sh system-images/android-33/google_apis_playstore/x86_64/ramdisk.img
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system-images/android-33/google_apis_playstore/x86_64/ramdisk.img&lt;/code&gt; is the path of AVD devices relative to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$ANDROID_HOME&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Next step, would be to install &lt;a href=&quot;https://github.com/NVISOsecurity/MagiskTrustUserCerts&quot;&gt;MagiskTrustUserCerts&lt;/a&gt; module of &lt;a href=&quot;https://github.com/topjohnwu/Magisk&quot;&gt;Magisk&lt;/a&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;This module makes all installed user certificates part of the system certificate store, so that they will 
-automatically be used when building the trust chain. This module makes it unnecessary to add the 
-network_security_config property to an application’s manifest.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Once installed, your Magisk modules section should look like this&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/magisk.png&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, the only step remaining is enabling proxy to intercept traffic. I use &lt;a href=&quot;https://www.charlesproxy.com/&quot;&gt;Charles proxy&lt;/a&gt; and this opens the port 8888 for listening to traffic.&lt;/p&gt;
-
-&lt;p&gt;Enabling proxy on AVD is as simple as executing:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;adb shell settings put global http_proxy 192.168.1.252:8888 
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.252&lt;/code&gt; is the local IP address of the host machine.&lt;/p&gt;
-
-&lt;p&gt;Disabling proxy can be done using:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;adb shell settings put global http_proxy :0
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;hr /&gt;
-
-&lt;p&gt;If you guys have been using more preferred way to inspect SSL traffic. Let me know in the comments.&lt;/p&gt;
 </content>
  </entry>
  
