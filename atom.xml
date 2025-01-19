@@ -3,13 +3,105 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-01-04T11:11:30+05:30</updated>
+ <updated>2025-01-19T12:44:32+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Homelab Dashboard</title>
+   <link href="https://madhur.co.in/blog/2025/01/19/homelab-dashboard.html"/>
+   <updated>2025-01-19T00:00:00+05:30</updated>
+   <id>id:/blog/2025/01/19/homelab-dashboard</id>
+   <content type="html">&lt;p&gt;Quick update on my personal homelab server.&lt;/p&gt;
+
+&lt;p&gt;I set up a dashboard using &lt;a href=&quot;https://github.com/gethomepage/homepage&quot;&gt;homepage&lt;/a&gt; to monitor and manage all my services in one place. Though it was a bit tedious to set up, it turned out well.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/homepage.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/homepage.png&quot; height=&quot;800px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I also setup a &lt;a href=&quot;https://cdimage.debian.org/images/cloud/bookworm/20250115-1993/&quot;&gt;Debian VM&lt;/a&gt; on my &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;proxmox&lt;/a&gt; to host some of the applications on docker.&lt;/p&gt;
+
+&lt;p&gt;The applications I am hosting through docker are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://freshrss.org/index.html&quot;&gt;FreshRSS&lt;/a&gt; - RSS Aggregator&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/usememos/memos&quot;&gt;Memos&lt;/a&gt; - Self-hosted note-taking application for capturing and organizing thoughts&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/ellite/Wallos&quot;&gt;Wallos&lt;/a&gt; - Open Source tool for tracking and managing personal subscriptions&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/mailcow/mailcow-dockerized&quot;&gt;Mailcow&lt;/a&gt; - Full-featured email server solution with SMTP capabilities&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Setting up Mailcow has been rewarding. As now, I am able to deliver some of the notifications from my applications directly to email.&lt;/p&gt;
+
+&lt;p&gt;Example of some of the notifications are:&lt;/p&gt;
+
+&lt;h3 id=&quot;torrent-download-complete-notification-through-qbittorrent&quot;&gt;Torrent download complete notification through qbittorrent.&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/email1.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/email1.png&quot; height=&quot;500px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;disk-usage-of-some-of-my-applications&quot;&gt;Disk usage of some of my applications&lt;/h3&gt;
+
+&lt;p&gt;Find the &lt;a href=&quot;https://gist.github.com/madhur/436481bf712866ed57af7007552912f9&quot;&gt;disk monitoring script here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/email2.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/email2.png&quot; height=&quot;500px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;cpu-utilizations-of-my-servers-in-homelab-through-alertmanager&quot;&gt;CPU Utilizations of my servers in homelab through &lt;a href=&quot;https://prometheus.io/docs/alerting/latest/alertmanager/&quot;&gt;AlertManager&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Prometheus configuraiton for same&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;groups&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cpu_alerts&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;rules&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;HighCPUUsage&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;(1 - avg by(instance) (&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[1m])&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;)) * 100 &amp;gt; 50&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2m&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warning&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;High CPU usage detected on&lt;/span&gt; 
+        &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 50%&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Current value: %&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Instance: &lt;/span&gt;
+          
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;HighCPUUsageCritical&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;(1 - avg by(instance) (&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[1m])&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;)) * 100 &amp;gt; 80&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2m&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;critical&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Critical CPU usage detected on&lt;/span&gt; 
+        &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 80%&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Current value: %&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Instance: &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/email3.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/email3.png&quot; height=&quot;500px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;availability-notifications-through-uptime-kuma&quot;&gt;Availability notifications through &lt;a href=&quot;https://github.com/louislam/uptime-kuma&quot;&gt;Uptime Kuma&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/email4.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/email4.png&quot; height=&quot;500px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Qtile crash on Arch Linux</title>
@@ -1154,93 +1246,6 @@ such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Name_server&quot;&gt;DNS 
 
 &lt;p&gt;Incase, I choose PiHole as my permanent DNS resolver and AdBlocker, the scaleable way would be to add these entries in PiHole itself so that it becomes available to any client within my network.&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Using Kitty hints to parse maven output</title>
-   <link href="https://madhur.co.in/blog/2023/12/28/using-kitty-hints-parse-maven-output.html"/>
-   <updated>2023-12-28T00:00:00+05:30</updated>
-   <id>id:/blog/2023/12/28/using-kitty-hints-parse-maven-output</id>
-   <content type="html">&lt;p&gt;&lt;a href=&quot;https://github.com/kovidgoyal/kitty&quot;&gt;Kitty&lt;/a&gt; is a very fast and feature rich terminal which has soon become my favourite.&lt;/p&gt;
-
-&lt;p&gt;One of the powerful features of Kitty is its customizability.&lt;/p&gt;
-
-&lt;p&gt;One such feature is &lt;a href=&quot;https://sw.kovidgoyal.net/kitty/kittens/hints/&quot;&gt;Kitty hints&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Kitty hints allows you to select text on terminal and perform an action through a shortcut key. It is completely customizeable.&lt;/p&gt;
-
-&lt;p&gt;Common kitty hints action include opening files, folders and opening web urls outputted in terminal.&lt;/p&gt;
-
-&lt;p&gt;One example where, I was able to customize it was to parse maven output and makes the file links clickable to land directly on the line numbers.&lt;/p&gt;
-
-&lt;p&gt;For example, consider this build output:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[INFO] BUILD FAILURE
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  0.618 s
-[INFO] Finished at: 2023-12-28T10:08:38+05:30
-[INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project reactive-programming: Compilation failure: Compilation failure: 
-[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/FileService.java:[17,9] invalid method declaration; return type required
-[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/FileService.java:[17,20] illegal start of type
-[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/Lec08MonoRunnable.java:[15,54] ';' expected
-[ERROR] /run/media/madhur/centos/home/madhur/github/personal/reactive-programming/src/main/java/in/co/madhur/mono/Lec06SupplierRefactoring.java:[25,37] ';' expected
-[ERROR] -&amp;gt; [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Using kitty hints, we can make the file paths to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FileService.java&lt;/code&gt; , &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lec08MonoRunnable.java&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lec06SupplierRefactoring.java&lt;/code&gt; clickable and land it directly on appropriate line numbers.&lt;/p&gt;
-
-&lt;p&gt;This required writing custom regex to parse this line and emitting two named capturing groups &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;path&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;line&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;This can be done in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;kitty.conf&lt;/code&gt; as :&lt;/p&gt;
-
-&lt;div class=&quot;language-conf highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;map&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kitty_mod&lt;/span&gt;+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;kitten&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hints&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;regex&lt;/span&gt;=&lt;span class=&quot;s2&quot;&gt;&quot;(?&amp;lt;path&amp;gt;(?:\/[\w-_^ ]+)+\/?(?:[\w.])+[^.]):\[(?&amp;lt;line&amp;gt;\d+),\d+\].?&quot;&lt;/span&gt; --&lt;span class=&quot;n&quot;&gt;program&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;launch /home/madhur/scripts/editor.py&quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;editor.py&lt;/code&gt; is a simple program which is invoked with parameters &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;path=...../FileService.java&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;line=17&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;In my case, I launch &lt;a href=&quot;https://github.com/neovim/neovim&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Neovim&lt;/code&gt;&lt;/a&gt; or &lt;a href=&quot;https://www.jetbrains.com/idea/&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IntelliJ&lt;/code&gt;&lt;/a&gt; depending upon if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Intellij&lt;/code&gt; is previously running.&lt;/p&gt;
-
-&lt;p&gt;This can be simply done through following snippet:&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env python3
-&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;sys&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;subprocess&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sys&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'='&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;continue&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rstrip&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Popen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'ps'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'aux'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stdout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;PIPE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;communicate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;list_ps&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;decode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'utf-8'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'intellij'&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;list_ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;idea_running&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'java'&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Intellij found&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;flatpak run com.jetbrains.IntelliJ-IDEA-Community &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Intellij not found&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;nvim &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; +&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'line'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;myObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'path'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
