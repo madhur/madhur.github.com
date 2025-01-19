@@ -6,6 +6,7 @@ disqus_id: /2024/01/07/proxmos-user-friendly-urls/
 tags:
     - Proxmox
     - LXC
+    - Homelab
 ---
 
 I have been recently tinkering up with idea of setting up a [homelab](https://en.wikipedia.org/wiki/Home_server) and [self hosting](https://en.wikipedia.org/wiki/Self-hosting_(web_services)) few services
