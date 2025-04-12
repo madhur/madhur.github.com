@@ -1,7 +1,7 @@
 ---
 layout: blog-post
-title: "Homelab Dashboard"
-excerpt: "Homelab Dashboard"
+title: "Revealing Hidden characters in a string"
+excerpt: "Revealing Hidden characters in a string"
 disqus_id: /2025/02/01/revealing-hidden-characters/
 tags:
     - Shell
