@@ -3,13 +3,45 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-01-19T12:44:32+05:30</updated>
+ <updated>2025-04-12T22:29:28+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Homelab Dashboard</title>
+   <link href="https://madhur.co.in/blog/2025/02/01/revealing-hidden-characters.html"/>
+   <updated>2025-02-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/02/01/revealing-hidden-characters</id>
+   <content type="html">&lt;p&gt;Recently we faced an issue, where there were some hidden characters inside the hostname of a configuration store of our backend services.&lt;/p&gt;
+
+&lt;p&gt;Because of this, we were getting continously getting DNS resolution errors.&lt;/p&gt;
+
+&lt;p&gt;One quick way to reveal such hidden characters is to run the command&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;string&quot;&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For example try copying the belwo string into dig or a whois website.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;madhur.​co.​in
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The above string contains hidden characters which can be reveled as follows&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;madhur.co.in&quot; | command cat -v
+madhur.M-bM-^@M-^Kco.M-bM-^@M-^Kin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Sometimes these characters are not visible even in terminals, because modern terminals tend to be very good “renderers” and would render these hidden characters.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Homelab Dashboard</title>
@@ -1174,78 +1206,6 @@ make build
     &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Proxmox - Setting up user friendly urls</title>
-   <link href="https://madhur.co.in/blog/2024/01/07/proxmox-user-friendly-urls.html"/>
-   <updated>2024-01-07T00:00:00+05:30</updated>
-   <id>id:/blog/2024/01/07/proxmox-user-friendly-urls</id>
-   <content type="html">&lt;p&gt;I have been recently tinkering up with idea of setting up a &lt;a href=&quot;https://en.wikipedia.org/wiki/Home_server&quot;&gt;homelab&lt;/a&gt; and &lt;a href=&quot;https://en.wikipedia.org/wiki/Self-hosting_(web_services)&quot;&gt;self hosting&lt;/a&gt; few services
-such as &lt;a href=&quot;https://en.wikipedia.org/wiki/Name_server&quot;&gt;DNS Server&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/Media_server&quot;&gt;Media server&lt;/a&gt;, &lt;a href=&quot;https://en.wikipedia.org/wiki/News_aggregator&quot;&gt;RSS Aggregator&lt;/a&gt; etc along with some standard monitoring tools.&lt;/p&gt;
-
-&lt;p&gt;I evaluated two products, &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;Proxmox&lt;/a&gt; and &lt;a href=&quot;https://unraid.net/&quot;&gt;Unraid&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;After evaluating both, I choose Proxmox primarily because it seemed to fit my needs more than Unraid. Unraid is primarily useful if you have lot of data which needs to be made available to multiple services.&lt;/p&gt;
-
-&lt;p&gt;Whereas, Proxmox seems more suitable to run independent services altogether, either in [Docker](https://en.wikipedia.org/wiki/Docker_(software), &lt;a href=&quot;https://en.wikipedia.org/wiki/Virtual_machine&quot;&gt;VMs&lt;/a&gt; or &lt;a href=&quot;https://en.wikipedia.org/wiki/LXC&quot;&gt;Linux Containers&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;For me, the size of the data was not going to be very much, atleast initially and I found the idea of running an open source software (Proxmox) more appealing than one I had to purchase (Unraid).&lt;/p&gt;
-
-&lt;p&gt;I had a spare 12 CORE / 32 GB machine on which I quickly setup Proxmox and I must say, I really like the way I was quickly able to run the following services in a day:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://jellyfin.org/&quot;&gt;Jellyfin&lt;/a&gt; - Media server&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/Athou/commafeed&quot;&gt;Commafeed&lt;/a&gt; - Open source RSS aggregator written in Java&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://pi-hole.net/&quot;&gt;PiHole&lt;/a&gt; - DNS Server with Ad Blocking&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://www.qbittorrent.org/&quot;&gt;qbittorrent&lt;/a&gt; - Torrent client&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://nginxproxymanager.com/&quot;&gt;Nginx Proxy Manager&lt;/a&gt; - A simple reverse proxy&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://prometheus.io/&quot;&gt;Prometheus&lt;/a&gt; - Well known time series database&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://grafana.com/&quot;&gt;Grafana&lt;/a&gt; - Well known visualization platform&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The cool thing about &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;Proxmox&lt;/a&gt; is that it uses a &lt;a href=&quot;https://www.ibm.com/topics/hypervisors&quot;&gt;Type 1 Hypervisor&lt;/a&gt; called &lt;a href=&quot;https://ubuntu.com/blog/kvm-hyphervisor&quot;&gt;Kernel-based Virtual Machine (KVM)&lt;/a&gt; to run all the above mentioned services in &lt;a href=&quot;https://wiki.debian.org/LXC&quot;&gt;Linux Containers running on Debian Linux OS&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;What that essentially means is that all these services get their own unique IP Addresses on my LAN network as opposed to all running on a single IP Addresses and exposing on different ports. Type 1 Hypervisor means that they are able to directly access machine hardware and do not have the any additional layer or overhead of resource hungry VM’s.&lt;/p&gt;
-
-&lt;p&gt;Each LXC takes around 200 - 300 MB of disk space and around 512 MB of RAM , making them all fit in a single commodity machine.&lt;/p&gt;
-
-&lt;p&gt;One caveat of this approach is that now I have tons of IP addresses and ports for me to memorize to access these services when I require. Though I can bookmark them, I do not find it appealing.&lt;/p&gt;
-
-&lt;p&gt;Hence, I decided to setup a reverse proxy in nginx for each of them in order for me to reach them through a very user friendly url. Here is the screenshot of the setup:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/nginx.png&quot; height=&quot;600px&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The above setup requires some manual setup of setting up a &lt;a href=&quot;https://en.wikipedia.org/wiki/Hosts_(file)&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt;&lt;/a&gt; file with appropriate entries as follows&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Hosts for nginx proxy manager
-192.168.1.133 nginx
-192.168.1.133 plexui
-192.168.1.133 tui
-192.168.1.133 jellyfinui
-192.168.1.133 grafanaui
-192.168.1.133 promui
-192.168.1.133 zkui
-192.168.1.133 piholeui
-192.168.1.133 rssui
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.133&lt;/code&gt; is the IP Address of &lt;a href=&quot;https://github.com/NginxProxyManager/nginx-proxy-manager&quot;&gt;Nginx Proxy Manager&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;With the above setup I can reach my services in friendly urls such as:&lt;/p&gt;
-
-&lt;p&gt;http://plexui, http://tui, http://jellyfinui, http://grafanaui etc.&lt;/p&gt;
-
-&lt;h3 id=&quot;using-pihole-for-dns-records-instead-of-static-host-file&quot;&gt;Using Pihole for DNS Records instead of static host file&lt;/h3&gt;
-
-&lt;p&gt;One might argue that these hosts entries need to be done in each individiaul client that needs to access Proxmox containers and is not a scaleable approach.&lt;/p&gt;
-
-&lt;p&gt;That is correct, the reason I went with hosts file approach is that right now, I only have a single client - my desktop PC and I do not foresee running PiHole 24x7.&lt;/p&gt;
-
-&lt;p&gt;Incase, I choose PiHole as my permanent DNS resolver and AdBlocker, the scaleable way would be to add these entries in PiHole itself so that it becomes available to any client within my network.&lt;/p&gt;
-
 </content>
  </entry>
  
