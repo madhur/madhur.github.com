@@ -62,11 +62,11 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: High CPU usage detected on {{ $labels.instance }}
+        summary: High CPU usage detected on {% raw %}{{ $labels.instance }}{% endraw %}
         description: |
           CPU usage has exceeded 50%
-          Current value: {{ $value }}%
-          Instance: {{ $labels.instance }}
+          Current value: {% raw %}{{ $value }}{% endraw %}%
+          Instance: {% raw %}{{ $labels.instance }}{% endraw %}
           
     - alert: HighCPUUsageCritical
       expr: |
@@ -77,11 +77,11 @@ groups:
       labels:
         severity: critical
       annotations:
-        summary: Critical CPU usage detected on {{ $labels.instance }}
+        summary: Critical CPU usage detected on {% raw %}{{ $labels.instance }}{% endraw %}
         description: |
           CPU usage has exceeded 80%
-          Current value: {{ $value }}%
-          Instance: {{ $labels.instance }}
+          Current value: {% raw %}{{ $value }}{% endraw %}%
+          Instance: {% raw %}{{ $labels.instance }}{% endraw %}
 ```
 
 <a href="/images/email3.png" data-fancybox>
