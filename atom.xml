@@ -3,13 +3,132 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-04-12T22:31:03+05:30</updated>
+ <updated>2025-04-18T13:51:03+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Case of sudden Kafka lag drop</title>
+   <link href="https://madhur.co.in/blog/2025/03/01/case-of-sudden-kafka-lag-drop.html"/>
+   <updated>2025-03-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/03/01/case-of-sudden-kafka-lag-drop</id>
+   <content type="html">&lt;p&gt;Recently we faced an interesting issue in our data pipeline where we observed Kafka consumer lag suddenly dropping whenever it reached a certain threshold. This behavior was unexpected and potentially concerning, as consumer lag—the difference between the latest message produced and the message currently being processed by consumers—should typically decrease gradually as consumers process messages.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;Our application was relatively simple, with two instances of pods running in Kubernetes. Since we didn’t need high throughput, the Kafka topic had only a single partition. The screenshot below shows the behavior we observed.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/images/Blog/kafka_lag.png&quot; data-fancybox=&quot;&quot;&gt;
+&lt;img src=&quot;/images/Blog/kafka_lag.png&quot; width=&quot;1200px&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;As visible in the graph, the consumer lag would build up gradually but then suddenly drop at certain points, creating a sawtooth pattern rather than the expected gradual decline.&lt;/p&gt;
+
+&lt;h2 id=&quot;investigation&quot;&gt;Investigation&lt;/h2&gt;
+
+&lt;p&gt;When facing such an issue with Kafka lag abruptly dropping, one of the first things to check is the retention.bytes setting of the topic and its partitions.
+It’s possible that when a topic reaches its retention.bytes capacity, Kafka will start deleting the oldest log segment files. The size of these segment files is defined by the segment.bytes property.
+To inspect our topic’s configuration, we ran:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic single_partition_topic --describe 
+
+Topic: single_partition_topic	TopicId: tNA9_CAwT62MzHsW88b_Ig	PartitionCount: 1	ReplicationFactor: 2	Configs: segment.bytes=104857600,retention.bytes=173741824
+	Topic: single_partition_topic	Partition: 0	Leader: 1	Replicas: 1,3	Isr: 1,3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;root-cause-analysis&quot;&gt;Root Cause Analysis&lt;/h2&gt;
+
+&lt;p&gt;The output revealed that our topic had:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A retention.bytes of 173MB&lt;/li&gt;
+  &lt;li&gt;A segment.bytes of approximately 100MB&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This configuration meant that for this topic, the Kafka server could maintain at most two segment log files:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The first segment file (up to 100MB)&lt;/li&gt;
+  &lt;li&gt;A second segment file (which could only grow to about 73MB before hitting the total retention limit)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When the second file would reach around 73MB, Kafka would be forced to delete the first file entirely to stay within the retention limit. This deletion caused the earliest available offset in the topic to jump forward, resulting in the abrupt consumer lag drop we were observing.
+This problem is particularly likely to occur with topics that have a low number of partitions, since the retention.bytes setting is applied at the partition level, not at the topic level.&lt;/p&gt;
+
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;/h2&gt;
+
+&lt;p&gt;The solution was straightforward: increase the retention.bytes property of the topic to allow for more data retention. We executed:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics --entity-name single_partition_topic --alter --add-config retention.bytes=1073741824
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;With this command, we increased the retention.bytes property from 173MB to 1073MB (approximately 1GB), which solved our problem by allowing more headroom for message retention.&lt;/p&gt;
+
+&lt;p&gt;To verify that the setting was applied correctly, we ran:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./kafka-configs.sh --bootstrap-server localhost:9092 --entity-type topics --entity-name single_partition_topic --describe --all
+
+All configs for topic single_partition_topic are:
+  compression.type=producer sensitive=false synonyms={DEFAULT_CONFIG:compression.type=producer}
+  leader.replication.throttled.replicas= sensitive=false synonyms={}
+  message.downconversion.enable=true sensitive=false synonyms={DEFAULT_CONFIG:log.message.downconversion.enable=true}
+  min.insync.replicas=1 sensitive=false synonyms={DEFAULT_CONFIG:min.insync.replicas=1}
+  segment.jitter.ms=0 sensitive=false synonyms={}
+  cleanup.policy=delete sensitive=false synonyms={DEFAULT_CONFIG:log.cleanup.policy=delete}
+  flush.ms=9223372036854775807 sensitive=false synonyms={}
+  follower.replication.throttled.replicas= sensitive=false synonyms={}
+  segment.bytes=104857600 sensitive=false synonyms={STATIC_BROKER_CONFIG:log.segment.bytes=104857600, DEFAULT_CONFIG:log.segment.bytes=1073741824}
+  retention.ms=86400000 sensitive=false synonyms={}
+  flush.messages=9223372036854775807 sensitive=false synonyms={DEFAULT_CONFIG:log.flush.interval.messages=9223372036854775807}
+  message.format.version=2.8-IV1 sensitive=false synonyms={DEFAULT_CONFIG:log.message.format.version=2.8-IV1}
+  max.compaction.lag.ms=9223372036854775807 sensitive=false synonyms={DEFAULT_CONFIG:log.cleaner.max.compaction.lag.ms=9223372036854775807}
+  file.delete.delay.ms=60000 sensitive=false synonyms={DEFAULT_CONFIG:log.segment.delete.delay.ms=60000}
+  max.message.bytes=1048588 sensitive=false synonyms={DEFAULT_CONFIG:message.max.bytes=1048588}
+  min.compaction.lag.ms=0 sensitive=false synonyms={DEFAULT_CONFIG:log.cleaner.min.compaction.lag.ms=0}
+  message.timestamp.type=CreateTime sensitive=false synonyms={DEFAULT_CONFIG:log.message.timestamp.type=CreateTime}
+  preallocate=false sensitive=false synonyms={DEFAULT_CONFIG:log.preallocate=false}
+  min.cleanable.dirty.ratio=0.5 sensitive=false synonyms={DEFAULT_CONFIG:log.cleaner.min.cleanable.ratio=0.5}
+  index.interval.bytes=4096 sensitive=false synonyms={DEFAULT_CONFIG:log.index.interval.bytes=4096}
+  unclean.leader.election.enable=false sensitive=false synonyms={DEFAULT_CONFIG:unclean.leader.election.enable=false}
+  retention.bytes=1073741824 sensitive=false synonyms={DYNAMIC_TOPIC_CONFIG:retention.bytes=1073741824, STATIC_BROKER_CONFIG:log.retention.bytes=173741824, DEFAULT_CONFIG:log.retention.bytes=-1}
+  delete.retention.ms=86400000 sensitive=false synonyms={DEFAULT_CONFIG:log.cleaner.delete.retention.ms=86400000}
+  segment.ms=604800000 sensitive=false synonyms={}
+  message.timestamp.difference.max.ms=9223372036854775807 sensitive=false synonyms={DEFAULT_CONFIG:log.message.timestamp.difference.max.ms=9223372036854775807}
+  segment.index.bytes=10485760 sensitive=false synonyms={DEFAULT_CONFIG:log.index.size.max.bytes=10485760}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This command will show all configurations for the topic with a DEFAULT or DYNAMIC source column, where:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;DYNAMIC means the configuration was explicitly set for this specific topic&lt;/li&gt;
+  &lt;li&gt;DEFAULT means the configuration is inherited from the broker-level defaults&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In the output (partially shown below), we could confirm the change was successful:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; retention.bytes=1073741824 sensitive=false synonyms={DYNAMIC_TOPIC_CONFIG:retention.bytes=1073741824, STATIC_BROKER_CONFIG:log.retention.bytes=173741824, DEFAULT_CONFIG:log.retention.bytes=-1}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The presence of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DYNAMIC_TOPIC_CONFIG:retention.bytes=1073741824&lt;/code&gt; indicates that our topic-level override was successfully applied.&lt;/p&gt;
+
+&lt;h2 id=&quot;best-practices-and-additional-considerations&quot;&gt;Best Practices and Additional Considerations&lt;/h2&gt;
+&lt;p&gt;When configuring Kafka topics, keep these points in mind:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Balance retention settings: Remember that both retention.bytes and retention.ms (time-based retention) can trigger log segment deletion. Configure both appropriately for your use case.&lt;/li&gt;
+  &lt;li&gt;Monitor partition growth: For topics with few partitions, monitor data growth closely and set retention limits accordingly.&lt;/li&gt;
+  &lt;li&gt;Consider partition count: If you need to retain more data and scaling consumption throughput is desirable, consider increasing the partition count.&lt;/li&gt;
+  &lt;li&gt;Check broker defaults: The default retention settings are defined in the Kafka broker’s server.properties file under log.retention.bytes and log.retention.hours. Be aware of these defaults when creating new topics.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Sudden drops in Kafka consumer lag can often be traced back to retention settings causing older messages to be deleted. By understanding how retention.bytes and segment.bytes interact, particularly at the partition level, you can properly size these settings to match your data retention needs.&lt;/p&gt;
+
+&lt;p&gt;If you’re seeing unexpected behavior in your Kafka metrics, checking these configuration parameters should be one of your first troubleshooting steps.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Revealing Hidden characters in a string</title>
@@ -101,11 +220,11 @@ madhur.M-bM-^@M-^Kco.M-bM-^@M-^Kin
       &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
         &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warning&lt;/span&gt;
       &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;High CPU usage detected on&lt;/span&gt; 
+        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;High CPU usage detected on {{ $labels.instance }}&lt;/span&gt;
         &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
           &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 50%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Current value: %&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Instance: &lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Current value: {{ $value }}%&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Instance: {{ $labels.instance }}&lt;/span&gt;
           
     &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;HighCPUUsageCritical&lt;/span&gt;
       &lt;span class=&quot;na&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
@@ -116,11 +235,11 @@ madhur.M-bM-^@M-^Kco.M-bM-^@M-^Kin
       &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
         &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;critical&lt;/span&gt;
       &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Critical CPU usage detected on&lt;/span&gt; 
+        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Critical CPU usage detected on {{ $labels.instance }}&lt;/span&gt;
         &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
           &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 80%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Current value: %&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Instance: &lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Current value: {{ $value }}%&lt;/span&gt;
+          &lt;span class=&quot;s&quot;&gt;Instance: {{ $labels.instance }}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;a href=&quot;/images/email3.png&quot; data-fancybox=&quot;&quot;&gt;
@@ -1036,176 +1155,6 @@ make build
 
 &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;loadmodule /etc/redis/redisearch.so
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Websocket - Close Status codes</title>
-   <link href="https://madhur.co.in/blog/2024/02/11/websocket-close-status-codes.html"/>
-   <updated>2024-02-11T00:00:00+05:30</updated>
-   <id>id:/blog/2024/02/11/websocket-close-status-codes</id>
-   <content type="html">&lt;h3 id=&quot;a-table-for-reference&quot;&gt;A table for reference&lt;/h3&gt;
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Close code (uint16)&lt;/th&gt;
-      &lt;th&gt;Codename&lt;/th&gt;
-      &lt;th&gt;Internal&lt;/th&gt;
-      &lt;th&gt;Customizable&lt;/th&gt;
-      &lt;th&gt;Description&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;0 - 999&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Unused&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1000&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_NORMAL&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Successful operation / regular socket shutdown&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1001&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_GOING_AWAY&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Client is leaving (browser tab closing)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1002&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_PROTOCOL_ERROR&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Endpoint received a malformed frame&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1003&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_UNSUPPORTED&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Endpoint received an unsupported frame (e.g. binary-only endpoint received text frame)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1004&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Reserved&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1005&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSED_NO_STATUS&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Expected close status, received none&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1006&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_ABNORMAL&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No close code frame has been receieved&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1007&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Unsupported payload&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Endpoint received inconsistent message (e.g. malformed UTF-8)&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1008&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Policy violation&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Generic code used for situations other than 1003 and 1009&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1009&lt;/td&gt;
-      &lt;td&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLOSE_TOO_LARGE&lt;/code&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Endpoint won’t process large frame&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1010&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Mandatory extension&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Client wanted an extension which server did not negotiate&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1011&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Server error&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Internal server error while operating&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1012&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Service restart&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Server/service is restarting&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1013&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Try again later&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Temporary server condition forced blocking client’s request&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1014&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;Bad gateway&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Server acting as gateway received an invalid response&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1015&lt;/td&gt;
-      &lt;td&gt;&lt;em&gt;TLS handshake fail&lt;/em&gt;&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Transport Layer Security handshake failure&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;1016 - 1999&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Reserved for later&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;2000 - 2999&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;Reserved for websocket extensions&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;3000 - 3999&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;Registered first come first serve at IANA&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;4000 - 4999&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
-      &lt;td&gt;No&lt;/td&gt;
-      &lt;td&gt;Yes&lt;/td&gt;
-      &lt;td&gt;Available for applications&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
 </content>
  </entry>
  
