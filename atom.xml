@@ -3,13 +3,79 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-04-18T13:51:03+05:30</updated>
+ <updated>2025-06-14T21:54:34+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Combine videos using ffmpeg</title>
+   <link href="https://madhur.co.in/blog/2025/04/01/combine-videos-ffmpeg.html"/>
+   <updated>2025-04-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/04/01/combine-videos-ffmpeg</id>
+   <content type="html">&lt;p&gt;I wanted to combine videos using the tool. I had two videos in 9x16 format and wanted to combine side by side.&lt;/p&gt;
+
+&lt;p&gt;With a little bit of trial and error, I was able to achieve this using &lt;a href=&quot;https://ffmpeg.org/&quot;&gt;ffmpeg&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The exact command is&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ffmpeg -i video1.mp4 -i video2.mp4 -filter_complex &quot;[0:v]scale=540:960:force_original_aspect_ratio=decrease,pad=540:960:(ow-iw)/2:(oh-ih)/2[v0];[1:v]scale=540:960:force_original_aspect_ratio=decrease,pad=540:960:(ow-iw)/2:(oh-ih)/2[v1];[v0][v1]hstack=inputs=2[v]&quot; -map &quot;[v]&quot; -map 0:a -c:v libx264 -c:a aac output.mp4
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;breaking-down-the-command&quot;&gt;Breaking Down the Command&lt;/h2&gt;
+
+&lt;p&gt;Let’s understand what each part of this complex command does:&lt;/p&gt;
+
+&lt;h3 id=&quot;input-files&quot;&gt;Input Files&lt;/h3&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; video1.mp4 &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; video2.mp4
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;This specifies our two input videos. FFmpeg will reference them as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[0]&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[1]&lt;/code&gt; respectively.&lt;/p&gt;
+
+&lt;h3 id=&quot;filter-chain-explanation&quot;&gt;Filter Chain Explanation&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-filter_complex&lt;/code&gt; parameter contains several operations:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1. Scale and Pad First Video:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;0:v]scale&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:force_original_aspect_ratio&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;decrease,pad&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ow-iw&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;oh-ih&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2[v0]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scale=540:960&lt;/code&gt;: Resize to 540x960 pixels&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;force_original_aspect_ratio=decrease&lt;/code&gt;: Maintain aspect ratio, making the video smaller if needed&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pad=540:960:(ow-iw)/2:(oh-ih)/2&lt;/code&gt;: Add padding to center the video in a 540x960 frame&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[v0]&lt;/code&gt;: Label this processed video as “v0”&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;2. Scale and Pad Second Video:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;1:v]scale&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:force_original_aspect_ratio&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;decrease,pad&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ow-iw&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;oh-ih&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2[v1]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Same process for the second video, labeled as “v1”.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;3. Horizontal Stack:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;v0][v1]hstack&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;inputs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2[v]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hstack&lt;/code&gt;: Horizontally stack the two processed videos&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inputs=2&lt;/code&gt;: Specify we’re combining 2 video streams&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[v]&lt;/code&gt;: Label the final combined video&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;output-mapping-and-encoding&quot;&gt;Output Mapping and Encoding&lt;/h3&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;-map&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;[v]&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-map&lt;/span&gt; 0:a &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;:v libx264 &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;:a aac output.mp4
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-map &quot;[v]&quot;&lt;/code&gt;: Use our combined video stream&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-map 0:a&lt;/code&gt;: Use audio from the first video&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c:v libx264&lt;/code&gt;: Encode video using H.264 codec&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c:a aac&lt;/code&gt;: Encode audio using AAC codec&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Its great that in Linux even without tools such as Adobe Premiere Pro, you can achieve so much.&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Case of sudden Kafka lag drop</title>
@@ -1116,44 +1182,6 @@ LogLevelMax=warning
 &lt;span class=&quot;n&quot;&gt;on_message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_message&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on_ping&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_ping&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on_pong&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_pong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on_open&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on_error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on_close&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;on_close&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;wsapp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;run_forever&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ping_interval&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ping_timeout&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ping_payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dumps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ping_payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Building RediSearch module in Amazon Linux 2</title>
-   <link href="https://madhur.co.in/blog/2024/03/08/building-redisearch-module.html"/>
-   <updated>2024-03-08T00:00:00+05:30</updated>
-   <id>id:/blog/2024/03/08/building-redisearch-module</id>
-   <content type="html">&lt;p&gt;RediSearch is a &lt;a href=&quot;https://redis.io/&quot;&gt;Redis&lt;/a&gt; module that provides querying, secondary indexing, and full-text search for Redis. To use RediSearch, you first declare indexes on your Redis data. You can then use the RediSearch query language to query that data.&lt;/p&gt;
-
-&lt;p&gt;There is a very good &lt;a href=&quot;https://github.com/RediSearch/redisearch-getting-started&quot;&gt;RediSearch getting started&lt;/a&gt; tutorial on github.&lt;/p&gt;
-
-&lt;p&gt;There are several steps in bulding RediSearch module. The following steps worked on Amazon Linux 2 machine for us:&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yum &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;git perl perl-DateTime perl-JSON perl-Capture-Tiny
-git clone https://github.com/RediSearch/RediSearch.git
-wget https://github.com/linux-test-project/lcov/releases/download/v2.0/lcov-2.0-1.noarch.rpm
-rpm &lt;span class=&quot;nt&quot;&gt;-ivh&lt;/span&gt; /root/lcov-2.0-1.noarch.rpm
-&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;RediSearch
-make setup
-make build
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;At this point, the module should be built at the following location&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./RediSearch/bin/linux-x64-release/search/redisearch.so
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Copy it to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/redis&lt;/code&gt;&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; /root/RediSearch/bin/linux-x64-release/search/redisearch.so  /etc/redis/
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The module can be activated in redis conf as follows:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;loadmodule /etc/redis/redisearch.so
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
