@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>HTTP Certificate Pinning &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" HTTP Certificate Pinning" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top " role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>HTTP Certificate Pinning</h1>
+			</header>
+
+			<div class="row social hidden-xs">
+    <div class="col-md-2 col-sm-2">
+        <time datetime="2025-05-01 00:00:00 +0530" pubdate="pubdate"
+            >01 May 2025</time
+        >
+    </div>
+    <div class="social-icon col-md-2 col-sm-2">
+       <a href="https://twitter.com/madhur25?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @madhur25</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+            class="twitter-share-button"
+            data-via="madhur25"
+            data-show-count="false"
+            >Tweet</a
+        >
+        <script
+            async
+            src="https://platform.twitter.com/widgets.js"
+            charset="utf-8"
+        ></script>
+    </div>
+
+    <div class="social-icon col-md-1 col-sm-2">
+        <a
+            data-pocket-label="pocket"
+            data-pocket-count="horizontal"
+            class="pocket-btn"
+            data-lang="en"
+        ></a>
+        <script type="text/javascript">
+            !(function (d, i) {
+                if (!d.getElementById(i)) {
+                    var j = d.createElement("script");
+                    j.id = i;
+                    j.src = "https://widgets.getpocket.com/v1/j/btn.js?v=1";
+                    var w = d.getElementById(i);
+                    d.body.appendChild(j);
+                }
+            })(document, "pocket-btn-js");
+        </script>
+    </div>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<p>Certificate pinning code for Java</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">org.example</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.net.ssl.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.net.URL</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.security.MessageDigest</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.security.cert.Certificate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.security.cert.X509Certificate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Base64</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CertificatePinningClient</span> <span class="o">{</span>
+
+    <span class="c1">// SHA-256 fingerprint of the expected certificate</span>
+    <span class="c1">// You need to replace this with the actual certificate fingerprint of madhur.co.in</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">EXPECTED_CERT_SHA256</span> <span class="o">=</span> <span class="s">"YOUR_CERT_FINGERPRINT_HERE"</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="nc">String</span> <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">getCertificateFingerprint</span><span class="o">(</span><span class="s">"https://localhost:8443"</span><span class="o">);</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">fingerprint</span><span class="o">);</span>
+          <span class="c1">//  String response = makeSecureRequest("https://madhur.co.in");</span>
+           <span class="c1">// System.out.println("Response: " + response);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Error: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">makeSecureRequest</span><span class="o">(</span><span class="nc">String</span> <span class="n">urlString</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="no">URL</span> <span class="n">url</span> <span class="o">=</span> <span class="k">new</span> <span class="no">URL</span><span class="o">(</span><span class="n">urlString</span><span class="o">);</span>
+        <span class="nc">HttpsURLConnection</span> <span class="n">connection</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HttpsURLConnection</span><span class="o">)</span> <span class="n">url</span><span class="o">.</span><span class="na">openConnection</span><span class="o">();</span>
+
+        <span class="c1">// Set up custom SSL context with certificate pinning</span>
+        <span class="nc">SSLContext</span> <span class="n">sslContext</span> <span class="o">=</span> <span class="nc">SSLContext</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"TLS"</span><span class="o">);</span>
+        <span class="n">sslContext</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="k">new</span> <span class="nc">TrustManager</span><span class="o">[]{</span><span class="k">new</span> <span class="nc">PinningTrustManager</span><span class="o">()},</span> <span class="kc">null</span><span class="o">);</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">setSSLSocketFactory</span><span class="o">(</span><span class="n">sslContext</span><span class="o">.</span><span class="na">getSocketFactory</span><span class="o">());</span>
+
+        <span class="c1">// Set request properties</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">setRequestMethod</span><span class="o">(</span><span class="s">"GET"</span><span class="o">);</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">setConnectTimeout</span><span class="o">(</span><span class="mi">10000</span><span class="o">);</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">setReadTimeout</span><span class="o">(</span><span class="mi">10000</span><span class="o">);</span>
+
+        <span class="c1">// Make the request</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">getResponseCode</span><span class="o">();</span>
+
+        <span class="c1">// Read the response</span>
+        <span class="nc">StringBuilder</span> <span class="n">response</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">(</span><span class="nc">BufferedReader</span> <span class="n">reader</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedReader</span><span class="o">(</span>
+                <span class="k">new</span> <span class="nf">InputStreamReader</span><span class="o">(</span><span class="n">connection</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">())))</span> <span class="o">{</span>
+            <span class="nc">String</span> <span class="n">line</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">((</span><span class="n">line</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">readLine</span><span class="o">())</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">response</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">line</span><span class="o">).</span><span class="na">append</span><span class="o">(</span><span class="s">"\n"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="n">connection</span><span class="o">.</span><span class="na">disconnect</span><span class="o">();</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="c1">// Custom TrustManager that implements certificate pinning</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">PinningTrustManager</span> <span class="kd">implements</span> <span class="nc">X509TrustManager</span> <span class="o">{</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkClientTrusted</span><span class="o">(</span><span class="nc">X509Certificate</span><span class="o">[]</span> <span class="n">chain</span><span class="o">,</span> <span class="nc">String</span> <span class="n">authType</span><span class="o">)</span> <span class="o">{</span>
+            <span class="c1">// Not used for client certificates in this example</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">checkServerTrusted</span><span class="o">(</span><span class="nc">X509Certificate</span><span class="o">[]</span> <span class="n">chain</span><span class="o">,</span> <span class="nc">String</span> <span class="n">authType</span><span class="o">)</span>
+                <span class="kd">throws</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">cert</span><span class="o">.</span><span class="na">CertificateException</span> <span class="o">{</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">chain</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="n">chain</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">cert</span><span class="o">.</span><span class="na">CertificateException</span><span class="o">(</span><span class="s">"Certificate chain is empty"</span><span class="o">);</span>
+            <span class="o">}</span>
+
+            <span class="c1">// Get the server certificate (first in chain)</span>
+            <span class="nc">X509Certificate</span> <span class="n">serverCert</span> <span class="o">=</span> <span class="n">chain</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">// Calculate SHA-256 fingerprint of the certificate</span>
+                <span class="nc">MessageDigest</span> <span class="n">md</span> <span class="o">=</span> <span class="nc">MessageDigest</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"SHA-256"</span><span class="o">);</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">certBytes</span> <span class="o">=</span> <span class="n">serverCert</span><span class="o">.</span><span class="na">getEncoded</span><span class="o">();</span>
+                <span class="kt">byte</span><span class="o">[]</span> <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">(</span><span class="n">certBytes</span><span class="o">);</span>
+                <span class="nc">String</span> <span class="n">certFingerprint</span> <span class="o">=</span> <span class="nc">Base64</span><span class="o">.</span><span class="na">getEncoder</span><span class="o">().</span><span class="na">encodeToString</span><span class="o">(</span><span class="n">fingerprint</span><span class="o">);</span>
+
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Server certificate fingerprint: "</span> <span class="o">+</span> <span class="n">certFingerprint</span><span class="o">);</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Expected fingerprint: "</span> <span class="o">+</span> <span class="no">EXPECTED_CERT_SHA256</span><span class="o">);</span>
+
+                <span class="c1">// Check if the certificate matches our pinned certificate</span>
+                <span class="k">if</span> <span class="o">(!</span><span class="no">EXPECTED_CERT_SHA256</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">certFingerprint</span><span class="o">))</span> <span class="o">{</span>
+                    <span class="k">throw</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">cert</span><span class="o">.</span><span class="na">CertificateException</span><span class="o">(</span><span class="s">"Certificate pinning failed! "</span> <span class="o">+</span>
+                            <span class="s">"Expected: "</span> <span class="o">+</span> <span class="no">EXPECTED_CERT_SHA256</span> <span class="o">+</span>
+                            <span class="s">", Got: "</span> <span class="o">+</span> <span class="n">certFingerprint</span><span class="o">);</span>
+                <span class="o">}</span>
+
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Certificate pinning validation passed!"</span><span class="o">);</span>
+
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">cert</span><span class="o">.</span><span class="na">CertificateException</span><span class="o">(</span><span class="s">"Error validating certificate: "</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="nc">X509Certificate</span><span class="o">[]</span> <span class="nf">getAcceptedIssuers</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nc">X509Certificate</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">// Utility method to get certificate fingerprint for a given URL</span>
+    <span class="c1">// Run this first to get the actual certificate fingerprint</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">getCertificateFingerprint</span><span class="o">(</span><span class="nc">String</span> <span class="n">urlString</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="no">URL</span> <span class="n">url</span> <span class="o">=</span> <span class="k">new</span> <span class="no">URL</span><span class="o">(</span><span class="n">urlString</span><span class="o">);</span>
+        <span class="nc">HttpsURLConnection</span> <span class="n">connection</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HttpsURLConnection</span><span class="o">)</span> <span class="n">url</span><span class="o">.</span><span class="na">openConnection</span><span class="o">();</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
+
+        <span class="nc">Certificate</span><span class="o">[]</span> <span class="n">certificates</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="na">getServerCertificates</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">certificates</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">X509Certificate</span> <span class="n">cert</span> <span class="o">=</span> <span class="o">(</span><span class="nc">X509Certificate</span><span class="o">)</span> <span class="n">certificates</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+            <span class="nc">MessageDigest</span> <span class="n">md</span> <span class="o">=</span> <span class="nc">MessageDigest</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="s">"SHA-256"</span><span class="o">);</span>
+            <span class="kt">byte</span><span class="o">[]</span> <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="na">digest</span><span class="o">(</span><span class="n">cert</span><span class="o">.</span><span class="na">getEncoded</span><span class="o">());</span>
+            <span class="k">return</span> <span class="nc">Base64</span><span class="o">.</span><span class="na">getEncoder</span><span class="o">().</span><span class="na">encodeToString</span><span class="o">(</span><span class="n">fingerprint</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="n">connection</span><span class="o">.</span><span class="na">disconnect</span><span class="o">();</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">Exception</span><span class="o">(</span><span class="s">"No certificates found"</span><span class="o">);</span>
+    <span class="o">}</span>
+
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/security">Security</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+
+
+
+			<!-- Discus Comments -->
+			<div id="disqus_thread"></div>
+
+			
+			<!-- Enable Disqus comments -->
+			<script type="text/javascript">
+  var disqus_developer = 0; // developer mode is on
+  var disqus_shortname = 'madhur';
+  var disqus_identifier = '/2025/05/01/http-certificate-pinning/';
+  var disqus_title = 'HTTP Certificate Pinning';
+  var disqus_url = 'https://madhur.co.in/blog/2025/05/01/http-certificate-pinning.html';
+  (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+</script>
+
+			
+
+
+
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2025 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by
+                <a href="http://jekyllrb.com" title="A static, minimalist CMS">Jekyll</a>,
+                <a href="http://github.com/">Github</a> and
+                <a href="http://disqus.com">Disqus</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script data-main="/files/js/app" src="/files/js/require.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
