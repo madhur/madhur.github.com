@@ -3,13 +3,85 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-06-15T16:18:57+05:30</updated>
+ <updated>2025-06-29T15:13:58+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Run elasticsearch in docker</title>
+   <link href="https://madhur.co.in/blog/2025/06/01/run-elasticsearch-docker.html"/>
+   <updated>2025-06-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/06/01/run-elasticsearch-docker</id>
+   <content type="html">&lt;p&gt;If you’re running Elasticsearch in Docker locally, you might encounter a frustrating issue where your cluster suddenly goes into a red (unhealthy) state, even though everything seems fine. This often happens when your local disk usage exceeds 90%.&lt;/p&gt;
+
+&lt;p&gt;I tend to mount the elasticsearch data directory into my host file system to preserve data.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3.9&quot;&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;elasticsearch&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elasticsearch:9.0.2&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;discovery.type=single-node&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ES_JAVA_OPTS=-Xms1g -Xmx1g&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;xpack.security.enabled=false&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./es_data:/usr/share/elasticsearch/data&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;9200&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;published&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;9200&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;kibana&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;kibana:9.0.2&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5601&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;published&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5601&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;depends_on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elasticsearch&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;      
+
+&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;es_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;local&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;elastic&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;the-problem-disk-space-watermarks&quot;&gt;The Problem: Disk Space Watermarks&lt;/h3&gt;
+
+&lt;p&gt;When your local filesystem usage exceeds 90%, Elasticsearch triggers its high watermark threshold, causing the cluster to enter a red state. This is particularly common on development machines where disk space is often limited.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-adjusting-watermark-thresholds&quot;&gt;Solution: Adjusting Watermark Thresholds&lt;/h3&gt;
+
+&lt;p&gt;If you are facing the same issue, to resolve this, run this curl command which adjusts the disk space percentage at which elasticsearch goes into unhealthy state.&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; PUT &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/_cluster/settings&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Content-Type: application/json'&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{
+    &quot;persistent&quot;: {
+      &quot;cluster.routing.allocation.disk.watermark.low&quot;: &quot;95%&quot;,
+      &quot;cluster.routing.allocation.disk.watermark.high&quot;: &quot;97%&quot;,
+      &quot;cluster.routing.allocation.disk.watermark.flood_stage&quot;: &quot;98%&quot;
+    }
+  }'&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Check your cluster health:&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/_cluster/health?pretty&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</content>
+ </entry>
  
  <entry>
    <title>HTTP Certificate Pinning</title>
@@ -1224,51 +1296,6 @@ LogLevelMax=warning
 
 &lt;p&gt;And restart rtkit daemon using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl restart rtkit-daemon&lt;/code&gt;&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>My Homelab Update - Part I</title>
-   <link href="https://madhur.co.in/blog/2024/05/01/my-homelab-update-part1.html"/>
-   <updated>2024-05-01T00:00:00+05:30</updated>
-   <id>id:/blog/2024/05/01/my-homelab-update-part1</id>
-   <content type="html">&lt;p&gt;&lt;a href=&quot;/blog/2024/01/07/proxmox-user-friendly-urls.html&quot;&gt;Continuing my Homelab journey using Proxmox&lt;/a&gt;, I have setup a full fledged home network with multiple services running.&lt;/p&gt;
-
-&lt;p&gt;Here is the quick diagram below for reference:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/images/Blog/homenetwork.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Some of the services I am running on my homenetwork as of now are&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/jellyfin/jellyfin&quot;&gt;Jellyfin&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/Athou/commafeed&quot;&gt;Commmafeed&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/prometheus/prometheus&quot;&gt;Prometheus&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/grafana/grafana&quot;&gt;Grafana&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/NginxProxyManager/nginx-proxy-manager&quot;&gt;Nginx Proxy Manager&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://snapdrop.net/&quot;&gt;Snapdrop&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/louislam/uptime-kuma&quot;&gt;Uptime Kuma&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/dgtlmoon/changedetection.io&quot;&gt;Change Detection&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/qbittorrent/qBittorrent&quot;&gt;qBittorrent&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/OliveTin/OliveTin&quot;&gt;Olivetin&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/dani-garcia/vaultwarden&quot;&gt;Vaultwarden&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/binwiederhier/ntfy&quot;&gt;ntfy&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Some of the things I am trying to solve:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Easily able to VPN from outside to access my password manager, RSS feeds, media etc&lt;/li&gt;
-  &lt;li&gt;Get rid of &lt;a href=&quot;https://www.pfsense.org/&quot;&gt;PfSense&lt;/a&gt;, PfSense is good but I feel its overkill for my needs.&lt;/li&gt;
-  &lt;li&gt;Evaluate &lt;a href=&quot;https://tailscale.com/&quot;&gt;Tailscale&lt;/a&gt;, &lt;a href=&quot;https://www.wireguard.com/&quot;&gt;Wireguard&lt;/a&gt; and &lt;a href=&quot;https://openvpn.net/&quot;&gt;OpenVPN&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;And finally,&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Having less power bill while powering my Proxmox server 24x7 :)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Stay tuned for further updates if you are interested.&lt;/p&gt;
 </content>
  </entry>
  
