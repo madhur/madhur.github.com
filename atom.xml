@@ -3,13 +3,91 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-06-29T15:13:58+05:30</updated>
+ <updated>2025-07-19T12:09:19+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Row level locking in database</title>
+   <link href="https://madhur.co.in/blog/2025/07/09/row-level-locking-database.html"/>
+   <updated>2025-07-09T00:00:00+05:30</updated>
+   <id>id:/blog/2025/07/09/row-level-locking-database</id>
+   <content type="html">&lt;p&gt;Quick refereshers on how locks are implemented in databases.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Exclusive Locks - The row is locked for read and update. Until the exclusive lock is released, no reads and writes are allowed. Only one transaction can acquire an exclusive lock.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Shared Lock - The row is locked for update. However, readers are allowed to read. Multiple transactions are allowed to acquire shared locks.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Major points&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;If the transaction has shared lock on resource, other transaction cannot acquire exclusive lock on it.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A process cannot acquire a shared lock on a resource that is locked by an exclusive lock.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;optimistic-vs-pessimistic-locking&quot;&gt;Optimistic vs Pessimistic Locking&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Optimistic - Let multiple transactions be allowed to update the row concurrently. One one will succeed and others will fail.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Pessimistic - Only one transaction is allowed to update the row. Others are put to wait.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;transaction-isolation&quot;&gt;Transaction Isolation&lt;/h3&gt;
+
+&lt;p&gt;What happens when a transaction tries to read a row updated by another transaction?&lt;/p&gt;
+
+&lt;p&gt;Problems when transaction isolation is not done&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Dirty Read — Let’s take a situation where one transaction updates a row or a table but does not commit the changes. If the database lets another transaction read those changes (before it’s committed) then it’s called a dirty read. Why? Let’s say the first transaction rolls back its changes. The other transaction which read the row/table has stale data.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Non-repeatable read — Another side effect of concurrent execution of transactions is that consecutive reads can retrieve different results if you allow another transaction to do updates in between&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Phantom read — In a similar situation as above, if one transaction does two reads of the same query, but another transaction inserts or deletes new rows leading to a change in the number of rows retrieved by the first transaction in its second read, it’s called a Phantom read.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;levels-of-isolation&quot;&gt;Levels of Isolation&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Read uncomitted - This level of isolation lets other transactions read data that was not committed to the database by other transactions.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Read committed — This, as the name suggests, lets other transactions only read data that is committed to the database. While this looks like an ideal level of isolation, it only solves the dirty read problem mentioned above. If a transaction is updating a row, and another transaction tries to access it, it won’t be able to. But this can still cause non-repeatable and phantom reads because this applies only to updates and not read queries.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Repeatable read - To counter the transactions from getting inconsistent data, we need a higher level of isolation and that is offered by repeatable read. In this, the resource is locked throughout the transaction. So, if the transaction contains two select queries and in between, if another transaction tries to update the same rows, it would be blocked from doing so. This isolation level is not immune to phantom reads though it helps against non-repeatable reads. This is the default level of isolation in many databases.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Serializable — This is the highest level of isolation. In this, all concurrent transactions “appear” to be executed serially. Pay attention to how I said it appears to be. That’s because it’s not truly serially or sequentially executed. This level works against phantom reads as well.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
+&lt;p&gt;https://medium.com/inspiredbrilliance/what-are-database-locks-1aff9117c290&lt;/p&gt;
+
+</content>
+ </entry>
  
  <entry>
    <title>Run elasticsearch in docker</title>
@@ -1258,44 +1336,6 @@ Time &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;
 &lt;h3 id=&quot;reset-back-to-real-time&quot;&gt;Reset back to real time&lt;/h3&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--request&lt;/span&gt; POST &lt;span class=&quot;s1&quot;&gt;'localhost:8080/time/resetTime'&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Rtkit Daemon flooding journalctl logs</title>
-   <link href="https://madhur.co.in/blog/2024/06/22/journalctl-rtkit-daemon.html"/>
-   <updated>2024-06-22T00:00:00+05:30</updated>
-   <id>id:/blog/2024/06/22/journalctl-rtkit-daemon</id>
-   <content type="html">&lt;p&gt;Recently I observed, &lt;a href=&quot;https://github.com/heftig/rtkit&quot;&gt;Rtkit daemon&lt;/a&gt; has been flooding the &lt;a href=&quot;https://www.freedesktop.org/software/systemd/man/latest/journalctl.html&quot;&gt;Journalctl&lt;/a&gt; logs&lt;/p&gt;
-
-&lt;p&gt;I frequently found logs such as below in the journalctl logs&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
-Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
-Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
-Jun 13 22:51:50 madhur-b550mds3h rtkit-daemon[1922]: Supervising 2 threads of 1 processes of 1 users.
-...
-Jun 12 23:48:39 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
-Jun 12 23:48:42 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
-Jun 12 23:48:44 madhur-b550mds3h rtkit-daemon[1942]: Failed to look up client: No such file or directory
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Not much aware about this daemon, however, it seems to be used by audio systems such as &lt;a href=&quot;https://wiki.archlinux.org/title/PulseAudio&quot;&gt;Pulseaudio&lt;/a&gt; and &lt;a href=&quot;https://wiki.archlinux.org/title/PipeWire&quot;&gt;Pipewire&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Fixing these logs is simple&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl edit rtkit-daemon
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Add the following lines&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Service]
-LogLevelMax=warning
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;And restart rtkit daemon using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl restart rtkit-daemon&lt;/code&gt;&lt;/p&gt;
-
 </content>
  </entry>
  
