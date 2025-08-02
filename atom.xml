@@ -3,13 +3,219 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-07-19T12:09:19+05:30</updated>
+ <updated>2025-08-02T16:37:55+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Troubleshooting Shared Library Issues on Linux</title>
+   <link href="https://madhur.co.in/blog/2025/08/01/troubleshooting-shared-library-issues-linux.html"/>
+   <updated>2025-08-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/08/01/troubleshooting-shared-library-issues-linux</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Author’s Note:&lt;/strong&gt; I recently encountered this exact library issue with qimgv and OpenCV on my Arch Linux system. After solving it, I used Claude AI to help me structure this troubleshooting guide based on my experience. The problem and solution are genuine - I just wanted to create a comprehensive resource that others could benefit from.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If you’ve been using Linux for a while, you’ve probably encountered the dreaded “cannot open shared object file” error at least once. This error can be frustrating, especially when you’re trying to run a perfectly good application that worked yesterday. In this guide, we’ll explore what causes these errors and how to fix them systematically.&lt;/p&gt;
+
+&lt;h2 id=&quot;understanding-the-error&quot;&gt;Understanding the Error&lt;/h2&gt;
+
+&lt;p&gt;When you see an error like this:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;qimgv: error while loading shared libraries: libopencv_imgproc.so.411: cannot open shared object file: No such file or directory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It means that the application (in this case &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;qimgv&lt;/code&gt;) is looking for a specific shared library file that it can’t find on your system. Shared libraries are collections of code that multiple programs can use simultaneously, making your system more efficient.&lt;/p&gt;
+
+&lt;h2 id=&quot;common-causes&quot;&gt;Common Causes&lt;/h2&gt;
+
+&lt;p&gt;Several scenarios can lead to this error:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Missing library&lt;/strong&gt;: The required library isn’t installed on your system&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Version mismatch&lt;/strong&gt;: You have a different version of the library than what the application expects&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Incorrect library path&lt;/strong&gt;: The library exists but isn’t in the system’s search path&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Corrupted installation&lt;/strong&gt;: The library files are damaged or incomplete&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;step-by-step-troubleshooting&quot;&gt;Step-by-Step Troubleshooting&lt;/h2&gt;
+
+&lt;h3 id=&quot;step-1-check-what-libraries-are-available&quot;&gt;Step 1: Check What Libraries Are Available&lt;/h3&gt;
+
+&lt;p&gt;First, let’s see what versions of the library you have installed:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldconfig &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;library_name]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For our OpenCV example:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldconfig &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This command will show you all the OpenCV libraries installed on your system along with their versions and paths.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-2-identify-the-version-mismatch&quot;&gt;Step 2: Identify the Version Mismatch&lt;/h3&gt;
+
+&lt;p&gt;In our case, the output showed:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;libopencv_imgproc.so.412 (libc6,x86-64) =&amp;gt; /usr/lib/libopencv_imgproc.so.412
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The application was looking for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libopencv_imgproc.so.411&lt;/code&gt; but we had version &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;4.12&lt;/code&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.412&lt;/code&gt;) installed. This is a classic version mismatch.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-3-check-what-the-application-actually-needs&quot;&gt;Step 3: Check What the Application Actually Needs&lt;/h3&gt;
+
+&lt;p&gt;To see exactly what libraries an application is trying to link to:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldd &lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;which application_name&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;library_name]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldd &lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;which qimgv&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This will show you all the OpenCV libraries that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;qimgv&lt;/code&gt; expects to find.&lt;/p&gt;
+
+&lt;h3 id=&quot;step-4-choose-your-fix-strategy&quot;&gt;Step 4: Choose Your Fix Strategy&lt;/h3&gt;
+
+&lt;p&gt;You have several options depending on the situation:&lt;/p&gt;
+
+&lt;h4 id=&quot;option-a-install-the-correct-version-recommended-for-missing-libraries&quot;&gt;Option A: Install the Correct Version (Recommended for missing libraries)&lt;/h4&gt;
+
+&lt;p&gt;If the library is completely missing, install it using pacman:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also search for OpenCV-related packages:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Ss&lt;/span&gt; opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If you need development headers and additional libraries:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; opencv vtk hdf5
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;option-b-create-symbolic-links-best-for-version-mismatches&quot;&gt;Option B: Create Symbolic Links (Best for version mismatches)&lt;/h4&gt;
+
+&lt;p&gt;When you have a newer version of the library that’s compatible with the older version the application expects, create symbolic links:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /usr/lib/libopencv_imgproc.so.412 /usr/lib/libopencv_imgproc.so.411
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You might need to create links for multiple libraries. Based on the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldd&lt;/code&gt; output, you might need:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /usr/lib/libopencv_core.so.412 /usr/lib/libopencv_core.so.411
+&lt;span class=&quot;nb&quot;&gt;sudo ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /usr/lib/libopencv_imgcodecs.so.412 /usr/lib/libopencv_imgcodecs.so.411
+&lt;span class=&quot;nb&quot;&gt;sudo ln&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /usr/lib/libopencv_highgui.so.412 /usr/lib/libopencv_highgui.so.411
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After creating symbolic links, update the library cache:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ldconfig
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;option-c-reinstall-the-application&quot;&gt;Option C: Reinstall the Application&lt;/h4&gt;
+
+&lt;p&gt;Sometimes the easiest solution is to reinstall the problematic application to ensure all dependencies are properly resolved:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; qimgv
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; qimgv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also use pacman to check what packages depend on a specific library:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Qi&lt;/span&gt; opencv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Or find which package provides a specific file:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Qo&lt;/span&gt; /usr/lib/libopencv_imgproc.so.412
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;step-5-verify-the-fix&quot;&gt;Step 5: Verify the Fix&lt;/h3&gt;
+
+&lt;p&gt;After applying your chosen solution, test the application:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;qimgv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If it still doesn’t work, run the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldd&lt;/code&gt; command again to see if there are other missing libraries.&lt;/p&gt;
+
+&lt;h2 id=&quot;advanced-troubleshooting&quot;&gt;Advanced Troubleshooting&lt;/h2&gt;
+
+&lt;h3 id=&quot;checking-library-paths&quot;&gt;Checking Library Paths&lt;/h3&gt;
+
+&lt;p&gt;If the library exists but isn’t being found, check your library search paths:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$LD_LIBRARY_PATH&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can temporarily add a directory to the search path:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;LD_LIBRARY_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/path/to/library:&lt;span class=&quot;nv&quot;&gt;$LD_LIBRARY_PATH&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;finding-libraries-by-name&quot;&gt;Finding Libraries by Name&lt;/h3&gt;
+
+&lt;p&gt;To find all instances of a library on your system:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;find /usr &lt;span class=&quot;nt&quot;&gt;-name&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;libopencv_imgproc.so*&quot;&lt;/span&gt; 2&amp;gt;/dev/null
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You can also use pacman to find which package provides a file:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pacman &lt;span class=&quot;nt&quot;&gt;-F&lt;/span&gt; libopencv_imgproc.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Or search for packages containing specific files:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Fx&lt;/span&gt; opencv
+
+&lt;span class=&quot;c&quot;&gt;### Checking Library Dependencies&lt;/span&gt;
+
+To see what other libraries a specific library depends on:
+
+&lt;span class=&quot;sb&quot;&gt;```&lt;/span&gt;bash
+ldd /usr/lib/libopencv_imgproc.so.412
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;prevention-tips&quot;&gt;Prevention Tips&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Use pacman&lt;/strong&gt;: Install software through pacman when possible, as it handles dependencies automatically.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Keep your system updated&lt;/strong&gt;: Regular updates often resolve compatibility issues:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Syu&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Use AUR helpers carefully&lt;/strong&gt;: When installing from AUR, be aware that it might create dependency conflicts. Consider using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yay&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;paru&lt;/code&gt; for better dependency management:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;yay &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; package-name
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Check for orphaned packages&lt;/strong&gt;: Clean up unused dependencies:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Rns&lt;/span&gt; &lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;pacman &lt;span class=&quot;nt&quot;&gt;-Qtdq&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Use containerization&lt;/strong&gt;: For complex applications with specific library requirements, consider using Docker or similar containerization tools.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;when-symbolic-links-might-not-work&quot;&gt;When Symbolic Links Might Not Work&lt;/h2&gt;
+
+&lt;p&gt;While symbolic links are often a quick fix, they’re not always appropriate:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Major version differences&lt;/strong&gt;: Linking between major versions (e.g., OpenCV 3.x to 4.x) can cause crashes&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;ABI incompatibility&lt;/strong&gt;: Different library versions might have incompatible application binary interfaces&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Security concerns&lt;/strong&gt;: Older applications might have security vulnerabilities when used with newer libraries&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In these cases, consider using the application’s official repositories, building from source, or using containerization.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Shared library errors are common in Linux but usually straightforward to fix once you understand the underlying cause. The key is to systematically diagnose the problem: check what you have, identify what’s missing or mismatched, and choose the appropriate fix strategy.&lt;/p&gt;
+
+&lt;p&gt;Remember that while symbolic links are often the quickest solution for version mismatches, they’re not always the safest long-term approach. When possible, prefer proper package management and keep your system updated to avoid these issues altogether.&lt;/p&gt;
+
+&lt;p&gt;The next time you encounter a “cannot open shared object file” error, you’ll have the tools and knowledge to diagnose and fix it efficiently. Happy troubleshooting!&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Row level locking in database</title>
@@ -1211,131 +1417,6 @@ To further debug and diagnose cluster problems, use &lt;span class=&quot;s1&quot
 &lt;p&gt;&lt;a href=&quot;/images/grafana_stream.png&quot; data-fancybox=&quot;&quot;&gt;
 &lt;img src=&quot;/images/grafana_stream.png&quot; width=&quot;1000px&quot; /&gt;
 &lt;/a&gt;&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Faking time in JVM Process</title>
-   <link href="https://madhur.co.in/blog/2024/07/01/mocking-jvm-time.html"/>
-   <updated>2024-07-01T00:00:00+05:30</updated>
-   <id>id:/blog/2024/07/01/mocking-jvm-time</id>
-   <content type="html">&lt;p&gt;Recently, we were doing automation testing for one of our backend services and encountered an unique scenario wherein we wanted to forward the time by 24 hrs because we had entities which were created on daily basis at certain time.&lt;/p&gt;
-
-&lt;p&gt;To automate these scenarios, we had to wait for 24 unless we did either of these things:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;Somehow create those entities every few minutes instead of every 24 hours - This would require making the implementation generic for both scenarios.&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Fast forward the system time - Since we were running in containers and containers inherit the date time settings of host machine, we had to change the time of host machine. However, that means lot of other containers running in the same machine getting affected by these side effect.&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;We did not go with first option either, since there were lot of backend validations implemented and removing those validations means making the implementation susceptible to errors.&lt;/p&gt;
-
-&lt;p&gt;We looked through many solutions and finally arrived by using a library called &lt;a href=&quot;https://github.com/faketime-java/faketime&quot;&gt;faketime&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;In short,&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;FakeTime uses a native Java agent to replace &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;System.currentTimeMillis()&lt;/code&gt; implementation with the one you can control using system properties.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;getting-started-with-faketime&quot;&gt;Getting started with Faketime&lt;/h3&gt;
-
-&lt;p&gt;Faketime is implemented as a native agent and hence it needs to be built for every platform such as Linux, Mac OS x86, Mac M1 etc.&lt;/p&gt;
-
-&lt;p&gt;Fortunately, there exists maven modules for each of the architectures&lt;/p&gt;
-
-&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Windows 32bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;windows32&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Windows 64bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;windows64&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- macOS 32bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;mac32&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- macOS 64bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;mac64&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Linux 32bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;linux32&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Linux 64bit --&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;dependency&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;groupId&amp;gt;&lt;/span&gt;io.github.faketime-java&lt;span class=&quot;nt&quot;&gt;&amp;lt;/groupId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;artifactId&amp;gt;&lt;/span&gt;faketime-agent&lt;span class=&quot;nt&quot;&gt;&amp;lt;/artifactId&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;version&amp;gt;&lt;/span&gt;0.8.0&lt;span class=&quot;nt&quot;&gt;&amp;lt;/version&amp;gt;&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;&amp;lt;classifier&amp;gt;&lt;/span&gt;linux64&lt;span class=&quot;nt&quot;&gt;&amp;lt;/classifier&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/dependency&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;I have implemented a &lt;a href=&quot;https://github.com/madhur/faketime-example&quot;&gt;small github project&lt;/a&gt; to demonstrate faking the time using this library.&lt;/p&gt;
-
-&lt;p&gt;Here is how you would run it…&lt;/p&gt;
-
-&lt;h3 id=&quot;run-using-maven&quot;&gt;Run using Maven&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mvn spring-boot:run &lt;span class=&quot;nt&quot;&gt;-Dspring-boot&lt;/span&gt;.run.jvmArguments&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;-agentpath:./src/main/resources/libfaketime -XX:+UnlockDiagnosticVMOptions -XX:DisableIntrinsic=_currentTimeMillis -XX:CompileCommand=quiet -XX:CompileCommand=exclude,java/lang/System.currentTimeMillis -XX:CompileCommand=exclude,jdk/internal/misc/VM.getNanoTimeAdjustment&quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;get-current-time&quot;&gt;Get current time&lt;/h3&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'localhost:8080/time/getTime'&lt;/span&gt;
-
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&quot;localDateTime&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-06-29T15:42:41.973356&quot;&lt;/span&gt;,
-    &lt;span class=&quot;s2&quot;&gt;&quot;timestamp&quot;&lt;/span&gt;: 1719655961973,
-    &lt;span class=&quot;s2&quot;&gt;&quot;instant&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-06-29T10:12:41.973377Z&quot;&lt;/span&gt;,
-    &lt;span class=&quot;s2&quot;&gt;&quot;date&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-06-29T10:12:41.973+00:00&quot;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;set-fake-time&quot;&gt;Set fake time&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--request&lt;/span&gt; POST &lt;span class=&quot;s1&quot;&gt;'localhost:8080/time/setTime?dateTime=2024-08-01T00%3A00%3A00'&lt;/span&gt;
-
-Time &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;get-current-time-1&quot;&gt;Get current time&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'localhost:8080/time/getTime'&lt;/span&gt;
-
-&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;s2&quot;&gt;&quot;localDateTime&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-08-01T00:00:35.085&quot;&lt;/span&gt;,
-    &lt;span class=&quot;s2&quot;&gt;&quot;timestamp&quot;&lt;/span&gt;: 1722450635085,
-    &lt;span class=&quot;s2&quot;&gt;&quot;instant&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-07-31T18:30:35.085Z&quot;&lt;/span&gt;,
-    &lt;span class=&quot;s2&quot;&gt;&quot;date&quot;&lt;/span&gt;: &lt;span class=&quot;s2&quot;&gt;&quot;2024-07-31T18:30:35.085+00:00&quot;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;reset-back-to-real-time&quot;&gt;Reset back to real time&lt;/h3&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--request&lt;/span&gt; POST &lt;span class=&quot;s1&quot;&gt;'localhost:8080/time/resetTime'&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
