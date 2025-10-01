@@ -100,3 +100,4 @@ gulp.task('lessCopy', gulp.series('less', 'copy'));
 gulp.task('default', gulp.series('watch'));
 gulp.task('deploy', gulp.series('build', 'uglify', 'cssmin', 'nojekyll'));
 gulp.task('pushdeploy', gulp.series('build', 'uglify', 'cssmin', 'nojekyll', 'git'));
+gulp.task('deploywithoutbuild', gulp.series('uglify', 'cssmin', 'nojekyll', 'git'));
