@@ -3,13 +3,194 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2025-09-08T09:01:27+05:30</updated>
+ <updated>2025-10-01T20:04:39+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Configuring AWS ALB Timeouts</title>
+   <link href="https://madhur.co.in/blog/2025/10/01/configuring-aws-alb-timeout.html"/>
+   <updated>2025-10-01T00:00:00+05:30</updated>
+   <id>id:/blog/2025/10/01/configuring-aws-alb-timeout</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Author’s Note:&lt;/strong&gt; I recently encountered this exact library issue. After solving it, I used Claude AI to help me structure this troubleshooting guide based on my experience. The problem and solution are genuine - I just wanted to create a quick resource that others could benefit from.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;alb-idle-timeout-configuration-best-practices-to-prevent-5xx-errors&quot;&gt;ALB Idle Timeout Configuration: Best Practices to Prevent 5xx Errors&lt;/h3&gt;
+
+&lt;p&gt;If you’ve ever encountered mysterious 502 Bad Gateway or 504 Gateway Timeout errors from your AWS Application Load Balancer (ALB), you’re not alone. Many of these issues stem from improperly configured timeout settings between your ALB and backend applications. In this article, we’ll explore the best practices for configuring ALB idle timeouts.&lt;/p&gt;
+
+&lt;h2 id=&quot;understanding-the-problem&quot;&gt;Understanding the Problem&lt;/h2&gt;
+
+&lt;p&gt;AWS Application Load Balancers manage connections between clients and your backend applications. When timeout configurations are misaligned, you create race conditions that result in intermittent 5xx errors and degraded user experience.&lt;/p&gt;
+
+&lt;p&gt;The root cause typically involves two types of timeouts that must work in harmony:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Request timeouts&lt;/strong&gt;: How long to wait for a single request/response cycle&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Keep-alive (idle) timeouts&lt;/strong&gt;: How long to maintain connections between requests&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;request-timeout-best-practices&quot;&gt;Request Timeout Best Practices&lt;/h2&gt;
+
+&lt;h3 id=&quot;the-golden-rule-application-timeout--alb-timeout&quot;&gt;The Golden Rule: Application Timeout &amp;lt; ALB Timeout&lt;/h3&gt;
+
+&lt;p&gt;Your application’s request timeout should always be shorter than your ALB’s timeout. Here’s the recommended hierarchy:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ALB Request Timeout: 60 seconds (default)
+Application Timeout: 50-55 seconds
+Database/External API Timeout: 45 seconds or less
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;why-this-matters&quot;&gt;Why This Matters&lt;/h3&gt;
+
+&lt;p&gt;When your application timeout equals or exceeds the ALB timeout, you create a dangerous race condition:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Request arrives&lt;/strong&gt; at ALB and forwards to your application&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Both timers start&lt;/strong&gt; counting down simultaneously&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Application timeout hits first&lt;/strong&gt; and closes the connection&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;ALB is still waiting&lt;/strong&gt; for a response when connection terminates&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;ALB generates 5xx error&lt;/strong&gt; instead of receiving your application’s graceful error response&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;keep-alive-timeout-best-practices&quot;&gt;Keep-Alive Timeout Best Practices&lt;/h2&gt;
+
+&lt;h3 id=&quot;the-reverse-rule-application-keep-alive--alb-idle-timeout&quot;&gt;The Reverse Rule: Application Keep-Alive &amp;gt; ALB Idle Timeout&lt;/h3&gt;
+
+&lt;p&gt;Unlike request timeouts, keep-alive timeouts follow the opposite pattern:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ALB Idle Timeout: 60 seconds (default)
+Application Keep-Alive: 65+ seconds
+Database Connection Pool Idle: 70+ seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;why-application-keep-alive-should-be-higher&quot;&gt;Why Application Keep-Alive Should Be Higher&lt;/h3&gt;
+
+&lt;p&gt;If your application’s keep-alive timeout is shorter than ALB’s idle timeout:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Client completes request&lt;/strong&gt; through ALB to application&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Application closes connection&lt;/strong&gt; after its shorter keep-alive period&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;ALB still considers connection active&lt;/strong&gt; and attempts reuse&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Next request fails&lt;/strong&gt; with 502 Bad Gateway because connection is closed&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;advanced-configuration-scenarios&quot;&gt;Advanced Configuration Scenarios&lt;/h2&gt;
+
+&lt;h3 id=&quot;high-traffic-applications&quot;&gt;High-Traffic Applications&lt;/h3&gt;
+
+&lt;p&gt;For applications handling high request volumes:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ALB Idle Timeout: 30 seconds (reduced)
+Application Keep-Alive: 35 seconds
+Request Timeout: 25 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Shorter timeouts free up connections faster and improve resource utilization.&lt;/p&gt;
+
+&lt;h3 id=&quot;long-running-operations&quot;&gt;Long-Running Operations&lt;/h3&gt;
+
+&lt;p&gt;For applications with legitimate long-running operations:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ALB Request Timeout: 300 seconds (5 minutes)
+Application Timeout: 280 seconds
+Keep-Alive: 310 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Consider moving truly long operations to asynchronous processing with status polling endpoints.&lt;/p&gt;
+
+&lt;h3 id=&quot;microservices-architecture&quot;&gt;Microservices Architecture&lt;/h3&gt;
+
+&lt;p&gt;For service-to-service communication:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;External ALB (Internet-facing):
+  - Request Timeout: 60s
+  - Idle Timeout: 60s
+
+Internal ALB (Service-to-service):
+  - Request Timeout: 30s
+  - Idle Timeout: 30s
+
+Application Configuration:
+  - Request Timeout: 25s
+  - Keep-Alive: 35s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;monitoring-and-troubleshooting&quot;&gt;Monitoring and Troubleshooting&lt;/h2&gt;
+
+&lt;h3 id=&quot;key-metrics-to-monitor&quot;&gt;Key Metrics to Monitor&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;ALB CloudWatch Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HTTPCode_ELB_5XX_Count&lt;/code&gt;: Track 5xx errors from ALB&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TargetResponseTime&lt;/code&gt;: Monitor backend response times&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ActiveConnectionCount&lt;/code&gt;: Watch connection patterns&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Application Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Connection pool utilization&lt;/li&gt;
+  &lt;li&gt;Request timeout occurrences&lt;/li&gt;
+  &lt;li&gt;Keep-alive connection reuse rates&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;common-error-patterns&quot;&gt;Common Error Patterns&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;502 Bad Gateway&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Often indicates application closed connection unexpectedly&lt;/li&gt;
+  &lt;li&gt;Check: Application keep-alive &amp;lt; ALB idle timeout&lt;/li&gt;
+  &lt;li&gt;Check: Application crashed or became unresponsive&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;504 Gateway Timeout&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;ALB timeout expired waiting for response&lt;/li&gt;
+  &lt;li&gt;Check: Application timeout ≥ ALB request timeout&lt;/li&gt;
+  &lt;li&gt;Check: Long-running operations without proper timeout handling&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;debugging-commands&quot;&gt;Debugging Commands&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;Test connection behavior&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Test keep-alive behavior&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Connection: keep-alive&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt; http://your-alb-endpoint/
+
+&lt;span class=&quot;c&quot;&gt;# Monitor connection reuse&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Connection: keep-alive&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  http://your-alb-endpoint/endpoint1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  http://your-alb-endpoint/endpoint2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Check ALB configuration&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;aws elbv2 describe-load-balancer-attributes &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;--load-balancer-arn&lt;/span&gt; arn:aws:elasticloadbalancing:...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;best-practices-summary&quot;&gt;Best Practices Summary&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Request Timeouts&lt;/strong&gt;: Application timeout should be 10-15% shorter than ALB timeout&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Keep-Alive Timeouts&lt;/strong&gt;: Application keep-alive should be 5-10 seconds longer than ALB idle timeout&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Monitor Religiously&lt;/strong&gt;: Set up alerts for 5xx error rates and connection metrics&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Test Thoroughly&lt;/strong&gt;: Use load testing tools to validate timeout behavior under various conditions&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Document Configuration&lt;/strong&gt;: Maintain clear documentation of timeout values across your infrastructure&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Gradual Changes&lt;/strong&gt;: Modify timeout values incrementally and monitor impact&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Proper timeout configuration is crucial for maintaining reliable web applications behind AWS Application Load Balancers. By following the principles outlined in this guide—keeping application request timeouts shorter than ALB timeouts and application keep-alive timeouts longer than ALB idle timeouts—you can eliminate most timeout-related 5xx errors.&lt;/p&gt;
+
+&lt;p&gt;Remember that timeout configuration is not a one-size-fits-all solution. Consider your application’s specific requirements, traffic patterns, and operational constraints when implementing these best practices. Regular monitoring and testing will help you fine-tune these settings for optimal performance and reliability.&lt;/p&gt;
+
+&lt;p&gt;The investment in properly configuring these timeouts will pay dividends in improved user experience, reduced operational overhead, and fewer 3 AM troubleshooting sessions.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Non Blocking I/O</title>
@@ -1178,135 +1359,6 @@ CoreDNS is running at https://127.0.0.1:46251/api/v1/namespaces/kube-system/serv
 
 To further debug and diagnose cluster problems, use &lt;span class=&quot;s1&quot;&gt;'kubectl cluster-info dump'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-</content>
- </entry>
- 
- <entry>
-   <title>Load testing Websocket servers using Locust</title>
-   <link href="https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html"/>
-   <updated>2024-08-04T00:00:00+05:30</updated>
-   <id>id:/blog/2024/08/04/load-testing-websocket-servers-locust</id>
-   <content type="html">&lt;p&gt;The entire code of this article is present on this &lt;a href=&quot;https://github.com/madhur/load-test-websocket-locust&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Load testing WebSocket servers is crucial for ensuring their performance and scalability.&lt;/p&gt;
-
-&lt;p&gt;This article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.&lt;/p&gt;
-
-&lt;p&gt;We will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.&lt;/p&gt;
-
-&lt;p&gt;The only message we will be handling is heartbeat requests for simplicity.&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;ServerConnector&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;ServerConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setPort&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setHost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setConnectors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Connector&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;socketConnector&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;});&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;disableServerVersionHeader&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;nc&quot;&gt;WebSocketHandler&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webSocketHandler&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;WebSocketHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;nd&quot;&gt;@Override&lt;/span&gt;
-            &lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;configure&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebSocketServletFactory&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;register&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;WebSocketChannelHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;webSocketServletFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getExtensionFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;unregister&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;permessage-deflate&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;};&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;setHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;webSocketHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;isStarted&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Websocket Jetty server started @- {}/{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Unable to start the server on {}/{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;isRunning&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Here is a simple handler which handles heartbeat requests&lt;/p&gt;
-
-&lt;div class=&quot;language-java highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@OnWebSocketMessage&lt;/span&gt;
-&lt;span class=&quot;kd&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;WS message received : {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;processMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Exception&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Exception in onMessage for session {} message {} due to {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;processMessage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;message&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;optString&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;toLowerCase&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;();&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;processEventsBasedOnMessageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-
-&lt;span class=&quot;kd&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;processEventsBasedOnMessageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nc&quot;&gt;Session&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JSONObject&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;switch&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;heartbeatreq&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
-            &lt;span class=&quot;nc&quot;&gt;SystemFactory&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;getWebSocketMessageHandler&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;handleHeartBeatMessages&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;session&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;logger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Unknown message type received : {}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;messageType&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;For the load testing part, we will use the popular &lt;a href=&quot;https://locust.io/&quot;&gt;Locust&lt;/a&gt; load testing framework.&lt;/p&gt;
-
-&lt;p&gt;We use &lt;a href=&quot;https://github.com/websocket-client/websocket-client/&quot;&gt;websocket-client&lt;/a&gt; to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.&lt;/p&gt;
-
-&lt;p&gt;Whenever we send the heartbeat request to server, we send a timestamp from the client side in the field &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;publishTimestamp&lt;/code&gt;. The server then responds with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;heartbeatresp&lt;/code&gt; and also includes the original timestamp &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;publishTimestamp&lt;/code&gt; which was sent in the request in the response. The server also includes the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;serverDelay&lt;/code&gt; which represents the delay of server in processing the heartbeat response.&lt;/p&gt;
-
-&lt;p&gt;Our contract looks like this:&lt;/p&gt;
-&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;heartbeatreq&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;userId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;publishTimestamp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1722758706760&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;type&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;heartbeatresp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;userId&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;serverDelay&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    &lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;clientPublishTimestamp&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1722758706760&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;We can subtract the current time (the time we received the message in locust) and the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;clientPublishTimestamp&lt;/code&gt; in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;heartbeatresp&lt;/code&gt; to calculate the end to end time of processing the heartbeat request message.&lt;/p&gt;
-
-&lt;p&gt;When running the load test with Locust, it’s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.&lt;/p&gt;
-
-&lt;p&gt;We run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.&lt;/p&gt;
-
-&lt;p&gt;This means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_start.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/Blog/locust_start.png&quot; width=&quot;1000px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Locust will take some time to spawn all the 10K users. At this point, we can see that rate of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ws_connect&lt;/code&gt; is 500 per second.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_spawn.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/Blog/locust_spawn.png&quot; width=&quot;1000px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Once the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/Blog/locust_running.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/Blog/locust_running.png&quot; width=&quot;1000px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-
-&lt;p&gt;In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.&lt;/p&gt;
-
-&lt;p&gt;The entire code of this article is present on this &lt;a href=&quot;https://github.com/madhur/load-test-websocket-locust&quot;&gt;github repository&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Feel free to use this code or if you have any comments, add comment using the comment box below.&lt;/p&gt;
 
 </content>
  </entry>
