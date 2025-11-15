@@ -180,7 +180,7 @@ echo "EHLO localhost"
 sleep 1
 echo "MAIL FROM:<your-email@gmail.com>"
 sleep 1  
-echo "RCPT TO:<recipient@gmail.com>"
+echo "RCPT TO:<ahuja.madhur@gmail.com>"
 sleep 1
 echo "DATA"
 sleep 1
