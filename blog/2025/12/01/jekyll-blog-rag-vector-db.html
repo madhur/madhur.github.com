@@ -1,0 +1,434 @@
+<blockquote>
+  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
+</blockquote>
+
+<p>Head over to the <a href="https://github.com/madhur/jekyll-blog-rag">Complete source code on GitHub</a></p>
+
+<p>Ever wanted to create a smart assistant that can answer questions specifically about your blog content? In this post, I’ll walk you through building a Retrieval Augmented Generation (RAG) system that indexes all your Jekyll blog posts in a vector database and uses AWS Bedrock Claude to provide intelligent answers based solely on your content.</p>
+
+<h2 id="what-were-building">What We’re Building</h2>
+
+<p>Our RAG system will:</p>
+<ul>
+  <li>✅ Automatically discover and parse Jekyll blog posts</li>
+  <li>✅ Create semantic embeddings of blog content</li>
+  <li>✅ Store embeddings in a FAISS vector database</li>
+  <li>✅ Use AWS Bedrock Claude to answer questions</li>
+  <li>✅ Ensure responses are based only on blog content</li>
+  <li>✅ Provide source citations for transparency</li>
+</ul>
+
+<h2 id="architecture-overview">Architecture Overview</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Jekyll Blog Posts → Content Processing → Embeddings → Vector DB (FAISS)
+                                                           ↓
+User Question → Query Embeddings → Similarity Search → Context Retrieval
+                                                           ↓
+Context + Question → AWS Bedrock Claude → Contextualized Answer
+</code></pre></div></div>
+
+<h2 id="why-this-approach-works">Why This Approach Works</h2>
+
+<p><strong>Traditional Search Limitations</strong>: Standard blog search relies on keyword matching, missing semantic relationships and context.</p>
+
+<p><strong>RAG Advantages</strong>:</p>
+<ul>
+  <li><strong>Semantic Understanding</strong>: Vector embeddings capture meaning, not just keywords</li>
+  <li><strong>Context-Aware Responses</strong>: Claude understands nuanced technical concepts</li>
+  <li><strong>Source Attribution</strong>: Always cites which blog posts informed the answer</li>
+  <li><strong>Content Accuracy</strong>: Responses are grounded in your actual writing</li>
+</ul>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>Before we dive in, ensure you have:</p>
+
+<ul>
+  <li>A Jekyll blog with markdown posts</li>
+  <li>Python 3.8+ environment</li>
+  <li>AWS account with Bedrock access</li>
+  <li>Basic familiarity with vector databases</li>
+</ul>
+
+<h2 id="core-components-explained">Core Components Explained</h2>
+
+<h3 id="1-content-discovery-and-parsing">1. Content Discovery and Parsing</h3>
+
+<p>The system automatically finds Jekyll posts in common locations:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">post_patterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">blog_path</span> <span class="o">/</span> <span class="s">"_posts"</span> <span class="o">/</span> <span class="s">"*.md"</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">blog_path</span> <span class="o">/</span> <span class="s">"_posts"</span> <span class="o">/</span> <span class="s">"*.markdown"</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">blog_path</span> <span class="o">/</span> <span class="s">"blog"</span> <span class="o">/</span> <span class="s">"*.md"</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">.</span><span class="n">blog_path</span> <span class="o">/</span> <span class="s">"posts"</span> <span class="o">/</span> <span class="s">"*.md"</span><span class="p">,</span>
+<span class="p">]</span>
+</code></pre></div></div>
+
+<p>It then parses the frontmatter and content, extracting metadata like titles, dates, tags, and categories while cleaning the markdown for better indexing.</p>
+
+<h3 id="2-content-chunking-strategy">2. Content Chunking Strategy</h3>
+
+<p>Long blog posts are split into overlapping chunks to improve retrieval accuracy:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">chunk_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="n">overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
+    <span class="s">"""Split content into overlapping chunks for better retrieval."""</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">max_tokens</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+        <span class="n">chunk_tokens</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        <span class="n">chunk_text</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">decode</span><span class="p">(</span><span class="n">chunk_tokens</span><span class="p">)</span>
+        <span class="n">chunks</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk_text</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">end</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">overlap</span>
+    
+    <span class="k">return</span> <span class="n">chunks</span>
+</code></pre></div></div>
+
+<p><strong>Why Chunking Matters</strong>:</p>
+<ul>
+  <li><strong>Improved Precision</strong>: Smaller chunks mean more precise matches</li>
+  <li><strong>Context Preservation</strong>: Overlap ensures important context isn’t lost</li>
+  <li><strong>Efficient Processing</strong>: Manageable sizes for embedding models</li>
+</ul>
+
+<h3 id="3-embedding-generation">3. Embedding Generation</h3>
+
+<p>We use Sentence Transformers for creating semantic embeddings:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="bp">self</span><span class="p">.</span><span class="n">embedding_model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s">'all-MiniLM-L6-v2'</span><span class="p">)</span>
+
+<span class="c1"># Combine title and content for richer context
+</span><span class="n">text_to_embed</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"Title: </span><span class="si">{</span><span class="n">post</span><span class="p">.</span><span class="n">title</span><span class="si">}</span><span class="se">\n\n</span><span class="s">Content: </span><span class="si">{</span><span class="n">chunk</span><span class="si">}</span><span class="s">"</span>
+<span class="n">embeddings</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">embedding_model</span><span class="p">.</span><span class="n">encode</span><span class="p">(</span><span class="n">all_chunks</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">all-MiniLM-L6-v2</code> model provides excellent semantic understanding while being computationally efficient.</p>
+
+<h3 id="4-faiss-vector-database">4. FAISS Vector Database</h3>
+
+<p>FAISS (Facebook AI Similarity Search) provides lightning-fast similarity search:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Create index optimized for cosine similarity
+</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">embeddings</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="bp">self</span><span class="p">.</span><span class="n">faiss_index</span> <span class="o">=</span> <span class="n">faiss</span><span class="p">.</span><span class="n">IndexFlatIP</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span>
+
+<span class="c1"># Normalize for cosine similarity
+</span><span class="n">faiss</span><span class="p">.</span><span class="n">normalize_L2</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+<span class="bp">self</span><span class="p">.</span><span class="n">faiss_index</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">embeddings</span><span class="p">.</span><span class="n">astype</span><span class="p">(</span><span class="s">'float32'</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="5-aws-bedrock-integration">5. AWS Bedrock Integration</h3>
+
+<p>The system uses Claude 3.5 Sonnet via Bedrock for intelligent responses:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">query_bedrock_claude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">system_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"""You are an AI assistant that answers questions based ONLY on the provided blog post content. 
+
+Rules:
+1. ONLY use information from the provided blog post excerpts
+2. If the blog posts don't contain enough information, say so explicitly
+3. Always cite which blog post(s) you're referencing by title
+4. Do not use any external knowledge beyond what's in the blog posts
+5. Be concise but thorough in your responses
+
+Blog post content:
+</span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s">"""</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">bedrock_client</span><span class="p">.</span><span class="n">invoke_model</span><span class="p">(</span>
+        <span class="n">modelId</span><span class="o">=</span><span class="s">'anthropic.claude-3-5-sonnet-20241022-v2:0'</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">json</span><span class="p">.</span><span class="n">dumps</span><span class="p">({</span>
+            <span class="s">"anthropic_version"</span><span class="p">:</span> <span class="s">"bedrock-2023-05-31"</span><span class="p">,</span>
+            <span class="s">"max_tokens"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s">"system"</span><span class="p">:</span> <span class="n">system_prompt</span><span class="p">,</span>
+            <span class="s">"messages"</span><span class="p">:</span> <span class="p">[{</span><span class="s">"role"</span><span class="p">:</span> <span class="s">"user"</span><span class="p">,</span> <span class="s">"content"</span><span class="p">:</span> <span class="sa">f</span><span class="s">"Question: </span><span class="si">{</span><span class="n">prompt</span><span class="si">}</span><span class="s">"</span><span class="p">}]</span>
+        <span class="p">})</span>
+    <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">json</span><span class="p">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s">'body'</span><span class="p">].</span><span class="n">read</span><span class="p">())[</span><span class="s">'content'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">'text'</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h2 id="installation-and-setup">Installation and Setup</h2>
+
+<h3 id="1-install-dependencies">1. Install Dependencies</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>boto3 sentence-transformers faiss-cpu python-frontmatter tiktoken numpy
+</code></pre></div></div>
+
+<h3 id="2-configure-aws-credentials">2. Configure AWS Credentials</h3>
+
+<p>Choose your preferred method:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Option A: AWS CLI</span>
+aws configure
+
+<span class="c"># Option B: Environment Variables</span>
+<span class="nb">export </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span>your_access_key
+<span class="nb">export </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span>your_secret_key
+
+<span class="c"># Option C: Use IAM roles (if running on EC2)</span>
+</code></pre></div></div>
+
+<h3 id="3-enable-bedrock-model-access">3. Enable Bedrock Model Access</h3>
+
+<ol>
+  <li>Navigate to AWS Bedrock console in your region (ap-south-1)</li>
+  <li>Go to “Model access” in the left sidebar</li>
+  <li>Request access to Claude models if not already enabled</li>
+  <li>Wait for approval (usually instant for Claude models)</li>
+</ol>
+
+<h3 id="4-update-configuration">4. Update Configuration</h3>
+
+<p>Modify the blog path in the script to match your Jekyll site:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rag</span> <span class="o">=</span> <span class="n">JekyllBlogRAG</span><span class="p">(</span>
+    <span class="n">blog_path</span><span class="o">=</span><span class="s">"/your/jekyll/blog/path"</span><span class="p">,</span>
+    <span class="n">aws_region</span><span class="o">=</span><span class="s">"ap-south-1"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="usage-examples">Usage Examples</h2>
+
+<p>Once set up, you can ask sophisticated questions:</p>
+
+<p><strong>Technical Implementation Questions</strong>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Q: "How do I implement authentication in React applications?"
+A: Based on your blog post "React Authentication Best Practices", you can implement authentication using JWT tokens with...
+</code></pre></div></div>
+
+<p><strong>Architecture and Design</strong>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Q: "What are the pros and cons of microservices architecture?"
+A: In your post "Microservices vs Monoliths: A Practical Guide", you outlined several key advantages of microservices...
+</code></pre></div></div>
+
+<p><strong>Performance Optimization</strong>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Q: "How can I optimize database queries for better performance?"
+A: Your blog post "Database Optimization Techniques" covers several strategies including indexing, query optimization...
+</code></pre></div></div>
+
+<h2 id="performance-considerations">Performance Considerations</h2>
+
+<h3 id="indexing-performance">Indexing Performance</h3>
+<ul>
+  <li><strong>Initial Setup</strong>: ~2-5 minutes for 100 blog posts</li>
+  <li><strong>Query Time</strong>: ~100-200ms per question</li>
+  <li><strong>Memory Usage</strong>: ~50MB for 1000 post chunks</li>
+</ul>
+
+<h3 id="optimization-tips">Optimization Tips</h3>
+
+<ol>
+  <li><strong>Chunk Size Tuning</strong>: Experiment with chunk sizes (300-800 tokens)</li>
+  <li><strong>Embedding Model Selection</strong>: Balance accuracy vs speed</li>
+  <li><strong>Index Persistence</strong>: Save/load indices to avoid re-indexing</li>
+  <li><strong>Batch Processing</strong>: Process multiple queries together</li>
+</ol>
+
+<h2 id="advanced-features-you-can-add">Advanced Features You Can Add</h2>
+
+<h3 id="1-incremental-updates">1. Incremental Updates</h3>
+<p>Track file modification times to only re-index changed posts:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">needs_reindexing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="s">"""Check if file needs re-indexing based on modification time."""</span>
+    <span class="n">last_indexed</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_last_indexed_time</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="n">file_mtime</span> <span class="o">=</span> <span class="n">file_path</span><span class="p">.</span><span class="n">stat</span><span class="p">().</span><span class="n">st_mtime</span>
+    <span class="k">return</span> <span class="n">file_mtime</span> <span class="o">&gt;</span> <span class="n">last_indexed</span>
+</code></pre></div></div>
+
+<h3 id="2-semantic-filtering">2. Semantic Filtering</h3>
+<p>Add filters for categories, tags, or date ranges:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">search_with_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">categories</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> 
+                       <span class="n">date_range</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="s">"""Search with additional filtering criteria."""</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">search_similar_chunks</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">cat</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s">'categories'</span><span class="p">]</span> <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">)]</span>
+    
+    <span class="k">if</span> <span class="n">date_range</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">date_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">r</span><span class="p">[</span><span class="s">'date'</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">date_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    
+    <span class="k">return</span> <span class="n">results</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># Return top 5 after filtering
+</span></code></pre></div></div>
+
+<h3 id="3-multi-modal-support">3. Multi-Modal Support</h3>
+<p>Extend to handle images and code snippets:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">extract_code_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="s">"""Extract and index code blocks separately."""</span>
+    <span class="n">code_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s">'```(\w+)?\n(.*?)\n```'</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="n">findall</span><span class="p">(</span><span class="n">code_pattern</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="p">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">[{</span><span class="s">'language'</span><span class="p">:</span> <span class="n">lang</span><span class="p">,</span> <span class="s">'code'</span><span class="p">:</span> <span class="n">code</span><span class="p">}</span> <span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+</code></pre></div></div>
+
+<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues</h2>
+
+<h3 id="1-no-blog-posts-found">1. No Blog Posts Found</h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Debug post discovery
+</span><span class="n">post_files</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">find_posts</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Checking paths: </span><span class="si">{</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">post_patterns</span><span class="p">]</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Found files: </span><span class="si">{</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">post_files</span><span class="p">]</span><span class="si">}</span><span class="s">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="2-aws-bedrock-access-errors">2. AWS Bedrock Access Errors</h3>
+<ul>
+  <li>Verify region configuration matches your model access</li>
+  <li>Check IAM permissions for Bedrock actions</li>
+  <li>Confirm model access is granted in Bedrock console</li>
+</ul>
+
+<h3 id="3-memory-issues-with-large-blogs">3. Memory Issues with Large Blogs</h3>
+<ul>
+  <li>Reduce chunk size or increase overlap</li>
+  <li>Process posts in batches</li>
+  <li>Use FAISS indices with compression</li>
+</ul>
+
+<h2 id="security-considerations">Security Considerations</h2>
+
+<h3 id="1-content-filtering">1. Content Filtering</h3>
+<p>Ensure sensitive information isn’t indexed:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">should_index_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">post</span><span class="p">:</span> <span class="n">BlogPost</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="s">"""Check if post should be indexed (skip drafts, private posts)."""</span>
+    <span class="k">if</span> <span class="s">'draft'</span> <span class="ow">in</span> <span class="n">post</span><span class="p">.</span><span class="n">categories</span> <span class="ow">or</span> <span class="s">'private'</span> <span class="ow">in</span> <span class="n">post</span><span class="p">.</span><span class="n">tags</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+</code></pre></div></div>
+
+<h3 id="2-query-sanitization">2. Query Sanitization</h3>
+<p>Validate and sanitize user inputs:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sanitize_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="s">"""Sanitize user query to prevent injection attacks."""</span>
+    <span class="c1"># Remove potentially harmful characters
+</span>    <span class="k">return</span> <span class="n">re</span><span class="p">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s">'[&lt;&gt;\"\'%;()&amp;+]'</span><span class="p">,</span> <span class="s">''</span><span class="p">,</span> <span class="n">query</span><span class="p">).</span><span class="n">strip</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="3-rate-limiting">3. Rate Limiting</h3>
+<p>Implement rate limiting for production use:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+
+<span class="k">class</span> <span class="nc">RateLimiter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_requests</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">time_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">max_requests</span> <span class="o">=</span> <span class="n">max_requests</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">time_window</span> <span class="o">=</span> <span class="n">time_window</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">requests</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">allow_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">client_requests</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">requests</span><span class="p">[</span><span class="n">client_id</span><span class="p">]</span>
+        
+        <span class="c1"># Remove old requests
+</span>        <span class="n">client_requests</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">req_time</span> <span class="k">for</span> <span class="n">req_time</span> <span class="ow">in</span> <span class="n">client_requests</span> 
+                             <span class="k">if</span> <span class="n">now</span> <span class="o">-</span> <span class="n">req_time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">time_window</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">client_requests</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="p">.</span><span class="n">max_requests</span><span class="p">:</span>
+            <span class="n">client_requests</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        
+        <span class="k">return</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<h2 id="cost-optimization">Cost Optimization</h2>
+
+<h3 id="aws-bedrock-costs">AWS Bedrock Costs</h3>
+<ul>
+  <li><strong>Claude 3.5 Sonnet</strong>: ~$0.003 per 1K input tokens, ~$0.015 per 1K output tokens</li>
+  <li><strong>Typical Query</strong>: ~$0.01-0.05 per question</li>
+  <li><strong>Monthly Budget</strong>: ~$10-50 for moderate usage</li>
+</ul>
+
+<h3 id="cost-reduction-strategies">Cost Reduction Strategies</h3>
+<ol>
+  <li><strong>Caching</strong>: Store responses for common queries</li>
+  <li><strong>Batch Processing</strong>: Group similar questions</li>
+  <li><strong>Model Selection</strong>: Use smaller models for simpler queries</li>
+  <li><strong>Context Optimization</strong>: Send only relevant chunks</li>
+</ol>
+
+<h2 id="future-enhancements">Future Enhancements</h2>
+
+<h3 id="1-web-interface">1. Web Interface</h3>
+<p>Build a React/Vue frontend:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Example API integration</span>
+<span class="kd">const</span> <span class="nx">askQuestion</span> <span class="o">=</span> <span class="k">async</span> <span class="p">(</span><span class="nx">question</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">/api/ask</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">method</span><span class="p">:</span> <span class="dl">'</span><span class="s1">POST</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">headers</span><span class="p">:</span> <span class="p">{</span><span class="dl">'</span><span class="s1">Content-Type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/json</span><span class="dl">'</span><span class="p">},</span>
+    <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="nx">question</span><span class="p">})</span>
+  <span class="p">});</span>
+  <span class="k">return</span> <span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<h3 id="2-analytics-dashboard">2. Analytics Dashboard</h3>
+<p>Track popular queries and content performance:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">log_query_analytics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> 
+                       <span class="n">response_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="s">"""Log query analytics for insights."""</span>
+    <span class="n">analytics_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">'timestamp'</span><span class="p">:</span> <span class="n">datetime</span><span class="p">.</span><span class="n">now</span><span class="p">(),</span>
+        <span class="s">'query'</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s">'num_results'</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">),</span>
+        <span class="s">'response_time'</span><span class="p">:</span> <span class="n">response_time</span><span class="p">,</span>
+        <span class="s">'top_posts'</span><span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s">'title'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">}</span>
+    
+    <span class="c1"># Store in database or analytics service
+</span>    <span class="bp">self</span><span class="p">.</span><span class="n">store_analytics</span><span class="p">(</span><span class="n">analytics_data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="3-multi-language-support">3. Multi-Language Support</h3>
+<p>Extend to support multiple languages:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">detect_language</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="s">"""Detect content language for appropriate processing."""</span>
+    <span class="kn">from</span> <span class="nn">langdetect</span> <span class="kn">import</span> <span class="n">detect</span>
+    <span class="k">return</span> <span class="n">detect</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_embedding_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SentenceTransformer</span><span class="p">:</span>
+    <span class="s">"""Select appropriate embedding model for language."""</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">'en'</span><span class="p">:</span> <span class="s">'all-MiniLM-L6-v2'</span><span class="p">,</span>
+        <span class="s">'hi'</span><span class="p">:</span> <span class="s">'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'</span><span class="p">,</span>
+        <span class="c1"># Add more language models as needed
+</span>    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="n">models</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">models</span><span class="p">[</span><span class="s">'en'</span><span class="p">]))</span>
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Building a RAG system for your Jekyll blog creates a powerful way to make your content more accessible and useful. The combination of semantic search with Claude’s reasoning capabilities provides responses that are both accurate and contextually rich.</p>
+
+<p>The system we’ve built offers:</p>
+<ul>
+  <li><strong>Intelligent Search</strong>: Goes beyond keyword matching</li>
+  <li><strong>Authoritative Responses</strong>: Always grounded in your actual content</li>
+  <li><strong>Scalable Architecture</strong>: Handles growing blog content efficiently</li>
+  <li><strong>Cost-Effective Operation</strong>: Reasonable costs for individual blogs</li>
+</ul>
+
+<p>Whether you’re building this for personal use or considering it for a larger content site, the principles and code provided give you a solid foundation to build upon.</p>
+
+<h2 id="resources-and-next-steps">Resources and Next Steps</h2>
+
+<ul>
+  <li><a href="https://github.com/madhur/jekyll-blog-rag">Complete source code on GitHub</a></li>
+  <li><a href="https://docs.aws.amazon.com/bedrock/">AWS Bedrock Documentation</a></li>
+  <li><a href="https://faiss.ai/">FAISS Documentation</a></li>
+  <li><a href="https://www.sbert.net/">Sentence Transformers Guide</a></li>
+</ul>
+
