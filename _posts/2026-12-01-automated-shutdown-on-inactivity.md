@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Automated Shutdown on Computer Inactivity"
 excerpt: "Automated Shutdown on Computer Inactivity"
 disqus_id: /2026/12/01/automated-shutdown-on-inactivity/

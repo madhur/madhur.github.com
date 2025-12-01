@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "WireGuard Docker Configuration Drift"
 excerpt: "SWireGuard Docker Configuration Drift"
 disqus_id: /2026/08/01/wireguard-docker-issue/

@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Building a RAG System for Your Jekyll Blog with AWS Bedrock Claude"
 excerpt: "Building a RAG System for Your Jekyll Blog with AWS Bedrock Claude"
 disqus_id: /2025/12/01/jekyll-blog-rag-vector-db/

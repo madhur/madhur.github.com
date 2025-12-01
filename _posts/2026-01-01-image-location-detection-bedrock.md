@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Image location detection using Bedrock and Claude Model"
 excerpt: "Image location detection using Bedrock and Claude Model"
 disqus_id: /2026/01/01/image-location-detection-bedrock/

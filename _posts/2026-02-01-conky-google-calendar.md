@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Displaying Google Calendar Events in Conky"
 excerpt: "Displaying Google Calendar Events in Conky"
 disqus_id: /2026/02/01/conky-google-calendar/

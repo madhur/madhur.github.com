@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Systemd timer running on every boot"
 excerpt: "Systemd timer running on every boot"
 disqus_id: /2026/03/01/systemd-timer-running-every-boot/

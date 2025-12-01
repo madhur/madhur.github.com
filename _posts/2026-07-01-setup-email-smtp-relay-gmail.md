@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation"
 excerpt: "Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation"
 disqus_id: /2026/07/01/setup-email-smtp-relay-gmail/

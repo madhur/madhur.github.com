@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Envelope encryption with vault"
 excerpt: "Envelope encryption with vault"
 disqus_id: /2026/10/01/envelope-encryption-with-vault/

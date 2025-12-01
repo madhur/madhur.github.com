@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Manage both github and github enterprise"
 excerpt: "Manage both github and github enterprise"
 disqus_id: /2026/09/01/manage-github-enterprise/

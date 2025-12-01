@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "HMAC and JWT"
 excerpt: "HMAC and JWT"
 disqus_id: /2026/11/01/hmac-and-jwt/

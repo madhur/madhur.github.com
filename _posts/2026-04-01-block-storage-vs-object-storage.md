@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Block Storage vs Object Storage"
 excerpt: "Block Storage vs Object Storage"
 disqus_id: /2026/04/01/block-storage-vs-object-storage/

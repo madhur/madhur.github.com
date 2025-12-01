@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "How to Send Emails from Python Using msmtp and Gmail"
 excerpt: "How to Send Emails from Python Using msmtp and Gmail"
 disqus_id: /2026/05/01/send-gmail-email-python/

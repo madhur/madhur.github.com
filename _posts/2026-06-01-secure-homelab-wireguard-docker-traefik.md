@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: blog-post
 title: "Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"
 excerpt: "Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"
 disqus_id: /2026/06/01/secure-homelab-wireguard-docker-traefik/
