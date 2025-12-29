@@ -824,7 +824,7 @@ The app has a 4.6-star rating with over 50K+ downloads and provides a native mob
 
 Here's a screenshot of the app showing my processed documents:
 
-![](/images/Blog/paperless-mobile-app.png)
+<img src="/images/Blog/paperless-mobile-app.png" alt="Paperless Mobile App Screenshot" style="max-width: 300px; width: 100%; height: auto;" />
 
 The mobile app makes it incredibly convenient to access important documents like bank statements or tax documents when you're away from your computer. Since all documents are automatically OCR'd by Paperless NGX, you can search for specific text within documents directly from your phone.
 
