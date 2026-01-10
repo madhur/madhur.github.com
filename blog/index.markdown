@@ -11,25 +11,8 @@ Blog
 <span class="low-top quiet large-bottom"><a href="/blog/archives" class="small quiet">Archives</a></span>
 <p/>
 
-{% for post in site.posts limit: 10 %}
-<article>
-<header>
-<h2 class="prepend-top"><a href="{{ post.url }}">{{ post.title }}</a></h2>
-<h3 class="datetext" style="float:left">
-Posted on {{ post.date | date_to_string }}
-</h3>
-<div class="tag-list hidden-xs" style="display:inline"> {% for tag in post.tags %}<a href="/blog/tags/{{ tag |  downcase | slugize }}/">{{ tag }}</a> {% endfor %}</div>
-</header>
-
-
-<div class="c">&nbsp;</div>
-<div class="hidden-xs">
-<p>{{ post.content | strip_html | truncatewords: 75 }}</p>
-<footer>
-<p><a href="{{ post.url }}">Read more...</a></p>
-</footer>
-</div>
-</article>
+{% for post in site.posts limit: 50 %}
+<p>{{ post.date | date: "%d %b %Y" }} &raquo; <a href="{{ post.url }}">{{ post.title }}</a> {% if post.tags.size > 0 %}<span class="tag-list hidden-xs">{% for tag in post.tags %}<a href="/blog/tags/{{ tag | downcase | slugize }}/">{{ tag }}</a>{% unless forloop.last %} {% endunless %}{% endfor %}</span>{% endif %}</p>
 {% endfor %}
 
 
