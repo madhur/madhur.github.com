@@ -15,6 +15,16 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
+        // Mobile navbar toggle (replacement for Bootstrap JS)
+        var navbarToggle = document.querySelector('.navbar-toggle');
+        var navbarCollapse = document.querySelector('.navbar-collapse');
+
+        if (navbarToggle && navbarCollapse) {
+            navbarToggle.addEventListener('click', function() {
+                navbarCollapse.classList.toggle('in');
+            });
+        }
+
         // Highlight the project left navigation selected item
         if (document.URL.indexOf("projects") != -1) {
             var filename = document.URL.split('/').pop();
