@@ -14,7 +14,7 @@ gulp.task('copy', function () {
 });
 
 gulp.task('uglify', function () {
-    return gulp.src(['../site/files/js/app.js', '../site/files/js/main.js'])
+    return gulp.src(['../site/files/js/main.js'])
         .pipe(uglify())
         .pipe(gulp.dest('../site/files/js/'));
 
