@@ -6,7 +6,7 @@ keywords: C/C++, Windbg, Reverse Engineering, important
 important: yes
 ---
 
-Blog 
+Blog
 =====================
 <span class="low-top quiet large-bottom"><a href="/blog/archives" class="small quiet">Archives</a></span>
 <p/>
@@ -23,5 +23,3 @@ Blog
 <p>
 <a href="/blog/archives">Older Posts &rarr;</a>
 </p>
-
-
