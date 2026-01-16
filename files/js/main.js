@@ -15,17 +15,6 @@ define(["jquery", "bootstrap", "fancybox"], function ($, bootstrap, fancybox) {
 
 
     $(document).ready(function () {
-        // Animate fixed top navigation
-        $(window).scroll(function () {
-            if ($(".navbar").offset().top > 50) {
-                $(".navbar-fixed-top").addClass("top-nav-collapse");
-            }
-            else {
-                $(".navbar-fixed-top").removeClass("top-nav-collapse");
-            }
-        });
-
-
 
         // Highlight the project left navigation selected item
         var basefile;
