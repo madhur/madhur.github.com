@@ -3,13 +3,200 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2026-02-01T07:45:11+05:30</updated>
+ <updated>2026-03-01T00:03:19+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Systemd timer running on every boot</title>
+   <link href="https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html"/>
+   <updated>2026-03-01T00:00:00+05:30</updated>
+   <id>id:/blog/2026/03/01/systemd-timer-running-every-boot</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Disclaimer&lt;/strong&gt;: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;problem-description&quot;&gt;Problem Description&lt;/h2&gt;
+
+&lt;p&gt;A systemd timer configured with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;OnCalendar=daily&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Persistent=true&lt;/code&gt; was executing its associated service on every system boot, in addition to the scheduled execution time. The expected behavior was execution only at the scheduled time, with persistent timers catching up on missed runs only when the system was offline during the scheduled time.&lt;/p&gt;
+
+&lt;h2 id=&quot;environment&quot;&gt;Environment&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;System&lt;/strong&gt;: User systemd instance (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemctl --user&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Timer&lt;/strong&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rednotebook-backup.timer&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Service&lt;/strong&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rednotebook-backup.service&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Systemd version&lt;/strong&gt;: Standard systemd installation&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;observed-behavior&quot;&gt;Observed Behavior&lt;/h2&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Aug 13 20:59:24 - Service executed after boot
+-- Boot f6bac27bcb034b92807c437ec2834916 --
+Aug 13 21:10:50 - Service executed after boot
+-- Boot 18a831a9d19b415da72eb836e78ad866 --
+Aug 13 21:11:20 - Service executed after boot
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The service executed immediately after each boot, regardless of the last execution time or scheduled interval.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration-analysis&quot;&gt;Configuration Analysis&lt;/h2&gt;
+
+&lt;h3 id=&quot;original-timer-configuration&quot;&gt;Original Timer Configuration&lt;/h3&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[Unit]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Description&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Run RedNotebook backup daily&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Requires&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;rednotebook-backup.service&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[Timer]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;OnCalendar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;daily&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Persistent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;RandomizedDelaySec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;300&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[Install]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;WantedBy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;timers.target&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;service-configuration&quot;&gt;Service Configuration&lt;/h3&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[Unit]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Description&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;RedNotebook GitHub Backup Service&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;After&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;network-online.target &lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Wants&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;network-online.target&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[Service]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;oneshot&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ExecStart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;%h/bin/rednotebook-backup.sh&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;ExecStartPre&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/bin/sleep 30&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Environment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;HOME=%h&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;StandardOutput&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;journal&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;StandardError&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;journal&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Environment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;SSH_AUTH_SOCK=%t/ssh-agent.socket&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;root-cause-analysis&quot;&gt;Root Cause Analysis&lt;/h2&gt;
+
+&lt;p&gt;The issue stems from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=rednotebook-backup.service&lt;/code&gt; directive in the timer unit’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[Unit]&lt;/code&gt; section.&lt;/p&gt;
+
+&lt;h3 id=&quot;systemd-dependency-resolution&quot;&gt;Systemd Dependency Resolution&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Timer activation&lt;/strong&gt;: The timer unit is started by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;timers.target&lt;/code&gt; during boot&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Dependency resolution&lt;/strong&gt;: Due to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=rednotebook-backup.service&lt;/code&gt;, systemd immediately activates the service unit when the timer starts&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Unintended execution&lt;/strong&gt;: The service executes on boot, independent of the timer schedule&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;systemd-timer-mechanics&quot;&gt;Systemd Timer Mechanics&lt;/h3&gt;
+
+&lt;p&gt;Systemd timers automatically establish relationships with their target services through:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Implicit naming convention&lt;/strong&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo.timer&lt;/code&gt; automatically targets &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo.service&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Automatic dependencies&lt;/strong&gt;: Timer units gain an implicit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Before=&lt;/code&gt; dependency on their target service&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;No explicit linking required&lt;/strong&gt;: The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Unit=&lt;/code&gt; directive in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[Timer]&lt;/code&gt; section is only needed when targeting a service with a different name&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;From &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd.timer(5)&lt;/code&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Timer units automatically gain a Before= dependency on the service they are supposed to activate.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;/h2&gt;
+
+&lt;p&gt;Remove the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=&lt;/code&gt; directive from the timer unit:&lt;/p&gt;
+
+&lt;div class=&quot;language-ini highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[Unit]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Description&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;Run RedNotebook backup daily&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Removed: Requires=rednotebook-backup.service
+&lt;/span&gt;
+&lt;span class=&quot;nn&quot;&gt;[Timer]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;OnCalendar&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;daily&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;Persistent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;RandomizedDelaySec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;300&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[Install]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;WantedBy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;timers.target&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;implementation&quot;&gt;Implementation&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; stop rednotebook-backup.timer
+systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; edit rednotebook-backup.timer
+&lt;span class=&quot;c&quot;&gt;# Add override: [Unit]\nRequires=&lt;/span&gt;
+systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; daemon-reload
+systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; start rednotebook-backup.timer
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;verification&quot;&gt;Verification&lt;/h2&gt;
+
+&lt;p&gt;Post-fix timer state:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;NEXT                            LEFT     LAST PASSED UNIT                     ACTIVATES                 
+Thu 2025-08-14 00:02:17 IST    2h 54min  -    -      rednotebook-backup.timer rednotebook-backup.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Multiple reboot test results:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Service does not execute on boot&lt;/li&gt;
+  &lt;li&gt;Timer maintains correct scheduling&lt;/li&gt;
+  &lt;li&gt;Service executes only at scheduled intervals&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;related-issues&quot;&gt;Related Issues&lt;/h2&gt;
+
+&lt;h3 id=&quot;common-misconceptions&quot;&gt;Common Misconceptions&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Explicit linking requirement&lt;/strong&gt;: Many assume timers require explicit service dependencies&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Cargo-cult configuration&lt;/strong&gt;: Copy-pasting examples with unnecessary &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=&lt;/code&gt; directives&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Documentation gaps&lt;/strong&gt;: Some tutorials incorrectly show &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=&lt;/code&gt; as standard practice&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;alternative-diagnostic-approaches&quot;&gt;Alternative Diagnostic Approaches&lt;/h3&gt;
+
+&lt;p&gt;If removing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=&lt;/code&gt; doesn’t resolve the issue:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Check service enablement&lt;/strong&gt;:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; is-enabled rednotebook-backup.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;p&gt;Services triggered by timers should show &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;static&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;disabled&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Verify service dependencies&lt;/strong&gt;:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;systemctl &lt;span class=&quot;nt&quot;&gt;--user&lt;/span&gt; list-dependencies rednotebook-backup.service
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Check for WantedBy directives&lt;/strong&gt;: Remove &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;WantedBy=&lt;/code&gt; from service &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[Install]&lt;/code&gt; section&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;timer-state-management&quot;&gt;Timer State Management&lt;/h3&gt;
+
+&lt;p&gt;Systemd maintains timer state in:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;System timers: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/lib/systemd/timers/&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;User timers: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.local/share/systemd/&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;State corruption can cause similar symptoms but is less common than configuration issues.&lt;/p&gt;
+
+&lt;h2 id=&quot;technical-references&quot;&gt;Technical References&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd.timer(5)&lt;/code&gt; - Timer unit configuration&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd.unit(5)&lt;/code&gt; - Unit configuration directives&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;systemd.special(7)&lt;/code&gt; - Special systemd units&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/systemd/systemd/issues/14642&quot;&gt;systemd GitHub Issue #14642&lt;/a&gt; - Timer runs on every boot&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Requires=&lt;/code&gt; directive in systemd timer units creates an unnecessary dependency that causes service execution on timer activation (boot). Systemd’s implicit timer-to-service binding mechanism eliminates the need for explicit dependencies in standard configurations. This issue affects both user and system timer units and represents a common configuration anti-pattern in systemd timer implementations.&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Displaying Google Calendar Events in Conky</title>
@@ -3280,98 +3467,6 @@ madhur.M-bM-^@M-^Kco.M-bM-^@M-^Kin
 
 &lt;p&gt;Sometimes these characters are not visible even in terminals, because modern terminals tend to be very good “renderers” and would render these hidden characters.&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Homelab Dashboard</title>
-   <link href="https://madhur.co.in/blog/2025/01/19/homelab-dashboard.html"/>
-   <updated>2025-01-19T00:00:00+05:30</updated>
-   <id>id:/blog/2025/01/19/homelab-dashboard</id>
-   <content type="html">&lt;p&gt;Quick update on my personal homelab server.&lt;/p&gt;
-
-&lt;p&gt;I set up a dashboard using &lt;a href=&quot;https://github.com/gethomepage/homepage&quot;&gt;homepage&lt;/a&gt; to monitor and manage all my services in one place. Though it was a bit tedious to set up, it turned out well.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/homepage.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/homepage.png&quot; height=&quot;800px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;I also setup a &lt;a href=&quot;https://cdimage.debian.org/images/cloud/bookworm/20250115-1993/&quot;&gt;Debian VM&lt;/a&gt; on my &lt;a href=&quot;https://www.proxmox.com/en/&quot;&gt;proxmox&lt;/a&gt; to host some of the applications on docker.&lt;/p&gt;
-
-&lt;p&gt;The applications I am hosting through docker are:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://freshrss.org/index.html&quot;&gt;FreshRSS&lt;/a&gt; - RSS Aggregator&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/usememos/memos&quot;&gt;Memos&lt;/a&gt; - Self-hosted note-taking application for capturing and organizing thoughts&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/ellite/Wallos&quot;&gt;Wallos&lt;/a&gt; - Open Source tool for tracking and managing personal subscriptions&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/mailcow/mailcow-dockerized&quot;&gt;Mailcow&lt;/a&gt; - Full-featured email server solution with SMTP capabilities&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Setting up Mailcow has been rewarding. As now, I am able to deliver some of the notifications from my applications directly to email.&lt;/p&gt;
-
-&lt;p&gt;Example of some of the notifications are:&lt;/p&gt;
-
-&lt;h3 id=&quot;torrent-download-complete-notification-through-qbittorrent&quot;&gt;Torrent download complete notification through qbittorrent.&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/email1.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/email1.png&quot; height=&quot;500px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;disk-usage-of-some-of-my-applications&quot;&gt;Disk usage of some of my applications&lt;/h3&gt;
-
-&lt;p&gt;Find the &lt;a href=&quot;https://gist.github.com/madhur/436481bf712866ed57af7007552912f9&quot;&gt;disk monitoring script here&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/email2.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/email2.png&quot; height=&quot;500px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;cpu-utilizations-of-my-servers-in-homelab-through-alertmanager&quot;&gt;CPU Utilizations of my servers in homelab through &lt;a href=&quot;https://prometheus.io/docs/alerting/latest/alertmanager/&quot;&gt;AlertManager&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;Prometheus configuraiton for same&lt;/p&gt;
-
-&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;groups&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;cpu_alerts&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;rules&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;HighCPUUsage&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;(1 - avg by(instance) (&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[1m])&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;)) * 100 &amp;gt; 50&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2m&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;warning&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;High CPU usage detected on {{ $labels.instance }}&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 50%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Current value: {{ $value }}%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Instance: {{ $labels.instance }}&lt;/span&gt;
-          
-    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;HighCPUUsageCritical&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;expr&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;(1 - avg by(instance) (&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;rate(node_cpu_seconds_total{mode=&quot;idle&quot;}[1m])&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;)) * 100 &amp;gt; 80&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;for&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;2m&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;severity&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;critical&lt;/span&gt;
-      &lt;span class=&quot;na&quot;&gt;annotations&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;summary&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Critical CPU usage detected on {{ $labels.instance }}&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;description&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;|&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;CPU usage has exceeded 80%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Current value: {{ $value }}%&lt;/span&gt;
-          &lt;span class=&quot;s&quot;&gt;Instance: {{ $labels.instance }}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/email3.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/email3.png&quot; height=&quot;500px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;availability-notifications-through-uptime-kuma&quot;&gt;Availability notifications through &lt;a href=&quot;https://github.com/louislam/uptime-kuma&quot;&gt;Uptime Kuma&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;/images/email4.png&quot; data-fancybox=&quot;&quot;&gt;
-&lt;img src=&quot;/images/email4.png&quot; height=&quot;500px&quot; /&gt;
-&lt;/a&gt;&lt;/p&gt;
 </content>
  </entry>
  

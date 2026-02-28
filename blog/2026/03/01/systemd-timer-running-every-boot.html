@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Systemd timer running on every boot &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Systemd timer running on every boot" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>Systemd timer running on every boot</h1>
+			</header>
+
+			
+
+
+
+<div class="post-meta">
+    <time datetime="2026-03-01T00:00:00+05:30">March 01, 2026</time>
+    <span class="reading-time">4 min read</span>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<blockquote>
+  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
+</blockquote>
+
+<h2 id="problem-description">Problem Description</h2>
+
+<p>A systemd timer configured with <code class="language-plaintext highlighter-rouge">OnCalendar=daily</code> and <code class="language-plaintext highlighter-rouge">Persistent=true</code> was executing its associated service on every system boot, in addition to the scheduled execution time. The expected behavior was execution only at the scheduled time, with persistent timers catching up on missed runs only when the system was offline during the scheduled time.</p>
+
+<h2 id="environment">Environment</h2>
+
+<ul>
+  <li><strong>System</strong>: User systemd instance (<code class="language-plaintext highlighter-rouge">systemctl --user</code>)</li>
+  <li><strong>Timer</strong>: <code class="language-plaintext highlighter-rouge">rednotebook-backup.timer</code></li>
+  <li><strong>Service</strong>: <code class="language-plaintext highlighter-rouge">rednotebook-backup.service</code></li>
+  <li><strong>Systemd version</strong>: Standard systemd installation</li>
+</ul>
+
+<h2 id="observed-behavior">Observed Behavior</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Aug 13 20:59:24 - Service executed after boot
+-- Boot f6bac27bcb034b92807c437ec2834916 --
+Aug 13 21:10:50 - Service executed after boot
+-- Boot 18a831a9d19b415da72eb836e78ad866 --
+Aug 13 21:11:20 - Service executed after boot
+</code></pre></div></div>
+
+<p>The service executed immediately after each boot, regardless of the last execution time or scheduled interval.</p>
+
+<h2 id="configuration-analysis">Configuration Analysis</h2>
+
+<h3 id="original-timer-configuration">Original Timer Configuration</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">Run RedNotebook backup daily</span>
+<span class="py">Requires</span><span class="p">=</span><span class="s">rednotebook-backup.service</span>
+
+<span class="nn">[Timer]</span>
+<span class="py">OnCalendar</span><span class="p">=</span><span class="s">daily</span>
+<span class="py">Persistent</span><span class="p">=</span><span class="s">true</span>
+<span class="py">RandomizedDelaySec</span><span class="p">=</span><span class="s">300</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">timers.target</span>
+</code></pre></div></div>
+
+<h3 id="service-configuration">Service Configuration</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">RedNotebook GitHub Backup Service</span>
+<span class="py">After</span><span class="p">=</span><span class="s">network-online.target </span>
+<span class="py">Wants</span><span class="p">=</span><span class="s">network-online.target</span>
+
+<span class="nn">[Service]</span>
+<span class="py">Type</span><span class="p">=</span><span class="s">oneshot</span>
+<span class="py">ExecStart</span><span class="p">=</span><span class="s">%h/bin/rednotebook-backup.sh</span>
+<span class="py">ExecStartPre</span><span class="p">=</span><span class="s">/bin/sleep 30</span>
+<span class="py">Environment</span><span class="p">=</span><span class="s">HOME=%h</span>
+<span class="py">StandardOutput</span><span class="p">=</span><span class="s">journal</span>
+<span class="py">StandardError</span><span class="p">=</span><span class="s">journal</span>
+<span class="py">Environment</span><span class="p">=</span><span class="s">SSH_AUTH_SOCK=%t/ssh-agent.socket</span>
+</code></pre></div></div>
+
+<h2 id="root-cause-analysis">Root Cause Analysis</h2>
+
+<p>The issue stems from the <code class="language-plaintext highlighter-rouge">Requires=rednotebook-backup.service</code> directive in the timer unit’s <code class="language-plaintext highlighter-rouge">[Unit]</code> section.</p>
+
+<h3 id="systemd-dependency-resolution">Systemd Dependency Resolution</h3>
+
+<ol>
+  <li><strong>Timer activation</strong>: The timer unit is started by <code class="language-plaintext highlighter-rouge">timers.target</code> during boot</li>
+  <li><strong>Dependency resolution</strong>: Due to <code class="language-plaintext highlighter-rouge">Requires=rednotebook-backup.service</code>, systemd immediately activates the service unit when the timer starts</li>
+  <li><strong>Unintended execution</strong>: The service executes on boot, independent of the timer schedule</li>
+</ol>
+
+<h3 id="systemd-timer-mechanics">Systemd Timer Mechanics</h3>
+
+<p>Systemd timers automatically establish relationships with their target services through:</p>
+
+<ol>
+  <li><strong>Implicit naming convention</strong>: <code class="language-plaintext highlighter-rouge">foo.timer</code> automatically targets <code class="language-plaintext highlighter-rouge">foo.service</code></li>
+  <li><strong>Automatic dependencies</strong>: Timer units gain an implicit <code class="language-plaintext highlighter-rouge">Before=</code> dependency on their target service</li>
+  <li><strong>No explicit linking required</strong>: The <code class="language-plaintext highlighter-rouge">Unit=</code> directive in <code class="language-plaintext highlighter-rouge">[Timer]</code> section is only needed when targeting a service with a different name</li>
+</ol>
+
+<p>From <code class="language-plaintext highlighter-rouge">systemd.timer(5)</code>:</p>
+<blockquote>
+  <p>Timer units automatically gain a Before= dependency on the service they are supposed to activate.</p>
+</blockquote>
+
+<h2 id="solution">Solution</h2>
+
+<p>Remove the <code class="language-plaintext highlighter-rouge">Requires=</code> directive from the timer unit:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">Run RedNotebook backup daily</span>
+<span class="c"># Removed: Requires=rednotebook-backup.service
+</span>
+<span class="nn">[Timer]</span>
+<span class="py">OnCalendar</span><span class="p">=</span><span class="s">daily</span>
+<span class="py">Persistent</span><span class="p">=</span><span class="s">true</span>
+<span class="py">RandomizedDelaySec</span><span class="p">=</span><span class="s">300</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">timers.target</span>
+</code></pre></div></div>
+
+<h3 id="implementation">Implementation</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> stop rednotebook-backup.timer
+systemctl <span class="nt">--user</span> edit rednotebook-backup.timer
+<span class="c"># Add override: [Unit]\nRequires=</span>
+systemctl <span class="nt">--user</span> daemon-reload
+systemctl <span class="nt">--user</span> start rednotebook-backup.timer
+</code></pre></div></div>
+
+<h2 id="verification">Verification</h2>
+
+<p>Post-fix timer state:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NEXT                            LEFT     LAST PASSED UNIT                     ACTIVATES                 
+Thu 2025-08-14 00:02:17 IST    2h 54min  -    -      rednotebook-backup.timer rednotebook-backup.service
+</code></pre></div></div>
+
+<p>Multiple reboot test results:</p>
+<ul>
+  <li>Service does not execute on boot</li>
+  <li>Timer maintains correct scheduling</li>
+  <li>Service executes only at scheduled intervals</li>
+</ul>
+
+<h2 id="related-issues">Related Issues</h2>
+
+<h3 id="common-misconceptions">Common Misconceptions</h3>
+
+<ol>
+  <li><strong>Explicit linking requirement</strong>: Many assume timers require explicit service dependencies</li>
+  <li><strong>Cargo-cult configuration</strong>: Copy-pasting examples with unnecessary <code class="language-plaintext highlighter-rouge">Requires=</code> directives</li>
+  <li><strong>Documentation gaps</strong>: Some tutorials incorrectly show <code class="language-plaintext highlighter-rouge">Requires=</code> as standard practice</li>
+</ol>
+
+<h3 id="alternative-diagnostic-approaches">Alternative Diagnostic Approaches</h3>
+
+<p>If removing <code class="language-plaintext highlighter-rouge">Requires=</code> doesn’t resolve the issue:</p>
+
+<ol>
+  <li><strong>Check service enablement</strong>:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> is-enabled rednotebook-backup.service
+</code></pre></div>    </div>
+    <p>Services triggered by timers should show <code class="language-plaintext highlighter-rouge">static</code> or <code class="language-plaintext highlighter-rouge">disabled</code></p>
+  </li>
+  <li><strong>Verify service dependencies</strong>:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> list-dependencies rednotebook-backup.service
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Check for WantedBy directives</strong>: Remove <code class="language-plaintext highlighter-rouge">WantedBy=</code> from service <code class="language-plaintext highlighter-rouge">[Install]</code> section</li>
+</ol>
+
+<h3 id="timer-state-management">Timer State Management</h3>
+
+<p>Systemd maintains timer state in:</p>
+<ul>
+  <li>System timers: <code class="language-plaintext highlighter-rouge">/var/lib/systemd/timers/</code></li>
+  <li>User timers: <code class="language-plaintext highlighter-rouge">~/.local/share/systemd/</code></li>
+</ul>
+
+<p>State corruption can cause similar symptoms but is less common than configuration issues.</p>
+
+<h2 id="technical-references">Technical References</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">systemd.timer(5)</code> - Timer unit configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">systemd.unit(5)</code> - Unit configuration directives</li>
+  <li><code class="language-plaintext highlighter-rouge">systemd.special(7)</code> - Special systemd units</li>
+  <li><a href="https://github.com/systemd/systemd/issues/14642">systemd GitHub Issue #14642</a> - Timer runs on every boot</li>
+</ul>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">Requires=</code> directive in systemd timer units creates an unnecessary dependency that causes service execution on timer activation (boot). Systemd’s implicit timer-to-service binding mechanism eliminates the need for explicit dependencies in standard configurations. This issue affects both user and system timer units and represents a common configuration anti-pattern in systemd timer implementations.</p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/systemd">Systemd</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2026 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script src="/files/js/main.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
