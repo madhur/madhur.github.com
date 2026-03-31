@@ -3,13 +3,74 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2026-03-01T00:03:19+05:30</updated>
+ <updated>2026-04-01T00:05:06+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Block Storage vs Object Storage</title>
+   <link href="https://madhur.co.in/blog/2026/04/01/block-storage-vs-object-storage.html"/>
+   <updated>2026-04-01T00:00:00+05:30</updated>
+   <id>id:/blog/2026/04/01/block-storage-vs-object-storage</id>
+   <content type="html">&lt;p&gt;In this article, we will look at &lt;a href=&quot;https://aws.amazon.com/what-is/block-storage/&quot;&gt;Block Storage&lt;/a&gt; and &lt;a href=&quot;https://aws.amazon.com/what-is/object-storage/&quot;&gt;Object Storage&lt;/a&gt; and differences between them.&lt;/p&gt;
+
+&lt;h3 id=&quot;block-storage&quot;&gt;Block Storage&lt;/h3&gt;
+
+&lt;p&gt;Block storage consists of Block servers whose responsibility is to take a file, split it into blocks, then optionally compress and encrypt it and then finally store it into actual storage.&lt;/p&gt;
+
+&lt;p&gt;One of the advantage Block servers provide is Delta sync. When a file is modified, only modified blocks are synced instead of the whole file using a sync algorithm.&lt;/p&gt;
+
+&lt;p&gt;Block servers process filed passed from clients by splitting a file into blocks, compressing each block, and encrypting them.&lt;/p&gt;
+
+&lt;p&gt;Question-&amp;gt; How do they determine which blocks are modified?&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Frequent modification
+Block storage supports frequent data writes without affecting performance. Instead of rewriting &amp;gt; the entire file, the system identifies the particular block that needs to be amended. Then, it rewrites the selected block with the new data. This makes block storage very efficient for managing large files that require frequent updates.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Example of block storage is &lt;a href=&quot;https://aws.amazon.com/ebs/&quot;&gt;Amazon EBS&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Block storage gives the flexibility of storing frequent data on SSD while non-frequent data on HDD.&lt;/p&gt;
+
+&lt;h3 id=&quot;how-does-it-work&quot;&gt;How does it work?&lt;/h3&gt;
+
+&lt;p&gt;Block servers process files passed from clients by splitting a file into blocks, compress each block and encrypting them. Instead of uploading the whole file to the storage system, only modified blocks are transferred.&lt;/p&gt;
+
+&lt;p&gt;The advantage of it is that in version history, you need not store the entire file. Only modified blocks.&lt;/p&gt;
+
+&lt;p&gt;Block storage offers high performance, low latency, and quick data transfer rates. As it operates on a block level, you can directly access data and achieve a high I/O performance. You use block storage for applications that need fast access to data you have stored, like a virtual machine or database.&lt;/p&gt;
+
+&lt;h3 id=&quot;object-storage&quot;&gt;Object Storage&lt;/h3&gt;
+
+&lt;p&gt;Object storage is different from Block storage&lt;/p&gt;
+
+&lt;p&gt;Object storage systems prioritize storage quantity over availability. As highly scalable systems, you can store large volume of unstructured data in an object storage system. However, there’s more latency when you access these files. Object storage also has a lower throughput compared to block storage and cloud storage.&lt;/p&gt;
+
+&lt;p&gt;Example of object storage is &lt;a href=&quot;https://aws.amazon.com/s3/&quot;&gt;Amazon s3&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;block-storage-vs-object-storage&quot;&gt;Block Storage vs Object Storage&lt;/h3&gt;
+
+&lt;p&gt;Block storage is mainly useful for structured data with high volumes of read and write loads.&lt;/p&gt;
+
+&lt;p&gt;Th key here is that in these files, mostly you don’t need the entire file in its entirety, but only the part of it. For example few rows of database, few files inside the VM mount etc.&lt;/p&gt;
+
+&lt;p&gt;Block Storage is like having a filing cabinet with lots of small, numbered drawers. Perfect when you neet to quickly grab a specific drawer.&lt;/p&gt;
+
+&lt;p&gt;Object storage is best used for large amouts of unstructured data.&lt;/p&gt;
+
+&lt;p&gt;In object storage, you typically need the whole file to operate. for example Images, Videos, PDF, backups etc.&lt;/p&gt;
+
+&lt;p&gt;Object Storage is like having a warehouse with labeled boxes. Perfect when you need to retrieve entire boxes (complete files)&lt;/p&gt;
+
+&lt;p&gt;References:
+https://aws.amazon.com/compare/the-difference-between-block-file-object-storage/&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Systemd timer running on every boot</title>
@@ -3435,38 +3496,6 @@ All configs for topic single_partition_topic are:
 &lt;p&gt;Sudden drops in Kafka consumer lag can often be traced back to retention settings causing older messages to be deleted. By understanding how retention.bytes and segment.bytes interact, particularly at the partition level, you can properly size these settings to match your data retention needs.&lt;/p&gt;
 
 &lt;p&gt;If you’re seeing unexpected behavior in your Kafka metrics, checking these configuration parameters should be one of your first troubleshooting steps.&lt;/p&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Revealing Hidden characters in a string</title>
-   <link href="https://madhur.co.in/blog/2025/02/01/revealing-hidden-characters.html"/>
-   <updated>2025-02-01T00:00:00+05:30</updated>
-   <id>id:/blog/2025/02/01/revealing-hidden-characters</id>
-   <content type="html">&lt;p&gt;Recently we faced an issue, where there were some hidden characters inside the hostname of a configuration store of our backend services.&lt;/p&gt;
-
-&lt;p&gt;Because of this, we were getting continously getting DNS resolution errors.&lt;/p&gt;
-
-&lt;p&gt;One quick way to reveal such hidden characters is to run the command&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;string&quot;&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;For example try copying the belwo string into dig or a whois website.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;madhur.​co.​in
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The above string contains hidden characters which can be reveled as follows&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;echo &quot;madhur.co.in&quot; | command cat -v
-madhur.M-bM-^@M-^Kco.M-bM-^@M-^Kin
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Sometimes these characters are not visible even in terminals, because modern terminals tend to be very good “renderers” and would render these hidden characters.&lt;/p&gt;
-
 </content>
  </entry>
  
