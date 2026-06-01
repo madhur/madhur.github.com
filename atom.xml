@@ -3,13 +3,573 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2026-05-01T00:04:10+05:30</updated>
+ <updated>2026-06-01T07:55:37+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik</title>
+   <link href="https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html"/>
+   <updated>2026-06-01T00:00:00+05:30</updated>
+   <id>id:/blog/2026/06/01/secure-homelab-wireguard-docker-traefik</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Disclaimer&lt;/strong&gt;: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Running a homelab is exciting, but security should never be an afterthought. In this guide, I’ll show you how to create a sophisticated setup where:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Public services&lt;/strong&gt; remain accessible to everyone (like your blog or portfolio)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Private services&lt;/strong&gt; require VPN access (like admin panels, monitoring tools, or personal apps)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Home network access&lt;/strong&gt; works seamlessly when you’re at home&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;VPN access&lt;/strong&gt; is required when traveling&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll use &lt;strong&gt;WireGuard&lt;/strong&gt; for VPN connectivity and &lt;strong&gt;Traefik&lt;/strong&gt; as our reverse proxy to intelligently route traffic based on your location.&lt;/p&gt;
+
+&lt;h2 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#architecture-overview&quot;&gt;Architecture Overview&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#prerequisites&quot;&gt;Prerequisites&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#setting-up-wireguard-with-wg-easy&quot;&gt;Setting Up WireGuard with wg-easy&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#configuring-traefik-for-selective-access&quot;&gt;Configuring Traefik for Selective Access&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#example-service-configurations&quot;&gt;Example Service Configurations&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#testing-your-setup&quot;&gt;Testing Your Setup&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#security-considerations&quot;&gt;Security Considerations&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#troubleshooting&quot;&gt;Troubleshooting&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;architecture-overview&quot;&gt;Architecture Overview&lt;/h2&gt;
+
+&lt;p&gt;Our setup creates three distinct access patterns:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Internet      │    │   Home Network   │    │   VPN Clients   │
+│   (Public)      │    │   (Trusted)      │    │   (Secure)      │
+└─────────┬───────┘    └────────┬─────────┘    └─────────┬───────┘
+          │                     │                        │
+          │                     │                        │
+    ┌─────▼─────────────────────▼────────────────────────▼─────┐
+    │                    Traefik                               │
+    │            (Reverse Proxy + SSL Termination)            │
+    └─────┬─────────────────────┬────────────────────────┬─────┘
+          │                     │                        │
+    ┌─────▼─────┐         ┌─────▼─────┐            ┌─────▼─────┐
+    │  Public   │         │   Mixed   │            │  Private  │
+    │ Services  │         │ Services  │            │ Services  │
+    │ (Blog,    │         │(Admin +   │            │(Database, │
+    │  API)     │         │ Public)   │            │ Monitoring│
+    └───────────┘         └───────────┘            └───────────┘
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;Before we start, ensure you have:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A server with Docker and Docker Compose installed&lt;/li&gt;
+  &lt;li&gt;A domain name with DNS pointing to your server&lt;/li&gt;
+  &lt;li&gt;Basic familiarity with Docker Compose&lt;/li&gt;
+  &lt;li&gt;Traefik already running (or follow the basic setup below)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;basic-traefik-setup&quot;&gt;Basic Traefik Setup&lt;/h3&gt;
+
+&lt;p&gt;If you don’t have Traefik running yet, here’s a minimal configuration:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# traefik/docker-compose.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3.8'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;traefik&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik:v3.0&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--api.dashboard=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--providers.docker=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--providers.docker.exposedByDefault=false&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--entrypoints.web.address=:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--entrypoints.websecure.address=:443&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--certificatesresolvers.letsencrypt.acme.tlschallenge=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--certificatesresolvers.letsencrypt.acme.email=your-email@example.com&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;80:80&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;443:443&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock:ro&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;./letsencrypt:/letsencrypt&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.traefik.rule=Host(`traefik.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.traefik.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.traefik.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Create the network: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker network create proxy-network&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-up-wireguard-with-wg-easy&quot;&gt;Setting Up WireGuard with wg-easy&lt;/h2&gt;
+
+&lt;p&gt;WireGuard Easy (wg-easy) v15 is a complete rewrite that simplifies VPN management significantly. Unlike previous versions, it uses a web-based setup wizard instead of environment variables.&lt;/p&gt;
+
+&lt;h3 id=&quot;wireguard-configuration&quot;&gt;WireGuard Configuration&lt;/h3&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# wireguard/docker-compose.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3.8'&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;etc_wireguard&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;wg-easy&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ghcr.io/wg-easy/wg-easy:15&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;wg-easy&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# v15 requires minimal environment variables&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;INSECURE=false&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# Set to true if accessing via HTTP instead of HTTPS&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pi&quot;&gt;{}&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# For Traefik access to web UI&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# VPN network with static IPs&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;ipv4_address&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10.42.42.42&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;ipv6_address&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;fdcc:ad94:bacf:61a3::2a&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;etc_wireguard:/etc/wireguard&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/lib/modules:/lib/modules:ro&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;51820:51820/udp&quot;&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# WireGuard VPN port (must be directly exposed)&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Port 51821 is handled internally by Traefik&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;restart&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;unless-stopped&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;cap_add&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;NET_ADMIN&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SYS_MODULE&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;sysctls&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;net.ipv4.ip_forward=1&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;net.ipv4.conf.all.src_valid_mark=1&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;net.ipv6.conf.all.disable_ipv6=0&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;net.ipv6.conf.all.forwarding=1&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;net.ipv6.conf.default.forwarding=1&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Traefik labels for HTTPS access to web management UI&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.wg-easy.rule=Host(`wg.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.wg-easy.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.wg-easy.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.wg-easy.loadbalancer.server.port=51821&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.docker.network=proxy-network&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;wg&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# Force exact network name&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;enable_ipv6&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ipam&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;default&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;subnet&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10.42.42.0/24&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;subnet&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;fdcc:ad94:bacf:61a3::/64&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;initial-setup&quot;&gt;Initial Setup&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Deploy WireGuard:&lt;/strong&gt;
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;wireguard
+docker-compose up &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Access the setup wizard:&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Visit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://wg.yourdomain.com&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;Complete the setup wizard:
+        &lt;ul&gt;
+          &lt;li&gt;Server IP: Your server’s public IP&lt;/li&gt;
+          &lt;li&gt;Admin password: Choose a strong password&lt;/li&gt;
+          &lt;li&gt;VPN subnet: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.0/24&lt;/code&gt;&lt;/li&gt;
+          &lt;li&gt;DNS servers: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1.1.1.1, 8.8.8.8&lt;/code&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Create your first VPN client:&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Click “Add Client” in the web UI&lt;/li&gt;
+      &lt;li&gt;Download the configuration or scan the QR code&lt;/li&gt;
+      &lt;li&gt;Test the connection&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;configuring-traefik-for-selective-access&quot;&gt;Configuring Traefik for Selective Access&lt;/h2&gt;
+
+&lt;p&gt;Now comes the magic! We’ll create different access patterns using Traefik’s IP whitelisting middleware.&lt;/p&gt;
+
+&lt;h3 id=&quot;access-pattern-1-public-services&quot;&gt;Access Pattern 1: Public Services&lt;/h3&gt;
+
+&lt;p&gt;These services are accessible from anywhere on the internet:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# examples/public-service.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;blog&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;nginx:alpine&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;blog&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./blog-content:/usr/share/nginx/html&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.blog.rule=Host(`blog.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.blog.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.blog.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.blog.loadbalancer.server.port=80&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# No IP restrictions - publicly accessible&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;access-pattern-2-vpn--home-network-only&quot;&gt;Access Pattern 2: VPN + Home Network Only&lt;/h3&gt;
+
+&lt;p&gt;These services require either VPN access OR being on your home network:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# examples/mixed-access-service.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;admin-panel&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;your-admin-app:latest&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;admin-panel&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.admin.rule=Host(`admin.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.admin.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.admin.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.admin.loadbalancer.server.port=3000&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# IP whitelist: VPN clients + home network + localhost&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.admin.middlewares=home-and-vpn&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;access-pattern-3-vpn-only-services&quot;&gt;Access Pattern 3: VPN-Only Services&lt;/h3&gt;
+
+&lt;p&gt;These services are only accessible through the VPN:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# examples/vpn-only-service.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;monitoring&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;grafana/grafana:latest&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;monitoring&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;GF_SECURITY_ADMIN_PASSWORD=secure-password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;grafana_data:/var/lib/grafana&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.monitoring.rule=Host(`monitoring.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.monitoring.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.monitoring.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.monitoring.loadbalancer.server.port=3000&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Strict VPN-only access&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.monitoring.middlewares=vpn-only&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;grafana_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;access-pattern-4-network-isolation&quot;&gt;Access Pattern 4: Network Isolation&lt;/h3&gt;
+
+&lt;p&gt;For maximum security, some services can be completely isolated from the internet:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# examples/isolated-service.yml&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;database&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;postgres:13&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;database&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;POSTGRES_DB=homelab&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;POSTGRES_USER=admin&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;POSTGRES_PASSWORD=secure-password&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;wg&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# Only connected to VPN network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;postgres_data:/var/lib/postgresql/data&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# No Traefik labels - only accessible via direct IP when connected to VPN&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# Access via: postgresql://10.42.42.43:5432/homelab&lt;/span&gt;
+
+  &lt;span class=&quot;na&quot;&gt;internal-api&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;your-internal-api:latest&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;internal-api&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;ipv4_address&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10.42.42.50&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# Access via: http://10.42.42.50:8080 when connected to VPN&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;postgres_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;example-service-configurations&quot;&gt;Example Service Configurations&lt;/h2&gt;
+
+&lt;p&gt;Let’s look at some real-world examples:&lt;/p&gt;
+
+&lt;h3 id=&quot;change-detection-service-mixed-access&quot;&gt;Change Detection Service (Mixed Access)&lt;/h3&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;changedetection&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ghcr.io/dgtlmoon/changedetection.io&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;changedetection&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./data:/datastore&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;restart&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;unless-stopped&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.changedetection.rule=Host(`cd.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.changedetection.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.changedetection.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.changedetection.loadbalancer.server.port=5000&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# Allow home network and VPN access&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.changedetection.middlewares=home-and-vpn&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;portainer-vpn-only&quot;&gt;Portainer (VPN-Only)&lt;/h3&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;portainer&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;portainer/portainer-ce:latest&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;portainer&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;-H unix:///var/run/docker.sock&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;/var/run/docker.sock:/var/run/docker.sock&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;portainer_data:/data&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;proxy-network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;labels&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.enable=true&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.portainer.rule=Host(`portainer.yourdomain.com`)&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.portainer.entrypoints=websecure&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.portainer.tls.certresolver=letsencrypt&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.services.portainer.loadbalancer.server.port=9000&quot;&lt;/span&gt;
+      &lt;span class=&quot;c1&quot;&gt;# VPN-only access for security&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.routers.portainer.middlewares=vpn-only&quot;&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24&quot;&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;portainer_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;proxy-network&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;external&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;testing-your-setup&quot;&gt;Testing Your Setup&lt;/h2&gt;
+
+&lt;h3 id=&quot;1-test-public-access&quot;&gt;1. Test Public Access&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Should work from anywhere&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://blog.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 200 OK&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;2-test-vpn-only-access&quot;&gt;2. Test VPN-Only Access&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Without VPN - should be blocked&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://monitoring.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 403 Forbidden&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# With VPN connected - should work&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://monitoring.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 200 OK&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3-test-mixed-access&quot;&gt;3. Test Mixed Access&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# From home network - should work&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://admin.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 200 OK&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# From mobile data (without VPN) - should be blocked&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://admin.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 403 Forbidden&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# From mobile data (with VPN) - should work&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; https://admin.yourdomain.com
+&lt;span class=&quot;c&quot;&gt;# Expected: 200 OK&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;4-monitor-access-logs&quot;&gt;4. Monitor Access Logs&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Monitor Traefik logs for IP restrictions&lt;/span&gt;
+docker logs traefik &lt;span class=&quot;nt&quot;&gt;--tail&lt;/span&gt; 50 | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-E&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;(403|Forbidden|ipwhitelist)&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Monitor successful VPN connections&lt;/span&gt;
+docker logs wg-easy &lt;span class=&quot;nt&quot;&gt;--tail&lt;/span&gt; 20
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;security-considerations&quot;&gt;Security Considerations&lt;/h2&gt;
+
+&lt;h3 id=&quot;understanding-ip-ranges&quot;&gt;Understanding IP Ranges&lt;/h3&gt;
+
+&lt;p&gt;It’s crucial to understand how IP whitelisting works:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.0/24&lt;/code&gt;&lt;/strong&gt;: Your VPN clients (WireGuard users)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.0/24&lt;/code&gt;&lt;/strong&gt;: Your home network (adjust to match your router’s range)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1/32&lt;/code&gt;&lt;/strong&gt;: Server localhost access&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;why-private-ips-are-safe&quot;&gt;Why Private IPs Are Safe&lt;/h3&gt;
+
+&lt;p&gt;When you’re at a friend’s house with WiFi using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.x&lt;/code&gt;:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Your device gets &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.50&lt;/code&gt; (friend’s network)&lt;/li&gt;
+  &lt;li&gt;Friend’s router has public IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;203.45.67.89&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Traefik sees&lt;/strong&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;203.45.67.89&lt;/code&gt; (blocked!)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Not&lt;/strong&gt;: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.1.50&lt;/code&gt; (which would be allowed)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Private IP ranges only work for actual local network access, not internet requests from similar ranges elsewhere.&lt;/p&gt;
+
+&lt;h3 id=&quot;firewall-configuration&quot;&gt;Firewall Configuration&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Allow WireGuard VPN port&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ufw allow 51820/udp
+
+&lt;span class=&quot;c&quot;&gt;# Allow HTTPS (Traefik)&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ufw allow 443/tcp
+
+&lt;span class=&quot;c&quot;&gt;# Allow HTTP (for redirects)&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ufw allow 80/tcp
+
+&lt;span class=&quot;c&quot;&gt;# Block direct access to service ports&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ufw deny 5000  &lt;span class=&quot;c&quot;&gt;# Example: block direct access to change detection&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;ufw deny 3000  &lt;span class=&quot;c&quot;&gt;# Example: block direct access to Grafana&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;additional-security-measures&quot;&gt;Additional Security Measures&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Use strong passwords&lt;/strong&gt; for all admin interfaces&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Enable 2FA&lt;/strong&gt; where available (WireGuard Easy v15 supports TOTP)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Regular updates&lt;/strong&gt; of all containers&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Monitor access logs&lt;/strong&gt; for suspicious activity&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Backup configurations&lt;/strong&gt; regularly&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Backup WireGuard configs&lt;/span&gt;
+docker &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;wg-easy &lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /etc/wireguard/wg0.json &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; backup-&lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; +%Y%m%d&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt;.json
+
+&lt;span class=&quot;c&quot;&gt;# Backup Traefik dynamic config&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; traefik/ backup-traefik-&lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;date&lt;/span&gt; +%Y%m%d&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt;/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;troubleshooting&quot;&gt;Troubleshooting&lt;/h2&gt;
+
+&lt;h3 id=&quot;common-issues-and-solutions&quot;&gt;Common Issues and Solutions&lt;/h3&gt;
+
+&lt;h4 id=&quot;issue-404-not-found-from-traefik&quot;&gt;Issue: 404 Not Found from Traefik&lt;/h4&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Check if container is in proxy-network&lt;/span&gt;
+docker network inspect proxy-network | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;your-service
+
+&lt;span class=&quot;c&quot;&gt;# Verify Traefik can reach the service&lt;/span&gt;
+docker &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;traefik ping your-service-container
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;issue-vpn-clients-cant-access-services&quot;&gt;Issue: VPN Clients Can’t Access Services&lt;/h4&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Check WireGuard client logs&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# On client: wg show&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Verify routing&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# On server: &lt;/span&gt;
+docker &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;wg-easy wg show
+ip route | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;wg0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;issue-ip-whitelisting-not-working&quot;&gt;Issue: IP Whitelisting Not Working&lt;/h4&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Check what IP Traefik sees&lt;/span&gt;
+docker logs traefik &lt;span class=&quot;nt&quot;&gt;--tail&lt;/span&gt; 50 | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;your-domain
+
+&lt;span class=&quot;c&quot;&gt;# Test IP detection&lt;/span&gt;
+curl &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;X-Real-IP: 10.42.42.5&quot;&lt;/span&gt; https://your-service.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;issue-certificate-errors&quot;&gt;Issue: Certificate Errors&lt;/h4&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Check certificate resolver&lt;/span&gt;
+docker logs traefik | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; acme
+
+&lt;span class=&quot;c&quot;&gt;# Verify DNS propagation&lt;/span&gt;
+dig your-domain.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;network-debugging&quot;&gt;Network Debugging&lt;/h3&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# List all Docker networks&lt;/span&gt;
+docker network &lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Inspect specific network&lt;/span&gt;
+docker network inspect wg
+docker network inspect proxy-network
+
+&lt;span class=&quot;c&quot;&gt;# Check container network connections&lt;/span&gt;
+docker inspect your-container | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-A&lt;/span&gt; 20 &lt;span class=&quot;s2&quot;&gt;&quot;Networks&quot;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Test connectivity between containers&lt;/span&gt;
+docker &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;container1 ping container2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;This setup gives you the best of both worlds: convenience when you’re at home and security when you’re traveling. You can:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Access everything normally&lt;/strong&gt; when on your home network&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Use VPN for sensitive services&lt;/strong&gt; when traveling&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Keep some services completely public&lt;/strong&gt; for legitimate external access&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Isolate critical services&lt;/strong&gt; that should never touch the internet&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Happy homelabbing! 🏠🔧&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;em&gt;What services are you planning to add to your homelab? Share your setup in the comments below!&lt;/em&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>How to Send Emails from Python Using msmtp and Gmail</title>
@@ -3707,72 +4267,6 @@ ldd /usr/lib/libopencv_imgproc.so.412
 &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-</content>
- </entry>
- 
- <entry>
-   <title>Combine videos using ffmpeg</title>
-   <link href="https://madhur.co.in/blog/2025/04/01/combine-videos-ffmpeg.html"/>
-   <updated>2025-04-01T00:00:00+05:30</updated>
-   <id>id:/blog/2025/04/01/combine-videos-ffmpeg</id>
-   <content type="html">&lt;p&gt;I wanted to combine videos using the tool. I had two videos in 9x16 format and wanted to combine side by side.&lt;/p&gt;
-
-&lt;p&gt;With a little bit of trial and error, I was able to achieve this using &lt;a href=&quot;https://ffmpeg.org/&quot;&gt;ffmpeg&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;The exact command is&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ffmpeg -i video1.mp4 -i video2.mp4 -filter_complex &quot;[0:v]scale=540:960:force_original_aspect_ratio=decrease,pad=540:960:(ow-iw)/2:(oh-ih)/2[v0];[1:v]scale=540:960:force_original_aspect_ratio=decrease,pad=540:960:(ow-iw)/2:(oh-ih)/2[v1];[v0][v1]hstack=inputs=2[v]&quot; -map &quot;[v]&quot; -map 0:a -c:v libx264 -c:a aac output.mp4
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h2 id=&quot;breaking-down-the-command&quot;&gt;Breaking Down the Command&lt;/h2&gt;
-
-&lt;p&gt;Let’s understand what each part of this complex command does:&lt;/p&gt;
-
-&lt;h3 id=&quot;input-files&quot;&gt;Input Files&lt;/h3&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; video1.mp4 &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; video2.mp4
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;This specifies our two input videos. FFmpeg will reference them as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[0]&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[1]&lt;/code&gt; respectively.&lt;/p&gt;
-
-&lt;h3 id=&quot;filter-chain-explanation&quot;&gt;Filter Chain Explanation&lt;/h3&gt;
-
-&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-filter_complex&lt;/code&gt; parameter contains several operations:&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;1. Scale and Pad First Video:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;0:v]scale&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:force_original_aspect_ratio&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;decrease,pad&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ow-iw&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;oh-ih&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2[v0]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scale=540:960&lt;/code&gt;: Resize to 540x960 pixels&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;force_original_aspect_ratio=decrease&lt;/code&gt;: Maintain aspect ratio, making the video smaller if needed&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pad=540:960:(ow-iw)/2:(oh-ih)/2&lt;/code&gt;: Add padding to center the video in a 540x960 frame&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[v0]&lt;/code&gt;: Label this processed video as “v0”&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;2. Scale and Pad Second Video:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;1:v]scale&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:force_original_aspect_ratio&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;decrease,pad&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;540:960:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;ow-iw&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2:&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;oh-ih&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;/2[v1]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;Same process for the second video, labeled as “v1”.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;3. Horizontal Stack:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;v0][v1]hstack&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;inputs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2[v]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hstack&lt;/code&gt;: Horizontally stack the two processed videos&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;inputs=2&lt;/code&gt;: Specify we’re combining 2 video streams&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[v]&lt;/code&gt;: Label the final combined video&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;output-mapping-and-encoding&quot;&gt;Output Mapping and Encoding&lt;/h3&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;-map&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;[v]&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-map&lt;/span&gt; 0:a &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;:v libx264 &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;:a aac output.mp4
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-map &quot;[v]&quot;&lt;/code&gt;: Use our combined video stream&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-map 0:a&lt;/code&gt;: Use audio from the first video&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c:v libx264&lt;/code&gt;: Encode video using H.264 codec&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-c:a aac&lt;/code&gt;: Encode audio using AAC codec&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Its great that in Linux even without tools such as Adobe Premiere Pro, you can achieve so much.&lt;/p&gt;
-
 </content>
  </entry>
  
