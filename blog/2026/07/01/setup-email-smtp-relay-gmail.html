@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation</h1>
+			</header>
+
+			
+
+
+
+<div class="post-meta">
+    <time datetime="2026-07-01T00:00:00+05:30">July 01, 2026</time>
+    <span class="reading-time">5 min read</span>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<blockquote>
+  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
+</blockquote>
+
+<p>Setting up a local SMTP daemon can be incredibly useful for applications that need to send emails. Instead of running a full-featured mail server like Postfix, you can use <code class="language-plaintext highlighter-rouge">msmtpd</code> with <code class="language-plaintext highlighter-rouge">msmtp</code> as a lightweight SMTP relay that forwards emails through external providers like Gmail. This guide shows you how to set up <code class="language-plaintext highlighter-rouge">msmtpd</code> with systemd socket activation for an efficient, on-demand mail relay service.</p>
+
+<h2 id="why-msmtpd--msmtp">Why msmtpd + msmtp?</h2>
+
+<p><strong>msmtp</strong> is a lightweight SMTP client that can relay emails through external SMTP servers (like Gmail’s). <strong>msmtpd</strong> is the daemon version that provides a local SMTP server interface, making it perfect for:</p>
+
+<ul>
+  <li>Applications that need to send emails via SMTP</li>
+  <li>Development environments requiring mail functionality</li>
+  <li>Lightweight mail relay without running a full mail server</li>
+  <li><strong>Gmail integration</strong> - easily send emails through your Gmail account</li>
+</ul>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>Install the required packages:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ubuntu/Debian</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>msmtp msmtp-mta
+
+<span class="c"># Arch Linux  </span>
+<span class="nb">sudo </span>pacman <span class="nt">-S</span> msmtp
+
+<span class="c"># RHEL/CentOS/Fedora</span>
+<span class="nb">sudo </span>dnf <span class="nb">install </span>msmtp
+</code></pre></div></div>
+
+<h2 id="step-1-configure-msmtp-client">Step 1: Configure msmtp Client</h2>
+
+<p>First, create the msmtp configuration file. You can place it in <code class="language-plaintext highlighter-rouge">/etc/msmtprc</code> for system-wide use or <code class="language-plaintext highlighter-rouge">~/.msmtprc</code> for user-specific configuration:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create system-wide configuration</span>
+<span class="nb">sudo </span>nano /etc/msmtprc
+</code></pre></div></div>
+
+<p>Add your Gmail SMTP configuration:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Default values for all accounts
+</span><span class="err">defaults</span>
+<span class="err">auth</span>           <span class="err">on</span>
+<span class="err">tls</span>            <span class="err">on</span>
+<span class="err">tls_trust_file</span> <span class="err">/etc/ssl/certs/ca-certificates.crt</span>
+<span class="err">logfile</span>        <span class="err">/var/log/msmtp.log</span>
+
+<span class="c"># Gmail account configuration
+</span><span class="err">account</span>        <span class="err">gmail</span>
+<span class="err">host</span>           <span class="err">smtp.gmail.com</span>
+<span class="err">port</span>           <span class="err">587</span>
+<span class="err">from</span>           <span class="err">your-email@gmail.com</span>
+<span class="err">user</span>           <span class="err">your-email@gmail.com</span>
+<span class="err">password</span>       <span class="err">your-app-password</span>
+
+<span class="c"># Set default account
+</span><span class="err">account</span> <span class="err">default</span> <span class="err">:</span> <span class="err">gmail</span>
+</code></pre></div></div>
+
+<p><strong>Important</strong>: For Gmail, you’ll need to:</p>
+<ol>
+  <li>Enable 2-factor authentication on your Google account</li>
+  <li>Generate an App Password (not your regular password)</li>
+  <li>Use the App Password in the configuration above</li>
+</ol>
+
+<p>Set proper permissions:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># For system-wide config</span>
+<span class="nb">sudo chmod </span>600 /etc/msmtprc
+<span class="nb">sudo chown </span>root:root /etc/msmtprc
+
+<span class="c"># For user config</span>
+<span class="nb">chmod </span>600 ~/.msmtprc
+</code></pre></div></div>
+
+<h2 id="step-2-test-msmtp-client">Step 2: Test msmtp Client</h2>
+
+<p>Verify your msmtp configuration works:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Test the configuration</span>
+<span class="nb">echo</span> <span class="s2">"Test message body"</span> | msmtp <span class="nt">--debug</span> your-recipient@gmail.com
+
+<span class="c"># Or use mail command</span>
+<span class="nb">echo</span> <span class="s2">"This is a test"</span> | mail <span class="nt">-s</span> <span class="s2">"Test Subject"</span> your-recipient@gmail.com
+</code></pre></div></div>
+
+<h2 id="step-3-create-systemd-socket-unit">Step 3: Create systemd Socket Unit</h2>
+
+<p>Now let’s set up the systemd socket that will listen on port 25:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl edit <span class="nt">--force</span> <span class="nt">--full</span> msmtpd.socket
+</code></pre></div></div>
+
+<p>Add the following configuration:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">msmtp daemon socket</span>
+<span class="py">Documentation</span><span class="p">=</span><span class="s">man:msmtpd(1)</span>
+
+<span class="nn">[Socket]</span>
+<span class="py">ListenStream</span><span class="p">=</span><span class="s">25</span>
+<span class="py">Accept</span><span class="p">=</span><span class="s">yes</span>
+
+<span class="nn">[Install]</span>
+<span class="py">WantedBy</span><span class="p">=</span><span class="s">sockets.target</span>
+</code></pre></div></div>
+
+<p><strong>Key points</strong>:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ListenStream=25</code> - Listen on SMTP port 25</li>
+  <li><code class="language-plaintext highlighter-rouge">Accept=yes</code> - Each connection gets its own service instance</li>
+  <li>Socket activation means the daemon only runs when needed</li>
+</ul>
+
+<h2 id="step-4-create-systemd-service-template">Step 4: Create systemd Service Template</h2>
+
+<p>Create the service template that handles incoming SMTP connections:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl edit <span class="nt">--force</span> <span class="nt">--full</span> msmtpd@.service
+</code></pre></div></div>
+
+<p>Add this configuration:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
+<span class="py">Description</span><span class="p">=</span><span class="s">msmtp daemon</span>
+<span class="py">Documentation</span><span class="p">=</span><span class="s">man:msmtpd(1)</span>
+
+<span class="nn">[Service]</span>
+<span class="py">ProtectHome</span><span class="p">=</span><span class="s">false</span>
+<span class="py">PrivateTmp</span><span class="p">=</span><span class="s">true</span>
+<span class="py">NoNewPrivileges</span><span class="p">=</span><span class="s">true</span>
+
+<span class="py">StandardInput</span><span class="p">=</span><span class="s">socket</span>
+<span class="py">ExecStart</span><span class="p">=</span><span class="s">/usr/bin/msmtpd --inet --command='/usr/bin/msmtp -C /etc/msmtprc -f %i'</span>
+</code></pre></div></div>
+
+<p><strong>Configuration explanation</strong>:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ProtectHome=false</code> - Allows access to home directories (needed if config is in <code class="language-plaintext highlighter-rouge">/home</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">StandardInput=socket</code> - Receives the socket connection from systemd</li>
+  <li><code class="language-plaintext highlighter-rouge">%i</code> - systemd specifier replaced with instance identifier</li>
+  <li>The <code class="language-plaintext highlighter-rouge">@</code> in the filename makes this a template unit</li>
+</ul>
+
+<h2 id="step-5-enable-and-start-the-socket">Step 5: Enable and Start the Socket</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Reload systemd configuration</span>
+<span class="nb">sudo </span>systemctl daemon-reload
+
+<span class="c"># Enable and start the socket</span>
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>msmtpd.socket
+<span class="nb">sudo </span>systemctl start msmtpd.socket
+
+<span class="c"># Check status</span>
+<span class="nb">sudo </span>systemctl status msmtpd.socket
+
+<span class="c"># Verify it's listening on port 25</span>
+<span class="nb">sudo </span>ss <span class="nt">-tlnp</span> | <span class="nb">grep</span> :25
+</code></pre></div></div>
+
+<h2 id="testing-your-smtp-daemon">Testing Your SMTP Daemon</h2>
+
+<h3 id="netcat-automated-test">netcat (Automated Test)</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+<span class="nb">echo</span> <span class="s2">"EHLO localhost"</span>
+<span class="nb">sleep </span>1
+<span class="nb">echo</span> <span class="s2">"MAIL FROM:&lt;your-email@gmail.com&gt;"</span>
+<span class="nb">sleep </span>1  
+<span class="nb">echo</span> <span class="s2">"RCPT TO:&lt;ahuja.madhur@gmail.com&gt;"</span>
+<span class="nb">sleep </span>1
+<span class="nb">echo</span> <span class="s2">"DATA"</span>
+<span class="nb">sleep </span>1
+<span class="nb">echo</span> <span class="s2">"Subject: Test via SMTP daemon"</span>
+<span class="nb">echo</span> <span class="s2">""</span>
+<span class="nb">echo</span> <span class="s2">"This is a test message sent through the msmtpd daemon."</span>
+<span class="nb">echo</span> <span class="s2">"."</span>
+<span class="nb">sleep </span>1
+<span class="nb">echo</span> <span class="s2">"QUIT"</span>
+<span class="o">}</span> | nc localhost 25
+</code></pre></div></div>
+
+<h2 id="monitoring-and-troubleshooting">Monitoring and Troubleshooting</h2>
+
+<h3 id="check-service-status">Check Service Status</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Monitor socket status</span>
+<span class="nb">sudo </span>systemctl status msmtpd.socket
+
+<span class="c"># Watch for active service instances</span>
+watch <span class="s1">'systemctl list-units | grep msmtpd@'</span>
+
+<span class="c"># Check logs</span>
+<span class="nb">sudo </span>journalctl <span class="nt">-f</span> <span class="nt">-u</span> msmtpd.socket <span class="nt">-u</span> <span class="s2">"msmtpd@*"</span>
+</code></pre></div></div>
+
+<h2 id="socket-activation-benefits">Socket Activation Benefits</h2>
+
+<p>This setup provides several advantages:</p>
+
+<ol>
+  <li><strong>On-demand activation</strong>: The daemon only runs when there are connections</li>
+  <li><strong>Resource efficient</strong>: No memory usage when idle</li>
+  <li><strong>Concurrent connections</strong>: Multiple simultaneous SMTP sessions</li>
+  <li><strong>Fast response</strong>: Socket is always ready, service starts instantly</li>
+  <li><strong>Automatic cleanup</strong>: Service instances exit after handling connections</li>
+</ol>
+
+<h2 id="sending-to-gmail-successfully">Sending to Gmail Successfully</h2>
+
+<p>The beauty of this setup is that <strong>your local applications can send emails to Gmail</strong> (or any email address) through your local SMTP port 25, and msmtpd will relay them through Gmail’s SMTP servers. This is perfect for:</p>
+
+<ul>
+  <li>Web applications needing to send notifications</li>
+  <li>System monitoring scripts sending alerts</li>
+  <li>Development environments testing email functionality</li>
+  <li>Any application that needs SMTP without running a full mail server</li>
+</ul>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>With msmtpd and systemd socket activation, you now have a lightweight, efficient SMTP relay that can send emails through Gmail. The socket activation ensures resources are only used when needed, while the template service allows handling multiple concurrent connections.</p>
+
+<p>Your applications can now send emails by connecting to <code class="language-plaintext highlighter-rouge">localhost:25</code>, and msmtpd will handle the relay through Gmail’s SMTP servers. This setup is perfect for development, testing, or production environments that need simple mail relay functionality without the complexity of a full mail server.</p>
+
+<hr />
+
+<p><em>Have questions or run into issues? The systemd journal (<code class="language-plaintext highlighter-rouge">journalctl</code>) is your friend for debugging, and the msmtp documentation (<code class="language-plaintext highlighter-rouge">man msmtp</code>) provides additional configuration options.</em></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/linux">Linux</a> |
+						
+						<a href="/blog/tags/email">Email</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2026 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script src="/files/js/main.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>
