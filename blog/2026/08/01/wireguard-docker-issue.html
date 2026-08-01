@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" /> 
+    <title>WireGuard Docker Configuration Drift &#8211; Madhur Ahuja</title>
+    
+
+    <meta name="author" content="Madhur Ahuja" />
+    <meta name="description" content=" WireGuard Docker Configuration Drift" />
+
+    <link rel="start" href="/" />
+
+    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
+    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
+
+    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
+    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
+    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
+    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
+
+     <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-N14VDHYFHQ');
+</script> 
+    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
+
+    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <header id="header" class="row">
+
+            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
+    <div class="container">
+
+        <div class="navbar-header">
+
+            <div class="hidden-md hidden-sm hidden-lg searchli">
+
+                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
+
+                    <div class="form-group">
+                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
+                            placeholder="Search" />
+                    </div>
+                </form>
+            </div>
+
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!--  <a class="navbar-brand " href="/">Home</a> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="mainmenu">
+            <ul id="nav" class="nav navbar-nav">
+
+                <li><a class="home" href="/">Home</a>
+                </li>
+                <li><a class="blog" href="/blog">Blog</a>
+                </li>
+                <!--<li><a class="work" href="/work">Resume</a></li>-->
+                <li><a class="code" href="/projects">Work</a>
+                </li>
+                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
+                <li><a class="info" href="/info">About</a>
+                </li>
+                <li><a class="contact" href="/contact">Contact</a>
+                </li>
+
+            </ul>
+
+            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
+                <li>
+                    <form method="get" role="search" id="searchform" action="/results"
+                        onsubmit="return checkfrm_search();">
+
+                        <div class="form-group">
+                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
+                                placeholder="Search" />
+                        </div>
+                    </form>
+                </li>
+            </ul>
+
+
+            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
+                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
+                </li>
+                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
+                </li>
+                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
+                </li>
+            </ul>
+
+
+        </div>
+
+    </div>
+</nav>
+
+        </header>
+
+        <div id="content" class="row">
+
+            <section>
+
+	<div id="blogcontent">
+
+
+		<article id="blog-article" class="post col-md-12 clearfix">
+
+			<header>
+				<h1>WireGuard Docker Configuration Drift</h1>
+			</header>
+
+			
+
+
+
+<div class="post-meta">
+    <time datetime="2026-08-01T00:00:00+05:30">August 01, 2026</time>
+    <span class="reading-time">4 min read</span>
+</div>
+
+
+			<hr style="margin-top:0px" />
+
+
+			<blockquote>
+  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
+</blockquote>
+
+<h1 id="wireguard-docker-configuration-drift-a-debugging-journey">WireGuard Docker Configuration Drift: A Debugging Journey</h1>
+
+<p>Recently, I encountered a frustrating networking issue with my containerized WireGuard VPN setup. My Android client could connect to the WireGuard server running in Docker, but couldn’t access the internet or any services. What started as a simple connectivity problem turned into a lesson about configuration drift and the importance of understanding how different network layers interact.</p>
+
+<h2 id="the-setup">The Setup</h2>
+
+<p>I was running <a href="https://github.com/wg-easy/wg-easy">WG-Easy</a> in Docker Compose with a custom network configuration:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">wg-easy</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/wg-easy/wg-easy:15</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">wg-easy</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="na">wg</span><span class="pi">:</span>
+        <span class="na">ipv4_address</span><span class="pi">:</span> <span class="s">10.42.42.42</span>  <span class="c1"># Static IP in custom network</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">etc_wireguard:/etc/wireguard</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">51820:51820/udp"</span>
+    <span class="na">cap_add</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">NET_ADMIN</span>
+      <span class="pi">-</span> <span class="s">SYS_MODULE</span>
+    <span class="c1"># ... other config</span>
+
+<span class="na">networks</span><span class="pi">:</span>
+  <span class="na">wg</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+    <span class="na">ipam</span><span class="pi">:</span>
+      <span class="na">config</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">subnet</span><span class="pi">:</span> <span class="s">10.42.42.0/24</span>
+</code></pre></div></div>
+
+<p>The container was running fine, WireGuard clients could connect, but they couldn’t reach the internet.</p>
+
+<h2 id="the-investigation">The Investigation</h2>
+
+<h3 id="network-traffic-analysis">Network Traffic Analysis</h3>
+
+<p>Using <code class="language-plaintext highlighter-rouge">tcpdump</code>, I captured the network traffic and noticed something interesting:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>07:59:26.193202 IP RT-AC68U-4740.local.35734 &gt; zk.docker.dev.https: Flags [P.]
+08:05:27.821764 IP6 fdcc:ad94:bacf:61a4::cafe:2.39226 &gt; whatsapp-chatd-edge6-shv-02-iad3.facebook.com.https
+08:05:28.076785 IP 10.42.42.2.38844 &gt; whatsapp-chatd-edge-shv-02-mia3.facebook.com.https
+</code></pre></div></div>
+
+<p>The traffic showed:</p>
+<ul>
+  <li>Container was at <code class="language-plaintext highlighter-rouge">10.42.42.42</code> (Docker network IP)</li>
+  <li>Android client was assigned <code class="language-plaintext highlighter-rouge">10.42.42.2</code> (VPN client IP)</li>
+  <li>WireGuard handshakes were successful</li>
+</ul>
+
+<p>Everything looked normal from a network perspective, so I dug deeper.</p>
+
+<h3 id="configuration-inspection">Configuration Inspection</h3>
+
+<p>Inside the WireGuard container, I found the first clue:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> wg-easy wg show
+interface: wg0
+  public key: gi/bShTv06aiw1x8NT48x93oS5gx9drWdUEUtJMUpQ0<span class="o">=</span>
+  listening port: 51820
+  peer: <span class="nv">zEEv0Ig9h5zjHGYZMai06DSNnCsqgz7tD4oJK7JL0y0</span><span class="o">=</span>
+    allowed ips: 10.42.42.2/32
+    latest handshake: 1 minute, 48 seconds ago
+    transfer: 469.18 KiB received, 4.66 KiB sent
+</code></pre></div></div>
+
+<p>But then I checked the actual WireGuard interface:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> wg-easy ip addr show wg0
+4: wg0: &lt;POINTOPOINT,NOARP,UP,LOWER_UP&gt; mtu 1420 qdisc noqueue state UNKNOWN
+    inet 10.8.0.1/24 scope global wg0  <span class="c"># ← This was the problem!</span>
+</code></pre></div></div>
+
+<h3 id="the-root-cause">The Root Cause</h3>
+
+<p>Here’s what was happening:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Expected IP</th>
+      <th>Actual IP</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Docker Container</td>
+      <td>10.42.42.42</td>
+      <td>10.42.42.42</td>
+      <td>✅ Correct</td>
+    </tr>
+    <tr>
+      <td>WireGuard Server</td>
+      <td>10.42.42.1</td>
+      <td><strong>10.8.0.1</strong></td>
+      <td>❌ Wrong</td>
+    </tr>
+    <tr>
+      <td>WireGuard Client</td>
+      <td>10.42.42.2</td>
+      <td><strong>10.8.0.2</strong></td>
+      <td>❌ Wrong</td>
+    </tr>
+    <tr>
+      <td>NAT Rules</td>
+      <td>10.42.42.0/24</td>
+      <td><strong>10.8.0.0/24</strong></td>
+      <td>❌ Wrong</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The WireGuard configuration file showed one thing, but the running interface used completely different IP ranges!</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> wg-easy <span class="nb">cat</span> /etc/wireguard/wg0.conf
+<span class="o">[</span>Interface]
+Address <span class="o">=</span> 10.42.42.1/24  <span class="c"># Config file said this</span>
+<span class="c"># But actual interface was 10.8.0.1/24</span>
+</code></pre></div></div>
+
+<h3 id="why-this-happened">Why This Happened</h3>
+
+<p><strong>WG-Easy’s Auto-Configuration Behavior:</strong></p>
+<ol>
+  <li>WG-Easy automatically generates WireGuard configs on first startup</li>
+  <li>It uses its own default VPN subnet (<code class="language-plaintext highlighter-rouge">10.8.0.0/24</code>) regardless of Docker network settings</li>
+  <li>The Docker network (<code class="language-plaintext highlighter-rouge">10.42.42.0/24</code>) is for container-to-container communication</li>
+  <li>The WireGuard network (<code class="language-plaintext highlighter-rouge">10.8.0.0/24</code>) is for VPN clients connecting to the server</li>
+  <li>These networks are intentionally separate in WG-Easy’s design</li>
+</ol>
+
+<p><strong>Configuration Drift:</strong>
+The config file (<code class="language-plaintext highlighter-rouge">/etc/wireguard/wg0.conf</code>) contained stale or template data that didn’t match the actual running configuration. This can happen when:</p>
+<ul>
+  <li>Container versions change behavior between updates</li>
+  <li>Manual configuration edits conflict with auto-generated settings</li>
+  <li>Persistent volumes retain old configs when you expect them to refresh</li>
+</ul>
+
+<h3 id="the-debugging-process">The Debugging Process</h3>
+
+<ol>
+  <li><strong>IP Forwarding</strong>: ✅ Enabled (<code class="language-plaintext highlighter-rouge">/proc/sys/net/ipv4/ip_forward</code> = 1)</li>
+  <li><strong>Container Internet Access</strong>: ✅ Working (<code class="language-plaintext highlighter-rouge">ping 8.8.8.8</code> succeeded)</li>
+  <li><strong>WireGuard Interface</strong>: ❌ Wrong IP range</li>
+  <li><strong>NAT Rules</strong>: ❌ Only masquerading <code class="language-plaintext highlighter-rouge">10.8.0.0/24</code>, not <code class="language-plaintext highlighter-rouge">10.42.42.0/24</code></li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>docker <span class="nb">exec</span> <span class="nt">-it</span> wg-easy iptables <span class="nt">-t</span> nat <span class="nt">-L</span> POSTROUTING <span class="nt">-n</span>
+Chain POSTROUTING <span class="o">(</span>policy ACCEPT<span class="o">)</span>
+target     prot opt <span class="nb">source               </span>destination         
+MASQUERADE  all  <span class="nt">--</span>  10.8.0.0/24          0.0.0.0/0  <span class="c"># Only 10.8.x traffic!</span>
+</code></pre></div></div>
+
+<h2 id="the-solution">The Solution</h2>
+
+<p>Rather than trying to manually fix the configuration drift, I chose to just re-create the wg-easy container</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Complete teardown</span>
+docker-compose down <span class="nt">-v</span>
+
+<span class="c"># Remove the persistent volume (destroys all WireGuard configs)</span>
+docker volume <span class="nb">rm</span> <span class="si">$(</span>docker volume <span class="nb">ls</span> <span class="nt">-q</span> | <span class="nb">grep </span>etc_wireguard<span class="si">)</span>
+
+<span class="c"># Recreate everything</span>
+docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<h2 id="key-learnings">Key Learnings</h2>
+
+<h3 id="1-understand-network-layer-separation">1. <strong>Understand Network Layer Separation</strong></h3>
+<p>Docker networks and VPN tunnels serve different purposes:</p>
+<ul>
+  <li><strong>Docker network</strong>: Container-to-container communication</li>
+  <li><strong>VPN network</strong>: Client-to-server tunnel communication</li>
+</ul>
+
+<p>Don’t assume they should use the same IP ranges.</p>
+
+<hr />
+
+<p><em>Have you encountered similar Docker networking issues? Share your debugging stories in the comments below!</em></p>
+
+			<footer>
+				<div class="blocked tags">
+					<p>
+						
+						<a href="/blog/tags/wireguard">Wireguard</a> |
+						
+						<a href="/blog/tags/docker">Docker</a> |
+						
+					</p>
+				</div>
+			</footer>
+
+			<br />
+
+
+
+			<div class="hr"></div>
+
+		</article>
+
+		<div class="c">&nbsp;</div>
+
+	</div>
+
+
+</section>
+
+<div class="c">&nbsp;</div>
+
+        </div>
+
+
+        <footer id="footer" class="row">
+
+            <p id="copyright">
+                &copy; 2011-2026 Madhur Ahuja
+            </p>
+            <p id="poweredby" class="visible-lg visible-md">
+                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
+            </p>
+
+            <div class="c">&nbsp;</div>
+
+
+        </footer>
+
+
+    </div>
+
+    <script src="/files/js/main.js"></script> 
+    
+
+    <!-- serviceWorker.html -->
+    <script>
+        if ('serviceWorker' in navigator) {
+
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+        }
+
+// if ('serviceWorker' in navigator) {
+//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
+//         if (!reg.installing) return;
+//         console.log("[*] ServiceWorker is installing...");
+
+//         var worker = reg.installing;
+//         worker.addEventListener('statechange', function() {
+//             if (worker.state == 'redundant') {
+//                 console.log('[*] Install failed');
+//             }
+//             if (worker.state == 'installed') {
+//                 console.log('[*] Install successful!');
+//             }
+//         });
+//     });
+// }
+
+    </script>
+
+</body>
+
+</html>

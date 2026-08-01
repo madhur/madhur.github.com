@@ -3,13 +3,211 @@
  
  <title>Coding it my way</title>
   <link href="https://madhur.co.in/blog/"/>
- <updated>2026-07-01T06:45:45+05:30</updated>
+ <updated>2026-08-01T06:06:39+05:30</updated>
  <id>https://madhur.co.in/blog/</id>
  <author>
    <name>Madhur Ahuja</name>
    <email>ahuja.madhur@gmail.com</email>
  </author>
  
+ 
+ <entry>
+   <title>WireGuard Docker Configuration Drift</title>
+   <link href="https://madhur.co.in/blog/2026/08/01/wireguard-docker-issue.html"/>
+   <updated>2026-08-01T00:00:00+05:30</updated>
+   <id>id:/blog/2026/08/01/wireguard-docker-issue</id>
+   <content type="html">&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Disclaimer&lt;/strong&gt;: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;wireguard-docker-configuration-drift-a-debugging-journey&quot;&gt;WireGuard Docker Configuration Drift: A Debugging Journey&lt;/h1&gt;
+
+&lt;p&gt;Recently, I encountered a frustrating networking issue with my containerized WireGuard VPN setup. My Android client could connect to the WireGuard server running in Docker, but couldn’t access the internet or any services. What started as a simple connectivity problem turned into a lesson about configuration drift and the importance of understanding how different network layers interact.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-setup&quot;&gt;The Setup&lt;/h2&gt;
+
+&lt;p&gt;I was running &lt;a href=&quot;https://github.com/wg-easy/wg-easy&quot;&gt;WG-Easy&lt;/a&gt; in Docker Compose with a custom network configuration:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;wg-easy&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ghcr.io/wg-easy/wg-easy:15&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;container_name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;wg-easy&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;ipv4_address&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10.42.42.42&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# Static IP in custom network&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;etc_wireguard:/etc/wireguard&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;51820:51820/udp&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;cap_add&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;NET_ADMIN&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;SYS_MODULE&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;# ... other config&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;wg&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;ipam&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;subnet&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;10.42.42.0/24&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The container was running fine, WireGuard clients could connect, but they couldn’t reach the internet.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-investigation&quot;&gt;The Investigation&lt;/h2&gt;
+
+&lt;h3 id=&quot;network-traffic-analysis&quot;&gt;Network Traffic Analysis&lt;/h3&gt;
+
+&lt;p&gt;Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcpdump&lt;/code&gt;, I captured the network traffic and noticed something interesting:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;07:59:26.193202 IP RT-AC68U-4740.local.35734 &amp;gt; zk.docker.dev.https: Flags [P.]
+08:05:27.821764 IP6 fdcc:ad94:bacf:61a4::cafe:2.39226 &amp;gt; whatsapp-chatd-edge6-shv-02-iad3.facebook.com.https
+08:05:28.076785 IP 10.42.42.2.38844 &amp;gt; whatsapp-chatd-edge-shv-02-mia3.facebook.com.https
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The traffic showed:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Container was at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.42&lt;/code&gt; (Docker network IP)&lt;/li&gt;
+  &lt;li&gt;Android client was assigned &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.2&lt;/code&gt; (VPN client IP)&lt;/li&gt;
+  &lt;li&gt;WireGuard handshakes were successful&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Everything looked normal from a network perspective, so I dug deeper.&lt;/p&gt;
+
+&lt;h3 id=&quot;configuration-inspection&quot;&gt;Configuration Inspection&lt;/h3&gt;
+
+&lt;p&gt;Inside the WireGuard container, I found the first clue:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; wg-easy wg show
+interface: wg0
+  public key: gi/bShTv06aiw1x8NT48x93oS5gx9drWdUEUtJMUpQ0&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+  listening port: 51820
+  peer: &lt;span class=&quot;nv&quot;&gt;zEEv0Ig9h5zjHGYZMai06DSNnCsqgz7tD4oJK7JL0y0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+    allowed ips: 10.42.42.2/32
+    latest handshake: 1 minute, 48 seconds ago
+    transfer: 469.18 KiB received, 4.66 KiB sent
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;But then I checked the actual WireGuard interface:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; wg-easy ip addr show wg0
+4: wg0: &amp;lt;POINTOPOINT,NOARP,UP,LOWER_UP&amp;gt; mtu 1420 qdisc noqueue state UNKNOWN
+    inet 10.8.0.1/24 scope global wg0  &lt;span class=&quot;c&quot;&gt;# ← This was the problem!&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;the-root-cause&quot;&gt;The Root Cause&lt;/h3&gt;
+
+&lt;p&gt;Here’s what was happening:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Component&lt;/th&gt;
+      &lt;th&gt;Expected IP&lt;/th&gt;
+      &lt;th&gt;Actual IP&lt;/th&gt;
+      &lt;th&gt;Status&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Docker Container&lt;/td&gt;
+      &lt;td&gt;10.42.42.42&lt;/td&gt;
+      &lt;td&gt;10.42.42.42&lt;/td&gt;
+      &lt;td&gt;✅ Correct&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;WireGuard Server&lt;/td&gt;
+      &lt;td&gt;10.42.42.1&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;10.8.0.1&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;❌ Wrong&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;WireGuard Client&lt;/td&gt;
+      &lt;td&gt;10.42.42.2&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;10.8.0.2&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;❌ Wrong&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;NAT Rules&lt;/td&gt;
+      &lt;td&gt;10.42.42.0/24&lt;/td&gt;
+      &lt;td&gt;&lt;strong&gt;10.8.0.0/24&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;❌ Wrong&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The WireGuard configuration file showed one thing, but the running interface used completely different IP ranges!&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; wg-easy &lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /etc/wireguard/wg0.conf
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Interface]
+Address &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 10.42.42.1/24  &lt;span class=&quot;c&quot;&gt;# Config file said this&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# But actual interface was 10.8.0.1/24&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;why-this-happened&quot;&gt;Why This Happened&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;WG-Easy’s Auto-Configuration Behavior:&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;WG-Easy automatically generates WireGuard configs on first startup&lt;/li&gt;
+  &lt;li&gt;It uses its own default VPN subnet (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.8.0.0/24&lt;/code&gt;) regardless of Docker network settings&lt;/li&gt;
+  &lt;li&gt;The Docker network (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.0/24&lt;/code&gt;) is for container-to-container communication&lt;/li&gt;
+  &lt;li&gt;The WireGuard network (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.8.0.0/24&lt;/code&gt;) is for VPN clients connecting to the server&lt;/li&gt;
+  &lt;li&gt;These networks are intentionally separate in WG-Easy’s design&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Configuration Drift:&lt;/strong&gt;
+The config file (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/wireguard/wg0.conf&lt;/code&gt;) contained stale or template data that didn’t match the actual running configuration. This can happen when:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Container versions change behavior between updates&lt;/li&gt;
+  &lt;li&gt;Manual configuration edits conflict with auto-generated settings&lt;/li&gt;
+  &lt;li&gt;Persistent volumes retain old configs when you expect them to refresh&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;the-debugging-process&quot;&gt;The Debugging Process&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;IP Forwarding&lt;/strong&gt;: ✅ Enabled (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/proc/sys/net/ipv4/ip_forward&lt;/code&gt; = 1)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Container Internet Access&lt;/strong&gt;: ✅ Working (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ping 8.8.8.8&lt;/code&gt; succeeded)&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;WireGuard Interface&lt;/strong&gt;: ❌ Wrong IP range&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;NAT Rules&lt;/strong&gt;: ❌ Only masquerading &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.8.0.0/24&lt;/code&gt;, not &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.42.42.0/24&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; wg-easy iptables &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; nat &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; POSTROUTING &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt;
+Chain POSTROUTING &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;policy ACCEPT&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+target     prot opt &lt;span class=&quot;nb&quot;&gt;source               &lt;/span&gt;destination         
+MASQUERADE  all  &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt;  10.8.0.0/24          0.0.0.0/0  &lt;span class=&quot;c&quot;&gt;# Only 10.8.x traffic!&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The Solution&lt;/h2&gt;
+
+&lt;p&gt;Rather than trying to manually fix the configuration drift, I chose to just re-create the wg-easy container&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Complete teardown&lt;/span&gt;
+docker-compose down &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Remove the persistent volume (destroys all WireGuard configs)&lt;/span&gt;
+docker volume &lt;span class=&quot;nb&quot;&gt;rm&lt;/span&gt; &lt;span class=&quot;si&quot;&gt;$(&lt;/span&gt;docker volume &lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-q&lt;/span&gt; | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;etc_wireguard&lt;span class=&quot;si&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Recreate everything&lt;/span&gt;
+docker-compose up &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;key-learnings&quot;&gt;Key Learnings&lt;/h2&gt;
+
+&lt;h3 id=&quot;1-understand-network-layer-separation&quot;&gt;1. &lt;strong&gt;Understand Network Layer Separation&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Docker networks and VPN tunnels serve different purposes:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Docker network&lt;/strong&gt;: Container-to-container communication&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;VPN network&lt;/strong&gt;: Client-to-server tunnel communication&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Don’t assume they should use the same IP ranges.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;em&gt;Have you encountered similar Docker networking issues? Share your debugging stories in the comments below!&lt;/em&gt;&lt;/p&gt;
+</content>
+ </entry>
  
  <entry>
    <title>Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation</title>
@@ -4292,78 +4490,6 @@ ldd /usr/lib/libopencv_imgproc.so.412
 &lt;h3 id=&quot;references&quot;&gt;References&lt;/h3&gt;
 &lt;p&gt;https://medium.com/inspiredbrilliance/what-are-database-locks-1aff9117c290&lt;/p&gt;
 
-</content>
- </entry>
- 
- <entry>
-   <title>Run elasticsearch in docker</title>
-   <link href="https://madhur.co.in/blog/2025/06/01/run-elasticsearch-docker.html"/>
-   <updated>2025-06-01T00:00:00+05:30</updated>
-   <id>id:/blog/2025/06/01/run-elasticsearch-docker</id>
-   <content type="html">&lt;p&gt;If you’re running Elasticsearch in Docker locally, you might encounter a frustrating issue where your cluster suddenly goes into a red (unhealthy) state, even though everything seems fine. This often happens when your local disk usage exceeds 90%.&lt;/p&gt;
-
-&lt;p&gt;I tend to mount the elasticsearch data directory into my host file system to preserve data.&lt;/p&gt;
-
-&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;3.9&quot;&lt;/span&gt;
-&lt;span class=&quot;na&quot;&gt;services&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;elasticsearch&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elasticsearch:9.0.2&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;environment&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;discovery.type=single-node&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ES_JAVA_OPTS=-Xms1g -Xmx1g&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;xpack.security.enabled=false&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./es_data:/usr/share/elasticsearch/data&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;9200&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;published&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;9200&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;
-
-  &lt;span class=&quot;na&quot;&gt;kibana&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;kibana:9.0.2&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;ports&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5601&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;published&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;5601&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;depends_on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elasticsearch&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;      
-
-&lt;span class=&quot;na&quot;&gt;volumes&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;es_data&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;local&lt;/span&gt;
-
-&lt;span class=&quot;na&quot;&gt;networks&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-  &lt;span class=&quot;na&quot;&gt;elastic&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;elastic&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;driver&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;bridge&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;h3 id=&quot;the-problem-disk-space-watermarks&quot;&gt;The Problem: Disk Space Watermarks&lt;/h3&gt;
-
-&lt;p&gt;When your local filesystem usage exceeds 90%, Elasticsearch triggers its high watermark threshold, causing the cluster to enter a red state. This is particularly common on development machines where disk space is often limited.&lt;/p&gt;
-
-&lt;h3 id=&quot;solution-adjusting-watermark-thresholds&quot;&gt;Solution: Adjusting Watermark Thresholds&lt;/h3&gt;
-
-&lt;p&gt;If you are facing the same issue, to resolve this, run this curl command which adjusts the disk space percentage at which elasticsearch goes into unhealthy state.&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; PUT &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/_cluster/settings&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Content-Type: application/json'&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-  &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{
-    &quot;persistent&quot;: {
-      &quot;cluster.routing.allocation.disk.watermark.low&quot;: &quot;95%&quot;,
-      &quot;cluster.routing.allocation.disk.watermark.high&quot;: &quot;97%&quot;,
-      &quot;cluster.routing.allocation.disk.watermark.flood_stage&quot;: &quot;98%&quot;
-    }
-  }'&lt;/span&gt;
-
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Check your cluster health:&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;s2&quot;&gt;&quot;localhost:9200/_cluster/health?pretty&quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 </content>
  </entry>
  
