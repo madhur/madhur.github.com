@@ -917,7 +917,7 @@ for section in code papers work info donate contact; do
     echo "title: $title"
     echo "---"
     echo
-    sed '1,/^---$/d; 1,/^---$/d' "$section/index.markdown"
+    awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "$section/index.markdown"
   } > "hugo/content/$section/_index.md"
 done
 ```
@@ -933,7 +933,7 @@ for f in hddusage vocabbuilder weather; do
     echo "title: $title"
     echo "---"
     echo
-    sed '1,/^---$/d; 1,/^---$/d' "privacy/$f.md"
+    awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "privacy/$f.md"
   } > "hugo/content/privacy/$f.md"
 done
 ```
@@ -959,15 +959,19 @@ Expected: exits 0.
 
 ```bash
 for section in code papers work info donate contact privacy/hddusage privacy/vocabbuilder privacy/weather; do
-  test -f "hugo/public/$section/index.html" && echo "OK: $section" || echo "MISSING: $section"
+  bytes=$(wc -c < "hugo/public/$section/index.html" 2>/dev/null || echo 0)
+  if [ "$bytes" -gt 500 ]; then echo "OK: $section ($bytes bytes)"; else echo "MISSING OR EMPTY: $section ($bytes bytes)"; fi
 done
 test -f hugo/public/leetcodeformat/data.json && echo "OK: leetcodeformat/data.json"
 test -f hugo/public/leetcode-format.html && echo "OK: leetcode-format.html"
 test -f hugo/public/silverdemo/Index.html && echo "OK: silverdemo"
 ```
 
-Expected: `OK` printed for all nine sections plus the three static-asset checks, no `MISSING`
-lines.
+Expected: `OK` printed for all nine sections plus the three static-asset checks, no `MISSING OR
+EMPTY` lines. The byte-count threshold matters, not just file existence — a file-existence-only
+check would pass even if content extraction silently produced an empty body (PaperMod still
+renders the page shell — header, nav, footer — around zero content, so `test -f` alone proves
+nothing about whether the actual page content survived the migration).
 
 - [ ] **Step 6: Commit**
 
