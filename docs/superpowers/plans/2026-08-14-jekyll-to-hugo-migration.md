@@ -1060,12 +1060,15 @@ block the rest of the migration.
 
 **Files:**
 - Move: everything under `hugo/` to the repo root
+- Move: `images/` (31MB, site-wide post-embedded images, referenced by 48 migrated posts —
+  never wired into Hugo's static tree by any prior task) to `static/images/`
 - Modify: `.gitignore` (update `hugo/public/`/`hugo/.hugo_build.lock` to root-level
   `public/`/`.hugo_build.lock`, since the build output path itself moves in this task)
 - Delete: `_layouts/`, `_includes/`, `_plugins/`, `_posts/`, `_data/`, `_scripts/`,
   `.jekyll-cache/`, `Gulpfile.js`, `Gemfile`, `Gemfile.lock`, `node_modules/`, `files/`,
   `blog/`, `projects/`, `code/`, `papers/`, `work/`, `info/`, `donate/`, `contact/`,
-  `privacy/`, `leetcodeformat/`, `leetcode-format.html`, `silverdemo/`, `index.md`, `404.md`,
+  `privacy/`, `leetcodeformat/`, `leetcode-format.html`, `silverdemo/`, `results/`,
+  `index.md`, `404.md`,
   `.htaccess`, `serviceWorker.js`, `atom.xml`, `robots.txt`, `ph_postings_meta.json`,
   `_config.yml`, `package.json`, `package-lock.json`, `.nvmrc`, `.ruby-version`, `CNAME`
   (the root `CNAME` is superseded by `hugo/static/CNAME` from Task 2, which this task moves to
@@ -1108,6 +1111,20 @@ git mv hugo/archetypes ./archetypes 2>/dev/null || true
 rmdir hugo
 ```
 
+- [ ] **Step 3a: Wire the site-wide `images/` directory into Hugo's static tree**
+
+No task in this plan ever migrated the root-level `images/` directory (31MB of post-embedded
+`.png`/`.jpg`/`.svg` files, referenced via `/images/...` paths). 48 of the 278 migrated posts
+reference these paths (114 distinct references) — left unaddressed, every one of those images
+would 404 on the live site, since Hugo only serves files under `static/`, `assets/`, or content
+bundles, and a root-level `images/` sitting outside `static/` is invisible to the build. Fix:
+
+```bash
+git mv images static/images
+```
+
+Verify: `test -d static/images && echo "OK: images now under static/"`.
+
 - [ ] **Step 4: Delete retired Jekyll/Gulp/Ruby artifacts**
 
 ```bash
@@ -1115,8 +1132,12 @@ git rm -r _layouts _includes _plugins _posts _data _scripts .jekyll-cache \
   Gulpfile.js Gemfile Gemfile.lock node_modules files blog projects code papers work info \
   donate contact privacy leetcodeformat leetcode-format.html silverdemo index.md 404.md \
   .htaccess serviceWorker.js atom.xml robots.txt ph_postings_meta.json _config.yml \
-  package.json package-lock.json .nvmrc .ruby-version CNAME
+  package.json package-lock.json .nvmrc .ruby-version CNAME results
 ```
+
+(`results/` is the dead Google Custom Search widget page — the design spec explicitly calls for
+dropping it; nothing in the migrated site links to `/results/`, confirmed via
+`grep -rl '/results' content/ layouts/ themes/PaperMod/layouts/` returning no matches.)
 
 - [ ] **Step 5: Update `.gitmodules` and re-verify the submodule path**
 
@@ -1153,6 +1174,15 @@ Run: `hugo server -D &` then `curl -s http://localhost:1313/ | grep -o "Hi, I'm 
 `kill %1`
 Expected: prints the homepage greeting, confirming the root-level site serves correctly.
 
+Verify Step 3a's image fix actually resolves in the built output — pick any post that
+references `/images/...` and confirm the referenced file exists in `public/`:
+```bash
+sample=$(grep -l '/images/' content/posts/*.md | head -1)
+path=$(grep -oE '/images/[^") ]+' "$sample" | head -1)
+test -f "public${path}" && echo "OK: $path resolves" || echo "MISSING: $path"
+```
+Expected: `OK: ... resolves`.
+
 Confirm the new `.gitignore` entries actually take effect before committing:
 ```bash
 git check-ignore -q public && git check-ignore -q .hugo_build.lock && echo "BOTH IGNORED"
@@ -1167,6 +1197,13 @@ git add -A
 git status --short | grep -E '^\?\?|^A.*public/|^A.*hugo_build' && echo "WARNING: build artifacts staged, stop and fix .gitignore" || echo "clean, safe to commit"
 git commit -m "chore: promote Hugo site to repo root, retire Jekyll/Gulp artifacts"
 ```
+
+**Deliberately left alone, not part of this migration's scope:** `assets/` (root-level, contains
+unrelated movie-covers/star-rating icons — unreferenced by any migrated content, likely leftover
+from an unrelated old experiment) and `hdd-usage.dmg` (65MB, unreferenced by any migrated
+content or data file). Neither breaks anything by being left in place, and deleting a 65MB
+binary or an unrelated assets folder isn't this migration's call to make unilaterally — flag
+both to the user for their own judgment on whether to keep or remove post-migration.
 
 ---
 
