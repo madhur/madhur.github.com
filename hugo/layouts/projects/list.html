@@ -1,0 +1,26 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ $detailPages := where .Site.RegularPages "Section" "projects" }}
+{{ range site.Data.projects }}
+  {{ if .publish }}
+  <h2><i class="{{ .icon }}"></i> {{ .name }}</h2>
+  <ul>
+    {{ range .projects }}
+      {{ if .publish }}
+        {{ $slug := printf "%s" (.file | urlize) }}
+        {{ $match := where $detailPages "File.BaseFileName" $slug }}
+        <li>
+          {{ if $match }}
+            <a href="{{ (index $match 0).Permalink }}">{{ .project }}</a>
+          {{ else }}
+            <strong>{{ .project }}</strong>
+          {{ end }}
+          — {{ .description }}
+          {{ with .languages }}<em>({{ delimit . ", " }})</em>{{ end }}
+        </li>
+      {{ end }}
+    {{ end }}
+  </ul>
+  {{ end }}
+{{ end }}
+{{ end }}

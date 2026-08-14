@@ -1,0 +1,14 @@
+---
+title: My Site WebPart Property Changer
+img:
+  - >-
+    https://raw.githubusercontent.com/madhur/SPProjects/gh-pages/screenshots/screenshot.jpg
+---
+
+{% comment %} 
+<!--{% if site.generate_projects == true %}
+{% octokit_contents  SPProjects;MySiteWebPartsPropertyChanger/Readme.markdown%}
+{% endif %}-->
+{% endcomment %}
+
+A simple tool to change webpart property in MySite for all users automatically without going manually and change it one by one for each user.
