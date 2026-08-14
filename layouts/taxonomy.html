@@ -12,12 +12,13 @@
 {{- end }}
 
 {{/* This is Hugo's generic kind=taxonomy template, shared by both the tags and
-     categories taxonomies. Gate the tag cloud to the tags taxonomy only (.Type ==
-     "tags") so it doesn't leak onto /categories/. */}}
+     categories taxonomies. /tags/ gets the weighted tag cloud ported from the
+     old Jekyll site's _plugins/tag_cloud.rb; every other taxonomy falls back to
+     PaperMod's default pill list. Exactly one of the two renders — showing both
+     duplicated all 185 tags on the page. */}}
 {{ if eq .Type "tags" }}
 {{ .RenderString "{{< tagcloud >}}" }}
-{{ end }}
-
+{{ else }}
 <ul class="terms-tags">
     {{- $type := .Type }}
         {{- range $key, $value := .Data.Terms.Alphabetical }}
@@ -30,5 +31,6 @@
         {{- end }}
     {{- end }}
 </ul>
+{{ end }}
 
 {{- end }}{{/* end main */ -}}
