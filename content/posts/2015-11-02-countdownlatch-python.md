@@ -1,4 +1,5 @@
 ---
+slug: "countdownlatch-python"
 title: CountDownLatch in Python using Condition Objects
 date: '2015-11-02'
 description: CountDownLatch in Python using Condition Objects

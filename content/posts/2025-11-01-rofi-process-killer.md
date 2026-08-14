@@ -1,4 +1,5 @@
 ---
+slug: "rofi-process-killer"
 title: Rofi Process Killer
 date: '2025-11-01'
 description: Rofi Process Killer

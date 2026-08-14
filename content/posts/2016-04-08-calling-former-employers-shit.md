@@ -1,4 +1,5 @@
 ---
+slug: "calling-former-employers-shit"
 title: On calling your former employers shit
 date: '2016-04-08'
 description: On calling your former employers shit

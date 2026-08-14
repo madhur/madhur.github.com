@@ -1,4 +1,5 @@
 ---
+slug: "ethereum-transaction-ganache"
 title: Execute a transaction in etherum using ganache
 date: '2022-03-20'
 description: Execute a transaction in etherum using ganache

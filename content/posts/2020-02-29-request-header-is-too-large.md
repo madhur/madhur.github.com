@@ -1,4 +1,5 @@
 ---
+slug: "request-header-is-too-large"
 title: 'Solving: Request header is too large'
 date: '2020-02-29'
 description: 'Solving: Request header is too large'

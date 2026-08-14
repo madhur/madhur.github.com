@@ -1,4 +1,5 @@
 ---
+slug: "hashmap-with-ttl"
 title: HashMap with TTL
 date: '2021-02-27'
 description: HashMap with TTL

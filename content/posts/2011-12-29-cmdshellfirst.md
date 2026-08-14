@@ -1,4 +1,5 @@
 ---
+slug: "cmdshellfirst"
 title: Windows command shell(cmd.exe) runs only first command
 date: '2011-12-29'
 description: Windows command shell(cmd.exe) runs only first command

@@ -1,4 +1,5 @@
 ---
+slug: "tools-madhur-co-in"
 title: tools.madhur.co.in - Developer Utilities for Data Transformation
 date: '2027-01-01'
 description: >-

@@ -1,4 +1,5 @@
 ---
+slug: "introducinghermesandroidapp"
 title: Introducing Hermes Android App
 date: '2013-11-05'
 description: Introducing Hermes Android App

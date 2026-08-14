@@ -1,4 +1,5 @@
 ---
+slug: "nginx-cache-authenticated-requests"
 title: Caching authenticated requests using NGINX
 date: '2016-07-31'
 description: Caching authenticated requests using NGINX

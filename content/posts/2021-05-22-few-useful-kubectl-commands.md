@@ -1,4 +1,5 @@
 ---
+slug: "few-useful-kubectl-commands"
 title: Few Useful Kubectl commands
 date: '2021-05-22'
 description: Few Useful Kubectl commands

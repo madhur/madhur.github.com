@@ -1,4 +1,5 @@
 ---
+slug: "resize-disks-proxmox"
 title: Resize disk in Proxmox VM
 date: '2024-11-01'
 description: Resize disk in Proxmox VM

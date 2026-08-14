@@ -1,4 +1,5 @@
 ---
+slug: "validation-data-provided-must-contain-class"
 title: The validation data provided must contain class
 date: '2020-06-28'
 description: The validation data provided must contain class

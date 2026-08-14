@@ -1,4 +1,5 @@
 ---
+slug: "protbufferoverflow"
 title: Protections against buffer overflow exploits in Linux
 date: '2011-08-06'
 description: Protections against buffer overflow exploits in Linux

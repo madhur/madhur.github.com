@@ -1,4 +1,5 @@
 ---
+slug: "pitfalls-while-using-lombok"
 title: Pitfalls while using Lombok with Java Development
 date: '2021-02-06'
 description: Pitfalls while using Lombok with Java Development

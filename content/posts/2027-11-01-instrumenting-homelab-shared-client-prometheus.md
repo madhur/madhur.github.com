@@ -1,4 +1,5 @@
 ---
+slug: "instrumenting-homelab-shared-client-prometheus"
 title: >-
   Instrumenting My Homelab: One Shared Client Library, Source-Attributed
   Prometheus Metrics

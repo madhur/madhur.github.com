@@ -1,4 +1,5 @@
 ---
+slug: "javascript-event-loop-call-stack"
 title: Javascript Event loop and call stack
 date: '2020-09-12'
 description: Javascript Event loop and call stack

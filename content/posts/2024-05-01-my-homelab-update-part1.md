@@ -1,4 +1,5 @@
 ---
+slug: "my-homelab-update-part1"
 title: My Homelab Update - Part I
 date: '2024-05-01'
 description: My Homelab Update - Part I

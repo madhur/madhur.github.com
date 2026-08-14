@@ -1,4 +1,5 @@
 ---
+slug: "hermesremoved"
 title: Hermes removed from Play Store by Google
 date: '2014-05-26'
 description: Hermes removed from Play Store by Google

@@ -1,4 +1,5 @@
 ---
+slug: "tailing-multiple-log-files"
 title: Tailing log files on multiple remote machines
 date: '2020-03-14'
 description: Tailing log files on multiple remote machines

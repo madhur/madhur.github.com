@@ -1,4 +1,5 @@
 ---
+slug: "homelab-oidc-fifteen-services"
 title: Five Decisions for an OIDC-First Homelab
 date: '2027-09-01'
 description: >-

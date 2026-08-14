@@ -1,4 +1,5 @@
 ---
+slug: "oop-javascript"
 title: Object Oriented Programming in JavaScript
 date: '2020-09-27'
 description: Object Oriented Programming in JavaScript

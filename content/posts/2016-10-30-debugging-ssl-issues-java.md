@@ -1,4 +1,5 @@
 ---
+slug: "debugging-ssl-issues-java"
 title: Debugging SSL Issues in Java
 date: '2016-10-30'
 description: Debugging SSL Issues in Java

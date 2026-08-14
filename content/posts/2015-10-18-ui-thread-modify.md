@@ -1,4 +1,5 @@
 ---
+slug: "ui-thread-modify"
 title: Why is only UI thread allowed to modify the UI
 date: '2015-10-18'
 description: Why is only UI thread allowed to modify the UI

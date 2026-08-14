@@ -1,4 +1,5 @@
 ---
+slug: "timing-function-calls"
 title: Timing function / task execution in Celery
 date: '2015-12-14'
 description: Timing function / task execution in Celery

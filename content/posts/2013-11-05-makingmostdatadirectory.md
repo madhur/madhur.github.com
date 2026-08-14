@@ -1,4 +1,5 @@
 ---
+slug: "makingmostdatadirectory"
 title: Making most out of _data directory in Jekyll
 date: '2013-11-05'
 description: Making most out of _data directory in Jekyll

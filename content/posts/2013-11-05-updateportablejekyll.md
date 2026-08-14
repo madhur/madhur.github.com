@@ -1,4 +1,5 @@
 ---
+slug: "updateportablejekyll"
 title: Portable Jekyll Updated to Jekyll v1.3.0
 date: '2013-11-05'
 description: Portable Jekyll Updated to Jekyll v1.3.0

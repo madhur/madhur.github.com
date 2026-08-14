@@ -1,4 +1,5 @@
 ---
+slug: "google-docs-spreadsheet"
 title: Read Google docs spreadsheet using Python
 date: '2016-05-13'
 description: Read Google docs spreadsheet using Python

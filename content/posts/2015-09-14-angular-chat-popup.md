@@ -1,4 +1,5 @@
 ---
+slug: "angular-chat-popup"
 title: Angular Chat popup
 date: '2015-09-14'
 description: Angular Chat popup

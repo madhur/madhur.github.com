@@ -1,4 +1,5 @@
 ---
+slug: "homelab-dashboard"
 title: Homelab Dashboard
 date: '2025-01-19'
 description: Homelab Dashboard

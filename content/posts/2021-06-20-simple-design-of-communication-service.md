@@ -1,4 +1,5 @@
 ---
+slug: "simple-design-of-communication-service"
 title: Simple Design of Communication Service
 date: '2021-06-20'
 description: Simple Design of Communication Service

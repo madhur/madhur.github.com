@@ -1,4 +1,5 @@
 ---
+slug: "decodewunderlistapi"
 title: Decoding the hidden Wunderlist API (Part I)
 date: '2014-05-02'
 description: Decoding the hidden Wunderlist API (Part I)

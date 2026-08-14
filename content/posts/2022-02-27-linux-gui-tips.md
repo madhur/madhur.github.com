@@ -1,4 +1,5 @@
 ---
+slug: "linux-gui-tips"
 title: Linux GUI Tips
 date: '2022-02-27'
 description: Linux GUI Tips

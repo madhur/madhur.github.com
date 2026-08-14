@@ -1,4 +1,5 @@
 ---
+slug: "aws-athena-user-defined-function-cloudfront-filter"
 title: >-
   User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena
   Logs

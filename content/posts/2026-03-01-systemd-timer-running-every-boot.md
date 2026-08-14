@@ -1,4 +1,5 @@
 ---
+slug: "systemd-timer-running-every-boot"
 title: Systemd timer running on every boot
 date: '2026-03-01'
 description: Systemd timer running on every boot

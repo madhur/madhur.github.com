@@ -1,4 +1,5 @@
 ---
+slug: "cryptography-deep-dive"
 title: Cryptography Deep Dive
 date: '2027-02-01'
 description: Cryptography Deep Dive

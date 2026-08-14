@@ -1,4 +1,5 @@
 ---
+slug: "emoji-bubbles-android"
 title: Emoji Keyboard and Chat bubbles in Android
 date: '2015-03-06'
 description: Emoji Keyboard and Chat bubbles in Android

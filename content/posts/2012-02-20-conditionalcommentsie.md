@@ -1,4 +1,5 @@
 ---
+slug: "conditionalcommentsie"
 title: Conditional comments in Internet Explorer
 date: '2012-02-20'
 description: Conditional comments in Internet Explorer

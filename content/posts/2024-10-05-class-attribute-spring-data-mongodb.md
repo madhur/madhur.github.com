@@ -1,4 +1,5 @@
 ---
+slug: "class-attribute-spring-data-mongodb"
 title: _class attribute in Spring data MongoDB_
 date: '2024-10-05'
 description: _class attribute in Spring data MongoDB

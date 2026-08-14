@@ -1,4 +1,5 @@
 ---
+slug: "same-origin-policy-and-cors"
 title: Same origin policy and CORS
 date: '2021-02-20'
 description: Same origin policy and CORS

@@ -1,4 +1,5 @@
 ---
+slug: "processing-huge-log-files"
 title: Process huge log files
 date: '2023-06-10'
 description: Process huge log files

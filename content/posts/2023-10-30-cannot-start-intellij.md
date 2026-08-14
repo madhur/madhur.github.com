@@ -1,4 +1,5 @@
 ---
+slug: "cannot-start-intellij"
 title: Intellij cannot launch because 'process 2' already running
 date: '2023-10-30'
 description: Intellij cannot launch because 'process 2' already running

@@ -1,4 +1,5 @@
 ---
+slug: "handling-special-characters-python"
 title: Handling special characters in Python 2
 date: '2016-04-25'
 description: Handling special characters in Python 2

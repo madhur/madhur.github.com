@@ -1,4 +1,5 @@
 ---
+slug: "asusrouter-exporter"
 title: >-
   asusrouter-exporter: Prometheus Metrics for an Asuswrt-Merlin Router, No Cloud
   API Required

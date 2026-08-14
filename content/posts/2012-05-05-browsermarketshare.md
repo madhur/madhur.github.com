@@ -1,4 +1,5 @@
 ---
+slug: "browsermarketshare"
 title: Browser Market Share of Internet Explorer
 date: '2012-05-05'
 description: Browser Market Share of Internet Explorer

@@ -1,4 +1,5 @@
 ---
+slug: "making-angular-play-nice-with-social-sharing"
 title: Making AngularJs play nice with Social sharing
 date: '2016-04-09'
 description: Making AngularJs play nice with Social sharing

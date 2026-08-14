@@ -1,4 +1,5 @@
 ---
+slug: "block-storage-vs-object-storage"
 title: Block Storage vs Object Storage
 date: '2026-04-01'
 description: Block Storage vs Object Storage

@@ -1,4 +1,5 @@
 ---
+slug: "gracefully-shutting-down-jvm-applications"
 title: Gracefully shutting down JVM applications
 date: '2022-07-10'
 description: Gracefully shutting down JVM applications

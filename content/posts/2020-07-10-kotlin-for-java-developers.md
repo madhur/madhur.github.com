@@ -1,4 +1,5 @@
 ---
+slug: "kotlin-for-java-developers"
 title: Kotlin for Java Developers
 date: '2020-07-10'
 description: Kotlin for Java Developers

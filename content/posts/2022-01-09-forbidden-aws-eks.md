@@ -1,4 +1,5 @@
 ---
+slug: "forbidden-aws-eks"
 title: Forbidden error while accessing AWS services on Kubernetes
 date: '2022-01-09'
 description: Forbidden error while accessing AWS services on Kubernetes

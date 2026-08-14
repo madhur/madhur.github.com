@@ -1,4 +1,5 @@
 ---
+slug: "things-learn-modern-web-development"
 title: Things to learn for Modern Web Development
 date: '2016-05-14'
 description: Things to learn for Modern Web Development

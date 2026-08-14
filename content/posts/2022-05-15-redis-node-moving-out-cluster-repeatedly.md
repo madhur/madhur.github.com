@@ -1,4 +1,5 @@
 ---
+slug: "redis-node-moving-out-cluster-repeatedly"
 title: Redis Node moving out of cluster repeatedly
 date: '2022-05-15'
 description: Redis Node moving out of cluster repeatedly

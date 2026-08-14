@@ -1,4 +1,5 @@
 ---
+slug: "customize-windows10-desktop"
 title: Customize Windows 10 Desktop
 date: '2020-05-30'
 description: Customize Windows 10 Desktop

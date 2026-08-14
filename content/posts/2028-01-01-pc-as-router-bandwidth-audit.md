@@ -1,4 +1,5 @@
 ---
+slug: "pc-as-router-bandwidth-audit"
 title: >-
   Turning My Homelab PC Into the House Router for a Day, Just to Find One
   Bandwidth Hog

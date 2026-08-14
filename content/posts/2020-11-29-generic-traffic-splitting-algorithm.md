@@ -1,4 +1,5 @@
 ---
+slug: "generic-traffic-splitting-algorithm"
 title: Generic traffic splitting algorithm
 date: '2020-11-29'
 description: Generic traffic splitting algorithm

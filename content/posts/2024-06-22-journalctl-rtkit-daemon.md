@@ -1,4 +1,5 @@
 ---
+slug: "journalctl-rtkit-daemon"
 title: Rtkit Daemon flooding journalctl logs
 date: '2024-06-22'
 description: Rtkit Daemon flooding journalctl logs

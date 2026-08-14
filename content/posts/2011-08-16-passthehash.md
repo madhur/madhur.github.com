@@ -1,4 +1,5 @@
 ---
+slug: "passthehash"
 title: Pass the Hash Exploitation on Windows
 date: '2011-08-16'
 description: Pass the Hash Exploitation on Windows

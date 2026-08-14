@@ -1,4 +1,5 @@
 ---
+slug: "migratingblogtojekyll"
 title: Migrating 3rd party blogs to Jekyll
 date: '2011-09-01'
 description: Migrating 3rd party blogs to Jekyll

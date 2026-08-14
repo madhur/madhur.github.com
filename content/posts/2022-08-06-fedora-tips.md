@@ -1,4 +1,5 @@
 ---
+slug: "fedora-tips"
 title: Fedora Tips & Tricks
 date: '2022-08-06'
 description: Fedora Tips & Tricks

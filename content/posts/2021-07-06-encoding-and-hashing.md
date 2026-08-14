@@ -1,4 +1,5 @@
 ---
+slug: "encoding-and-hashing"
 title: Encoding and Hashing
 date: '2021-07-06'
 description: Encoding and Hashing

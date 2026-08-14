@@ -1,4 +1,5 @@
 ---
+slug: "codeplexmovegit"
 title: Move your projects from TFS to Git in Codeplex
 date: '2012-03-27'
 description: Move your projects from TFS to Git in Codeplex

@@ -1,4 +1,5 @@
 ---
+slug: "topsecuritytools"
 title: My Top Network Security Tools
 date: '2011-06-22'
 description: My Top Network Security Tools

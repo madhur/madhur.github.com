@@ -1,4 +1,5 @@
 ---
+slug: "how-tinyurl-does-redirection"
 title: How tinyUrl Does redirection
 date: '2021-07-11'
 description: How tinyUrl Does redirection

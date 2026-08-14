@@ -1,4 +1,5 @@
 ---
+slug: "troubleshooting-shared-library-issues-linux"
 title: Troubleshooting Shared Library Issues on Linux
 date: '2025-08-01'
 description: Troubleshooting Shared Library Issues on Linux

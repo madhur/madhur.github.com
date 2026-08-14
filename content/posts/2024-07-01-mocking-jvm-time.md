@@ -1,4 +1,5 @@
 ---
+slug: "mocking-jvm-time"
 title: Faking time in JVM Process
 date: '2024-07-01'
 description: Faking time in JVM Process

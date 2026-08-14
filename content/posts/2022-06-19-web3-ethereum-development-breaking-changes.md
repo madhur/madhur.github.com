@@ -1,4 +1,5 @@
 ---
+slug: "web3-ethereum-development-breaking-changes"
 title: Web3 ethereum development breaking changes
 date: '2022-06-19'
 description: Web3 ethereum development breaking changes

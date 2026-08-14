@@ -1,4 +1,5 @@
 ---
+slug: "conventional-commits"
 title: Conventional Commits
 date: '2021-11-13'
 description: Conventional Commits

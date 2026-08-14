@@ -1,4 +1,5 @@
 ---
+slug: "javascript-design-patterns"
 title: Useful Javascript Design patterns
 date: '2014-12-15'
 description: Useful Javascript Design patterns

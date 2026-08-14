@@ -1,4 +1,5 @@
 ---
+slug: "hackrouterpassword"
 title: Hacking Router password using Hydra
 date: '2011-07-25'
 description: Hacking Router password using Hydra

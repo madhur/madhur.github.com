@@ -1,4 +1,5 @@
 ---
+slug: "migrating-from-sql-nosql"
 title: Migrating from SQL to No-SQL without downtime
 date: '2021-06-05'
 description: Migrating from SQL to No-SQL without downtime

@@ -1,4 +1,5 @@
 ---
+slug: "hmac-and-jwt"
 title: HMAC and JWT
 date: '2026-11-01'
 description: HMAC and JWT

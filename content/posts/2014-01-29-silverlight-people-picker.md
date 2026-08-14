@@ -1,4 +1,5 @@
 ---
+slug: "silverlight-people-picker"
 title: >-
   Writing Silverlight people picker control using SharePoint 2010 Client object
   model

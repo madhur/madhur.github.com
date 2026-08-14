@@ -1,4 +1,5 @@
 ---
+slug: "querying-alb-logs-aws-athena"
 title: Querying AWS ALB Logs using Athena
 date: '2021-11-06'
 description: Querying AWS ALB Logs using Athena

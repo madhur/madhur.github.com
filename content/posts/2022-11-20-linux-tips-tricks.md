@@ -1,4 +1,5 @@
 ---
+slug: "linux-tips-tricks"
 title: Linux Tips and Tricks
 date: '2022-11-20'
 description: Linux Tips and Tricks

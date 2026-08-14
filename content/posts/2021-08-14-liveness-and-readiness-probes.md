@@ -1,4 +1,5 @@
 ---
+slug: "liveness-and-readiness-probes"
 title: Liveness and Readiness Probes
 date: '2021-08-14'
 description: Liveness and Readiness Probes

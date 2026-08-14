@@ -1,4 +1,5 @@
 ---
+slug: "updatingcreatedby"
 title: Updating Created By field in SharePoint through Client Object Model
 date: '2014-04-09'
 description: Updating Created By field in SharePoint through Client Object Model

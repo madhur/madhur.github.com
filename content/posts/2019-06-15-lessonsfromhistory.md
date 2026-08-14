@@ -1,4 +1,5 @@
 ---
+slug: "lessonsfromhistory"
 title: Lessons from History
 date: '2019-06-15'
 description: Lessons from History

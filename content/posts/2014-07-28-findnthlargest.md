@@ -1,4 +1,5 @@
 ---
+slug: "findnthlargest"
 title: Find Nth largest element in an array
 date: '2014-07-28'
 description: Find Nth largest element in an array

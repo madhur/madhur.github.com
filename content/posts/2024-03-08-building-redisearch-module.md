@@ -1,4 +1,5 @@
 ---
+slug: "building-redisearch-module"
 title: Building RediSearch module in Amazon Linux 2
 date: '2024-03-08'
 description: Building RediSearch module in Amazon Linux 2

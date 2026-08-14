@@ -1,4 +1,5 @@
 ---
+slug: "proxy-cache-lock-nginx"
 title: Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx
 date: '2016-12-25'
 description: Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx

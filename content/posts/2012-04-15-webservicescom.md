@@ -1,4 +1,5 @@
 ---
+slug: "webservicescom"
 title: WebServices or Client Object Model
 date: '2012-04-15'
 description: WebServices or Client Object Model

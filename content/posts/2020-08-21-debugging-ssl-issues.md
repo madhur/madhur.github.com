@@ -1,4 +1,5 @@
 ---
+slug: "debugging-ssl-issues"
 title: Debugging SSL Issues
 date: '2020-08-21'
 description: Debugging SSL Issues

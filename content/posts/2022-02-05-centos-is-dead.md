@@ -1,4 +1,5 @@
 ---
+slug: "centos-is-dead"
 title: CentOS is dead
 date: '2022-02-05'
 description: CentOS is dead

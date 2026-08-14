@@ -1,4 +1,5 @@
 ---
+slug: "githubplatform"
 title: Github as a development platform
 date: '2011-06-11'
 description: Github as a development platform

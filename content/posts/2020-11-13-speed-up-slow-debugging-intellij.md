@@ -1,4 +1,5 @@
 ---
+slug: "speed-up-slow-debugging-intellij"
 title: Speed up debugging in IntelliJ
 date: '2020-11-13'
 description: Speed up debugging in IntelliJ

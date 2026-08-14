@@ -1,4 +1,5 @@
 ---
+slug: "kafka-consumer-multithreading"
 title: Kafka Consumer Multithreading
 date: '2020-08-30'
 description: Kafka Consumer Multithreading

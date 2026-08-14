@@ -1,4 +1,5 @@
 ---
+slug: "capacity-estimation"
 title: Capacity Estimation Examples
 date: '2021-06-27'
 description: Capacity Estimation Examples

@@ -1,4 +1,5 @@
 ---
+slug: "runningjekyllwindows"
 title: Running Jekyll on Windows
 date: '2011-09-01'
 description: Running Jekyll on Windows

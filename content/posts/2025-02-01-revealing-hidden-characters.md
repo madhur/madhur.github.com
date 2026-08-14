@@ -1,4 +1,5 @@
 ---
+slug: "revealing-hidden-characters"
 title: Revealing Hidden characters in a string
 date: '2025-02-01'
 description: Revealing Hidden characters in a string

@@ -1,4 +1,5 @@
 ---
+slug: "feedlyoauth2flow"
 title: Feedly OAuth 2.0 implementation using Scribe in Java
 date: '2014-04-17'
 description: Feedly OAuth 2.0 implementation using Scribe in Java

@@ -1,4 +1,5 @@
 ---
+slug: "adding-package-suppressions-checkstyle-spotbugs"
 title: Adding package suppressions in Checkstyle and Spotbugs
 date: '2020-03-28'
 description: Adding package suppressions in Checkstyle and Spotbugs

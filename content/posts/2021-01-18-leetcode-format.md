@@ -1,4 +1,5 @@
 ---
+slug: "leetcode-format"
 title: LeetCode Format
 date: '2021-01-18'
 description: LeetCode Format

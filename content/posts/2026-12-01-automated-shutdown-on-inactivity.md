@@ -1,4 +1,5 @@
 ---
+slug: "automated-shutdown-on-inactivity"
 title: Automated Shutdown on Computer Inactivity
 date: '2026-12-01'
 description: Automated Shutdown on Computer Inactivity

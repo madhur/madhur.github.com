@@ -1,4 +1,5 @@
 ---
+slug: "angular-caching"
 title: Caching http requests with Angular
 date: '2015-08-24'
 description: Caching http requests with Angular

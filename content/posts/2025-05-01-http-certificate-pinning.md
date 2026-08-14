@@ -1,4 +1,5 @@
 ---
+slug: "http-certificate-pinning"
 title: HTTP Certificate Pinning
 date: '2025-05-01'
 description: HTTP Certificate Pinning

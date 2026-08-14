@@ -1,4 +1,5 @@
 ---
+slug: "parallelism-ordering"
 title: Parallelism and ordering
 date: '2019-07-04'
 description: Parallelism and ordering

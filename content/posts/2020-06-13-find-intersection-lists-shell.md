@@ -1,4 +1,5 @@
 ---
+slug: "find-intersection-lists-shell"
 title: Finding intersection of two lists in shell
 date: '2020-06-13'
 description: Finding intersection of two lists in shell

@@ -1,4 +1,5 @@
 ---
+slug: "emoji-encoding-decoding"
 title: Encoding and Decoding Emoji for Cross platform
 date: '2014-12-26'
 description: Encoding and decoding Emoji for Cross platform

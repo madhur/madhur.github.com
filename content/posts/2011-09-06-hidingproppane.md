@@ -1,4 +1,5 @@
 ---
+slug: "hidingproppane"
 title: Removing the Default Editor Parts from SharePoint Web Parts
 date: '2011-09-06'
 description: Removing the Default Editor Parts from SharePoint Web Parts

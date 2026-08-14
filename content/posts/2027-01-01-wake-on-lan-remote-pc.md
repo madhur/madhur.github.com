@@ -1,4 +1,5 @@
 ---
+slug: "wake-on-lan-remote-pc"
 title: 'Wake on LAN: Remotely Power On Your PC'
 date: '2027-01-01'
 description: >-

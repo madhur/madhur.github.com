@@ -1,4 +1,5 @@
 ---
+slug: "automating-gmail-pdf-extraction-paperless"
 title: Automating Gmail PDF Extraction and Paperless NGX Integration
 date: '2025-12-29'
 description: >-

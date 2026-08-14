@@ -1,4 +1,5 @@
 ---
+slug: "handling-distributed-transactions-rollback"
 title: Handling Distributed transactions rollback
 date: '2021-05-16'
 description: Handling Distributed transactions rollback

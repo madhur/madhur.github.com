@@ -1,4 +1,5 @@
 ---
+slug: "create-couchbase-bucket-docker"
 title: Create a couchbase bucket during build of the container
 date: '2016-07-07'
 description: Create a couchbase bucket during build of the container

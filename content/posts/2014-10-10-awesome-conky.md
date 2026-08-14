@@ -1,4 +1,5 @@
 ---
+slug: "awesome-conky"
 title: An awesome conky configuration
 date: '2014-10-10'
 description: An awesome conky configuration

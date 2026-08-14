@@ -1,4 +1,5 @@
 ---
+slug: "running-spark-on-windows"
 title: Running Spark on Windows
 date: '2021-10-16'
 description: Running Spark on Windows

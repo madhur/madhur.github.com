@@ -1,4 +1,5 @@
 ---
+slug: "fedora-centos-tips-tricks"
 title: Fedora / CentOS Tips & Tricks - running it as Desktop OS
 date: '2022-01-23'
 description: Fedora / CentOS Tips & Tricks - running it as Desktop OS

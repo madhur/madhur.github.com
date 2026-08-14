@@ -1,4 +1,5 @@
 ---
+slug: "incrementally-route-traffic-newer-version-service"
 title: Incrementally routing traffic to newer version of service
 date: '2020-02-08'
 description: Incrementally routing traffic to newer version of service

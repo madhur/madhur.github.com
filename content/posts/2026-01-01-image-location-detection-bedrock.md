@@ -1,4 +1,5 @@
 ---
+slug: "image-location-detection-bedrock"
 title: Image location detection using Bedrock and Claude Model
 date: '2026-01-01'
 description: Image location detection using Bedrock and Claude Model

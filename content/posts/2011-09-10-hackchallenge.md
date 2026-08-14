@@ -1,4 +1,5 @@
 ---
+slug: "hackchallenge"
 title: 'HackingLab Challenge: Disassemble .NET Clients'
 date: '2011-09-10'
 description: 'HackingLab Challenge: Disassemble .NET Clients'

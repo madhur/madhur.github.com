@@ -1,4 +1,5 @@
 ---
+slug: "integrating-sentry-node"
 title: Integrate node.js logging with Sentry
 date: '2016-12-04'
 description: Integrate node.js logging with Sentry

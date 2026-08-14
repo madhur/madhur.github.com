@@ -1,4 +1,5 @@
 ---
+slug: "quality-quantity"
 title: Quality or Quantity
 date: '2018-02-24'
 description: Quality or Quantity

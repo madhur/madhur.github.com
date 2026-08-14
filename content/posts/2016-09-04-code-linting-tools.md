@@ -1,4 +1,5 @@
 ---
+slug: "code-linting-tools"
 title: Code linting tools
 date: '2016-09-04'
 description: Code linting tools

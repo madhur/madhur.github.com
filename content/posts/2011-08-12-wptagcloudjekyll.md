@@ -1,4 +1,5 @@
 ---
+slug: "wptagcloudjekyll"
 title: Integrating Wordpress Tag cloud Plugin in Jekyll
 date: '2011-08-12'
 description: Integrating Wordpress Tag cloud Plugin in Jekyll

@@ -1,4 +1,5 @@
 ---
+slug: "liferiskreward"
 title: Life is a game of risk and reward
 date: '2018-04-18'
 description: Life is a game of risk and reward

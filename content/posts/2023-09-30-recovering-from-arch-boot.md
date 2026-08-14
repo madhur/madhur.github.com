@@ -1,4 +1,5 @@
 ---
+slug: "recovering-from-arch-boot"
 title: Recovering from Arch Boot failure
 date: '2023-09-30'
 description: Recovering from Arch Boot failure

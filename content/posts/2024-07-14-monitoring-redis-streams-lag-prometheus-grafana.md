@@ -1,4 +1,5 @@
 ---
+slug: "monitoring-redis-streams-lag-prometheus-grafana"
 title: Monitoring Redis Streams lag in Prometheus and Grafana
 date: '2024-07-14'
 description: Monitoring Redis Streams lag in Prometheus and Grafana

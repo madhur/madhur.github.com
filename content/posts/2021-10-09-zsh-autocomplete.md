@@ -1,4 +1,5 @@
 ---
+slug: "zsh-autocomplete"
 title: zsh Autocomplete
 date: '2021-10-09'
 description: zsh Autocomplete

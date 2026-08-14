@@ -1,4 +1,5 @@
 ---
+slug: "quickly-compare-two-mysql-databases"
 title: Quickly Compare two MySQL databases
 date: '2022-01-16'
 description: Quickly Compare two MySQL databases

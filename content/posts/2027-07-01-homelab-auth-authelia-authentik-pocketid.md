@@ -1,4 +1,5 @@
 ---
+slug: "homelab-auth-authelia-authentik-pocketid"
 title: >-
   Choosing an Auth Stack for My Homelab: Authentik, Authelia, PocketID, and
   TinyAuth

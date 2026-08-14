@@ -1,4 +1,5 @@
 ---
+slug: "pushbeyondcomfortzone"
 title: Push beyond comfort zone
 date: '2018-03-27'
 description: Push beyond comfort zone

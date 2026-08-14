@@ -1,4 +1,5 @@
 ---
+slug: "google-groups-developers"
 title: Google groups for Developers
 date: '2016-01-03'
 description: Google groups for Developers

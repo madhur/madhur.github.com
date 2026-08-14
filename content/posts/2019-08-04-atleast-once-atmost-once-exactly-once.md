@@ -1,4 +1,5 @@
 ---
+slug: "atleast-once-atmost-once-exactly-once"
 title: 'Meaning of atleast once, atmost once and exactly once delivery'
 date: '2019-08-04'
 description: 'Meaning of atleast once, atmost once and exactly once delivery'

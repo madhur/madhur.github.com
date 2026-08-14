@@ -1,4 +1,5 @@
 ---
+slug: "row-level-locking-database"
 title: Row level locking in database
 date: '2025-07-09'
 description: Row level locking in database

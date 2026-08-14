@@ -1,4 +1,5 @@
 ---
+slug: "goodreads-flipkart-chrome-extension"
 title: Goodreads For Flipkart
 date: '2019-09-13'
 description: Goodreads For Flipkart

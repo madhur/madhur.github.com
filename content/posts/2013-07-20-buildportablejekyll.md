@@ -1,4 +1,5 @@
 ---
+slug: "buildportablejekyll"
 title: Building portable Jekyll for Windows
 date: '2013-07-20'
 description: Building portable Jekyll for Windows

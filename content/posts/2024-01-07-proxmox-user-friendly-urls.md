@@ -1,4 +1,5 @@
 ---
+slug: "proxmox-user-friendly-urls"
 title: Proxmox - Setting up user friendly urls
 date: '2024-01-07'
 description: Proxmox - Setting up user friendly urls

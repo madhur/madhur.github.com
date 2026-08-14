@@ -1,4 +1,5 @@
 ---
+slug: "guidebuildgit2"
 title: Building Git 2.0.0 from sources on Windows
 date: '2014-06-08'
 description: Building Git 2.0.0 from sources on Windows

@@ -1,4 +1,5 @@
 ---
+slug: "batch-api-framework-nodejs"
 title: Improving performance using Batch APIs
 date: '2016-12-25'
 description: Improving performance using Batch APIs

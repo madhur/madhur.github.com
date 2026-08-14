@@ -1,4 +1,5 @@
 ---
+slug: "prevent-connection-leak-apache-http"
 title: Lessons learnt using Apache HTTP Connection Pooling Library
 date: '2020-03-22'
 description: Lessons learnt using Apache HTTP Connection Pooling Library

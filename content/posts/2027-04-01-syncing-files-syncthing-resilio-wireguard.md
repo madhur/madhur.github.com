@@ -1,4 +1,5 @@
 ---
+slug: "syncing-files-syncthing-resilio-wireguard"
 title: Syncing Files Over the Internet with Syncthing and Resilio Using WireGuard VPN
 date: '2027-04-01'
 description: >-

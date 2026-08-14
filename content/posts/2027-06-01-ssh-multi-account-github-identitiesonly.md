@@ -1,4 +1,5 @@
 ---
+slug: "ssh-multi-account-github-identitiesonly"
 title: Why My SSH Key Wasn't Being Used for Git Despite Multi-Key Setup
 date: '2027-06-01'
 description: >-

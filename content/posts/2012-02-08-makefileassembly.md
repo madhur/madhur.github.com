@@ -1,4 +1,5 @@
 ---
+slug: "makefileassembly"
 title: Using MakeFile with Assembly Programming
 date: '2012-02-08'
 description: Using MakeFile with Assembly Programming

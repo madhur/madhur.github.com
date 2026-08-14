@@ -1,4 +1,5 @@
 ---
+slug: "using-sshpass-to-skip-entering-password"
 title: Using sshpass to skip entering passwords for SSH
 date: '2021-10-23'
 description: Using sshpass to skip entering passwords for SSH

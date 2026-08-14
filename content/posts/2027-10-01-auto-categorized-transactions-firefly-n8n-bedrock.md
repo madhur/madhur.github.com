@@ -1,4 +1,5 @@
 ---
+slug: "auto-categorized-transactions-firefly-n8n-bedrock"
 title: 'Auto-Categorized Transactions in Firefly III with n8n, Bedrock and ntfy'
 date: '2027-10-01'
 description: >-

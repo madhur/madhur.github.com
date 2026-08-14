@@ -1,4 +1,5 @@
 ---
+slug: "unit-testing-http-retry-strategies"
 title: Unit testing HTTP retry strategies
 date: '2020-05-09'
 description: Unit testing HTTP retry strategies

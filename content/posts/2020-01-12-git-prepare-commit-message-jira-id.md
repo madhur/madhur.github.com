@@ -5,7 +5,7 @@ description: Ensuring git commit messages contain JIRA ID
 tags:
   - Git
 draft: false
-slug: git-prepare-commit-message-jira-id
+slug: "git-prepare-commit-message-jira-id"
 params:
   disqus_id: /2020/01/12/git-prepare-commit-message-jira-id/
 ---

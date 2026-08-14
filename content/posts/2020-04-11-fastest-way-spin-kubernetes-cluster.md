@@ -1,4 +1,5 @@
 ---
+slug: "fastest-way-spin-kubernetes-cluster"
 title: Fastest way to spin up Kubernetes cluster on AWS
 date: '2020-04-11'
 description: Fastest way to spin up Kubernetes cluster on AWS

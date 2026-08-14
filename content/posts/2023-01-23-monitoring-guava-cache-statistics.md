@@ -1,4 +1,5 @@
 ---
+slug: "monitoring-guava-cache-statistics"
 title: Monitoring Guava Cache Statistics
 date: '2023-01-23'
 description: Monitoring Guava Cache Statistics

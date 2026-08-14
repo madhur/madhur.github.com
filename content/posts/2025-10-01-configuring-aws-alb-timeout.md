@@ -1,4 +1,5 @@
 ---
+slug: "configuring-aws-alb-timeout"
 title: Configuring AWS ALB Timeouts
 date: '2025-10-01'
 description: Configuring AWS ALB Timeouts

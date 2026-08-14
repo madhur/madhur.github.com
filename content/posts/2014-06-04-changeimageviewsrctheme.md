@@ -1,4 +1,5 @@
 ---
+slug: "changeimageviewsrctheme"
 title: Change ImageView src based on Android Application theme
 date: '2014-06-04'
 description: Change ImageView src based on Android Application theme

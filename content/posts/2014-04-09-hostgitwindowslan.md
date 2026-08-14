@@ -1,4 +1,5 @@
 ---
+slug: "hostgitwindowslan"
 title: Hosting Git repository on a Windows LAN
 date: '2014-04-09'
 description: Hosting Git repository on a Windows LAN

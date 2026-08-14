@@ -1,4 +1,5 @@
 ---
+slug: "redis-cluster-ansible"
 title: Provision Redis cluster through Vagrant and Ansible
 date: '2022-01-01'
 description: Provision Redis cluster through Vagrant and Ansible

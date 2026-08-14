@@ -1,4 +1,5 @@
 ---
+slug: "secure-homelab-wireguard-docker-traefik"
 title: >-
   Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and
   Traefik

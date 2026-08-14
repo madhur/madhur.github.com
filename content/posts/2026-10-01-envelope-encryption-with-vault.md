@@ -1,4 +1,5 @@
 ---
+slug: "envelope-encryption-with-vault"
 title: Envelope encryption with vault
 date: '2026-10-01'
 description: Envelope encryption with vault

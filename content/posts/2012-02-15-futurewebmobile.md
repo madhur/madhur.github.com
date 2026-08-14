@@ -1,4 +1,5 @@
 ---
+slug: "futurewebmobile"
 title: 'Future of Web and Mobile: HTML5, CSS3 and Javascript'
 date: '2012-02-15'
 description: 'Future of Web and Mobile: HTML5, CSS3 and Javascript'

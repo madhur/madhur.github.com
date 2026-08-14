@@ -1,4 +1,5 @@
 ---
+slug: "dual-boot-windows-kali-different-hdd"
 title: Dual Booting Windows and Linux on different HDD / SDD
 date: '2020-11-01'
 description: Dual Booting Windows and Linux on different HDD / SDD

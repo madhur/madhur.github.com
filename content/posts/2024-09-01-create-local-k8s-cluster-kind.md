@@ -1,4 +1,5 @@
 ---
+slug: "create-local-k8s-cluster-kind"
 title: Create local kubernetes cluster using Kind
 date: '2024-09-01'
 description: Create local kubernetes cluster using Kind

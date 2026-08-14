@@ -1,4 +1,5 @@
 ---
+slug: "tagcloudjekyll"
 title: Creating Tag cloud of Categories in Jekyll
 date: '2011-06-11'
 description: Creating Tag cloud of Categories in Jekyll

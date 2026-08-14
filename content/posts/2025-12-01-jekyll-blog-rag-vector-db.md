@@ -1,4 +1,5 @@
 ---
+slug: "jekyll-blog-rag-vector-db"
 title: Building a RAG System for Your Jekyll Blog with AWS Bedrock Claude
 date: '2025-12-01'
 description: Building a RAG System for Your Jekyll Blog with AWS Bedrock Claude

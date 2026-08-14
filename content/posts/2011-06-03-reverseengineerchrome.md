@@ -1,4 +1,5 @@
 ---
+slug: "reverseengineerchrome"
 title: Reverse engineering Google chrome extensions
 date: '2011-06-03'
 description: How to reverse engineer Google Chrome extensions

@@ -1,4 +1,5 @@
 ---
+slug: "backup-and-restore-specific-cassandra-tables"
 title: Backup and Restore specific cassandra tables
 date: '2021-10-30'
 description: Backup and Restore specific cassandra tables

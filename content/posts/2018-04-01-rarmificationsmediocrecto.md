@@ -1,4 +1,5 @@
 ---
+slug: "rarmificationsmediocrecto"
 title: Ramifications of a mediocre founders
 date: '2018-04-01'
 description: Ramifications of a mediocre founders

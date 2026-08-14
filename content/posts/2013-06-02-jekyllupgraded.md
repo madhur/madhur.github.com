@@ -1,4 +1,5 @@
 ---
+slug: "jekyllupgraded"
 title: Jekyll upgraded to 1.0.2
 date: '2013-06-02'
 description: Jekyll upgraded to 1.0.2

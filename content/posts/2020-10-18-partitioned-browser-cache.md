@@ -1,4 +1,5 @@
 ---
+slug: "partitioned-browser-cache"
 title: Partitioned Browser Cache Starting Chrome v86
 date: '2020-10-18'
 description: Partitioned Browser Cache Starting Chrome v86

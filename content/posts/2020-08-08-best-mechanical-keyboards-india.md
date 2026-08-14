@@ -1,4 +1,5 @@
 ---
+slug: "best-mechanical-keyboards-india"
 title: Best Mechanical Keyboards in India for Engineers
 date: '2020-08-08'
 description: Best Mechanical Keyboards in India for Engineers

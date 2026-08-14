@@ -1,4 +1,5 @@
 ---
+slug: "using-ns-image"
 title: NSImage Caching
 date: '2016-01-25'
 description: NSImage Caching

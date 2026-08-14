@@ -1,4 +1,5 @@
 ---
+slug: "useful-systemd-commands"
 title: Useful Systemd commands
 date: '2022-02-20'
 description: Useful Systemd commands

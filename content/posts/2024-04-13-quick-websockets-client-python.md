@@ -1,4 +1,5 @@
 ---
+slug: "quick-websockets-client-python"
 title: Quick Websockets client in Python
 date: '2024-04-13'
 description: Quick Websockets client in Python

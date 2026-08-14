@@ -1,4 +1,5 @@
 ---
+slug: "useful-angular-libraries"
 title: Useful Angular libraries
 date: '2021-05-02'
 description: Useful Angular libraries

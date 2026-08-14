@@ -1,4 +1,5 @@
 ---
+slug: "estimate-partitions-single-thread-compute"
 title: Estimate no. of kafka partitions handled by a single thread on compute
 date: '2020-09-06'
 description: Estimate no. of kafka partitions handled by a single thread on compute

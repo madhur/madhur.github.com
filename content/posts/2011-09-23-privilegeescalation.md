@@ -1,4 +1,5 @@
 ---
+slug: "privilegeescalation"
 title: Privilege escalation on Windows using Binary Planting
 date: '2011-09-23'
 description: Privilege escalation on Windows using Binary Planting

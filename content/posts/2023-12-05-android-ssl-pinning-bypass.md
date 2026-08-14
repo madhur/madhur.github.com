@@ -1,4 +1,5 @@
 ---
+slug: "android-ssl-pinning-bypass"
 title: Android SSL Pinning Bypass
 date: '2023-12-05'
 description: Android SSL Pinning Bypass

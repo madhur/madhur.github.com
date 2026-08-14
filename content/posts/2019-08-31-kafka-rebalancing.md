@@ -1,4 +1,5 @@
 ---
+slug: "kafka-rebalancing"
 title: Kafka rebalancing
 date: '2019-08-31'
 description: Kafka rebalancing

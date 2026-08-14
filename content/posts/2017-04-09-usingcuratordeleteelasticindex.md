@@ -1,4 +1,5 @@
 ---
+slug: "usingcuratordeleteelasticindex"
 title: Using curator to delete older elasticsearch indices
 date: '2017-04-09'
 description: Using curator to delete older elasticsearch indices

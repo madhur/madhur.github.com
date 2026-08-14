@@ -1,4 +1,5 @@
 ---
+slug: "clear-buffer-memory-linux"
 title: Clear buffer memory on Linux
 date: '2022-03-18'
 description: Clear buffer memory on Linux

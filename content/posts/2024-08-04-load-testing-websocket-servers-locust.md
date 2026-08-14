@@ -1,4 +1,5 @@
 ---
+slug: "load-testing-websocket-servers-locust"
 title: Load testing Websocket servers using Locust
 date: '2024-08-04'
 description: Load testing Websocket servers using Locust

@@ -1,4 +1,5 @@
 ---
+slug: "zsh-and-etc-profile"
 title: zsh and /etc/profile
 date: '2023-05-10'
 description: zsh and /etc/profile

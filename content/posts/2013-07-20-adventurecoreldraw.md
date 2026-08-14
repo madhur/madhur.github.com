@@ -1,4 +1,5 @@
 ---
+slug: "adventurecoreldraw"
 title: Adventures with Corel Draw
 date: '2013-07-20'
 description: Adventures with Corel Draw

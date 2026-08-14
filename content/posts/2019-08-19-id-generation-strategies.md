@@ -1,4 +1,5 @@
 ---
+slug: "id-generation-strategies"
 title: id generation strategies
 date: '2019-08-19'
 description: id generation strategies

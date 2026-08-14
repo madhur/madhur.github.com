@@ -1,4 +1,5 @@
 ---
+slug: "filteredclosed"
 title: Difference between Filtered vs Closed Ports
 date: '2011-09-18'
 description: Difference between Filtered vs Closed Ports

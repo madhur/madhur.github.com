@@ -1,4 +1,5 @@
 ---
+slug: "ansible-vitess"
 title: Ansible roles for installing and configuring Vitess
 date: '2023-08-30'
 description: Ansible roles for installing and configuring Vitess

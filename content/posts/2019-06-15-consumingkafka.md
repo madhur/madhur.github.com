@@ -1,4 +1,5 @@
 ---
+slug: "consumingkafka"
 title: Consuming from Kafka
 date: '2019-06-15'
 description: Consuming from Kafka

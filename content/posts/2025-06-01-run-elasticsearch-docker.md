@@ -1,4 +1,5 @@
 ---
+slug: "run-elasticsearch-docker"
 title: Run elasticsearch in docker
 date: '2025-06-01'
 description: Run elasticsearch in docker

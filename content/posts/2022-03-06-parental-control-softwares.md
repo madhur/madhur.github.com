@@ -1,4 +1,5 @@
 ---
+slug: "parental-control-softwares"
 title: Parental Control Softwares for Windows and Linux
 date: '2022-03-06'
 description: Parental Control Softwares for Windows and Linux

@@ -1,4 +1,5 @@
 ---
+slug: "binary-search-jdk-bug"
 title: Binary Search bug in JDK
 date: '2020-12-05'
 description: Binary Search bug in JDK

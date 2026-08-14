@@ -1,4 +1,5 @@
 ---
+slug: "stagedevents"
 title: Using SEDA
 date: '2019-06-09'
 description: Using SEDA

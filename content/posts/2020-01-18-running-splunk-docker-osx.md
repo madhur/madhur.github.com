@@ -1,4 +1,5 @@
 ---
+slug: "running-splunk-docker-osx"
 title: Running splunk on docker on OSX
 date: '2020-01-18'
 description: Running splunk on docker on OSX

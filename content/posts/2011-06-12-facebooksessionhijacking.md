@@ -1,4 +1,5 @@
 ---
+slug: "facebooksessionhijacking"
 title: Facebook Vulnerability - Session sidejacking
 date: '2011-06-12'
 description: Facebook Vulnerability - Session sidejacking

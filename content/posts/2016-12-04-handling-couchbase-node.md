@@ -1,4 +1,5 @@
 ---
+slug: "handling-couchbase-node"
 title: Couchbase exception handling in Node.js
 date: '2016-12-04'
 description: Couchbase exception handling in Node.js

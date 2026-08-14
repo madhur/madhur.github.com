@@ -1,4 +1,5 @@
 ---
+slug: "crackresetwindows"
 title: Crack or Reset Windows Passwords
 date: '2011-09-18'
 description: Crack or Reset Windows Passwords

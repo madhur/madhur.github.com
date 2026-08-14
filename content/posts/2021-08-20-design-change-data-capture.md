@@ -1,4 +1,5 @@
 ---
+slug: "design-change-data-capture"
 title: Designing Change Data Capture
 date: '2021-08-20'
 description: Designing Change Data Capture

@@ -1,4 +1,5 @@
 ---
+slug: "fun-with-splunk"
 title: Fun with Splunk
 date: '2021-05-30'
 description: Fun with Splunk

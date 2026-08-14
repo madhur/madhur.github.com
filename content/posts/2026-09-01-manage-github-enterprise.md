@@ -1,4 +1,5 @@
 ---
+slug: "manage-github-enterprise"
 title: Manage both github and github enterprise
 date: '2026-09-01'
 description: Manage both github and github enterprise

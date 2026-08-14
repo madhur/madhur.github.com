@@ -1,4 +1,5 @@
 ---
+slug: "realtime-google-analytics-firefox-tab"
 title: Realtime Google Analytics in Firefox tab
 date: '2020-12-27'
 description: Realtime Google Analytics in Firefox tab

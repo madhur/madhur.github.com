@@ -1,4 +1,5 @@
 ---
+slug: "git-bulk-clone"
 title: Bulk git clone repositories
 date: '2017-02-12'
 description: Bulk git clone repositories

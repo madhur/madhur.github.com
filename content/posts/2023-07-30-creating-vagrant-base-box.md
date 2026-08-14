@@ -1,4 +1,5 @@
 ---
+slug: "creating-vagrant-base-box"
 title: Creating vagrant basebox
 date: '2023-07-30'
 description: Creating vagrant basebox

@@ -1,4 +1,5 @@
 ---
+slug: "sockets-in-shell"
 title: Sockets in shell
 date: '2020-12-13'
 description: Sockets in shell

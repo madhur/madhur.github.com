@@ -1,4 +1,5 @@
 ---
+slug: "nodejs-connection-pooling"
 title: Effect of connection pooling on node.js performance
 date: '2016-09-05'
 description: Effect of connection pooling on node.js performance

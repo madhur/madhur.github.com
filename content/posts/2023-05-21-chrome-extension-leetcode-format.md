@@ -1,4 +1,5 @@
 ---
+slug: "chrome-extension-leetcode-format"
 title: LeetCode Format v1.4
 date: '2023-05-21'
 description: LeetCode Format v1.4

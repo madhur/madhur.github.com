@@ -1,4 +1,5 @@
 ---
+slug: "spworkflowapprovers"
 title: >-
   Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web
   Services and Jquery

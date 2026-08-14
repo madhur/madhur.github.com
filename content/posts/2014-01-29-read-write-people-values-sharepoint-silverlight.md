@@ -1,4 +1,5 @@
 ---
+slug: "read-write-people-values-sharepoint-silverlight"
 title: >-
   Reading and writing People Values in SharePoint List through Silverlight
   Client object model

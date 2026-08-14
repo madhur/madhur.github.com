@@ -1,4 +1,5 @@
 ---
+slug: "concurrency-python"
 title: Concurrency in Python
 date: '2019-07-14'
 description: Concurrency in Python

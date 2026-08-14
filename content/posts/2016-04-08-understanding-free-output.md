@@ -1,4 +1,5 @@
 ---
+slug: "understanding-free-output"
 title: Understanding free output in Linux
 date: '2016-04-08'
 description: Understanding free output in Linux

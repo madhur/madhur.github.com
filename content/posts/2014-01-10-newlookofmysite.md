@@ -1,4 +1,5 @@
 ---
+slug: "newlookofmysite"
 title: New look for my site
 date: '2014-01-10'
 description: New look for my site

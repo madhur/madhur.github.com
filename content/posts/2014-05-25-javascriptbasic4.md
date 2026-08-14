@@ -1,4 +1,5 @@
 ---
+slug: "javascriptbasic4"
 title: Javascript Basics Part IV
 date: '2014-05-25'
 description: Javascript Basics Part IV

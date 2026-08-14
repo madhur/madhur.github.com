@@ -1,4 +1,5 @@
 ---
+slug: "feed-notifier-updated"
 title: Feed notifier updated
 date: '2015-10-25'
 description: Feed notifier updated

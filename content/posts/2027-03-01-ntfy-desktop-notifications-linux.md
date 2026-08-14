@@ -1,4 +1,5 @@
 ---
+slug: "ntfy-desktop-notifications-linux"
 title: Getting Native Desktop Notifications from ntfy on Linux
 date: '2027-03-01'
 description: >-

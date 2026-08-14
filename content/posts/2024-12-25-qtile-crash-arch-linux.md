@@ -1,4 +1,5 @@
 ---
+slug: "qtile-crash-arch-linux"
 title: Qtile crash on Arch Linux
 date: '2024-12-25'
 description: Qtile crash on Arch Linux

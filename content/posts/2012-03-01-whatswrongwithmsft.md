@@ -1,4 +1,5 @@
 ---
+slug: "whatswrongwithmsft"
 title: What's wrong with Microsoft
 date: '2012-03-01'
 description: What's wrong with Microsoft

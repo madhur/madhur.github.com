@@ -1,4 +1,5 @@
 ---
+slug: "must-have-java-code-analysis-tools-part1"
 title: Must have Java code analysis Tools - Part 1
 date: '2020-01-26'
 description: Must have Java code analysis Tools - Part 1

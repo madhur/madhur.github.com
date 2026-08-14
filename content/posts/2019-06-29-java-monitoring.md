@@ -1,4 +1,5 @@
 ---
+slug: "java-monitoring"
 title: Setting up Java project for monitoring
 date: '2019-06-29'
 description: Setting up Java project for monitoring

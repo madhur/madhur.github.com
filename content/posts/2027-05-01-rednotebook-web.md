@@ -1,4 +1,5 @@
 ---
+slug: "rednotebook-web"
 title: 'RedNotebook Web: A Self-Hostable Web Interface for RedNotebook'
 date: '2027-05-01'
 description: >-

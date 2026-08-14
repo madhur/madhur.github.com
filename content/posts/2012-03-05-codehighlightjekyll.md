@@ -1,4 +1,5 @@
 ---
+slug: "codehighlightjekyll"
 title: Enable code highlighting with Pygments/Jekyll
 date: '2012-03-05'
 description: Enable code highlighting with Pygments/Jekyll

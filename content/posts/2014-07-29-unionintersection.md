@@ -1,4 +1,5 @@
 ---
+slug: "unionintersection"
 title: Union and Intersection of ArrayList in Java
 date: '2014-07-29'
 description: Union and Intersection of ArrayList in Java

@@ -1,4 +1,5 @@
 ---
+slug: "router-hairpin-nat-homelab-traffic"
 title: 'Hairpin NAT, Split-Horizon DNS, and Where I Landed Between Them'
 date: '2027-08-01'
 description: >-

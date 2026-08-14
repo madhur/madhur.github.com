@@ -1,4 +1,5 @@
 ---
+slug: "generate-multiple-uuid-shell"
 title: Executing commands in parallel in Shell and other fun stuff
 date: '2020-06-06'
 description: Executing commands in parallel in Shell and other fun stuff

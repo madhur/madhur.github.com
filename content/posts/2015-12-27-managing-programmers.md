@@ -1,4 +1,5 @@
 ---
+slug: "managing-programmers"
 title: Managing Programmers By Douglas Crockford
 date: '2015-12-27'
 description: Managing Programmers By Douglas Crockford

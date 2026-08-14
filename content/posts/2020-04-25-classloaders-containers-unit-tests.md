@@ -1,4 +1,5 @@
 ---
+slug: "classloaders-containers-unit-tests"
 title: 'Classloaders, Containers & Unit Tests'
 date: '2020-04-25'
 description: 'Classloaders, Containers & Unit Tests'

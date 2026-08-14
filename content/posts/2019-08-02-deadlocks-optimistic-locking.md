@@ -1,4 +1,5 @@
 ---
+slug: "deadlocks-optimistic-locking"
 title: Deadlocks in Optimistic locking
 date: '2019-08-02'
 description: Deadlocks in Optimistic locking

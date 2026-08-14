@@ -1,4 +1,5 @@
 ---
+slug: "angular-confirmation-dialog"
 title: Angular2 Confirmation Dialog component
 date: '2017-03-26'
 description: Angular2 Confirmation Dialog component

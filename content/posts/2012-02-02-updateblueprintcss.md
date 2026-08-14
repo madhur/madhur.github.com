@@ -1,4 +1,5 @@
 ---
+slug: "updateblueprintcss"
 title: Updated with Blueprint CSS Framework
 date: '2012-02-02'
 description: Updated with Blueprint CSS Framework
