@@ -1,0 +1,30 @@
+{{/* Weighted tag cloud: mirrors _plugins/tag_cloud.rb's 75%-280% font-size scaling by post count */}}
+{{ $minSize := 75 }}
+{{ $maxSize := 280 }}
+{{ $tags := .Site.Taxonomies.tags }}
+{{ $counts := slice }}
+{{ range $name, $pages := $tags }}
+  {{ $counts = $counts | append (len $pages) }}
+{{ end }}
+{{ $minCount := 0 }}
+{{ $maxCount := 0 }}
+{{ if gt (len $counts) 0 }}
+  {{ $sorted := sort $counts }}
+  {{ $minCount = index $sorted 0 }}
+  {{ $maxCount = index $sorted (sub (len $sorted) 1) }}
+{{ end }}
+<div class="tag-cloud">
+{{ range $name, $pages := $tags }}
+  {{ $count := len $pages }}
+  {{ $weight := $minSize }}
+  {{ if ne $maxCount $minCount }}
+    {{ $weight = add (div (mul (sub $count $minCount) (sub $maxSize $minSize)) (sub $maxCount $minCount)) $minSize }}
+  {{ end }}
+  {{/* .Site.Taxonomies.tags keys are lowercased/urlized; look up the term page to display the tag's original-case label (mirrors PaperMod's own taxonomy.html terms list). */}}
+  {{ $display := $name }}
+  {{ with site.GetPage (printf "/tags/%s" $name) }}
+    {{ $display = .LinkTitle }}
+  {{ end }}
+  <span style="font-size: {{ $weight }}%"><a href="/tags/{{ $name | urlize }}/" title="{{ $count }} post{{ if ne $count 1 }}s{{ end }}">{{ $display }}</a></span>
+{{ end }}
+</div>
