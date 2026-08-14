@@ -122,6 +122,7 @@ git commit -m "feat: scaffold Hugo site with PaperMod theme"
 
 **Files:**
 - Modify: `hugo/hugo.toml`
+- Modify: `hugo/content/_index.md`
 - Create: `hugo/layouts/partials/extend_head.html`
 - Create: `hugo/static/CNAME`
 
@@ -149,10 +150,27 @@ googleAnalytics = "G-N14VDHYFHQ"
   ShowCodeCopyButtons = true
   ShowRssButtonInSectionTermList = true
   comments = true
+  mainSections = ["posts"]
 
   [params.homeInfoParams]
     Title = "Hi, I'm Madhur 👋"
     Content = "A software developer who likes building things and writing about technology."
+
+  [[params.socialIcons]]
+    name = "linkedin"
+    url = "http://www.linkedin.com/in/madhurahuja"
+
+  [[params.socialIcons]]
+    name = "stackoverflow"
+    url = "http://stackoverflow.com/users/507256/madhur-ahuja"
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/madhur"
+
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:ahuja.madhur@gmail.com"
 
   [params.assets]
     disableHLJS = true
@@ -210,7 +228,28 @@ cat >> hugo/layouts/partials/extend_head.html <<'EOF'
 EOF
 ```
 
-- [ ] **Step 5: Build and verify**
+- [ ] **Step 5: Replace the placeholder homepage with the real one**
+
+Task 1 left `hugo/content/_index.md` as a scaffold-verification placeholder. Replace it now that
+`mainSections`/`homeInfoParams`/`socialIcons` are configured — PaperMod's home template renders
+the info box + social icons above a list of recent posts from `mainSections` automatically, so
+`_index.md` itself only needs a title (no body copy is needed or shown):
+
+```bash
+cat > hugo/content/_index.md <<'EOF'
+---
+title: Home
+---
+EOF
+```
+
+This is a deliberate simplification of the old `index.md`'s hand-written "5 posts with inline
+reading-time math": PaperMod's home list is data-driven from `mainSections` (showing paginated
+posts, `pagerSize = 15` per Task 1) rather than a hardcoded `limit:5`, and reading time comes
+from the site-wide `ShowReadingTime = true` param already set above — same information, no
+custom logic required.
+
+- [ ] **Step 6: Build and verify**
 
 Run: `hugo build -s hugo -D --environment production`
 Expected: exits 0. Then:
@@ -221,12 +260,17 @@ test -f hugo/public/robots.txt && cat hugo/public/robots.txt
 test -f hugo/public/CNAME && cat hugo/public/CNAME
 test -f hugo/public/css/print.css && echo "OK: print.css"
 grep -o 'media="print"' hugo/public/index.html
+grep -o 'linkedin' hugo/public/index.html
+grep -o 'github.com/madhur' hugo/public/index.html
 ```
 
 Expected: GA snippet present, `robots.txt` contains `Allow: /`, `CNAME` contains
-`www.madhur.co.in`, `OK: print.css`, and `media="print"` found in the page head.
+`www.madhur.co.in`, `OK: print.css`, `media="print"` found in the page head, and both social
+icon links (`linkedin`, `github.com/madhur`) present on the homepage. Note: the homepage won't
+show any posts yet since Task 3 hasn't migrated them — an empty post list at this point is
+expected, not a failure.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add hugo
@@ -1017,7 +1061,9 @@ block the rest of the migration.
   `blog/`, `projects/`, `code/`, `papers/`, `work/`, `info/`, `donate/`, `contact/`,
   `privacy/`, `leetcodeformat/`, `leetcode-format.html`, `silverdemo/`, `index.md`, `404.md`,
   `.htaccess`, `serviceWorker.js`, `atom.xml`, `robots.txt`, `ph_postings_meta.json`,
-  `_config.yml`, `package.json`, `package-lock.json`, `.nvmrc`, `.ruby-version`
+  `_config.yml`, `package.json`, `package-lock.json`, `.nvmrc`, `.ruby-version`, `CNAME`
+  (the root `CNAME` is superseded by `hugo/static/CNAME` from Task 2, which this task moves to
+  `./static/CNAME` — Hugo copies `static/` into `public/` at build time, the root copy is dead)
 - Delete: `hugo/tools/` (one-off migration scripts, no longer needed post-migration)
 
 **Interfaces:**
@@ -1063,7 +1109,7 @@ git rm -r _layouts _includes _plugins _posts _data _scripts .jekyll-cache \
   Gulpfile.js Gemfile Gemfile.lock node_modules files blog projects code papers work info \
   donate contact privacy leetcodeformat leetcode-format.html silverdemo index.md 404.md \
   .htaccess serviceWorker.js atom.xml robots.txt ph_postings_meta.json _config.yml \
-  package.json package-lock.json .nvmrc .ruby-version
+  package.json package-lock.json .nvmrc .ruby-version CNAME
 ```
 
 - [ ] **Step 5: Update `.gitmodules` and re-verify the submodule path**
