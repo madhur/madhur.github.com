@@ -1060,6 +1060,8 @@ block the rest of the migration.
 
 **Files:**
 - Move: everything under `hugo/` to the repo root
+- Modify: `.gitignore` (update `hugo/public/`/`hugo/.hugo_build.lock` to root-level
+  `public/`/`.hugo_build.lock`, since the build output path itself moves in this task)
 - Delete: `_layouts/`, `_includes/`, `_plugins/`, `_posts/`, `_data/`, `_scripts/`,
   `.jekyll-cache/`, `Gulpfile.js`, `Gemfile`, `Gemfile.lock`, `node_modules/`, `files/`,
   `blog/`, `projects/`, `code/`, `papers/`, `work/`, `info/`, `donate/`, `contact/`,
@@ -1126,7 +1128,23 @@ Expected: the PaperMod submodule path now reads `path = themes/PaperMod` (it was
 `hugo/themes/PaperMod`). If `git mv` didn't update it automatically, edit `.gitmodules` by hand
 to fix the `path` value, then `git submodule sync`.
 
-- [ ] **Step 6: Build and serve from the repo root**
+- [ ] **Step 6: Update `.gitignore` for the new root-level build paths**
+
+`.gitignore` currently has `hugo/public/` and `hugo/.hugo_build.lock` (added in Task 1, back when
+the Hugo project lived under `hugo/`). Now that Step 3 moved everything to the repo root, those
+entries match nothing — the NEW build output lands at `./public/` and `./.hugo_build.lock`,
+which would be unignored. Left unfixed, Step 8's `git add -A` would re-commit build artifacts,
+repeating the exact bug Task 1 had to fix. Update the paths:
+
+```bash
+sed -i 's#^hugo/public/$#public/#; s#^hugo/\.hugo_build_lock$#.hugo_build.lock#; s#^hugo/\.hugo_build\.lock$#.hugo_build.lock#' .gitignore
+grep -E '^(public/|\.hugo_build\.lock)$' .gitignore
+```
+
+Expected: both `public/` and `.hugo_build.lock` present in `.gitignore` (exactly these two
+lines, no leftover `hugo/`-prefixed versions).
+
+- [ ] **Step 7: Build and serve from the repo root**
 
 Run: `hugo build -D --environment production`
 Expected: exits 0, produces `public/` at repo root.
@@ -1135,10 +1153,18 @@ Run: `hugo server -D &` then `curl -s http://localhost:1313/ | grep -o "Hi, I'm 
 `kill %1`
 Expected: prints the homepage greeting, confirming the root-level site serves correctly.
 
-- [ ] **Step 7: Commit**
+Confirm the new `.gitignore` entries actually take effect before committing:
+```bash
+git check-ignore -q public && git check-ignore -q .hugo_build.lock && echo "BOTH IGNORED"
+```
+Expected: `BOTH IGNORED`. If this fails, fix `.gitignore` and re-run before proceeding — do not
+let Step 8 run `git add -A` while build output is unignored.
+
+- [ ] **Step 8: Commit**
 
 ```bash
 git add -A
+git status --short | grep -E '^\?\?|^A.*public/|^A.*hugo_build' && echo "WARNING: build artifacts staged, stop and fix .gitignore" || echo "clean, safe to commit"
 git commit -m "chore: promote Hugo site to repo root, retire Jekyll/Gulp artifacts"
 ```
 
