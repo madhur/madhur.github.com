@@ -7,6 +7,16 @@ test('converts highlight blocks to fenced code blocks', () => {
   assert.equal(convertBody(input), '```javascript\nconsole.log(1);\n```');
 });
 
+test('converts highlight blocks with language names containing # (e.g. c#)', () => {
+  const input = '{% highlight c# %}\nvar x = 1;\n{% endhighlight %}';
+  assert.equal(convertBody(input), '```c#\nvar x = 1;\n```');
+});
+
+test('strips optional highlight parameters like linenos', () => {
+  const input = '{% highlight html linenos %}\n<div></div>\n{% endhighlight %}';
+  assert.equal(convertBody(input), '```html\n<div></div>\n```');
+});
+
 test('strips raw/endraw wrapper tags but keeps their inner content', () => {
   const input = '{% raw %}\n{% for x in y %}\n{% endraw %}\n';
   assert.equal(convertBody(input), '{% for x in y %}\n');
