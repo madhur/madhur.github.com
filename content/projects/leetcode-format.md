@@ -1,4 +1,5 @@
 ---
+source_key: "leetcode-format"
 title: LeetCode Format Extension
 img:
   - /images/format-demo.gif

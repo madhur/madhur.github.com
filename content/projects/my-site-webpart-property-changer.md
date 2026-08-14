@@ -1,4 +1,5 @@
 ---
+source_key: "My Site WebPart Property Changer"
 title: My Site WebPart Property Changer
 img:
   - >-

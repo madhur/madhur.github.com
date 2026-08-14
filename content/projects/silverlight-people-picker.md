@@ -1,4 +1,5 @@
 ---
+source_key: "Silverlight People picker"
 title: Silverlight People picker and People Chooser WebPart
 img:
   - >-

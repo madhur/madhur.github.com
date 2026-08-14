@@ -1,4 +1,5 @@
 ---
+source_key: "Feed Notifier"
 title: Feed notifier
 img:
   - /images/projects/feed/screen1.png

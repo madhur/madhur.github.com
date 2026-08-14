@@ -1,4 +1,5 @@
 ---
+source_key: "goodreads-chrome-flipkart"
 title: Goodreads Flipkart Chrome Extension
 img:
   - /images/projects/goodreads-chrome-flipkart/screen1.png

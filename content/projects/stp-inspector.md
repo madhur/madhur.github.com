@@ -1,4 +1,5 @@
 ---
+source_key: "STP Inspector"
 title: STP Inspector
 img:
   - 'https://raw.github.com/madhur/SPProjects/gh-pages/screenshots/stp.jpg'

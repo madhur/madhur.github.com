@@ -1,4 +1,5 @@
 ---
+source_key: "RabbitMQ Monitor"
 title: RabbitMQ Monitor
 img:
   - /images/projects/mqmonitor/screen1.png

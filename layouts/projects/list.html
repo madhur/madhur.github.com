@@ -1,14 +1,22 @@
 {{ define "main" }}
-<h1>{{ .Title }}</h1>
-{{ $detailPages := where .Site.RegularPages "Section" "projects" }}
-{{ range site.Data.projects }}
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+</header>
+
+{{/* Detail pages carry a `source_key` front-matter field holding the verbatim
+     `file:` value from data/projects/*.yml. Matching on that literal avoids
+     having to re-implement the old Jekyll slugize() in a Go template (which is
+     what silently broke the madhur.co.in link: urlize gives "madhur.co.in",
+     slugize gives "madhur-co-in"). */}}
+{{ $detailPages := where site.RegularPages "Section" "projects" }}
+
+{{ range hugo.Data.projects }}
   {{ if .publish }}
   <h2><i class="{{ .icon }}"></i> {{ .name }}</h2>
   <ul>
     {{ range .projects }}
-      {{ if .publish }}
-        {{ $slug := printf "%s" (.file | urlize) }}
-        {{ $match := where $detailPages "File.BaseFileName" $slug }}
+      {{ if eq .publish true }}
+        {{ $match := where $detailPages "Params.source_key" .file }}
         <li>
           {{ if $match }}
             <a href="{{ (index $match 0).Permalink }}">{{ .project }}</a>
@@ -23,4 +31,8 @@
   </ul>
   {{ end }}
 {{ end }}
+
+<p style="margin-top: 2em;">
+  <a href="{{ "projects/old/" | relURL }}">View some of my legacy projects</a>
+</p>
 {{ end }}

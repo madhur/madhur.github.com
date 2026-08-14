@@ -1,4 +1,5 @@
 ---
+source_key: "SharePoint Gadget"
 title: SharePoint Gadget
 img:
   - /images/picture1.png

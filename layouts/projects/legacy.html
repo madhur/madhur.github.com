@@ -1,0 +1,68 @@
+{{ define "main" }}
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+  {{- with .Description }}
+  <div class="post-description">{{ . }}</div>
+  {{- end }}
+</header>
+
+{{ .Content }}
+
+{{ $detailPages := where site.RegularPages "Section" "projects" }}
+
+{{/* Everything from data/projects/*.yml that the active listing does not show
+     (publish is false, or absent entirely). Category-level `publish` is
+     deliberately ignored here — the whole point of this page is the projects
+     the active listing filters out. */}}
+{{ range hugo.Data.projects }}
+  {{ $category := . }}
+  {{ $legacy := where .projects "publish" "!=" true }}
+  {{ with $legacy }}
+  <h2><i class="{{ $category.icon }}"></i> {{ $category.name }}</h2>
+  <ul>
+    {{ range . }}
+      {{ $match := where $detailPages "Params.source_key" .file }}
+      <li>
+        {{ if $match }}
+          <a href="{{ (index $match 0).Permalink }}">{{ .project }}</a>
+        {{ else }}
+          <strong>{{ .project }}</strong>
+        {{ end }}
+        — {{ .description }}
+        {{ with .languages }}<em>({{ delimit . ", " }})</em>{{ end }}
+      </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+{{ end }}
+
+{{/* data/oldprojects/* has no detail pages at all: `file:` is an external URL
+     or a path to a download that did not survive the migration. Link only when
+     the target is an off-site URL that still exists (GitHub); otherwise list
+     the project as plain text rather than emitting a dead link. */}}
+{{ range hugo.Data.oldprojects }}
+  {{ $category := . }}
+  {{ with .projects }}
+  <h2><i class="{{ $category.icon }}"></i> {{ $category.name }}</h2>
+  <ul>
+    {{ range . }}
+      {{ $url := trim (printf "%v" .file) " " }}
+      {{ $linkable := and (hasPrefix $url "http") (not (in $url "madhur.co.in")) }}
+      <li>
+        {{ if $linkable }}
+          <a href="{{ $url }}" rel="noopener">{{ .project }}</a>
+        {{ else }}
+          <strong>{{ .project }}</strong>
+        {{ end }}
+        — {{ .description }}
+        {{ with .languages }}<em>({{ delimit . ", " }})</em>{{ end }}
+      </li>
+    {{ end }}
+  </ul>
+  {{ end }}
+{{ end }}
+
+<p style="margin-top: 2em;">
+  <a href="{{ "projects/" | relURL }}">&larr; Back to current projects</a>
+</p>
+{{ end }}

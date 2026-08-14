@@ -1,4 +1,5 @@
 ---
+source_key: "realtime-google-analytics-firefox"
 title: Realtime Google Analytics Count in Tab
 img:
   - /images/realtime-analytics.png

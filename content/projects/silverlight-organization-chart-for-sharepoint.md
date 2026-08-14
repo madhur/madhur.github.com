@@ -1,4 +1,5 @@
 ---
+source_key: "Silverlight Organization Chart for SharePoint"
 title: Silverlight Organization Chart for SharePoint
 img:
   - >-
