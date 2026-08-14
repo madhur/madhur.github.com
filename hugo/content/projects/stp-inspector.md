@@ -5,12 +5,6 @@ img:
 ---
 
 
-{% comment %} 
-<!--{% if site.generate_projects == true %}
-{% octokit_contents  SPProjects;STPInspectorWin/Readme.markdown%}
-{% endif %}-->
-{% endcomment %}
-
 STP Inspector is an site template inspector for WSS/MOSS 2007. It analyzes a site template file (.stp) and basically shows its dependencies on the site features and site collection features. 
 
 I wrote this utility to debug some of the issues which are faced while applying site templates saved from different server. The issues are more often when site template contains custom solution such as custom master page, web parts or features.

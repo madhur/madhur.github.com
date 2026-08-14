@@ -15,14 +15,6 @@ img:
     https://raw.githubusercontent.com/madhur/GAnalytics/gh-pages/screenshots/screen4.png
 ---
 
-{% comment %} 
-<!--
-{% if site.generate_projects == true %}
-{% octokit_readme GAnalytics%}
-{% endif %}
--->
-{% endcomment %}
-
 ## DashAnalytics for DashClock
 
 DashAnalytics is an extension for [DashClock Widget](https://play.google.com/store/apps/details?id=net.nurik.roman.dashclock)

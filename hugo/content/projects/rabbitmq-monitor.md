@@ -5,15 +5,6 @@ img:
   - /images/projects/mqmonitor/screen2.png
 ---
 
-{% comment %} 
-<!--
-{% if site.generate_projects == true %}
-{% octokit_readme dashclock-feedly-extension%}
-{% endif %}
--->
-{% endcomment %}
-
-
 ## RabbitMQ Monitor Widget
 
 [](!https://raw.githubusercontent.com/madhur/dashclock-feedly-extension/develop/res/drawable-xhdpi/ic_launcher.png)
