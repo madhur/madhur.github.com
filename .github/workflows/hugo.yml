@@ -4,6 +4,13 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+  schedule:
+    # Rebuild on the 1st of every month so future-dated posts (all of this
+    # repo's scheduled posts land on the 1st) go live on schedule even when
+    # nothing was pushed that day — this replaces the old local systemd
+    # timer, since Hugo excludes future-dated pages by date at build time
+    # (no -D/--buildFuture here) and the runner's clock is UTC.
+    - cron: '0 6 1 * *'
 
 permissions:
   contents: read
