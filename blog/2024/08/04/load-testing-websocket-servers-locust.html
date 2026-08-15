@@ -1,358 +1,75 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Load testing Websocket servers using Locust &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Load testing Websocket servers using Locust" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Load testing Websocket servers using Locust</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2024-08-04T00:00:00+05:30">August 04, 2024</time>
-    <span class="reading-time">5 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<p>The entire code of this article is present on this <a href="https://github.com/madhur/load-test-websocket-locust">github repository</a></p>
-
-<p>Load testing WebSocket servers is crucial for ensuring their performance and scalability.</p>
-
-<p>This article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.</p>
-
-<p>We will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.</p>
-
-<p>The only message we will be handling is heartbeat requests for simplicity.</p>
-
-<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kd">private</span> <span class="kt">boolean</span> <span class="nf">start</span><span class="o">(</span><span class="nc">String</span> <span class="n">host</span><span class="o">,</span> <span class="kt">int</span> <span class="n">port</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">try</span> <span class="o">{</span>
-        <span class="nc">ServerConnector</span> <span class="n">socketConnector</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServerConnector</span><span class="o">(</span><span class="n">server</span><span class="o">);</span>
-        <span class="n">socketConnector</span><span class="o">.</span><span class="na">setPort</span><span class="o">(</span><span class="n">port</span><span class="o">);</span>
-        <span class="n">socketConnector</span><span class="o">.</span><span class="na">setHost</span><span class="o">(</span><span class="n">host</span><span class="o">);</span>
-        <span class="n">server</span><span class="o">.</span><span class="na">setConnectors</span><span class="o">(</span><span class="k">new</span> <span class="nc">Connector</span><span class="o">[]</span> <span class="o">{</span> <span class="n">socketConnector</span> <span class="o">});</span>
-        <span class="n">disableServerVersionHeader</span><span class="o">();</span>
-        <span class="nc">WebSocketHandler</span> <span class="n">webSocketHandler</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">WebSocketHandler</span><span class="o">()</span> <span class="o">{</span>
-            <span class="nd">@Override</span>
-            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="nc">WebSocketServletFactory</span> <span class="n">webSocketServletFactory</span><span class="o">)</span> <span class="o">{</span>
-                <span class="n">webSocketServletFactory</span><span class="o">.</span><span class="na">register</span><span class="o">(</span><span class="nc">WebSocketChannelHandler</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
-                <span class="n">webSocketServletFactory</span><span class="o">.</span><span class="na">getExtensionFactory</span><span class="o">().</span><span class="na">unregister</span><span class="o">(</span><span class="s">"permessage-deflate"</span><span class="o">);</span>
-            <span class="o">}</span>
-        <span class="o">};</span>
-        <span class="n">server</span><span class="o">.</span><span class="na">setHandler</span><span class="o">(</span><span class="n">webSocketHandler</span><span class="o">);</span>
-        <span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-        <span class="n">isRunning</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="na">isStarted</span><span class="o">();</span>
-        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Websocket Jetty server started @- {}/{}"</span><span class="o">,</span> <span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">);</span>
-
-    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Unable to start the server on {}/{}"</span><span class="o">,</span> <span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
-        <span class="n">isRunning</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
-    <span class="o">}</span>
-    <span class="k">return</span> <span class="n">isRunning</span><span class="o">;</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>Here is a simple handler which handles heartbeat requests</p>
-
-<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@OnWebSocketMessage</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onMessage</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">try</span> <span class="o">{</span>
-        <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"WS message received : {}"</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
-        <span class="n">processMessage</span><span class="o">(</span><span class="n">session</span><span class="o">,</span> <span class="n">message</span><span class="o">);</span>
-    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">logger</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">"Exception in onMessage for session {} message {} due to {}"</span><span class="o">,</span> <span class="n">session</span><span class="o">,</span> <span class="n">message</span><span class="o">,</span>
-                <span class="n">e</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="kd">private</span> <span class="kt">void</span> <span class="nf">processMessage</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
-    <span class="nc">JSONObject</span> <span class="n">json</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JSONObject</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
-    <span class="nc">String</span> <span class="n">messageType</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="na">optString</span><span class="o">(</span><span class="s">"type"</span><span class="o">).</span><span class="na">toLowerCase</span><span class="o">();</span>
-    <span class="n">processEventsBasedOnMessageType</span><span class="o">(</span><span class="n">session</span><span class="o">,</span> <span class="n">messageType</span><span class="o">,</span> <span class="n">json</span><span class="o">);</span>
-<span class="o">}</span>
-
-<span class="kd">private</span> <span class="kt">void</span> <span class="nf">processEventsBasedOnMessageType</span><span class="o">(</span><span class="nc">Session</span> <span class="n">session</span><span class="o">,</span> <span class="nc">String</span> <span class="n">messageType</span><span class="o">,</span> <span class="nc">JSONObject</span> <span class="n">json</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">switch</span> <span class="o">(</span><span class="n">messageType</span><span class="o">)</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="s">"heartbeatreq"</span><span class="o">:</span>
-            <span class="nc">SystemFactory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getWebSocketMessageHandler</span><span class="o">().</span><span class="na">handleHeartBeatMessages</span><span class="o">(</span><span class="n">session</span><span class="o">);</span>
-            <span class="k">break</span><span class="o">;</span>
-        <span class="k">default</span><span class="o">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Unknown message type received : {}"</span><span class="o">,</span> <span class="n">messageType</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-</code></pre></div></div>
-
-<p>For the load testing part, we will use the popular <a href="https://locust.io/">Locust</a> load testing framework.</p>
-
-<p>We use <a href="https://github.com/websocket-client/websocket-client/">websocket-client</a> to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.</p>
-
-<p>Whenever we send the heartbeat request to server, we send a timestamp from the client side in the field <code class="language-plaintext highlighter-rouge">publishTimestamp</code>. The server then responds with the <code class="language-plaintext highlighter-rouge">heartbeatresp</code> and also includes the original timestamp <code class="language-plaintext highlighter-rouge">publishTimestamp</code> which was sent in the request in the response. The server also includes the <code class="language-plaintext highlighter-rouge">serverDelay</code> which represents the delay of server in processing the heartbeat response.</p>
-
-<p>Our contract looks like this:</p>
-<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
-    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"heartbeatreq"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"userId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"publishTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1722758706760</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-
-</span><span class="p">{</span><span class="w">
-    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"heartbeatresp"</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"userId"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"serverDelay"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
-    </span><span class="nl">"clientPublishTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1722758706760</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre></div></div>
-
-<p>We can subtract the current time (the time we received the message in locust) and the <code class="language-plaintext highlighter-rouge">clientPublishTimestamp</code> in the <code class="language-plaintext highlighter-rouge">heartbeatresp</code> to calculate the end to end time of processing the heartbeat request message.</p>
-
-<p>When running the load test with Locust, it’s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.</p>
-
-<p>We run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.</p>
-
-<p>This means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.</p>
-
-<p><a href="/images/Blog/locust_start.png" data-fancybox="">
-<img src="/images/Blog/locust_start.png" width="1000px" />
-</a></p>
-
-<p>Locust will take some time to spawn all the 10K users. At this point, we can see that rate of <code class="language-plaintext highlighter-rouge">ws_connect</code> is 500 per second.</p>
-
-<p><a href="/images/Blog/locust_spawn.png" data-fancybox="">
-<img src="/images/Blog/locust_spawn.png" width="1000px" />
-</a></p>
-
-<p>Once the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.</p>
-
-<p><a href="/images/Blog/locust_running.png" data-fancybox="">
-<img src="/images/Blog/locust_running.png" width="1000px" />
-</a></p>
-
-<h3 id="conclusion">Conclusion</h3>
-
-<p>In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.</p>
-
-<p>The entire code of this article is present on this <a href="https://github.com/madhur/load-test-websocket-locust">github repository</a></p>
-
-<p>Feel free to use this code or if you have any comments, add comment using the comment box below.</p>
-
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/java">Java</a> |
-						
-						<a href="/blog/tags/locust">Locust</a> |
-						
-						<a href="/blog/tags/websocket">Websocket</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Load testing Websocket servers using Locust | Madhur Ahuja</title><meta name=keywords content="Java,Locust,Websocket"><meta name=description content="Load testing Websocket servers using Locust"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Load testing Websocket servers using Locust"><meta property="og:description" content="Load testing Websocket servers using Locust"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2024-08-04T00:00:00+00:00"><meta property="article:modified_time" content="2024-08-04T00:00:00+00:00"><meta property="article:tag" content="Java"><meta property="article:tag" content="Locust"><meta property="article:tag" content="Websocket"><meta name=twitter:card content="summary"><meta name=twitter:title content="Load testing Websocket servers using Locust"><meta name=twitter:description content="Load testing Websocket servers using Locust"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Load testing Websocket servers using Locust","item":"https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Load testing Websocket servers using Locust","name":"Load testing Websocket servers using Locust","description":"Load testing Websocket servers using Locust","keywords":["Java","Locust","Websocket"],"articleBody":"The entire code of this article is present on this github repository\nLoad testing WebSocket servers is crucial for ensuring their performance and scalability.\nThis article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.\nWe will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.\nThe only message we will be handling is heartbeat requests for simplicity.\nprivate boolean start(String host, int port) { try { ServerConnector socketConnector = new ServerConnector(server); socketConnector.setPort(port); socketConnector.setHost(host); server.setConnectors(new Connector[] { socketConnector }); disableServerVersionHeader(); WebSocketHandler webSocketHandler = new WebSocketHandler() { @Override public void configure(WebSocketServletFactory webSocketServletFactory) { webSocketServletFactory.register(WebSocketChannelHandler.class); webSocketServletFactory.getExtensionFactory().unregister(\"permessage-deflate\"); } }; server.setHandler(webSocketHandler); server.start(); isRunning = server.isStarted(); logger.info(\"Websocket Jetty server started @- {}/{}\", host, port); } catch (Exception e) { logger.error(\"Unable to start the server on {}/{}\", host, port, e); isRunning = false; } return isRunning; } Here is a simple handler which handles heartbeat requests\n@OnWebSocketMessage public void onMessage(Session session, String message) { try { logger.info(\"WS message received : {}\", message); processMessage(session, message); } catch (Exception e) { logger.error(\"Exception in onMessage for session {} message {} due to {}\", session, message, e); } } private void processMessage(Session session, String message) { JSONObject json = new JSONObject(message); String messageType = json.optString(\"type\").toLowerCase(); processEventsBasedOnMessageType(session, messageType, json); } private void processEventsBasedOnMessageType(Session session, String messageType, JSONObject json) { switch (messageType) { case \"heartbeatreq\": SystemFactory.getInstance().getWebSocketMessageHandler().handleHeartBeatMessages(session); break; default: logger.info(\"Unknown message type received : {}\", messageType); } } For the load testing part, we will use the popular Locust load testing framework.\nWe use websocket-client to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.\nWhenever we send the heartbeat request to server, we send a timestamp from the client side in the field publishTimestamp. The server then responds with the heartbeatresp and also includes the original timestamp publishTimestamp which was sent in the request in the response. The server also includes the serverDelay which represents the delay of server in processing the heartbeat response.\nOur contract looks like this:\n{ \"type\": \"heartbeatreq\", \"userId\": 1, \"publishTimestamp\": 1722758706760 } { \"type\": \"heartbeatresp\", \"userId\": 1, \"serverDelay\": 1, \"clientPublishTimestamp\": 1722758706760 } We can subtract the current time (the time we received the message in locust) and the clientPublishTimestamp in the heartbeatresp to calculate the end to end time of processing the heartbeat request message.\nWhen running the load test with Locust, it’s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.\nWe run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.\nThis means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.\nLocust will take some time to spawn all the 10K users. At this point, we can see that rate of ws_connect is 500 per second.\nOnce the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.\nConclusion In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.\nThe entire code of this article is present on this github repository\nFeel free to use this code or if you have any comments, add comment using the comment box below.\n","wordCount":"647","inLanguage":"en","datePublished":"2024-08-04T00:00:00Z","dateModified":"2024-08-04T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2024/08/04/load-testing-websocket-servers-locust.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Load testing Websocket servers using Locust</h1><div class=post-description>Load testing Websocket servers using Locust</div><div class=post-meta><span title='2024-08-04 00:00:00 +0000 UTC'>August 4, 2024</span>&nbsp;·&nbsp;<span>4 min</span></div></header><div class="post-content md-content"><p>The entire code of this article is present on this <a href=https://github.com/madhur/load-test-websocket-locust>github repository</a></p><p>Load testing WebSocket servers is crucial for ensuring their performance and scalability.</p><p>This article will guide you through using Locust, a popular open-source load testing tool, to test your Java WebSocket server.</p><p>We will use Jetty WebSocket in Java to run our websocket server. Jetty WebSocket is a Java library and part of the larger Jetty project, which is a popular open-source web server and servlet container.</p><p>The only message we will be handling is heartbeat requests for simplicity.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=w> </span><span class=kd>private</span><span class=w> </span><span class=kt>boolean</span><span class=w> </span><span class=nf>start</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>host</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>port</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ServerConnector</span><span class=w> </span><span class=n>socketConnector</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ServerConnector</span><span class=p>(</span><span class=n>server</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>socketConnector</span><span class=p>.</span><span class=na>setPort</span><span class=p>(</span><span class=n>port</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>socketConnector</span><span class=p>.</span><span class=na>setHost</span><span class=p>(</span><span class=n>host</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>server</span><span class=p>.</span><span class=na>setConnectors</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>Connector</span><span class=o>[]</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=n>socketConnector</span><span class=w> </span><span class=p>});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>disableServerVersionHeader</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>WebSocketHandler</span><span class=w> </span><span class=n>webSocketHandler</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>WebSocketHandler</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>configure</span><span class=p>(</span><span class=n>WebSocketServletFactory</span><span class=w> </span><span class=n>webSocketServletFactory</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>webSocketServletFactory</span><span class=p>.</span><span class=na>register</span><span class=p>(</span><span class=n>WebSocketChannelHandler</span><span class=p>.</span><span class=na>class</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>webSocketServletFactory</span><span class=p>.</span><span class=na>getExtensionFactory</span><span class=p>().</span><span class=na>unregister</span><span class=p>(</span><span class=s>&#34;permessage-deflate&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>};</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>server</span><span class=p>.</span><span class=na>setHandler</span><span class=p>(</span><span class=n>webSocketHandler</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>server</span><span class=p>.</span><span class=na>start</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>isRunning</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>server</span><span class=p>.</span><span class=na>isStarted</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>logger</span><span class=p>.</span><span class=na>info</span><span class=p>(</span><span class=s>&#34;Websocket Jetty server started @- {}/{}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>host</span><span class=p>,</span><span class=w> </span><span class=n>port</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>logger</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;Unable to start the server on {}/{}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>host</span><span class=p>,</span><span class=w> </span><span class=n>port</span><span class=p>,</span><span class=w> </span><span class=n>e</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>isRunning</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>false</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>isRunning</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>Here is a simple handler which handles heartbeat requests</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@OnWebSocketMessage</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>onMessage</span><span class=p>(</span><span class=n>Session</span><span class=w> </span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>message</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>logger</span><span class=p>.</span><span class=na>info</span><span class=p>(</span><span class=s>&#34;WS message received : {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>message</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>processMessage</span><span class=p>(</span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>message</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>logger</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;Exception in onMessage for session {} message {} due to {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>message</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>e</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>processMessage</span><span class=p>(</span><span class=n>Session</span><span class=w> </span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>message</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>JSONObject</span><span class=w> </span><span class=n>json</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>JSONObject</span><span class=p>(</span><span class=n>message</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>String</span><span class=w> </span><span class=n>messageType</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>json</span><span class=p>.</span><span class=na>optString</span><span class=p>(</span><span class=s>&#34;type&#34;</span><span class=p>).</span><span class=na>toLowerCase</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>processEventsBasedOnMessageType</span><span class=p>(</span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>messageType</span><span class=p>,</span><span class=w> </span><span class=n>json</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>processEventsBasedOnMessageType</span><span class=p>(</span><span class=n>Session</span><span class=w> </span><span class=n>session</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>messageType</span><span class=p>,</span><span class=w> </span><span class=n>JSONObject</span><span class=w> </span><span class=n>json</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>switch</span><span class=w> </span><span class=p>(</span><span class=n>messageType</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>case</span><span class=w> </span><span class=s>&#34;heartbeatreq&#34;</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>SystemFactory</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>getWebSocketMessageHandler</span><span class=p>().</span><span class=na>handleHeartBeatMessages</span><span class=p>(</span><span class=n>session</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>break</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>default</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>logger</span><span class=p>.</span><span class=na>info</span><span class=p>(</span><span class=s>&#34;Unknown message type received : {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>messageType</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div><p>For the load testing part, we will use the popular <a href=https://locust.io/>Locust</a> load testing framework.</p><p>We use <a href=https://github.com/websocket-client/websocket-client/>websocket-client</a> to manage websockets inside python. It is a very elegant library which allows to handle both short lived and long lived websocket connections.</p><p>Whenever we send the heartbeat request to server, we send a timestamp from the client side in the field <code>publishTimestamp</code>. The server then responds with the <code>heartbeatresp</code> and also includes the original timestamp <code>publishTimestamp</code> which was sent in the request in the response. The server also includes the <code>serverDelay</code> which represents the delay of server in processing the heartbeat response.</p><p>Our contract looks like this:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;type&#34;</span><span class=p>:</span> <span class=s2>&#34;heartbeatreq&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;userId&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;publishTimestamp&#34;</span><span class=p>:</span> <span class=mi>1722758706760</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;type&#34;</span><span class=p>:</span> <span class=s2>&#34;heartbeatresp&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;userId&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;serverDelay&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;clientPublishTimestamp&#34;</span><span class=p>:</span> <span class=mi>1722758706760</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>We can subtract the current time (the time we received the message in locust) and the <code>clientPublishTimestamp</code> in the <code>heartbeatresp</code> to calculate the end to end time of processing the heartbeat request message.</p><p>When running the load test with Locust, it&rsquo;s important to ensure that Locust itself is not experiencing high CPU usage. Otherwise, the high latency could be attributed to the lag in receiving the messages in the locust itself, rather than the processing time of the server.</p><p>We run the load with 10K connected users with ramp up rate of 500. I choose this number because I am running this on my local desktop computer.</p><p>This means we will be connecting 500 websockets / s until we reach total 10K connected sockets on the server.</p><a href=/images/Blog/locust_start.png data-fancybox><img src=/images/Blog/locust_start.png width=1000px></a><p>Locust will take some time to spawn all the 10K users. At this point, we can see that rate of <code>ws_connect</code> is 500 per second.</p><a href=/images/Blog/locust_spawn.png data-fancybox><img src=/images/Blog/locust_spawn.png width=1000px></a><p>Once the spawn state is finished, all the websockets are connected. At this point, all the connected websockets will be sending heartbeat requests at every 2 seconds, which comes out to ~ 5000 heartbeat requests per second as shown below.</p><a href=/images/Blog/locust_running.png data-fancybox><img src=/images/Blog/locust_running.png width=1000px></a><h3 id=conclusion>Conclusion<a hidden class=anchor aria-hidden=true href=#conclusion>#</a></h3><p>In this article, we saw how to load test WebSocket servers using locust. The benefit of using locust is to have fine grained control over number of sockets to connect, when to trigger messages as well as calculate end to end latency.</p><p>The entire code of this article is present on this <a href=https://github.com/madhur/load-test-websocket-locust>github repository</a></p><p>Feel free to use this code or if you have any comments, add comment using the comment box below.</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/java/>Java</a></li><li><a href=https://madhur.co.in/tags/locust/>Locust</a></li><li><a href=https://madhur.co.in/tags/websocket/>Websocket</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2024/09/01/create-local-k8s-cluster-kind.html><span class=title>« Prev</span>
+<span>Create local kubernetes cluster using Kind</span>
+</a><a class=next href=https://madhur.co.in/blog/2024/07/14/monitoring-redis-streams-lag-prometheus-grafana.html><span class=title>Next »</span>
+<span>Monitoring Redis Streams lag in Prometheus and Grafana</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on x" href="https://x.com/intent/tweet/?text=Load%20testing%20Websocket%20servers%20using%20Locust&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html&amp;hashtags=Java%2cLocust%2cWebsocket"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html&amp;title=Load%20testing%20Websocket%20servers%20using%20Locust&amp;summary=Load%20testing%20Websocket%20servers%20using%20Locust&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html&title=Load%20testing%20Websocket%20servers%20using%20Locust"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on whatsapp" href="https://api.whatsapp.com/send?text=Load%20testing%20Websocket%20servers%20using%20Locust%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on telegram" href="https://telegram.me/share/url?text=Load%20testing%20Websocket%20servers%20using%20Locust&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Load testing Websocket servers using Locust on ycombinator" href="https://news.ycombinator.com/submitlink?t=Load%20testing%20Websocket%20servers%20using%20Locust&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2024%2f08%2f04%2fload-testing-websocket-servers-locust.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

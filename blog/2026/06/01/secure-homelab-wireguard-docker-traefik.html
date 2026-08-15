@@ -1,184 +1,7 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2026-06-01T00:00:00+05:30">June 01, 2026</time>
-    <span class="reading-time">11 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<blockquote>
-  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
-</blockquote>
-
-<p>Running a homelab is exciting, but security should never be an afterthought. In this guide, I’ll show you how to create a sophisticated setup where:</p>
-
-<ul>
-  <li><strong>Public services</strong> remain accessible to everyone (like your blog or portfolio)</li>
-  <li><strong>Private services</strong> require VPN access (like admin panels, monitoring tools, or personal apps)</li>
-  <li><strong>Home network access</strong> works seamlessly when you’re at home</li>
-  <li><strong>VPN access</strong> is required when traveling</li>
-</ul>
-
-<p>We’ll use <strong>WireGuard</strong> for VPN connectivity and <strong>Traefik</strong> as our reverse proxy to intelligently route traffic based on your location.</p>
-
-<h2 id="table-of-contents">Table of Contents</h2>
-<ul>
-  <li><a href="#architecture-overview">Architecture Overview</a></li>
-  <li><a href="#prerequisites">Prerequisites</a></li>
-  <li><a href="#setting-up-wireguard-with-wg-easy">Setting Up WireGuard with wg-easy</a></li>
-  <li><a href="#configuring-traefik-for-selective-access">Configuring Traefik for Selective Access</a></li>
-  <li><a href="#example-service-configurations">Example Service Configurations</a></li>
-  <li><a href="#testing-your-setup">Testing Your Setup</a></li>
-  <li><a href="#security-considerations">Security Considerations</a></li>
-  <li><a href="#troubleshooting">Troubleshooting</a></li>
-</ul>
-
-<h2 id="architecture-overview">Architecture Overview</h2>
-
-<p>Our setup creates three distinct access patterns:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik | Madhur Ahuja</title><meta name=keywords content="Traefik,VPN,WireGuard,Homelab"><meta name=description content="Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"><meta property="og:description" content="Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-06-01T00:00:00+00:00"><meta property="article:modified_time" content="2026-06-01T00:00:00+00:00"><meta property="article:tag" content="Traefik"><meta property="article:tag" content="VPN"><meta property="article:tag" content="Wireguard"><meta property="article:tag" content="Homelab"><meta name=twitter:card content="summary"><meta name=twitter:title content="Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"><meta name=twitter:description content="Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik","item":"https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik","name":"Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik","description":"Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik","keywords":["Traefik","VPN","WireGuard","Homelab"],"articleBody":" Disclaimer: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.\nRunning a homelab is exciting, but security should never be an afterthought. In this guide, I’ll show you how to create a sophisticated setup where:\nPublic services remain accessible to everyone (like your blog or portfolio) Private services require VPN access (like admin panels, monitoring tools, or personal apps) Home network access works seamlessly when you’re at home VPN access is required when traveling We’ll use WireGuard for VPN connectivity and Traefik as our reverse proxy to intelligently route traffic based on your location.\nTable of Contents Architecture Overview Prerequisites Setting Up WireGuard with wg-easy Configuring Traefik for Selective Access Example Service Configurations Testing Your Setup Security Considerations Troubleshooting Architecture Overview Our setup creates three distinct access patterns:\n┌─────────────────┐ ┌──────────────────┐ ┌─────────────────┐ │ Internet │ │ Home Network │ │ VPN Clients │ │ (Public) │ │ (Trusted) │ │ (Secure) │ └─────────┬───────┘ └────────┬─────────┘ └─────────┬───────┘ │ │ │ │ │ │ ┌─────▼─────────────────────▼────────────────────────▼─────┐ │ Traefik │ │ (Reverse Proxy + SSL Termination) │ └─────┬─────────────────────┬────────────────────────┬─────┘ │ │ │ ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐ │ Public │ │ Mixed │ │ Private │ │ Services │ │ Services │ │ Services │ │ (Blog, │ │(Admin + │ │(Database, │ │ API) │ │ Public) │ │ Monitoring│ └───────────┘ └───────────┘ └───────────┘ Prerequisites Before we start, ensure you have:\nA server with Docker and Docker Compose installed A domain name with DNS pointing to your server Basic familiarity with Docker Compose Traefik already running (or follow the basic setup below) Basic Traefik Setup If you don’t have Traefik running yet, here’s a minimal configuration:\n# traefik/docker-compose.yml version: '3.8' services: traefik: image: traefik:v3.0 container_name: traefik command: - \"--api.dashboard=true\" - \"--providers.docker=true\" - \"--providers.docker.exposedByDefault=false\" - \"--entrypoints.web.address=:80\" - \"--entrypoints.websecure.address=:443\" - \"--certificatesresolvers.letsencrypt.acme.tlschallenge=true\" - \"--certificatesresolvers.letsencrypt.acme.email=your-email@example.com\" - \"--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json\" ports: - \"80:80\" - \"443:443\" volumes: - \"/var/run/docker.sock:/var/run/docker.sock:ro\" - \"./letsencrypt:/letsencrypt\" networks: - proxy-network labels: - \"traefik.enable=true\" - \"traefik.http.routers.traefik.rule=Host(`traefik.yourdomain.com`)\" - \"traefik.http.routers.traefik.entrypoints=websecure\" - \"traefik.http.routers.traefik.tls.certresolver=letsencrypt\" networks: proxy-network: external: true Create the network: docker network create proxy-network\nSetting Up WireGuard with wg-easy WireGuard Easy (wg-easy) v15 is a complete rewrite that simplifies VPN management significantly. Unlike previous versions, it uses a web-based setup wizard instead of environment variables.\nWireGuard Configuration # wireguard/docker-compose.yml version: '3.8' volumes: etc_wireguard: services: wg-easy: image: ghcr.io/wg-easy/wg-easy:15 container_name: wg-easy environment: # v15 requires minimal environment variables - INSECURE=false # Set to true if accessing via HTTP instead of HTTPS networks: proxy-network: {} # For Traefik access to web UI wg: # VPN network with static IPs ipv4_address: 10.42.42.42 ipv6_address: fdcc:ad94:bacf:61a3::2a volumes: - etc_wireguard:/etc/wireguard - /lib/modules:/lib/modules:ro ports: - \"51820:51820/udp\" # WireGuard VPN port (must be directly exposed) # Port 51821 is handled internally by Traefik restart: unless-stopped cap_add: - NET_ADMIN - SYS_MODULE sysctls: - net.ipv4.ip_forward=1 - net.ipv4.conf.all.src_valid_mark=1 - net.ipv6.conf.all.disable_ipv6=0 - net.ipv6.conf.all.forwarding=1 - net.ipv6.conf.default.forwarding=1 labels: # Traefik labels for HTTPS access to web management UI - \"traefik.enable=true\" - \"traefik.http.routers.wg-easy.rule=Host(`wg.yourdomain.com`)\" - \"traefik.http.routers.wg-easy.entrypoints=websecure\" - \"traefik.http.routers.wg-easy.tls.certresolver=letsencrypt\" - \"traefik.http.services.wg-easy.loadbalancer.server.port=51821\" - \"traefik.docker.network=proxy-network\" networks: wg: name: wg # Force exact network name driver: bridge enable_ipv6: true ipam: driver: default config: - subnet: 10.42.42.0/24 - subnet: fdcc:ad94:bacf:61a3::/64 proxy-network: external: true Initial Setup Deploy WireGuard:\ncd wireguard docker-compose up -d Access the setup wizard:\nVisit https://wg.yourdomain.com Complete the setup wizard: Server IP: Your server’s public IP Admin password: Choose a strong password VPN subnet: 10.42.42.0/24 DNS servers: 1.1.1.1, 8.8.8.8 Create your first VPN client:\nClick “Add Client” in the web UI Download the configuration or scan the QR code Test the connection Configuring Traefik for Selective Access Now comes the magic! We’ll create different access patterns using Traefik’s IP whitelisting middleware.\nAccess Pattern 1: Public Services These services are accessible from anywhere on the internet:\n# examples/public-service.yml services: blog: image: nginx:alpine container_name: blog volumes: - ./blog-content:/usr/share/nginx/html networks: - proxy-network labels: - \"traefik.enable=true\" - \"traefik.http.routers.blog.rule=Host(`blog.yourdomain.com`)\" - \"traefik.http.routers.blog.entrypoints=websecure\" - \"traefik.http.routers.blog.tls.certresolver=letsencrypt\" - \"traefik.http.services.blog.loadbalancer.server.port=80\" # No IP restrictions - publicly accessible networks: proxy-network: external: true Access Pattern 2: VPN + Home Network Only These services require either VPN access OR being on your home network:\n# examples/mixed-access-service.yml services: admin-panel: image: your-admin-app:latest container_name: admin-panel networks: - proxy-network labels: - \"traefik.enable=true\" - \"traefik.http.routers.admin.rule=Host(`admin.yourdomain.com`)\" - \"traefik.http.routers.admin.entrypoints=websecure\" - \"traefik.http.routers.admin.tls.certresolver=letsencrypt\" - \"traefik.http.services.admin.loadbalancer.server.port=3000\" # IP whitelist: VPN clients + home network + localhost - \"traefik.http.routers.admin.middlewares=home-and-vpn\" - \"traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32\" networks: proxy-network: external: true Access Pattern 3: VPN-Only Services These services are only accessible through the VPN:\n# examples/vpn-only-service.yml services: monitoring: image: grafana/grafana:latest container_name: monitoring environment: - GF_SECURITY_ADMIN_PASSWORD=secure-password networks: - proxy-network volumes: - grafana_data:/var/lib/grafana labels: - \"traefik.enable=true\" - \"traefik.http.routers.monitoring.rule=Host(`monitoring.yourdomain.com`)\" - \"traefik.http.routers.monitoring.entrypoints=websecure\" - \"traefik.http.routers.monitoring.tls.certresolver=letsencrypt\" - \"traefik.http.services.monitoring.loadbalancer.server.port=3000\" # Strict VPN-only access - \"traefik.http.routers.monitoring.middlewares=vpn-only\" - \"traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24\" volumes: grafana_data: networks: proxy-network: external: true Access Pattern 4: Network Isolation For maximum security, some services can be completely isolated from the internet:\n# examples/isolated-service.yml services: database: image: postgres:13 container_name: database environment: - POSTGRES_DB=homelab - POSTGRES_USER=admin - POSTGRES_PASSWORD=secure-password networks: - wg # Only connected to VPN network volumes: - postgres_data:/var/lib/postgresql/data # No Traefik labels - only accessible via direct IP when connected to VPN # Access via: postgresql://10.42.42.43:5432/homelab internal-api: image: your-internal-api:latest container_name: internal-api networks: wg: ipv4_address: 10.42.42.50 # Access via: http://10.42.42.50:8080 when connected to VPN volumes: postgres_data: networks: wg: external: true Example Service Configurations Let’s look at some real-world examples:\nChange Detection Service (Mixed Access) services: changedetection: image: ghcr.io/dgtlmoon/changedetection.io container_name: changedetection volumes: - ./data:/datastore restart: unless-stopped networks: - proxy-network labels: - \"traefik.enable=true\" - \"traefik.http.routers.changedetection.rule=Host(`cd.yourdomain.com`)\" - \"traefik.http.routers.changedetection.entrypoints=websecure\" - \"traefik.http.routers.changedetection.tls.certresolver=letsencrypt\" - \"traefik.http.services.changedetection.loadbalancer.server.port=5000\" # Allow home network and VPN access - \"traefik.http.routers.changedetection.middlewares=home-and-vpn\" - \"traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32\" networks: proxy-network: external: true Portainer (VPN-Only) services: portainer: image: portainer/portainer-ce:latest container_name: portainer command: -H unix:///var/run/docker.sock volumes: - /var/run/docker.sock:/var/run/docker.sock - portainer_data:/data networks: - proxy-network labels: - \"traefik.enable=true\" - \"traefik.http.routers.portainer.rule=Host(`portainer.yourdomain.com`)\" - \"traefik.http.routers.portainer.entrypoints=websecure\" - \"traefik.http.routers.portainer.tls.certresolver=letsencrypt\" - \"traefik.http.services.portainer.loadbalancer.server.port=9000\" # VPN-only access for security - \"traefik.http.routers.portainer.middlewares=vpn-only\" - \"traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24\" volumes: portainer_data: networks: proxy-network: external: true Testing Your Setup 1. Test Public Access # Should work from anywhere curl -I https://blog.yourdomain.com # Expected: 200 OK 2. Test VPN-Only Access # Without VPN - should be blocked curl -I https://monitoring.yourdomain.com # Expected: 403 Forbidden # With VPN connected - should work curl -I https://monitoring.yourdomain.com # Expected: 200 OK 3. Test Mixed Access # From home network - should work curl -I https://admin.yourdomain.com # Expected: 200 OK # From mobile data (without VPN) - should be blocked curl -I https://admin.yourdomain.com # Expected: 403 Forbidden # From mobile data (with VPN) - should work curl -I https://admin.yourdomain.com # Expected: 200 OK 4. Monitor Access Logs # Monitor Traefik logs for IP restrictions docker logs traefik --tail 50 | grep -E \"(403|Forbidden|ipwhitelist)\" # Monitor successful VPN connections docker logs wg-easy --tail 20 Security Considerations Understanding IP Ranges It’s crucial to understand how IP whitelisting works:\n10.42.42.0/24: Your VPN clients (WireGuard users) 192.168.1.0/24: Your home network (adjust to match your router’s range) 127.0.0.1/32: Server localhost access Why Private IPs Are Safe When you’re at a friend’s house with WiFi using 192.168.1.x:\nYour device gets 192.168.1.50 (friend’s network) Friend’s router has public IP 203.45.67.89 Traefik sees: 203.45.67.89 (blocked!) Not: 192.168.1.50 (which would be allowed) Private IP ranges only work for actual local network access, not internet requests from similar ranges elsewhere.\nFirewall Configuration # Allow WireGuard VPN port sudo ufw allow 51820/udp # Allow HTTPS (Traefik) sudo ufw allow 443/tcp # Allow HTTP (for redirects) sudo ufw allow 80/tcp # Block direct access to service ports sudo ufw deny 5000 # Example: block direct access to change detection sudo ufw deny 3000 # Example: block direct access to Grafana Additional Security Measures Use strong passwords for all admin interfaces Enable 2FA where available (WireGuard Easy v15 supports TOTP) Regular updates of all containers Monitor access logs for suspicious activity Backup configurations regularly # Backup WireGuard configs docker exec wg-easy cat /etc/wireguard/wg0.json \u003e backup-$(date +%Y%m%d).json # Backup Traefik dynamic config cp -r traefik/ backup-traefik-$(date +%Y%m%d)/ Troubleshooting Common Issues and Solutions Issue: 404 Not Found from Traefik # Check if container is in proxy-network docker network inspect proxy-network | grep your-service # Verify Traefik can reach the service docker exec traefik ping your-service-container Issue: VPN Clients Can’t Access Services # Check WireGuard client logs # On client: wg show # Verify routing # On server: docker exec wg-easy wg show ip route | grep wg0 Issue: IP Whitelisting Not Working # Check what IP Traefik sees docker logs traefik --tail 50 | grep your-domain # Test IP detection curl -H \"X-Real-IP: 10.42.42.5\" https://your-service.com Issue: Certificate Errors # Check certificate resolver docker logs traefik | grep -i acme # Verify DNS propagation dig your-domain.com Network Debugging # List all Docker networks docker network ls # Inspect specific network docker network inspect wg docker network inspect proxy-network # Check container network connections docker inspect your-container | grep -A 20 \"Networks\" # Test connectivity between containers docker exec container1 ping container2 Conclusion This setup gives you the best of both worlds: convenience when you’re at home and security when you’re traveling. You can:\nAccess everything normally when on your home network Use VPN for sensitive services when traveling Keep some services completely public for legitimate external access Isolate critical services that should never touch the internet Happy homelabbing! 🏠🔧\nWhat services are you planning to add to your homelab? Share your setup in the comments below!\n","wordCount":"1528","inLanguage":"en","datePublished":"2026-06-01T00:00:00Z","dateModified":"2026-06-01T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2026/06/01/secure-homelab-wireguard-docker-traefik.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik</h1><div class=post-description>Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik</div><div class=post-meta><span title='2026-06-01 00:00:00 +0000 UTC'>June 1, 2026</span>&nbsp;·&nbsp;<span>8 min</span></div></header><div class="post-content md-content"><blockquote><p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p></blockquote><p>Running a homelab is exciting, but security should never be an afterthought. In this guide, I&rsquo;ll show you how to create a sophisticated setup where:</p><ul><li><strong>Public services</strong> remain accessible to everyone (like your blog or portfolio)</li><li><strong>Private services</strong> require VPN access (like admin panels, monitoring tools, or personal apps)</li><li><strong>Home network access</strong> works seamlessly when you&rsquo;re at home</li><li><strong>VPN access</strong> is required when traveling</li></ul><p>We&rsquo;ll use <strong>WireGuard</strong> for VPN connectivity and <strong>Traefik</strong> as our reverse proxy to intelligently route traffic based on your location.</p><h2 id=table-of-contents>Table of Contents<a hidden class=anchor aria-hidden=true href=#table-of-contents>#</a></h2><ul><li><a href=#architecture-overview>Architecture Overview</a></li><li><a href=#prerequisites>Prerequisites</a></li><li><a href=#setting-up-wireguard-with-wg-easy>Setting Up WireGuard with wg-easy</a></li><li><a href=#configuring-traefik-for-selective-access>Configuring Traefik for Selective Access</a></li><li><a href=#example-service-configurations>Example Service Configurations</a></li><li><a href=#testing-your-setup>Testing Your Setup</a></li><li><a href=#security-considerations>Security Considerations</a></li><li><a href=#troubleshooting>Troubleshooting</a></li></ul><h2 id=architecture-overview>Architecture Overview<a hidden class=anchor aria-hidden=true href=#architecture-overview>#</a></h2><p>Our setup creates three distinct access patterns:</p><pre tabindex=0><code>┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Internet      │    │   Home Network   │    │   VPN Clients   │
 │   (Public)      │    │   (Trusted)      │    │   (Secure)      │
 └─────────┬───────┘    └────────┬─────────┘    └─────────┬───────┘
@@ -195,597 +18,324 @@
     │ (Blog,    │         │(Admin +   │            │(Database, │
     │  API)     │         │ Public)   │            │ Monitoring│
     └───────────┘         └───────────┘            └───────────┘
-</code></pre></div></div>
-
-<h2 id="prerequisites">Prerequisites</h2>
-
-<p>Before we start, ensure you have:</p>
-
-<ul>
-  <li>A server with Docker and Docker Compose installed</li>
-  <li>A domain name with DNS pointing to your server</li>
-  <li>Basic familiarity with Docker Compose</li>
-  <li>Traefik already running (or follow the basic setup below)</li>
-</ul>
-
-<h3 id="basic-traefik-setup">Basic Traefik Setup</h3>
-
-<p>If you don’t have Traefik running yet, here’s a minimal configuration:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># traefik/docker-compose.yml</span>
-<span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.8'</span>
-
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">traefik</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">traefik:v3.0</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">traefik</span>
-    <span class="na">command</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--api.dashboard=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--providers.docker=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--providers.docker.exposedByDefault=false"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--entrypoints.web.address=:80"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--entrypoints.websecure.address=:443"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--certificatesresolvers.letsencrypt.acme.tlschallenge=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"</span>
-    <span class="na">ports</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">80:80"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">443:443"</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">/var/run/docker.sock:/var/run/docker.sock:ro"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">./letsencrypt:/letsencrypt"</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.traefik.rule=Host(`traefik.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.traefik.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.traefik.tls.certresolver=letsencrypt"</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<p>Create the network: <code class="language-plaintext highlighter-rouge">docker network create proxy-network</code></p>
-
-<h2 id="setting-up-wireguard-with-wg-easy">Setting Up WireGuard with wg-easy</h2>
-
-<p>WireGuard Easy (wg-easy) v15 is a complete rewrite that simplifies VPN management significantly. Unlike previous versions, it uses a web-based setup wizard instead of environment variables.</p>
-
-<h3 id="wireguard-configuration">WireGuard Configuration</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># wireguard/docker-compose.yml</span>
-<span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.8'</span>
-
-<span class="na">volumes</span><span class="pi">:</span>
-  <span class="na">etc_wireguard</span><span class="pi">:</span>
-
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">wg-easy</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/wg-easy/wg-easy:15</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">wg-easy</span>
-    <span class="na">environment</span><span class="pi">:</span>
-      <span class="c1"># v15 requires minimal environment variables</span>
-      <span class="pi">-</span> <span class="s">INSECURE=false</span>  <span class="c1"># Set to true if accessing via HTTP instead of HTTPS</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="na">proxy-network</span><span class="pi">:</span> <span class="pi">{}</span>  <span class="c1"># For Traefik access to web UI</span>
-      <span class="na">wg</span><span class="pi">:</span>  <span class="c1"># VPN network with static IPs</span>
-        <span class="na">ipv4_address</span><span class="pi">:</span> <span class="s">10.42.42.42</span>
-        <span class="na">ipv6_address</span><span class="pi">:</span> <span class="s">fdcc:ad94:bacf:61a3::2a</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">etc_wireguard:/etc/wireguard</span>
-      <span class="pi">-</span> <span class="s">/lib/modules:/lib/modules:ro</span>
-    <span class="na">ports</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">51820:51820/udp"</span>  <span class="c1"># WireGuard VPN port (must be directly exposed)</span>
-      <span class="c1"># Port 51821 is handled internally by Traefik</span>
-    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
-    <span class="na">cap_add</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">NET_ADMIN</span>
-      <span class="pi">-</span> <span class="s">SYS_MODULE</span>
-    <span class="na">sysctls</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">net.ipv4.ip_forward=1</span>
-      <span class="pi">-</span> <span class="s">net.ipv4.conf.all.src_valid_mark=1</span>
-      <span class="pi">-</span> <span class="s">net.ipv6.conf.all.disable_ipv6=0</span>
-      <span class="pi">-</span> <span class="s">net.ipv6.conf.all.forwarding=1</span>
-      <span class="pi">-</span> <span class="s">net.ipv6.conf.default.forwarding=1</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="c1"># Traefik labels for HTTPS access to web management UI</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.wg-easy.rule=Host(`wg.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.wg-easy.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.wg-easy.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.wg-easy.loadbalancer.server.port=51821"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.docker.network=proxy-network"</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">wg</span><span class="pi">:</span>
-    <span class="na">name</span><span class="pi">:</span> <span class="s">wg</span>  <span class="c1"># Force exact network name</span>
-    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
-    <span class="na">enable_ipv6</span><span class="pi">:</span> <span class="no">true</span>
-    <span class="na">ipam</span><span class="pi">:</span>
-      <span class="na">driver</span><span class="pi">:</span> <span class="s">default</span>
-      <span class="na">config</span><span class="pi">:</span>
-        <span class="pi">-</span> <span class="na">subnet</span><span class="pi">:</span> <span class="s">10.42.42.0/24</span>
-        <span class="pi">-</span> <span class="na">subnet</span><span class="pi">:</span> <span class="s">fdcc:ad94:bacf:61a3::/64</span>
-
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h3 id="initial-setup">Initial Setup</h3>
-
-<ol>
-  <li><strong>Deploy WireGuard:</strong>
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>wireguard
-docker-compose up <span class="nt">-d</span>
-</code></pre></div>    </div>
-  </li>
-  <li><strong>Access the setup wizard:</strong>
-    <ul>
-      <li>Visit <code class="language-plaintext highlighter-rouge">https://wg.yourdomain.com</code></li>
-      <li>Complete the setup wizard:
-        <ul>
-          <li>Server IP: Your server’s public IP</li>
-          <li>Admin password: Choose a strong password</li>
-          <li>VPN subnet: <code class="language-plaintext highlighter-rouge">10.42.42.0/24</code></li>
-          <li>DNS servers: <code class="language-plaintext highlighter-rouge">1.1.1.1, 8.8.8.8</code></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  <li><strong>Create your first VPN client:</strong>
-    <ul>
-      <li>Click “Add Client” in the web UI</li>
-      <li>Download the configuration or scan the QR code</li>
-      <li>Test the connection</li>
-    </ul>
-  </li>
-</ol>
-
-<h2 id="configuring-traefik-for-selective-access">Configuring Traefik for Selective Access</h2>
-
-<p>Now comes the magic! We’ll create different access patterns using Traefik’s IP whitelisting middleware.</p>
-
-<h3 id="access-pattern-1-public-services">Access Pattern 1: Public Services</h3>
-
-<p>These services are accessible from anywhere on the internet:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># examples/public-service.yml</span>
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">blog</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">nginx:alpine</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">blog</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">./blog-content:/usr/share/nginx/html</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.blog.rule=Host(`blog.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.blog.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.blog.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.blog.loadbalancer.server.port=80"</span>
-      <span class="c1"># No IP restrictions - publicly accessible</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h3 id="access-pattern-2-vpn--home-network-only">Access Pattern 2: VPN + Home Network Only</h3>
-
-<p>These services require either VPN access OR being on your home network:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># examples/mixed-access-service.yml</span>
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">admin-panel</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">your-admin-app:latest</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">admin-panel</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.admin.rule=Host(`admin.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.admin.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.admin.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.admin.loadbalancer.server.port=3000"</span>
-      <span class="c1"># IP whitelist: VPN clients + home network + localhost</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.admin.middlewares=home-and-vpn"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32"</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h3 id="access-pattern-3-vpn-only-services">Access Pattern 3: VPN-Only Services</h3>
-
-<p>These services are only accessible through the VPN:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># examples/vpn-only-service.yml</span>
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">monitoring</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">grafana/grafana:latest</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">monitoring</span>
-    <span class="na">environment</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">GF_SECURITY_ADMIN_PASSWORD=secure-password</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">grafana_data:/var/lib/grafana</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.monitoring.rule=Host(`monitoring.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.monitoring.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.monitoring.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.monitoring.loadbalancer.server.port=3000"</span>
-      <span class="c1"># Strict VPN-only access</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.monitoring.middlewares=vpn-only"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24"</span>
-
-<span class="na">volumes</span><span class="pi">:</span>
-  <span class="na">grafana_data</span><span class="pi">:</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h3 id="access-pattern-4-network-isolation">Access Pattern 4: Network Isolation</h3>
-
-<p>For maximum security, some services can be completely isolated from the internet:</p>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># examples/isolated-service.yml</span>
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">database</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">postgres:13</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">database</span>
-    <span class="na">environment</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">POSTGRES_DB=homelab</span>
-      <span class="pi">-</span> <span class="s">POSTGRES_USER=admin</span>
-      <span class="pi">-</span> <span class="s">POSTGRES_PASSWORD=secure-password</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">wg</span>  <span class="c1"># Only connected to VPN network</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">postgres_data:/var/lib/postgresql/data</span>
-    <span class="c1"># No Traefik labels - only accessible via direct IP when connected to VPN</span>
-    <span class="c1"># Access via: postgresql://10.42.42.43:5432/homelab</span>
-
-  <span class="na">internal-api</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">your-internal-api:latest</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">internal-api</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="na">wg</span><span class="pi">:</span>
-        <span class="na">ipv4_address</span><span class="pi">:</span> <span class="s">10.42.42.50</span>
-    <span class="c1"># Access via: http://10.42.42.50:8080 when connected to VPN</span>
-
-<span class="na">volumes</span><span class="pi">:</span>
-  <span class="na">postgres_data</span><span class="pi">:</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">wg</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h2 id="example-service-configurations">Example Service Configurations</h2>
-
-<p>Let’s look at some real-world examples:</p>
-
-<h3 id="change-detection-service-mixed-access">Change Detection Service (Mixed Access)</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
-  <span class="na">changedetection</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/dgtlmoon/changedetection.io</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">changedetection</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">./data:/datastore</span>
-    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.changedetection.rule=Host(`cd.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.changedetection.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.changedetection.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.changedetection.loadbalancer.server.port=5000"</span>
-      <span class="c1"># Allow home network and VPN access</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.changedetection.middlewares=home-and-vpn"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32"</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h3 id="portainer-vpn-only">Portainer (VPN-Only)</h3>
-
-<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
-  <span class="na">portainer</span><span class="pi">:</span>
-    <span class="na">image</span><span class="pi">:</span> <span class="s">portainer/portainer-ce:latest</span>
-    <span class="na">container_name</span><span class="pi">:</span> <span class="s">portainer</span>
-    <span class="na">command</span><span class="pi">:</span> <span class="s">-H unix:///var/run/docker.sock</span>
-    <span class="na">volumes</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock</span>
-      <span class="pi">-</span> <span class="s">portainer_data:/data</span>
-    <span class="na">networks</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s">proxy-network</span>
-    <span class="na">labels</span><span class="pi">:</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.enable=true"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.portainer.rule=Host(`portainer.yourdomain.com`)"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.portainer.entrypoints=websecure"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.portainer.tls.certresolver=letsencrypt"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.services.portainer.loadbalancer.server.port=9000"</span>
-      <span class="c1"># VPN-only access for security</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.routers.portainer.middlewares=vpn-only"</span>
-      <span class="pi">-</span> <span class="s2">"</span><span class="s">traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24"</span>
-
-<span class="na">volumes</span><span class="pi">:</span>
-  <span class="na">portainer_data</span><span class="pi">:</span>
-
-<span class="na">networks</span><span class="pi">:</span>
-  <span class="na">proxy-network</span><span class="pi">:</span>
-    <span class="na">external</span><span class="pi">:</span> <span class="no">true</span>
-</code></pre></div></div>
-
-<h2 id="testing-your-setup">Testing Your Setup</h2>
-
-<h3 id="1-test-public-access">1. Test Public Access</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Should work from anywhere</span>
-curl <span class="nt">-I</span> https://blog.yourdomain.com
-<span class="c"># Expected: 200 OK</span>
-</code></pre></div></div>
-
-<h3 id="2-test-vpn-only-access">2. Test VPN-Only Access</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Without VPN - should be blocked</span>
-curl <span class="nt">-I</span> https://monitoring.yourdomain.com
-<span class="c"># Expected: 403 Forbidden</span>
-
-<span class="c"># With VPN connected - should work</span>
-curl <span class="nt">-I</span> https://monitoring.yourdomain.com
-<span class="c"># Expected: 200 OK</span>
-</code></pre></div></div>
-
-<h3 id="3-test-mixed-access">3. Test Mixed Access</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># From home network - should work</span>
-curl <span class="nt">-I</span> https://admin.yourdomain.com
-<span class="c"># Expected: 200 OK</span>
-
-<span class="c"># From mobile data (without VPN) - should be blocked</span>
-curl <span class="nt">-I</span> https://admin.yourdomain.com
-<span class="c"># Expected: 403 Forbidden</span>
-
-<span class="c"># From mobile data (with VPN) - should work</span>
-curl <span class="nt">-I</span> https://admin.yourdomain.com
-<span class="c"># Expected: 200 OK</span>
-</code></pre></div></div>
-
-<h3 id="4-monitor-access-logs">4. Monitor Access Logs</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Monitor Traefik logs for IP restrictions</span>
-docker logs traefik <span class="nt">--tail</span> 50 | <span class="nb">grep</span> <span class="nt">-E</span> <span class="s2">"(403|Forbidden|ipwhitelist)"</span>
-
-<span class="c"># Monitor successful VPN connections</span>
-docker logs wg-easy <span class="nt">--tail</span> 20
-</code></pre></div></div>
-
-<h2 id="security-considerations">Security Considerations</h2>
-
-<h3 id="understanding-ip-ranges">Understanding IP Ranges</h3>
-
-<p>It’s crucial to understand how IP whitelisting works:</p>
-
-<ul>
-  <li><strong><code class="language-plaintext highlighter-rouge">10.42.42.0/24</code></strong>: Your VPN clients (WireGuard users)</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">192.168.1.0/24</code></strong>: Your home network (adjust to match your router’s range)</li>
-  <li><strong><code class="language-plaintext highlighter-rouge">127.0.0.1/32</code></strong>: Server localhost access</li>
-</ul>
-
-<h3 id="why-private-ips-are-safe">Why Private IPs Are Safe</h3>
-
-<p>When you’re at a friend’s house with WiFi using <code class="language-plaintext highlighter-rouge">192.168.1.x</code>:</p>
-<ul>
-  <li>Your device gets <code class="language-plaintext highlighter-rouge">192.168.1.50</code> (friend’s network)</li>
-  <li>Friend’s router has public IP <code class="language-plaintext highlighter-rouge">203.45.67.89</code></li>
-  <li><strong>Traefik sees</strong>: <code class="language-plaintext highlighter-rouge">203.45.67.89</code> (blocked!)</li>
-  <li><strong>Not</strong>: <code class="language-plaintext highlighter-rouge">192.168.1.50</code> (which would be allowed)</li>
-</ul>
-
-<p>Private IP ranges only work for actual local network access, not internet requests from similar ranges elsewhere.</p>
-
-<h3 id="firewall-configuration">Firewall Configuration</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Allow WireGuard VPN port</span>
-<span class="nb">sudo </span>ufw allow 51820/udp
-
-<span class="c"># Allow HTTPS (Traefik)</span>
-<span class="nb">sudo </span>ufw allow 443/tcp
-
-<span class="c"># Allow HTTP (for redirects)</span>
-<span class="nb">sudo </span>ufw allow 80/tcp
-
-<span class="c"># Block direct access to service ports</span>
-<span class="nb">sudo </span>ufw deny 5000  <span class="c"># Example: block direct access to change detection</span>
-<span class="nb">sudo </span>ufw deny 3000  <span class="c"># Example: block direct access to Grafana</span>
-</code></pre></div></div>
-
-<h3 id="additional-security-measures">Additional Security Measures</h3>
-
-<ol>
-  <li><strong>Use strong passwords</strong> for all admin interfaces</li>
-  <li><strong>Enable 2FA</strong> where available (WireGuard Easy v15 supports TOTP)</li>
-  <li><strong>Regular updates</strong> of all containers</li>
-  <li><strong>Monitor access logs</strong> for suspicious activity</li>
-  <li><strong>Backup configurations</strong> regularly</li>
-</ol>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Backup WireGuard configs</span>
-docker <span class="nb">exec </span>wg-easy <span class="nb">cat</span> /etc/wireguard/wg0.json <span class="o">&gt;</span> backup-<span class="si">$(</span><span class="nb">date</span> +%Y%m%d<span class="si">)</span>.json
-
-<span class="c"># Backup Traefik dynamic config</span>
-<span class="nb">cp</span> <span class="nt">-r</span> traefik/ backup-traefik-<span class="si">$(</span><span class="nb">date</span> +%Y%m%d<span class="si">)</span>/
-</code></pre></div></div>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<h3 id="common-issues-and-solutions">Common Issues and Solutions</h3>
-
-<h4 id="issue-404-not-found-from-traefik">Issue: 404 Not Found from Traefik</h4>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check if container is in proxy-network</span>
-docker network inspect proxy-network | <span class="nb">grep </span>your-service
-
-<span class="c"># Verify Traefik can reach the service</span>
-docker <span class="nb">exec </span>traefik ping your-service-container
-</code></pre></div></div>
-
-<h4 id="issue-vpn-clients-cant-access-services">Issue: VPN Clients Can’t Access Services</h4>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check WireGuard client logs</span>
-<span class="c"># On client: wg show</span>
-
-<span class="c"># Verify routing</span>
-<span class="c"># On server: </span>
-docker <span class="nb">exec </span>wg-easy wg show
-ip route | <span class="nb">grep </span>wg0
-</code></pre></div></div>
-
-<h4 id="issue-ip-whitelisting-not-working">Issue: IP Whitelisting Not Working</h4>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check what IP Traefik sees</span>
-docker logs traefik <span class="nt">--tail</span> 50 | <span class="nb">grep </span>your-domain
-
-<span class="c"># Test IP detection</span>
-curl <span class="nt">-H</span> <span class="s2">"X-Real-IP: 10.42.42.5"</span> https://your-service.com
-</code></pre></div></div>
-
-<h4 id="issue-certificate-errors">Issue: Certificate Errors</h4>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check certificate resolver</span>
-docker logs traefik | <span class="nb">grep</span> <span class="nt">-i</span> acme
-
-<span class="c"># Verify DNS propagation</span>
-dig your-domain.com
-</code></pre></div></div>
-
-<h3 id="network-debugging">Network Debugging</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># List all Docker networks</span>
-docker network <span class="nb">ls</span>
-
-<span class="c"># Inspect specific network</span>
-docker network inspect wg
-docker network inspect proxy-network
-
-<span class="c"># Check container network connections</span>
-docker inspect your-container | <span class="nb">grep</span> <span class="nt">-A</span> 20 <span class="s2">"Networks"</span>
-
-<span class="c"># Test connectivity between containers</span>
-docker <span class="nb">exec </span>container1 ping container2
-</code></pre></div></div>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>This setup gives you the best of both worlds: convenience when you’re at home and security when you’re traveling. You can:</p>
-
-<ul>
-  <li><strong>Access everything normally</strong> when on your home network</li>
-  <li><strong>Use VPN for sensitive services</strong> when traveling</li>
-  <li><strong>Keep some services completely public</strong> for legitimate external access</li>
-  <li><strong>Isolate critical services</strong> that should never touch the internet</li>
-</ul>
-
-<p>Happy homelabbing! 🏠🔧</p>
-
-<hr />
-
-<p><em>What services are you planning to add to your homelab? Share your setup in the comments below!</em></p>
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/traefik">Traefik</a> |
-						
-						<a href="/blog/tags/vpn">VPN</a> |
-						
-						<a href="/blog/tags/wireguard">WireGuard</a> |
-						
-						<a href="/blog/tags/homelab">Homelab</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+</code></pre><h2 id=prerequisites>Prerequisites<a hidden class=anchor aria-hidden=true href=#prerequisites>#</a></h2><p>Before we start, ensure you have:</p><ul><li>A server with Docker and Docker Compose installed</li><li>A domain name with DNS pointing to your server</li><li>Basic familiarity with Docker Compose</li><li>Traefik already running (or follow the basic setup below)</li></ul><h3 id=basic-traefik-setup>Basic Traefik Setup<a hidden class=anchor aria-hidden=true href=#basic-traefik-setup>#</a></h3><p>If you don&rsquo;t have Traefik running yet, here&rsquo;s a minimal configuration:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># traefik/docker-compose.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;3.8&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>traefik</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>traefik:v3.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>traefik</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>command</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--api.dashboard=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--providers.docker=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--providers.docker.exposedByDefault=false&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--entrypoints.web.address=:80&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--entrypoints.websecure.address=:443&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--certificatesresolvers.letsencrypt.acme.tlschallenge=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--certificatesresolvers.letsencrypt.acme.email=your-email@example.com&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ports</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;80:80&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;443:443&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;/var/run/docker.sock:/var/run/docker.sock:ro&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;./letsencrypt:/letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.traefik.rule=Host(`traefik.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.traefik.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.traefik.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><p>Create the network: <code>docker network create proxy-network</code></p><h2 id=setting-up-wireguard-with-wg-easy>Setting Up WireGuard with wg-easy<a hidden class=anchor aria-hidden=true href=#setting-up-wireguard-with-wg-easy>#</a></h2><p>WireGuard Easy (wg-easy) v15 is a complete rewrite that simplifies VPN management significantly. Unlike previous versions, it uses a web-based setup wizard instead of environment variables.</p><h3 id=wireguard-configuration>WireGuard Configuration<a hidden class=anchor aria-hidden=true href=#wireguard-configuration>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># wireguard/docker-compose.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;3.8&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>etc_wireguard</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>wg-easy</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>ghcr.io/wg-easy/wg-easy:15</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>wg-easy</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># v15 requires minimal environment variables</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>INSECURE=false </span><span class=w> </span><span class=c># Set to true if accessing via HTTP instead of HTTPS</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w> </span>{}<span class=w>  </span><span class=c># For Traefik access to web UI</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>wg</span><span class=p>:</span><span class=w>  </span><span class=c># VPN network with static IPs</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>ipv4_address</span><span class=p>:</span><span class=w> </span><span class=m>10.42.42.42</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>ipv6_address</span><span class=p>:</span><span class=w> </span><span class=l>fdcc:ad94:bacf:61a3::2a</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>etc_wireguard:/etc/wireguard</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/lib/modules:/lib/modules:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ports</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;51820:51820/udp&#34;</span><span class=w>  </span><span class=c># WireGuard VPN port (must be directly exposed)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># Port 51821 is handled internally by Traefik</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>unless-stopped</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>cap_add</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>NET_ADMIN</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>SYS_MODULE</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>sysctls</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>net.ipv4.ip_forward=1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>net.ipv4.conf.all.src_valid_mark=1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>net.ipv6.conf.all.disable_ipv6=0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>net.ipv6.conf.all.forwarding=1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>net.ipv6.conf.default.forwarding=1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># Traefik labels for HTTPS access to web management UI</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.wg-easy.rule=Host(`wg.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.wg-easy.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.wg-easy.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.wg-easy.loadbalancer.server.port=51821&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.docker.network=proxy-network&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>wg</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>wg </span><span class=w> </span><span class=c># Force exact network name</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>driver</span><span class=p>:</span><span class=w> </span><span class=l>bridge</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enable_ipv6</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ipam</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>driver</span><span class=p>:</span><span class=w> </span><span class=l>default</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>config</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span>- <span class=nt>subnet</span><span class=p>:</span><span class=w> </span><span class=m>10.42.42.0</span><span class=l>/24</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span>- <span class=nt>subnet</span><span class=p>:</span><span class=w> </span><span class=l>fdcc:ad94:bacf:61a3::/64</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h3 id=initial-setup>Initial Setup<a hidden class=anchor aria-hidden=true href=#initial-setup>#</a></h3><ol><li><p><strong>Deploy WireGuard:</strong></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=nb>cd</span> wireguard
+</span></span><span class=line><span class=cl>docker-compose up -d
+</span></span></code></pre></div></li><li><p><strong>Access the setup wizard:</strong></p><ul><li>Visit <code>https://wg.yourdomain.com</code></li><li>Complete the setup wizard:<ul><li>Server IP: Your server&rsquo;s public IP</li><li>Admin password: Choose a strong password</li><li>VPN subnet: <code>10.42.42.0/24</code></li><li>DNS servers: <code>1.1.1.1, 8.8.8.8</code></li></ul></li></ul></li><li><p><strong>Create your first VPN client:</strong></p><ul><li>Click &ldquo;Add Client&rdquo; in the web UI</li><li>Download the configuration or scan the QR code</li><li>Test the connection</li></ul></li></ol><h2 id=configuring-traefik-for-selective-access>Configuring Traefik for Selective Access<a hidden class=anchor aria-hidden=true href=#configuring-traefik-for-selective-access>#</a></h2><p>Now comes the magic! We&rsquo;ll create different access patterns using Traefik&rsquo;s IP whitelisting middleware.</p><h3 id=access-pattern-1-public-services>Access Pattern 1: Public Services<a hidden class=anchor aria-hidden=true href=#access-pattern-1-public-services>#</a></h3><p>These services are accessible from anywhere on the internet:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># examples/public-service.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>blog</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>nginx:alpine</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>blog</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./blog-content:/usr/share/nginx/html</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.blog.rule=Host(`blog.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.blog.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.blog.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.blog.loadbalancer.server.port=80&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># No IP restrictions - publicly accessible</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h3 id=access-pattern-2-vpn--home-network-only>Access Pattern 2: VPN + Home Network Only<a hidden class=anchor aria-hidden=true href=#access-pattern-2-vpn--home-network-only>#</a></h3><p>These services require either VPN access OR being on your home network:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># examples/mixed-access-service.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>admin-panel</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>your-admin-app:latest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>admin-panel</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.admin.rule=Host(`admin.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.admin.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.admin.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.admin.loadbalancer.server.port=3000&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># IP whitelist: VPN clients + home network + localhost</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.admin.middlewares=home-and-vpn&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h3 id=access-pattern-3-vpn-only-services>Access Pattern 3: VPN-Only Services<a hidden class=anchor aria-hidden=true href=#access-pattern-3-vpn-only-services>#</a></h3><p>These services are only accessible through the VPN:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># examples/vpn-only-service.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>monitoring</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>grafana/grafana:latest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>monitoring</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>GF_SECURITY_ADMIN_PASSWORD=secure-password</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>grafana_data:/var/lib/grafana</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.monitoring.rule=Host(`monitoring.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.monitoring.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.monitoring.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.monitoring.loadbalancer.server.port=3000&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># Strict VPN-only access</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.monitoring.middlewares=vpn-only&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>grafana_data</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h3 id=access-pattern-4-network-isolation>Access Pattern 4: Network Isolation<a hidden class=anchor aria-hidden=true href=#access-pattern-4-network-isolation>#</a></h3><p>For maximum security, some services can be completely isolated from the internet:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># examples/isolated-service.yml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>database</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>postgres:13</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>database</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>POSTGRES_DB=homelab</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>POSTGRES_USER=admin</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>POSTGRES_PASSWORD=secure-password</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>wg </span><span class=w> </span><span class=c># Only connected to VPN network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>postgres_data:/var/lib/postgresql/data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># No Traefik labels - only accessible via direct IP when connected to VPN</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># Access via: postgresql://10.42.42.43:5432/homelab</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>internal-api</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>your-internal-api:latest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>internal-api</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>wg</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>ipv4_address</span><span class=p>:</span><span class=w> </span><span class=m>10.42.42.50</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># Access via: http://10.42.42.50:8080 when connected to VPN</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>postgres_data</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>wg</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h2 id=example-service-configurations>Example Service Configurations<a hidden class=anchor aria-hidden=true href=#example-service-configurations>#</a></h2><p>Let&rsquo;s look at some real-world examples:</p><h3 id=change-detection-service-mixed-access>Change Detection Service (Mixed Access)<a hidden class=anchor aria-hidden=true href=#change-detection-service-mixed-access>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>changedetection</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>ghcr.io/dgtlmoon/changedetection.io</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>changedetection</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./data:/datastore</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>unless-stopped</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.changedetection.rule=Host(`cd.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.changedetection.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.changedetection.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.changedetection.loadbalancer.server.port=5000&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># Allow home network and VPN access</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.changedetection.middlewares=home-and-vpn&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.middlewares.home-and-vpn.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24,127.0.0.1/32&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h3 id=portainer-vpn-only>Portainer (VPN-Only)<a hidden class=anchor aria-hidden=true href=#portainer-vpn-only>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>portainer</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=l>portainer/portainer-ce:latest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>portainer</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>command</span><span class=p>:</span><span class=w> </span>-<span class=l>H unix:///var/run/docker.sock</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/var/run/docker.sock:/var/run/docker.sock</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>portainer_data:/data</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>proxy-network</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>labels</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.enable=true&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.portainer.rule=Host(`portainer.yourdomain.com`)&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.portainer.entrypoints=websecure&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.portainer.tls.certresolver=letsencrypt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.services.portainer.loadbalancer.server.port=9000&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># VPN-only access for security</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.routers.portainer.middlewares=vpn-only&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;traefik.http.middlewares.vpn-only.ipwhitelist.sourcerange=10.42.42.0/24&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>portainer_data</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>proxy-network</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></div><h2 id=testing-your-setup>Testing Your Setup<a hidden class=anchor aria-hidden=true href=#testing-your-setup>#</a></h2><h3 id=1-test-public-access>1. Test Public Access<a hidden class=anchor aria-hidden=true href=#1-test-public-access>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Should work from anywhere</span>
+</span></span><span class=line><span class=cl>curl -I https://blog.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 200 OK</span>
+</span></span></code></pre></div><h3 id=2-test-vpn-only-access>2. Test VPN-Only Access<a hidden class=anchor aria-hidden=true href=#2-test-vpn-only-access>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Without VPN - should be blocked</span>
+</span></span><span class=line><span class=cl>curl -I https://monitoring.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 403 Forbidden</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># With VPN connected - should work</span>
+</span></span><span class=line><span class=cl>curl -I https://monitoring.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 200 OK</span>
+</span></span></code></pre></div><h3 id=3-test-mixed-access>3. Test Mixed Access<a hidden class=anchor aria-hidden=true href=#3-test-mixed-access>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># From home network - should work</span>
+</span></span><span class=line><span class=cl>curl -I https://admin.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 200 OK</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># From mobile data (without VPN) - should be blocked</span>
+</span></span><span class=line><span class=cl>curl -I https://admin.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 403 Forbidden</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># From mobile data (with VPN) - should work</span>
+</span></span><span class=line><span class=cl>curl -I https://admin.yourdomain.com
+</span></span><span class=line><span class=cl><span class=c1># Expected: 200 OK</span>
+</span></span></code></pre></div><h3 id=4-monitor-access-logs>4. Monitor Access Logs<a hidden class=anchor aria-hidden=true href=#4-monitor-access-logs>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Monitor Traefik logs for IP restrictions</span>
+</span></span><span class=line><span class=cl>docker logs traefik --tail <span class=m>50</span> <span class=p>|</span> grep -E <span class=s2>&#34;(403|Forbidden|ipwhitelist)&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Monitor successful VPN connections</span>
+</span></span><span class=line><span class=cl>docker logs wg-easy --tail <span class=m>20</span>
+</span></span></code></pre></div><h2 id=security-considerations>Security Considerations<a hidden class=anchor aria-hidden=true href=#security-considerations>#</a></h2><h3 id=understanding-ip-ranges>Understanding IP Ranges<a hidden class=anchor aria-hidden=true href=#understanding-ip-ranges>#</a></h3><p>It&rsquo;s crucial to understand how IP whitelisting works:</p><ul><li><strong><code>10.42.42.0/24</code></strong>: Your VPN clients (WireGuard users)</li><li><strong><code>192.168.1.0/24</code></strong>: Your home network (adjust to match your router&rsquo;s range)</li><li><strong><code>127.0.0.1/32</code></strong>: Server localhost access</li></ul><h3 id=why-private-ips-are-safe>Why Private IPs Are Safe<a hidden class=anchor aria-hidden=true href=#why-private-ips-are-safe>#</a></h3><p>When you&rsquo;re at a friend&rsquo;s house with WiFi using <code>192.168.1.x</code>:</p><ul><li>Your device gets <code>192.168.1.50</code> (friend&rsquo;s network)</li><li>Friend&rsquo;s router has public IP <code>203.45.67.89</code></li><li><strong>Traefik sees</strong>: <code>203.45.67.89</code> (blocked!)</li><li><strong>Not</strong>: <code>192.168.1.50</code> (which would be allowed)</li></ul><p>Private IP ranges only work for actual local network access, not internet requests from similar ranges elsewhere.</p><h3 id=firewall-configuration>Firewall Configuration<a hidden class=anchor aria-hidden=true href=#firewall-configuration>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Allow WireGuard VPN port</span>
+</span></span><span class=line><span class=cl>sudo ufw allow 51820/udp
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Allow HTTPS (Traefik)</span>
+</span></span><span class=line><span class=cl>sudo ufw allow 443/tcp
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Allow HTTP (for redirects)</span>
+</span></span><span class=line><span class=cl>sudo ufw allow 80/tcp
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Block direct access to service ports</span>
+</span></span><span class=line><span class=cl>sudo ufw deny <span class=m>5000</span>  <span class=c1># Example: block direct access to change detection</span>
+</span></span><span class=line><span class=cl>sudo ufw deny <span class=m>3000</span>  <span class=c1># Example: block direct access to Grafana</span>
+</span></span></code></pre></div><h3 id=additional-security-measures>Additional Security Measures<a hidden class=anchor aria-hidden=true href=#additional-security-measures>#</a></h3><ol><li><strong>Use strong passwords</strong> for all admin interfaces</li><li><strong>Enable 2FA</strong> where available (WireGuard Easy v15 supports TOTP)</li><li><strong>Regular updates</strong> of all containers</li><li><strong>Monitor access logs</strong> for suspicious activity</li><li><strong>Backup configurations</strong> regularly</li></ol><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Backup WireGuard configs</span>
+</span></span><span class=line><span class=cl>docker <span class=nb>exec</span> wg-easy cat /etc/wireguard/wg0.json &gt; backup-<span class=k>$(</span>date +%Y%m%d<span class=k>)</span>.json
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Backup Traefik dynamic config</span>
+</span></span><span class=line><span class=cl>cp -r traefik/ backup-traefik-<span class=k>$(</span>date +%Y%m%d<span class=k>)</span>/
+</span></span></code></pre></div><h2 id=troubleshooting>Troubleshooting<a hidden class=anchor aria-hidden=true href=#troubleshooting>#</a></h2><h3 id=common-issues-and-solutions>Common Issues and Solutions<a hidden class=anchor aria-hidden=true href=#common-issues-and-solutions>#</a></h3><h4 id=issue-404-not-found-from-traefik>Issue: 404 Not Found from Traefik<a hidden class=anchor aria-hidden=true href=#issue-404-not-found-from-traefik>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check if container is in proxy-network</span>
+</span></span><span class=line><span class=cl>docker network inspect proxy-network <span class=p>|</span> grep your-service
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Verify Traefik can reach the service</span>
+</span></span><span class=line><span class=cl>docker <span class=nb>exec</span> traefik ping your-service-container
+</span></span></code></pre></div><h4 id=issue-vpn-clients-cant-access-services>Issue: VPN Clients Can&rsquo;t Access Services<a hidden class=anchor aria-hidden=true href=#issue-vpn-clients-cant-access-services>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check WireGuard client logs</span>
+</span></span><span class=line><span class=cl><span class=c1># On client: wg show</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Verify routing</span>
+</span></span><span class=line><span class=cl><span class=c1># On server: </span>
+</span></span><span class=line><span class=cl>docker <span class=nb>exec</span> wg-easy wg show
+</span></span><span class=line><span class=cl>ip route <span class=p>|</span> grep wg0
+</span></span></code></pre></div><h4 id=issue-ip-whitelisting-not-working>Issue: IP Whitelisting Not Working<a hidden class=anchor aria-hidden=true href=#issue-ip-whitelisting-not-working>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check what IP Traefik sees</span>
+</span></span><span class=line><span class=cl>docker logs traefik --tail <span class=m>50</span> <span class=p>|</span> grep your-domain
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Test IP detection</span>
+</span></span><span class=line><span class=cl>curl -H <span class=s2>&#34;X-Real-IP: 10.42.42.5&#34;</span> https://your-service.com
+</span></span></code></pre></div><h4 id=issue-certificate-errors>Issue: Certificate Errors<a hidden class=anchor aria-hidden=true href=#issue-certificate-errors>#</a></h4><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Check certificate resolver</span>
+</span></span><span class=line><span class=cl>docker logs traefik <span class=p>|</span> grep -i acme
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Verify DNS propagation</span>
+</span></span><span class=line><span class=cl>dig your-domain.com
+</span></span></code></pre></div><h3 id=network-debugging>Network Debugging<a hidden class=anchor aria-hidden=true href=#network-debugging>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># List all Docker networks</span>
+</span></span><span class=line><span class=cl>docker network ls
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Inspect specific network</span>
+</span></span><span class=line><span class=cl>docker network inspect wg
+</span></span><span class=line><span class=cl>docker network inspect proxy-network
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Check container network connections</span>
+</span></span><span class=line><span class=cl>docker inspect your-container <span class=p>|</span> grep -A <span class=m>20</span> <span class=s2>&#34;Networks&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Test connectivity between containers</span>
+</span></span><span class=line><span class=cl>docker <span class=nb>exec</span> container1 ping container2
+</span></span></code></pre></div><h2 id=conclusion>Conclusion<a hidden class=anchor aria-hidden=true href=#conclusion>#</a></h2><p>This setup gives you the best of both worlds: convenience when you&rsquo;re at home and security when you&rsquo;re traveling. You can:</p><ul><li><strong>Access everything normally</strong> when on your home network</li><li><strong>Use VPN for sensitive services</strong> when traveling</li><li><strong>Keep some services completely public</strong> for legitimate external access</li><li><strong>Isolate critical services</strong> that should never touch the internet</li></ul><p>Happy homelabbing! 🏠🔧</p><hr><p><em>What services are you planning to add to your homelab? Share your setup in the comments below!</em></p></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/traefik/>Traefik</a></li><li><a href=https://madhur.co.in/tags/vpn/>VPN</a></li><li><a href=https://madhur.co.in/tags/wireguard/>Wireguard</a></li><li><a href=https://madhur.co.in/tags/homelab/>Homelab</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2026/07/01/setup-email-smtp-relay-gmail.html><span class=title>« Prev</span>
+<span>Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation</span>
+</a><a class=next href=https://madhur.co.in/blog/2026/05/01/send-gmail-email-python.html><span class=title>Next »</span>
+<span>How to Send Emails from Python Using msmtp and Gmail</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on x" href="https://x.com/intent/tweet/?text=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html&amp;hashtags=Traefik%2cVPN%2cWireGuard%2cHomelab"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html&amp;title=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik&amp;summary=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html&title=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on whatsapp" href="https://api.whatsapp.com/send?text=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on telegram" href="https://telegram.me/share/url?text=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and Traefik on ycombinator" href="https://news.ycombinator.com/submitlink?t=Secure%20Your%20Homelab%3a%20Exposing%20Services%20Selectively%20with%20WireGuard%20VPN%20and%20Traefik&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f06%2f01%2fsecure-homelab-wireguard-docker-traefik.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

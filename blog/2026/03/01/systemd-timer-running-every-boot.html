@@ -1,412 +1,60 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Systemd timer running on every boot &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Systemd timer running on every boot" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Systemd timer running on every boot</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2026-03-01T00:00:00+05:30">March 01, 2026</time>
-    <span class="reading-time">4 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<blockquote>
-  <p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p>
-</blockquote>
-
-<h2 id="problem-description">Problem Description</h2>
-
-<p>A systemd timer configured with <code class="language-plaintext highlighter-rouge">OnCalendar=daily</code> and <code class="language-plaintext highlighter-rouge">Persistent=true</code> was executing its associated service on every system boot, in addition to the scheduled execution time. The expected behavior was execution only at the scheduled time, with persistent timers catching up on missed runs only when the system was offline during the scheduled time.</p>
-
-<h2 id="environment">Environment</h2>
-
-<ul>
-  <li><strong>System</strong>: User systemd instance (<code class="language-plaintext highlighter-rouge">systemctl --user</code>)</li>
-  <li><strong>Timer</strong>: <code class="language-plaintext highlighter-rouge">rednotebook-backup.timer</code></li>
-  <li><strong>Service</strong>: <code class="language-plaintext highlighter-rouge">rednotebook-backup.service</code></li>
-  <li><strong>Systemd version</strong>: Standard systemd installation</li>
-</ul>
-
-<h2 id="observed-behavior">Observed Behavior</h2>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Aug 13 20:59:24 - Service executed after boot
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Systemd timer running on every boot | Madhur Ahuja</title><meta name=keywords content="Systemd"><meta name=description content="Systemd timer running on every boot"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Systemd timer running on every boot"><meta property="og:description" content="Systemd timer running on every boot"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-03-01T00:00:00+00:00"><meta property="article:modified_time" content="2026-03-01T00:00:00+00:00"><meta property="article:tag" content="Systemd"><meta name=twitter:card content="summary"><meta name=twitter:title content="Systemd timer running on every boot"><meta name=twitter:description content="Systemd timer running on every boot"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Systemd timer running on every boot","item":"https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Systemd timer running on every boot","name":"Systemd timer running on every boot","description":"Systemd timer running on every boot","keywords":["Systemd"],"articleBody":" Disclaimer: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.\nProblem Description A systemd timer configured with OnCalendar=daily and Persistent=true was executing its associated service on every system boot, in addition to the scheduled execution time. The expected behavior was execution only at the scheduled time, with persistent timers catching up on missed runs only when the system was offline during the scheduled time.\nEnvironment System: User systemd instance (systemctl --user) Timer: rednotebook-backup.timer Service: rednotebook-backup.service Systemd version: Standard systemd installation Observed Behavior Aug 13 20:59:24 - Service executed after boot -- Boot f6bac27bcb034b92807c437ec2834916 -- Aug 13 21:10:50 - Service executed after boot -- Boot 18a831a9d19b415da72eb836e78ad866 -- Aug 13 21:11:20 - Service executed after boot The service executed immediately after each boot, regardless of the last execution time or scheduled interval.\nConfiguration Analysis Original Timer Configuration [Unit] Description=Run RedNotebook backup daily Requires=rednotebook-backup.service [Timer] OnCalendar=daily Persistent=true RandomizedDelaySec=300 [Install] WantedBy=timers.target Service Configuration [Unit] Description=RedNotebook GitHub Backup Service After=network-online.target Wants=network-online.target [Service] Type=oneshot ExecStart=%h/bin/rednotebook-backup.sh ExecStartPre=/bin/sleep 30 Environment=HOME=%h StandardOutput=journal StandardError=journal Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket Root Cause Analysis The issue stems from the Requires=rednotebook-backup.service directive in the timer unit’s [Unit] section.\nSystemd Dependency Resolution Timer activation: The timer unit is started by timers.target during boot Dependency resolution: Due to Requires=rednotebook-backup.service, systemd immediately activates the service unit when the timer starts Unintended execution: The service executes on boot, independent of the timer schedule Systemd Timer Mechanics Systemd timers automatically establish relationships with their target services through:\nImplicit naming convention: foo.timer automatically targets foo.service Automatic dependencies: Timer units gain an implicit Before= dependency on their target service No explicit linking required: The Unit= directive in [Timer] section is only needed when targeting a service with a different name From systemd.timer(5):\nTimer units automatically gain a Before= dependency on the service they are supposed to activate.\nSolution Remove the Requires= directive from the timer unit:\n[Unit] Description=Run RedNotebook backup daily # Removed: Requires=rednotebook-backup.service [Timer] OnCalendar=daily Persistent=true RandomizedDelaySec=300 [Install] WantedBy=timers.target Implementation systemctl --user stop rednotebook-backup.timer systemctl --user edit rednotebook-backup.timer # Add override: [Unit]\\nRequires= systemctl --user daemon-reload systemctl --user start rednotebook-backup.timer Verification Post-fix timer state:\nNEXT LEFT LAST PASSED UNIT ACTIVATES Thu 2025-08-14 00:02:17 IST 2h 54min - - rednotebook-backup.timer rednotebook-backup.service Multiple reboot test results:\nService does not execute on boot Timer maintains correct scheduling Service executes only at scheduled intervals Related Issues Common Misconceptions Explicit linking requirement: Many assume timers require explicit service dependencies Cargo-cult configuration: Copy-pasting examples with unnecessary Requires= directives Documentation gaps: Some tutorials incorrectly show Requires= as standard practice Alternative Diagnostic Approaches If removing Requires= doesn’t resolve the issue:\nCheck service enablement:\nsystemctl --user is-enabled rednotebook-backup.service Services triggered by timers should show static or disabled\nVerify service dependencies:\nsystemctl --user list-dependencies rednotebook-backup.service Check for WantedBy directives: Remove WantedBy= from service [Install] section\nTimer State Management Systemd maintains timer state in:\nSystem timers: /var/lib/systemd/timers/ User timers: ~/.local/share/systemd/ State corruption can cause similar symptoms but is less common than configuration issues.\nTechnical References systemd.timer(5) - Timer unit configuration systemd.unit(5) - Unit configuration directives systemd.special(7) - Special systemd units systemd GitHub Issue #14642 - Timer runs on every boot Conclusion The Requires= directive in systemd timer units creates an unnecessary dependency that causes service execution on timer activation (boot). Systemd’s implicit timer-to-service binding mechanism eliminates the need for explicit dependencies in standard configurations. This issue affects both user and system timer units and represents a common configuration anti-pattern in systemd timer implementations.\n","wordCount":"584","inLanguage":"en","datePublished":"2026-03-01T00:00:00Z","dateModified":"2026-03-01T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2026/03/01/systemd-timer-running-every-boot.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Systemd timer running on every boot</h1><div class=post-description>Systemd timer running on every boot</div><div class=post-meta><span title='2026-03-01 00:00:00 +0000 UTC'>March 1, 2026</span>&nbsp;·&nbsp;<span>3 min</span></div></header><div class="post-content md-content"><blockquote><p><strong>Disclaimer</strong>: This blog article has been generated with the assistance of AI. While the content is AI-generated, the software itself and the ideas behind it are the result of real development work and genuine user needs.</p></blockquote><h2 id=problem-description>Problem Description<a hidden class=anchor aria-hidden=true href=#problem-description>#</a></h2><p>A systemd timer configured with <code>OnCalendar=daily</code> and <code>Persistent=true</code> was executing its associated service on every system boot, in addition to the scheduled execution time. The expected behavior was execution only at the scheduled time, with persistent timers catching up on missed runs only when the system was offline during the scheduled time.</p><h2 id=environment>Environment<a hidden class=anchor aria-hidden=true href=#environment>#</a></h2><ul><li><strong>System</strong>: User systemd instance (<code>systemctl --user</code>)</li><li><strong>Timer</strong>: <code>rednotebook-backup.timer</code></li><li><strong>Service</strong>: <code>rednotebook-backup.service</code></li><li><strong>Systemd version</strong>: Standard systemd installation</li></ul><h2 id=observed-behavior>Observed Behavior<a hidden class=anchor aria-hidden=true href=#observed-behavior>#</a></h2><pre tabindex=0><code>Aug 13 20:59:24 - Service executed after boot
 -- Boot f6bac27bcb034b92807c437ec2834916 --
 Aug 13 21:10:50 - Service executed after boot
 -- Boot 18a831a9d19b415da72eb836e78ad866 --
 Aug 13 21:11:20 - Service executed after boot
-</code></pre></div></div>
-
-<p>The service executed immediately after each boot, regardless of the last execution time or scheduled interval.</p>
-
-<h2 id="configuration-analysis">Configuration Analysis</h2>
-
-<h3 id="original-timer-configuration">Original Timer Configuration</h3>
-
-<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
-<span class="py">Description</span><span class="p">=</span><span class="s">Run RedNotebook backup daily</span>
-<span class="py">Requires</span><span class="p">=</span><span class="s">rednotebook-backup.service</span>
-
-<span class="nn">[Timer]</span>
-<span class="py">OnCalendar</span><span class="p">=</span><span class="s">daily</span>
-<span class="py">Persistent</span><span class="p">=</span><span class="s">true</span>
-<span class="py">RandomizedDelaySec</span><span class="p">=</span><span class="s">300</span>
-
-<span class="nn">[Install]</span>
-<span class="py">WantedBy</span><span class="p">=</span><span class="s">timers.target</span>
-</code></pre></div></div>
-
-<h3 id="service-configuration">Service Configuration</h3>
-
-<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
-<span class="py">Description</span><span class="p">=</span><span class="s">RedNotebook GitHub Backup Service</span>
-<span class="py">After</span><span class="p">=</span><span class="s">network-online.target </span>
-<span class="py">Wants</span><span class="p">=</span><span class="s">network-online.target</span>
-
-<span class="nn">[Service]</span>
-<span class="py">Type</span><span class="p">=</span><span class="s">oneshot</span>
-<span class="py">ExecStart</span><span class="p">=</span><span class="s">%h/bin/rednotebook-backup.sh</span>
-<span class="py">ExecStartPre</span><span class="p">=</span><span class="s">/bin/sleep 30</span>
-<span class="py">Environment</span><span class="p">=</span><span class="s">HOME=%h</span>
-<span class="py">StandardOutput</span><span class="p">=</span><span class="s">journal</span>
-<span class="py">StandardError</span><span class="p">=</span><span class="s">journal</span>
-<span class="py">Environment</span><span class="p">=</span><span class="s">SSH_AUTH_SOCK=%t/ssh-agent.socket</span>
-</code></pre></div></div>
-
-<h2 id="root-cause-analysis">Root Cause Analysis</h2>
-
-<p>The issue stems from the <code class="language-plaintext highlighter-rouge">Requires=rednotebook-backup.service</code> directive in the timer unit’s <code class="language-plaintext highlighter-rouge">[Unit]</code> section.</p>
-
-<h3 id="systemd-dependency-resolution">Systemd Dependency Resolution</h3>
-
-<ol>
-  <li><strong>Timer activation</strong>: The timer unit is started by <code class="language-plaintext highlighter-rouge">timers.target</code> during boot</li>
-  <li><strong>Dependency resolution</strong>: Due to <code class="language-plaintext highlighter-rouge">Requires=rednotebook-backup.service</code>, systemd immediately activates the service unit when the timer starts</li>
-  <li><strong>Unintended execution</strong>: The service executes on boot, independent of the timer schedule</li>
-</ol>
-
-<h3 id="systemd-timer-mechanics">Systemd Timer Mechanics</h3>
-
-<p>Systemd timers automatically establish relationships with their target services through:</p>
-
-<ol>
-  <li><strong>Implicit naming convention</strong>: <code class="language-plaintext highlighter-rouge">foo.timer</code> automatically targets <code class="language-plaintext highlighter-rouge">foo.service</code></li>
-  <li><strong>Automatic dependencies</strong>: Timer units gain an implicit <code class="language-plaintext highlighter-rouge">Before=</code> dependency on their target service</li>
-  <li><strong>No explicit linking required</strong>: The <code class="language-plaintext highlighter-rouge">Unit=</code> directive in <code class="language-plaintext highlighter-rouge">[Timer]</code> section is only needed when targeting a service with a different name</li>
-</ol>
-
-<p>From <code class="language-plaintext highlighter-rouge">systemd.timer(5)</code>:</p>
-<blockquote>
-  <p>Timer units automatically gain a Before= dependency on the service they are supposed to activate.</p>
-</blockquote>
-
-<h2 id="solution">Solution</h2>
-
-<p>Remove the <code class="language-plaintext highlighter-rouge">Requires=</code> directive from the timer unit:</p>
-
-<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[Unit]</span>
-<span class="py">Description</span><span class="p">=</span><span class="s">Run RedNotebook backup daily</span>
-<span class="c"># Removed: Requires=rednotebook-backup.service
-</span>
-<span class="nn">[Timer]</span>
-<span class="py">OnCalendar</span><span class="p">=</span><span class="s">daily</span>
-<span class="py">Persistent</span><span class="p">=</span><span class="s">true</span>
-<span class="py">RandomizedDelaySec</span><span class="p">=</span><span class="s">300</span>
-
-<span class="nn">[Install]</span>
-<span class="py">WantedBy</span><span class="p">=</span><span class="s">timers.target</span>
-</code></pre></div></div>
-
-<h3 id="implementation">Implementation</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> stop rednotebook-backup.timer
-systemctl <span class="nt">--user</span> edit rednotebook-backup.timer
-<span class="c"># Add override: [Unit]\nRequires=</span>
-systemctl <span class="nt">--user</span> daemon-reload
-systemctl <span class="nt">--user</span> start rednotebook-backup.timer
-</code></pre></div></div>
-
-<h2 id="verification">Verification</h2>
-
-<p>Post-fix timer state:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NEXT                            LEFT     LAST PASSED UNIT                     ACTIVATES                 
+</code></pre><p>The service executed immediately after each boot, regardless of the last execution time or scheduled interval.</p><h2 id=configuration-analysis>Configuration Analysis<a hidden class=anchor aria-hidden=true href=#configuration-analysis>#</a></h2><h3 id=original-timer-configuration>Original Timer Configuration<a hidden class=anchor aria-hidden=true href=#original-timer-configuration>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>Description</span><span class=o>=</span><span class=s>Run RedNotebook backup daily</span>
+</span></span><span class=line><span class=cl><span class=na>Requires</span><span class=o>=</span><span class=s>rednotebook-backup.service</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Timer]</span>
+</span></span><span class=line><span class=cl><span class=na>OnCalendar</span><span class=o>=</span><span class=s>daily</span>
+</span></span><span class=line><span class=cl><span class=na>Persistent</span><span class=o>=</span><span class=s>true</span>
+</span></span><span class=line><span class=cl><span class=na>RandomizedDelaySec</span><span class=o>=</span><span class=s>300</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>timers.target</span>
+</span></span></code></pre></div><h3 id=service-configuration>Service Configuration<a hidden class=anchor aria-hidden=true href=#service-configuration>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>Description</span><span class=o>=</span><span class=s>RedNotebook GitHub Backup Service</span>
+</span></span><span class=line><span class=cl><span class=na>After</span><span class=o>=</span><span class=s>network-online.target </span>
+</span></span><span class=line><span class=cl><span class=na>Wants</span><span class=o>=</span><span class=s>network-online.target</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Service]</span>
+</span></span><span class=line><span class=cl><span class=na>Type</span><span class=o>=</span><span class=s>oneshot</span>
+</span></span><span class=line><span class=cl><span class=na>ExecStart</span><span class=o>=</span><span class=s>%h/bin/rednotebook-backup.sh</span>
+</span></span><span class=line><span class=cl><span class=na>ExecStartPre</span><span class=o>=</span><span class=s>/bin/sleep 30</span>
+</span></span><span class=line><span class=cl><span class=na>Environment</span><span class=o>=</span><span class=s>HOME=%h</span>
+</span></span><span class=line><span class=cl><span class=na>StandardOutput</span><span class=o>=</span><span class=s>journal</span>
+</span></span><span class=line><span class=cl><span class=na>StandardError</span><span class=o>=</span><span class=s>journal</span>
+</span></span><span class=line><span class=cl><span class=na>Environment</span><span class=o>=</span><span class=s>SSH_AUTH_SOCK=%t/ssh-agent.socket</span>
+</span></span></code></pre></div><h2 id=root-cause-analysis>Root Cause Analysis<a hidden class=anchor aria-hidden=true href=#root-cause-analysis>#</a></h2><p>The issue stems from the <code>Requires=rednotebook-backup.service</code> directive in the timer unit&rsquo;s <code>[Unit]</code> section.</p><h3 id=systemd-dependency-resolution>Systemd Dependency Resolution<a hidden class=anchor aria-hidden=true href=#systemd-dependency-resolution>#</a></h3><ol><li><strong>Timer activation</strong>: The timer unit is started by <code>timers.target</code> during boot</li><li><strong>Dependency resolution</strong>: Due to <code>Requires=rednotebook-backup.service</code>, systemd immediately activates the service unit when the timer starts</li><li><strong>Unintended execution</strong>: The service executes on boot, independent of the timer schedule</li></ol><h3 id=systemd-timer-mechanics>Systemd Timer Mechanics<a hidden class=anchor aria-hidden=true href=#systemd-timer-mechanics>#</a></h3><p>Systemd timers automatically establish relationships with their target services through:</p><ol><li><strong>Implicit naming convention</strong>: <code>foo.timer</code> automatically targets <code>foo.service</code></li><li><strong>Automatic dependencies</strong>: Timer units gain an implicit <code>Before=</code> dependency on their target service</li><li><strong>No explicit linking required</strong>: The <code>Unit=</code> directive in <code>[Timer]</code> section is only needed when targeting a service with a different name</li></ol><p>From <code>systemd.timer(5)</code>:</p><blockquote><p>Timer units automatically gain a Before= dependency on the service they are supposed to activate.</p></blockquote><h2 id=solution>Solution<a hidden class=anchor aria-hidden=true href=#solution>#</a></h2><p>Remove the <code>Requires=</code> directive from the timer unit:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-ini data-lang=ini><span class=line><span class=cl><span class=k>[Unit]</span>
+</span></span><span class=line><span class=cl><span class=na>Description</span><span class=o>=</span><span class=s>Run RedNotebook backup daily</span>
+</span></span><span class=line><span class=cl><span class=c1># Removed: Requires=rednotebook-backup.service</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Timer]</span>
+</span></span><span class=line><span class=cl><span class=na>OnCalendar</span><span class=o>=</span><span class=s>daily</span>
+</span></span><span class=line><span class=cl><span class=na>Persistent</span><span class=o>=</span><span class=s>true</span>
+</span></span><span class=line><span class=cl><span class=na>RandomizedDelaySec</span><span class=o>=</span><span class=s>300</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>[Install]</span>
+</span></span><span class=line><span class=cl><span class=na>WantedBy</span><span class=o>=</span><span class=s>timers.target</span>
+</span></span></code></pre></div><h3 id=implementation>Implementation<a hidden class=anchor aria-hidden=true href=#implementation>#</a></h3><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user stop rednotebook-backup.timer
+</span></span><span class=line><span class=cl>systemctl --user edit rednotebook-backup.timer
+</span></span><span class=line><span class=cl><span class=c1># Add override: [Unit]\nRequires=</span>
+</span></span><span class=line><span class=cl>systemctl --user daemon-reload
+</span></span><span class=line><span class=cl>systemctl --user start rednotebook-backup.timer
+</span></span></code></pre></div><h2 id=verification>Verification<a hidden class=anchor aria-hidden=true href=#verification>#</a></h2><p>Post-fix timer state:</p><pre tabindex=0><code>NEXT                            LEFT     LAST PASSED UNIT                     ACTIVATES                 
 Thu 2025-08-14 00:02:17 IST    2h 54min  -    -      rednotebook-backup.timer rednotebook-backup.service
-</code></pre></div></div>
-
-<p>Multiple reboot test results:</p>
-<ul>
-  <li>Service does not execute on boot</li>
-  <li>Timer maintains correct scheduling</li>
-  <li>Service executes only at scheduled intervals</li>
-</ul>
-
-<h2 id="related-issues">Related Issues</h2>
-
-<h3 id="common-misconceptions">Common Misconceptions</h3>
-
-<ol>
-  <li><strong>Explicit linking requirement</strong>: Many assume timers require explicit service dependencies</li>
-  <li><strong>Cargo-cult configuration</strong>: Copy-pasting examples with unnecessary <code class="language-plaintext highlighter-rouge">Requires=</code> directives</li>
-  <li><strong>Documentation gaps</strong>: Some tutorials incorrectly show <code class="language-plaintext highlighter-rouge">Requires=</code> as standard practice</li>
-</ol>
-
-<h3 id="alternative-diagnostic-approaches">Alternative Diagnostic Approaches</h3>
-
-<p>If removing <code class="language-plaintext highlighter-rouge">Requires=</code> doesn’t resolve the issue:</p>
-
-<ol>
-  <li><strong>Check service enablement</strong>:
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> is-enabled rednotebook-backup.service
-</code></pre></div>    </div>
-    <p>Services triggered by timers should show <code class="language-plaintext highlighter-rouge">static</code> or <code class="language-plaintext highlighter-rouge">disabled</code></p>
-  </li>
-  <li><strong>Verify service dependencies</strong>:
-    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl <span class="nt">--user</span> list-dependencies rednotebook-backup.service
-</code></pre></div>    </div>
-  </li>
-  <li><strong>Check for WantedBy directives</strong>: Remove <code class="language-plaintext highlighter-rouge">WantedBy=</code> from service <code class="language-plaintext highlighter-rouge">[Install]</code> section</li>
-</ol>
-
-<h3 id="timer-state-management">Timer State Management</h3>
-
-<p>Systemd maintains timer state in:</p>
-<ul>
-  <li>System timers: <code class="language-plaintext highlighter-rouge">/var/lib/systemd/timers/</code></li>
-  <li>User timers: <code class="language-plaintext highlighter-rouge">~/.local/share/systemd/</code></li>
-</ul>
-
-<p>State corruption can cause similar symptoms but is less common than configuration issues.</p>
-
-<h2 id="technical-references">Technical References</h2>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">systemd.timer(5)</code> - Timer unit configuration</li>
-  <li><code class="language-plaintext highlighter-rouge">systemd.unit(5)</code> - Unit configuration directives</li>
-  <li><code class="language-plaintext highlighter-rouge">systemd.special(7)</code> - Special systemd units</li>
-  <li><a href="https://github.com/systemd/systemd/issues/14642">systemd GitHub Issue #14642</a> - Timer runs on every boot</li>
-</ul>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>The <code class="language-plaintext highlighter-rouge">Requires=</code> directive in systemd timer units creates an unnecessary dependency that causes service execution on timer activation (boot). Systemd’s implicit timer-to-service binding mechanism eliminates the need for explicit dependencies in standard configurations. This issue affects both user and system timer units and represents a common configuration anti-pattern in systemd timer implementations.</p>
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/systemd">Systemd</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+</code></pre><p>Multiple reboot test results:</p><ul><li>Service does not execute on boot</li><li>Timer maintains correct scheduling</li><li>Service executes only at scheduled intervals</li></ul><h2 id=related-issues>Related Issues<a hidden class=anchor aria-hidden=true href=#related-issues>#</a></h2><h3 id=common-misconceptions>Common Misconceptions<a hidden class=anchor aria-hidden=true href=#common-misconceptions>#</a></h3><ol><li><strong>Explicit linking requirement</strong>: Many assume timers require explicit service dependencies</li><li><strong>Cargo-cult configuration</strong>: Copy-pasting examples with unnecessary <code>Requires=</code> directives</li><li><strong>Documentation gaps</strong>: Some tutorials incorrectly show <code>Requires=</code> as standard practice</li></ol><h3 id=alternative-diagnostic-approaches>Alternative Diagnostic Approaches<a hidden class=anchor aria-hidden=true href=#alternative-diagnostic-approaches>#</a></h3><p>If removing <code>Requires=</code> doesn&rsquo;t resolve the issue:</p><ol><li><p><strong>Check service enablement</strong>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user is-enabled rednotebook-backup.service
+</span></span></code></pre></div><p>Services triggered by timers should show <code>static</code> or <code>disabled</code></p></li><li><p><strong>Verify service dependencies</strong>:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>systemctl --user list-dependencies rednotebook-backup.service
+</span></span></code></pre></div></li><li><p><strong>Check for WantedBy directives</strong>: Remove <code>WantedBy=</code> from service <code>[Install]</code> section</p></li></ol><h3 id=timer-state-management>Timer State Management<a hidden class=anchor aria-hidden=true href=#timer-state-management>#</a></h3><p>Systemd maintains timer state in:</p><ul><li>System timers: <code>/var/lib/systemd/timers/</code></li><li>User timers: <code>~/.local/share/systemd/</code></li></ul><p>State corruption can cause similar symptoms but is less common than configuration issues.</p><h2 id=technical-references>Technical References<a hidden class=anchor aria-hidden=true href=#technical-references>#</a></h2><ul><li><code>systemd.timer(5)</code> - Timer unit configuration</li><li><code>systemd.unit(5)</code> - Unit configuration directives</li><li><code>systemd.special(7)</code> - Special systemd units</li><li><a href=https://github.com/systemd/systemd/issues/14642>systemd GitHub Issue #14642</a> - Timer runs on every boot</li></ul><h2 id=conclusion>Conclusion<a hidden class=anchor aria-hidden=true href=#conclusion>#</a></h2><p>The <code>Requires=</code> directive in systemd timer units creates an unnecessary dependency that causes service execution on timer activation (boot). Systemd&rsquo;s implicit timer-to-service binding mechanism eliminates the need for explicit dependencies in standard configurations. This issue affects both user and system timer units and represents a common configuration anti-pattern in systemd timer implementations.</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/systemd/>Systemd</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2026/04/01/block-storage-vs-object-storage.html><span class=title>« Prev</span>
+<span>Block Storage vs Object Storage</span>
+</a><a class=next href=https://madhur.co.in/blog/2026/02/01/conky-google-calendar.html><span class=title>Next »</span>
+<span>Displaying Google Calendar Events in Conky</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on x" href="https://x.com/intent/tweet/?text=Systemd%20timer%20running%20on%20every%20boot&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html&amp;hashtags=Systemd"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html&amp;title=Systemd%20timer%20running%20on%20every%20boot&amp;summary=Systemd%20timer%20running%20on%20every%20boot&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html&title=Systemd%20timer%20running%20on%20every%20boot"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on whatsapp" href="https://api.whatsapp.com/send?text=Systemd%20timer%20running%20on%20every%20boot%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on telegram" href="https://telegram.me/share/url?text=Systemd%20timer%20running%20on%20every%20boot&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Systemd timer running on every boot on ycombinator" href="https://news.ycombinator.com/submitlink?t=Systemd%20timer%20running%20on%20every%20boot&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2026%2f03%2f01%2fsystemd-timer-running-every-boot.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

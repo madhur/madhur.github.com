@@ -1,313 +1,70 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Create a couchbase bucket during build of the container &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Create a couchbase bucket during build of the container" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Create a couchbase bucket during build of the container</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2016-07-07T00:00:00+05:30">July 07, 2016</time>
-    <span class="reading-time">2 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<p>We are using docker to automate the develop environments through <a href="https://docs.docker.com/compose/">docker compose</a>. We use couchbase heavily in our applications. One problem we faced is that if you boot up the <a href="https://hub.docker.com/r/couchbase/server/">docker image of couchbase</a>, you will have to manually perform the setup process, create buckets and so on.  Performing all of these steps manually and everytime is time consuming and not at all ideal.</p>
-
-<p>I will show you how we solved this problem and automated these steps through <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a></p>
-
-<p>The key thing here is that Couchbase exposes a set of <a href="http://docs.couchbase.com/admin/admin/rest-intro.html">services</a> to perform each of the operation which can be invoked just after the server start.</p>
-
-<p>We are using <code class="language-plaintext highlighter-rouge">docker-compose</code> and hence our <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> is as follows:</p>
-
-<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2'</span>
-<span class="na">services</span><span class="pi">:</span>
-  <span class="na">couchbase</span><span class="pi">:</span>
-    <span class="na">build</span><span class="pi">:</span> <span class="s">couchbase/</span>
-    <span class="na">ports</span><span class="pi">:</span>
-     <span class="pi">-</span> <span class="s">8091:8091</span>
-     <span class="pi">-</span> <span class="s">8092:8092</span> 
-     <span class="pi">-</span> <span class="s">8093:8093</span> 
-     <span class="pi">-</span> <span class="s">11210:11210</span></code></pre></figure>
-
-<p>Through <code class="language-plaintext highlighter-rouge">build: couchbase/</code>, I am pointing to a couchbase directory which contains our <code class="language-plaintext highlighter-rouge">Dockerfile</code> and a script <code class="language-plaintext highlighter-rouge">configure-node.sh</code> which invokes the REST API endpoints of couchbase.</p>
-
-<p>Here is the very simplistic <code class="language-plaintext highlighter-rouge">Dockerfile</code></p>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">FROM couchbase:community-3.1.3
-
-COPY configure-node.sh /opt/couchbase
-
-CMD ["/opt/couchbase/configure-node.sh"]</code></pre></figure>
-
-<p>We use the following script to configure the node.</p>
-
-<p>All the files are given in this <a href="https://github.com/madhur/couchbase-docker">github repo</a></p>
-
-<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="nb">set</span> <span class="nt">-m</span>
-
-/entrypoint.sh couchbase-server &amp;
-
-<span class="nb">sleep </span>60
-
-<span class="c"># Setup index and memory quota</span>
-curl <span class="nt">-v</span> <span class="nt">-X</span> POST http://127.0.0.1:8091/pools/default <span class="nt">-d</span> <span class="nv">memoryQuota</span><span class="o">=</span>300 <span class="nt">-d</span> <span class="nv">indexMemoryQuota</span><span class="o">=</span>300
-
-<span class="c"># Setup services</span>
-curl <span class="nt">-v</span> http://127.0.0.1:8091/node/controller/setupServices <span class="nt">-d</span> <span class="nv">services</span><span class="o">=</span>kv%2Cn1ql%2Cindex
-
-<span class="c"># Setup credentials</span>
-curl <span class="nt">-v</span> http://127.0.0.1:8091/settings/web <span class="nt">-d</span> <span class="nv">port</span><span class="o">=</span>8091 <span class="nt">-d</span> <span class="nv">username</span><span class="o">=</span>Administrator <span class="nt">-d</span> <span class="nv">password</span><span class="o">=</span>password
-
-<span class="c"># Load travel-sample bucket</span>
-<span class="c">#curl -v -u Administrator:password -X POST http://127.0.0.1:8091/sampleBuckets/install -d '["travel-sample"]'</span>
-curl <span class="nt">-X</span> POST <span class="nt">-u</span> Administrator:password <span class="nt">-d</span> <span class="nv">name</span><span class="o">=</span>default <span class="nt">-d</span> <span class="nv">ramQuotaMB</span><span class="o">=</span>100 <span class="nt">-d</span> <span class="nv">authType</span><span class="o">=</span>none <span class="nt">-d</span> <span class="nv">replicaNumber</span><span class="o">=</span>2 <span class="nt">-d</span> <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
-
-
-curl <span class="nt">-X</span> POST <span class="nt">-u</span> Administrator:password <span class="nt">-d</span> <span class="nv">name</span><span class="o">=</span>feed <span class="nt">-d</span> <span class="nv">ramQuotaMB</span><span class="o">=</span>100 <span class="nt">-d</span> <span class="nv">authType</span><span class="o">=</span>none <span class="nt">-d</span> <span class="nv">replicaNumber</span><span class="o">=</span>2 <span class="nt">-d</span> <span class="nv">proxyPort</span><span class="o">=</span>11215 http://127.0.0.1:8091/pools/default/buckets
-
-
-<span class="c"># Setup Memory Optimized Indexes</span>
-curl <span class="nt">-i</span> <span class="nt">-u</span> Administrator:password <span class="nt">-X</span> POST http://127.0.0.1:8091/settings/indexes <span class="nt">-d</span> <span class="s1">'storageMode=memory_optimized'</span>
-
-<span class="nb">echo</span> <span class="s2">"Type: </span><span class="nv">$TYPE</span><span class="s2">, Master: </span><span class="nv">$COUCHBASE_MASTER</span><span class="s2">"</span>
-
-<span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$TYPE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"worker"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
-  </span><span class="nb">sleep </span>15
-  <span class="nb">set </span><span class="nv">IP</span><span class="o">=</span><span class="sb">`</span><span class="nb">hostname</span> <span class="nt">-I</span><span class="sb">`</span>
-  couchbase-cli server-add <span class="nt">--cluster</span><span class="o">=</span><span class="nv">$COUCHBASE_MASTER</span>:8091 <span class="nt">--user</span> Administrator <span class="nt">--password</span> password <span class="nt">--server-add</span><span class="o">=</span><span class="nv">$IP</span>
-  <span class="c"># TODO: Hack with the cuts, use jq may be better.</span>
-  <span class="c">#KNOWN_NODES=`curl -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/addNode \</span>
-  <span class="c">#  -d hostname=$IP -d user=Administrator -d password=password -d services=kv,n1ql,index | cut -d: -f2 | cut -d\" -f 2 | sed -e   's/@/%40/g'`</span>
-
-  <span class="k">if</span> <span class="o">[</span> <span class="s2">"</span><span class="nv">$AUTO_REBALANCE</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"true"</span> <span class="o">]</span><span class="p">;</span> <span class="k">then
-    </span><span class="nb">echo</span> <span class="s2">"Auto Rebalance: </span><span class="nv">$AUTO_REBALANCE</span><span class="s2">"</span>
-    <span class="nb">sleep </span>10
-    couchbase-cli rebalance <span class="nt">-c</span> <span class="nv">$COUCHBASE_MASTER</span>:8091 <span class="nt">-u</span> Administrator <span class="nt">-p</span> password <span class="nt">--server-add</span><span class="o">=</span><span class="nv">$IP</span>
-    <span class="c">#curl -v -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/rebalance --data "knownNodes=$KNOWN_NODES&amp;ejectedNodes="</span>
-  <span class="k">fi</span><span class="p">;</span>
-<span class="k">fi</span><span class="p">;</span>
-
-<span class="nb">fg </span>1</code></pre></figure>
-
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/couchbase">Couchbase</a> |
-						
-						<a href="/blog/tags/docker">Docker</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Create a couchbase bucket during build of the container | Madhur Ahuja</title><meta name=keywords content="Couchbase,Docker"><meta name=description content="Create a couchbase bucket during build of the container"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Create a couchbase bucket during build of the container"><meta property="og:description" content="Create a couchbase bucket during build of the container"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2016-07-07T00:00:00+00:00"><meta property="article:modified_time" content="2016-07-07T00:00:00+00:00"><meta property="article:tag" content="Couchbase"><meta property="article:tag" content="Docker"><meta name=twitter:card content="summary"><meta name=twitter:title content="Create a couchbase bucket during build of the container"><meta name=twitter:description content="Create a couchbase bucket during build of the container"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Create a couchbase bucket during build of the container","item":"https://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Create a couchbase bucket during build of the container","name":"Create a couchbase bucket during build of the container","description":"Create a couchbase bucket during build of the container","keywords":["Couchbase","Docker"],"articleBody":"We are using docker to automate the develop environments through docker compose. We use couchbase heavily in our applications. One problem we faced is that if you boot up the docker image of couchbase, you will have to manually perform the setup process, create buckets and so on. Performing all of these steps manually and everytime is time consuming and not at all ideal.\nI will show you how we solved this problem and automated these steps through Dockerfile\nThe key thing here is that Couchbase exposes a set of services to perform each of the operation which can be invoked just after the server start.\nWe are using docker-compose and hence our docker-compose.yml is as follows:\nversion: '2' services: couchbase: build: couchbase/ ports: - 8091:8091 - 8092:8092 - 8093:8093 - 11210:11210 Through build: couchbase/, I am pointing to a couchbase directory which contains our Dockerfile and a script configure-node.sh which invokes the REST API endpoints of couchbase.\nHere is the very simplistic Dockerfile\nFROM couchbase:community-3.1.3 COPY configure-node.sh /opt/couchbase CMD [\"/opt/couchbase/configure-node.sh\"] We use the following script to configure the node.\nAll the files are given in this github repo\nset -m /entrypoint.sh couchbase-server \u0026 sleep 60 # Setup index and memory quota curl -v -X POST http://127.0.0.1:8091/pools/default -d memoryQuota=300 -d indexMemoryQuota=300 # Setup services curl -v http://127.0.0.1:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex # Setup credentials curl -v http://127.0.0.1:8091/settings/web -d port=8091 -d username=Administrator -d password=password # Load travel-sample bucket #curl -v -u Administrator:password -X POST http://127.0.0.1:8091/sampleBuckets/install -d '[\"travel-sample\"]' curl -X POST -u Administrator:password -d name=default -d ramQuotaMB=100 -d authType=none -d replicaNumber=2 -d proxyPort=11215 http://127.0.0.1:8091/pools/default/buckets curl -X POST -u Administrator:password -d name=feed -d ramQuotaMB=100 -d authType=none -d replicaNumber=2 -d proxyPort=11215 http://127.0.0.1:8091/pools/default/buckets # Setup Memory Optimized Indexes curl -i -u Administrator:password -X POST http://127.0.0.1:8091/settings/indexes -d 'storageMode=memory_optimized' echo \"Type: $TYPE, Master: $COUCHBASE_MASTER\" if [ \"$TYPE\" = \"worker\" ]; then sleep 15 set IP=`hostname -I` couchbase-cli server-add --cluster=$COUCHBASE_MASTER:8091 --user Administrator --password password --server-add=$IP # TODO: Hack with the cuts, use jq may be better. #KNOWN_NODES=`curl -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/addNode \\ # -d hostname=$IP -d user=Administrator -d password=password -d services=kv,n1ql,index | cut -d: -f2 | cut -d\\\" -f 2 | sed -e 's/@/%40/g'` if [ \"$AUTO_REBALANCE\" = \"true\" ]; then echo \"Auto Rebalance: $AUTO_REBALANCE\" sleep 10 couchbase-cli rebalance -c $COUCHBASE_MASTER:8091 -u Administrator -p password --server-add=$IP #curl -v -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/rebalance --data \"knownNodes=$KNOWN_NODES\u0026ejectedNodes=\" fi; fi; fg 1 ","wordCount":"390","inLanguage":"en","datePublished":"2016-07-07T00:00:00Z","dateModified":"2016-07-07T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2016/07/07/create-couchbase-bucket-docker.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Create a couchbase bucket during build of the container</h1><div class=post-description>Create a couchbase bucket during build of the container</div><div class=post-meta><span title='2016-07-07 00:00:00 +0000 UTC'>July 7, 2016</span>&nbsp;·&nbsp;<span>2 min</span></div></header><div class="post-content md-content"><p>We are using docker to automate the develop environments through <a href=https://docs.docker.com/compose/>docker compose</a>. We use couchbase heavily in our applications. One problem we faced is that if you boot up the <a href=https://hub.docker.com/r/couchbase/server/>docker image of couchbase</a>, you will have to manually perform the setup process, create buckets and so on. Performing all of these steps manually and everytime is time consuming and not at all ideal.</p><p>I will show you how we solved this problem and automated these steps through <a href=https://docs.docker.com/engine/reference/builder/>Dockerfile</a></p><p>The key thing here is that Couchbase exposes a set of <a href=http://docs.couchbase.com/admin/admin/rest-intro.html>services</a> to perform each of the operation which can be invoked just after the server start.</p><p>We are using <code>docker-compose</code> and hence our <code>docker-compose.yml</code> is as follows:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;2&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>couchbase</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>build</span><span class=p>:</span><span class=w> </span><span class=l>couchbase/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ports</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>     </span>- <span class=m>8091</span><span class=p>:</span><span class=m>8091</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>     </span>- <span class=m>8092</span><span class=p>:</span><span class=m>8092</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>     </span>- <span class=m>8093</span><span class=p>:</span><span class=m>8093</span><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>     </span>- <span class=m>11210</span><span class=p>:</span><span class=m>11210</span><span class=w>
+</span></span></span></code></pre></div><p>Through <code>build: couchbase/</code>, I am pointing to a couchbase directory which contains our <code>Dockerfile</code> and a script <code>configure-node.sh</code> which invokes the REST API endpoints of couchbase.</p><p>Here is the very simplistic <code>Dockerfile</code></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>FROM couchbase:community-3.1.3
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>COPY configure-node.sh /opt/couchbase
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>CMD [&#34;/opt/couchbase/configure-node.sh&#34;]
+</span></span></code></pre></div><p>We use the following script to configure the node.</p><p>All the files are given in this <a href=https://github.com/madhur/couchbase-docker>github repo</a></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=nb>set</span> -m
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>/entrypoint.sh couchbase-server <span class=p>&amp;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>sleep <span class=m>60</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Setup index and memory quota</span>
+</span></span><span class=line><span class=cl>curl -v -X POST http://127.0.0.1:8091/pools/default -d <span class=nv>memoryQuota</span><span class=o>=</span><span class=m>300</span> -d <span class=nv>indexMemoryQuota</span><span class=o>=</span><span class=m>300</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Setup services</span>
+</span></span><span class=line><span class=cl>curl -v http://127.0.0.1:8091/node/controller/setupServices -d <span class=nv>services</span><span class=o>=</span>kv%2Cn1ql%2Cindex
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Setup credentials</span>
+</span></span><span class=line><span class=cl>curl -v http://127.0.0.1:8091/settings/web -d <span class=nv>port</span><span class=o>=</span><span class=m>8091</span> -d <span class=nv>username</span><span class=o>=</span>Administrator -d <span class=nv>password</span><span class=o>=</span>password
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Load travel-sample bucket</span>
+</span></span><span class=line><span class=cl><span class=c1>#curl -v -u Administrator:password -X POST http://127.0.0.1:8091/sampleBuckets/install -d &#39;[&#34;travel-sample&#34;]&#39;</span>
+</span></span><span class=line><span class=cl>curl -X POST -u Administrator:password -d <span class=nv>name</span><span class=o>=</span>default -d <span class=nv>ramQuotaMB</span><span class=o>=</span><span class=m>100</span> -d <span class=nv>authType</span><span class=o>=</span>none -d <span class=nv>replicaNumber</span><span class=o>=</span><span class=m>2</span> -d <span class=nv>proxyPort</span><span class=o>=</span><span class=m>11215</span> http://127.0.0.1:8091/pools/default/buckets
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>curl -X POST -u Administrator:password -d <span class=nv>name</span><span class=o>=</span>feed -d <span class=nv>ramQuotaMB</span><span class=o>=</span><span class=m>100</span> -d <span class=nv>authType</span><span class=o>=</span>none -d <span class=nv>replicaNumber</span><span class=o>=</span><span class=m>2</span> -d <span class=nv>proxyPort</span><span class=o>=</span><span class=m>11215</span> http://127.0.0.1:8091/pools/default/buckets
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Setup Memory Optimized Indexes</span>
+</span></span><span class=line><span class=cl>curl -i -u Administrator:password -X POST http://127.0.0.1:8091/settings/indexes -d <span class=s1>&#39;storageMode=memory_optimized&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;Type: </span><span class=nv>$TYPE</span><span class=s2>, Master: </span><span class=nv>$COUCHBASE_MASTER</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=o>[</span> <span class=s2>&#34;</span><span class=nv>$TYPE</span><span class=s2>&#34;</span> <span class=o>=</span> <span class=s2>&#34;worker&#34;</span> <span class=o>]</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>  sleep <span class=m>15</span>
+</span></span><span class=line><span class=cl>  <span class=nb>set</span> <span class=nv>IP</span><span class=o>=</span><span class=sb>`</span>hostname -I<span class=sb>`</span>
+</span></span><span class=line><span class=cl>  couchbase-cli server-add --cluster<span class=o>=</span><span class=nv>$COUCHBASE_MASTER</span>:8091 --user Administrator --password password --server-add<span class=o>=</span><span class=nv>$IP</span>
+</span></span><span class=line><span class=cl>  <span class=c1># TODO: Hack with the cuts, use jq may be better.</span>
+</span></span><span class=line><span class=cl>  <span class=c1>#KNOWN_NODES=`curl -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/addNode \</span>
+</span></span><span class=line><span class=cl>  <span class=c1>#  -d hostname=$IP -d user=Administrator -d password=password -d services=kv,n1ql,index | cut -d: -f2 | cut -d\&#34; -f 2 | sed -e   &#39;s/@/%40/g&#39;`</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=o>[</span> <span class=s2>&#34;</span><span class=nv>$AUTO_REBALANCE</span><span class=s2>&#34;</span> <span class=o>=</span> <span class=s2>&#34;true&#34;</span> <span class=o>]</span><span class=p>;</span> <span class=k>then</span>
+</span></span><span class=line><span class=cl>    <span class=nb>echo</span> <span class=s2>&#34;Auto Rebalance: </span><span class=nv>$AUTO_REBALANCE</span><span class=s2>&#34;</span>
+</span></span><span class=line><span class=cl>    sleep <span class=m>10</span>
+</span></span><span class=line><span class=cl>    couchbase-cli rebalance -c <span class=nv>$COUCHBASE_MASTER</span>:8091 -u Administrator -p password --server-add<span class=o>=</span><span class=nv>$IP</span>
+</span></span><span class=line><span class=cl>    <span class=c1>#curl -v -X POST -u Administrator:password http://$COUCHBASE_MASTER:8091/controller/rebalance --data &#34;knownNodes=$KNOWN_NODES&amp;ejectedNodes=&#34;</span>
+</span></span><span class=line><span class=cl>  <span class=k>fi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>fi</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>fg</span> <span class=m>1</span>
+</span></span></code></pre></div></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/couchbase/>Couchbase</a></li><li><a href=https://madhur.co.in/tags/docker/>Docker</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2016/07/31/nginx-cache-authenticated-requests.html><span class=title>« Prev</span>
+<span>Caching authenticated requests using NGINX</span>
+</a><a class=next href=https://madhur.co.in/blog/2016/05/28/nodejs-dns-cache.html><span class=title>Next »</span>
+<span>Speeding up Node.js HTTP requests with DNS caching</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on x" href="https://x.com/intent/tweet/?text=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html&amp;hashtags=Couchbase%2cDocker"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html&amp;title=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container&amp;summary=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html&title=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on whatsapp" href="https://api.whatsapp.com/send?text=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on telegram" href="https://telegram.me/share/url?text=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Create a couchbase bucket during build of the container on ycombinator" href="https://news.ycombinator.com/submitlink?t=Create%20a%20couchbase%20bucket%20during%20build%20of%20the%20container&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f07%2f07%2fcreate-couchbase-bucket-docker.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

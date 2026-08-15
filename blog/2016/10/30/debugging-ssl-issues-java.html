@@ -1,514 +1,247 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Debugging SSL Issues in Java &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Debugging SSL Issues in Java" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Debugging SSL Issues in Java</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2016-10-30T00:00:00+05:30">October 30, 2016</time>
-    <span class="reading-time">6 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<p>Recently we faced an issue, where all are calls to a third party vendor were failing with following stack trace in Java</p>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">javax.net.ssl.SSLHandshakeException: Received fatal alert: handshake_failure 
-at sun.security.ssl.Alerts.getSSLException(Alerts.java:192) 
-at sun.security.ssl.Alerts.getSSLException(Alerts.java:154) 
-at sun.security.ssl.SSLSocketImpl.recvAlert(SSLSocketImpl.java:1979) 
-at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1086) 
-at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1332) 
-at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1359) 
-at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1343) 
-at org.apache.http.conn.ssl.SSLConnectionSocketFactory.createLayeredSocket(SSLConnectionSocketFactory.java:394) 
-at org.apache.http.conn.ssl.SSLConnectionSocketFactory.connectSocket(SSLConnectionSocketFactory.java:353) 
-at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:141) 
-at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:353) 
-at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:380) 
-at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236) 
-at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:184) 
-at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:88) 
-at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110) 
-at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:184) 
-at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:82) 
-at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:107) 
-at HttpURLConnectionExample.sendGet1(HttpURLConnectionExample.java:83) 
-at HttpURLConnectionExample.main(HttpURLConnectionExample.java:48) 
-at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) 
-at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) 
-at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) 
-at java.lang.reflect.Method.invoke(Method.java:606) 
-at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144) [Raw read]: length = 5 </code></pre></figure>
-
-<p>As per the vendor, there was no issue with their site. Other partners were able to call their API’s successfully.</p>
-
-<p>This is one of the peculiar problem which happens with Java 7, due to the mismatch of ciphers between Java 7 and the destination webserver.</p>
-
-<p>In order to debug this in Java, we need to add the parameter <code class="language-plaintext highlighter-rouge">-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">main, READ: TLSv1.2 Handshake, length = 333
-*** ECDH ServerKeyExchange
-Signature Algorithm SHA512withRSA
-Server key: Sun EC public key, 256 bits
-  public x coord: 52151221190485581151214316798815876713912665823307283797594930350231973293152
-  public y coord: 5451449004300784798879937097030816531206591013653597175688384253361719134656
-  parameters: secp256r1 [NIST P-256, X9.62 prime256v1] (1.2.840.10045.3.1.7)
-[read] MD5 and SHA1 hashes:  len = 333
-...
-[Raw read]: length = 5
-0000: 16 03 03 00 04                                     .....
-[Raw read]: length = 4
-0000: 0E 00 00 00                                        ....
-main, READ: TLSv1.2 Handshake, length = 4
-*** ServerHelloDone
-[read] MD5 and SHA1 hashes:  len = 4
-0000: 0E 00 00 00                                        ....
-*** ECDHClientKeyExchange
-ECDH Public value:  { 4, 247, 183, 127, 41, 28, 143, 49, 205, 39, 146, 57, 240, 102, 0, 53, 90, 244, 137, 176, 75, 192, 158, 138, 198, 115, 11, 101, 50, 2, 228, 254, 236, 211, 211, 208, 159, 105, 156, 135, 78, 234, 56, 97, 34, 209, 81, 216, 147, 185, 181, 67, 73, 84, 198, 4, 105, 61, 170, 131, 230, 115, 58, 207, 46 }
-[write] MD5 and SHA1 hashes:  len = 70
-0000: 10 00 00 42 41 04 F7 B7   7F 29 1C 8F 31 CD 27 92  ...BA....)..1.'.
-0010: 39 F0 66 00 35 5A F4 89   B0 4B C0 9E 8A C6 73 0B  9.f.5Z...K....s.
-0020: 65 32 02 E4 FE EC D3 D3   D0 9F 69 9C 87 4E EA 38  e2........i..N.8
-0030: 61 22 D1 51 D8 93 B9 B5   43 49 54 C6 04 69 3D AA  a".Q....CIT..i=.
-0040: 83 E6 73 3A CF 2E                                  ..s:..
-main, WRITE: TLSv1.2 Handshake, length = 70
-[Raw write]: length = 75
-...
-... no IV derived for this protocol
-main, WRITE: TLSv1.2 Change Cipher Spec, length = 1
-[Raw write]: length = 6
-0000: 14 03 03 00 01 01                                  ......
-*** Finished
-verify_data:  { 162, 89, 141, 227, 142, 139, 54, 27, 241, 56, 38, 145 }
-***
-[write] MD5 and SHA1 hashes:  len = 16
-0000: 14 00 00 0C A2 59 8D E3   8E 8B 36 1B F1 38 26 91  .....Y....6..8&amp;.
-Padded plaintext before ENCRYPTION:  len = 64
-0000: FD AD 67 A2 4D 09 37 F3   4F 7B 53 C5 D9 41 CA 17  ..g.M.7.O.S..A..
-0010: 14 00 00 0C A2 59 8D E3   8E 8B 36 1B F1 38 26 91  .....Y....6..8&amp;.
-0020: BF 2D 9D 66 AA EB 4C E6   4F 35 51 A2 F7 00 40 77  .-.f..L.O5Q...@w
-0030: 2A EA 37 3E 0B 0B 0B 0B   0B 0B 0B 0B 0B 0B 0B 0B  *.7&gt;............
-main, WRITE: TLSv1.2 Handshake, length = 64
-[Raw write]: length = 69
-0000: 16 03 03 00 40 D3 7C 46   86 EE 71 97 63 10 93 8B  ....@..F..q.c...
-0010: 16 28 84 D4 72 CB 29 CA   65 FB 08 6E 5F C7 F2 83  .(..r.).e..n_...
-0020: A7 45 5D 93 86 5B ED D7   AF A4 18 3A 6E AF 46 88  .E]..[.....:n.F.
-0030: 83 0C 09 CC 01 5B BF 8D   AB FD D9 6B 8C D1 E6 A6  .....[.....k....
-0040: AD 10 69 1D 81                                     ..i..
-[Raw read]: length = 5
-0000: 14 03 03 00 01                                     .....
-[Raw read]: length = 1
-0000: 01                                                 .
-main, READ: TLSv1.2 Change Cipher Spec, length = 1
-[Raw read]: length = 5
-0000: 16 03 03 00 40                                     ....@
-[Raw read]: length = 64
-0000: 6C 21 89 CD 5E FF 76 BD   95 43 51 F1 E6 58 64 5C  l!..^.v..CQ..Xd\
-0010: 97 6D DB 98 3F 1C 25 3D   39 DF C6 D3 8C E1 E2 64  .m..?.%=9......d
-0020: 18 BD 91 8A 7F B2 8E 78   82 F7 68 B2 3A 77 08 BE  .......x..h.:w..
-0030: B8 2C 94 2D 06 EE 7B CB   40 86 FA 1A B1 9C 06 3F  .,.-....@......?
-main, READ: TLSv1.2 Handshake, length = 64
-Padded plaintext after DECRYPTION:  len = 64
-0000: 15 A8 6B 92 28 EB 61 3B   2A A0 BA 2F 0E D4 6D F5  ..k.(.a;*../..m.
-0010: 14 00 00 0C 17 9E 44 19   42 D2 7F 29 74 7F 66 A8  ......D.B..)t.f.
-0020: 36 A5 B7 2A 7B A7 D5 B6   DE F2 53 2B 15 E3 CA 5E  6..*......S+...^
-0030: 1A 3F 1D D5 0B 0B 0B 0B   0B 0B 0B 0B 0B 0B 0B 0B  .?..............
-*** Finished
-verify_data:  { 23, 158, 68, 25, 66, 210, 127, 41, 116, 127, 102, 168 }
-***
-%% Cached client session: [Session-1, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA]
-[read] MD5 and SHA1 hashes:  len = 16
-0000: 14 00 00 0C 17 9E 44 19   42 D2 7F 29 74 7F 66 A8  ......D.B..)t.f.</code></pre></figure>
-
-<p>Unless you really know SSL protocol in detail, you won’t understand all of it. But atleast I am able to figure out the following:</p>
-
-<ul>
-  <li>The protocol in use is TLSv1.2</li>
-  <li>Cipher used was TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</li>
-  <li>The handshake was successfully completed</li>
-</ul>
-
-<p>Some of the secure webservers, will only support TLS v1.2 protocol and deny any request on SSLv3 or TSL v1 protocol.</p>
-
-<p>If that is the case, this is easy to fix in Java by adding following command line parameters</p>
-
-<p><code class="language-plaintext highlighter-rouge">JAVACMD="$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\
-deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true"</code></p>
-
-<p>or even this</p>
-
-<p><code class="language-plaintext highlighter-rouge">-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p>
-
-<p>However, some of the webservers can force the clients to use very strong ciphers which are not available in Java 7. They are only available in Java 8.</p>
-
-<p>The list of ciphers supported by SSL site can be found through 
-<a href="https://www.ssllabs.com/index.html">https://www.ssllabs.com/index.html</a></p>
-
-<p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html and replace the two JARs (<code class="language-plaintext highlighter-rouge">local_policy.jar, US_export_policy.jar</code>) under your JRE’s <code class="language-plaintext highlighter-rouge">lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p>
-
-<p>For reference, here are the ciphersuites available in Java 7 (1.7.0_79):</p>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">  SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
-        SSL_DH_anon_WITH_DES_CBC_SHA
-        SSL_DH_anon_WITH_RC4_128_MD5
-        SSL_RSA_EXPORT_WITH_DES40_CBC_SHA
-        SSL_RSA_EXPORT_WITH_RC4_40_MD5
-*       SSL_RSA_WITH_3DES_EDE_CBC_SHA
-        SSL_RSA_WITH_DES_CBC_SHA
-        SSL_RSA_WITH_NULL_MD5
-        SSL_RSA_WITH_NULL_SHA
-*       SSL_RSA_WITH_RC4_128_MD5
-*       SSL_RSA_WITH_RC4_128_SHA
-*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA
-*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
-*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA
-*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-        TLS_DH_anon_WITH_AES_128_CBC_SHA
-        TLS_DH_anon_WITH_AES_128_CBC_SHA256
-*       TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDHE_ECDSA_WITH_NULL_SHA
-*       TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
-*       TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDHE_RSA_WITH_NULL_SHA
-*       TLS_ECDHE_RSA_WITH_RC4_128_SHA
-*       TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDH_ECDSA_WITH_NULL_SHA
-*       TLS_ECDH_ECDSA_WITH_RC4_128_SHA
-*       TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
-        TLS_ECDH_RSA_WITH_NULL_SHA
-*       TLS_ECDH_RSA_WITH_RC4_128_SHA
-        TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA
-        TLS_ECDH_anon_WITH_AES_128_CBC_SHA
-        TLS_ECDH_anon_WITH_NULL_SHA
-        TLS_ECDH_anon_WITH_RC4_128_SHA
-*       TLS_EMPTY_RENEGOTIATION_INFO_SCSV
-        TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5
-        TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA
-        TLS_KRB5_EXPORT_WITH_RC4_40_MD5
-        TLS_KRB5_EXPORT_WITH_RC4_40_SHA
-        TLS_KRB5_WITH_3DES_EDE_CBC_MD5
-        TLS_KRB5_WITH_3DES_EDE_CBC_SHA
-        TLS_KRB5_WITH_DES_CBC_MD5
-        TLS_KRB5_WITH_DES_CBC_SHA
-        TLS_KRB5_WITH_RC4_128_MD5
-        TLS_KRB5_WITH_RC4_128_SHA
-*       TLS_RSA_WITH_AES_128_CBC_SHA
-*       TLS_RSA_WITH_AES_128_CBC_SHA256
-        TLS_RSA_WITH_NULL_SHA256</code></pre></figure>
-
-<p>and here are the ones after using the Unlimited Stringth Jurisdiction policy files:</p>
-
-<figure class="highlight"><pre><code class="language-text" data-lang="text">        SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA
-*       SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA
-        SSL_DHE_DSS_WITH_DES_CBC_SHA
-        SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
-*       SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA
-        SSL_DHE_RSA_WITH_DES_CBC_SHA
-        SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA
-        SSL_DH_anon_EXPORT_WITH_RC4_40_MD5
-        SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
-        SSL_DH_anon_WITH_DES_CBC_SHA
-        SSL_DH_anon_WITH_RC4_128_MD5
-        SSL_RSA_EXPORT_WITH_DES40_CBC_SHA
-        SSL_RSA_EXPORT_WITH_RC4_40_MD5
-*       SSL_RSA_WITH_3DES_EDE_CBC_SHA
-        SSL_RSA_WITH_DES_CBC_SHA
-        SSL_RSA_WITH_NULL_MD5
-        SSL_RSA_WITH_NULL_SHA
-*       SSL_RSA_WITH_RC4_128_MD5
-*       SSL_RSA_WITH_RC4_128_SHA
-*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA
-*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
-*       TLS_DHE_DSS_WITH_AES_256_CBC_SHA
-*       TLS_DHE_DSS_WITH_AES_256_CBC_SHA256
-*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA
-*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-*       TLS_DHE_RSA_WITH_AES_256_CBC_SHA
-*       TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
-        TLS_DH_anon_WITH_AES_128_CBC_SHA
-        TLS_DH_anon_WITH_AES_128_CBC_SHA256
-        TLS_DH_anon_WITH_AES_256_CBC_SHA
-        TLS_DH_anon_WITH_AES_256_CBC_SHA256
-*       TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
-*       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
-*       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
-        TLS_ECDHE_ECDSA_WITH_NULL_SHA
-*       TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
-*       TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-*       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
-*       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-        TLS_ECDHE_RSA_WITH_NULL_SHA
-*       TLS_ECDHE_RSA_WITH_RC4_128_SHA
-*       TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
-*       TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA
-*       TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384
-        TLS_ECDH_ECDSA_WITH_NULL_SHA
-*       TLS_ECDH_ECDSA_WITH_RC4_128_SHA
-*       TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
-*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
-*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
-*       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA
-*       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384
-        TLS_ECDH_RSA_WITH_NULL_SHA
-*       TLS_ECDH_RSA_WITH_RC4_128_SHA
-        TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA
-        TLS_ECDH_anon_WITH_AES_128_CBC_SHA
-        TLS_ECDH_anon_WITH_AES_256_CBC_SHA
-        TLS_ECDH_anon_WITH_NULL_SHA
-        TLS_ECDH_anon_WITH_RC4_128_SHA
-*       TLS_EMPTY_RENEGOTIATION_INFO_SCSV
-        TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5
-        TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA
-        TLS_KRB5_EXPORT_WITH_RC4_40_MD5
-        TLS_KRB5_EXPORT_WITH_RC4_40_SHA
-        TLS_KRB5_WITH_3DES_EDE_CBC_MD5
-        TLS_KRB5_WITH_3DES_EDE_CBC_SHA
-        TLS_KRB5_WITH_DES_CBC_MD5
-        TLS_KRB5_WITH_DES_CBC_SHA
-        TLS_KRB5_WITH_RC4_128_MD5
-        TLS_KRB5_WITH_RC4_128_SHA
-*       TLS_RSA_WITH_AES_128_CBC_SHA
-*       TLS_RSA_WITH_AES_128_CBC_SHA256
-*       TLS_RSA_WITH_AES_256_CBC_SHA
-*       TLS_RSA_WITH_AES_256_CBC_SHA256
-        TLS_RSA_WITH_NULL_SHA256</code></pre></figure>
-
-<p>Hope that helps anyone running into SSL issues with Java.</p>
-
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/java">Java</a> |
-						
-						<a href="/blog/tags/ssl">SSL</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Debugging SSL Issues in Java | Madhur Ahuja</title><meta name=keywords content="Java,SSL"><meta name=description content="Debugging SSL Issues in Java"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2016/10/30/debugging-ssl-issues-java.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2016/10/30/debugging-ssl-issues-java.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2016/10/30/debugging-ssl-issues-java.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Debugging SSL Issues in Java"><meta property="og:description" content="Debugging SSL Issues in Java"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2016-10-30T00:00:00+00:00"><meta property="article:modified_time" content="2016-10-30T00:00:00+00:00"><meta property="article:tag" content="Java"><meta property="article:tag" content="SSL"><meta name=twitter:card content="summary"><meta name=twitter:title content="Debugging SSL Issues in Java"><meta name=twitter:description content="Debugging SSL Issues in Java"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Debugging SSL Issues in Java","item":"https://madhur.co.in/blog/2016/10/30/debugging-ssl-issues-java.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Debugging SSL Issues in Java","name":"Debugging SSL Issues in Java","description":"Debugging SSL Issues in Java","keywords":["Java","SSL"],"articleBody":"Recently we faced an issue, where all are calls to a third party vendor were failing with following stack trace in Java\njavax.net.ssl.SSLHandshakeException: Received fatal alert: handshake_failure at sun.security.ssl.Alerts.getSSLException(Alerts.java:192) at sun.security.ssl.Alerts.getSSLException(Alerts.java:154) at sun.security.ssl.SSLSocketImpl.recvAlert(SSLSocketImpl.java:1979) at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1086) at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1332) at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1359) at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1343) at org.apache.http.conn.ssl.SSLConnectionSocketFactory.createLayeredSocket(SSLConnectionSocketFactory.java:394) at org.apache.http.conn.ssl.SSLConnectionSocketFactory.connectSocket(SSLConnectionSocketFactory.java:353) at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:141) at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:353) at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:380) at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236) at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:184) at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:88) at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110) at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:184) at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:82) at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:107) at HttpURLConnectionExample.sendGet1(HttpURLConnectionExample.java:83) at HttpURLConnectionExample.main(HttpURLConnectionExample.java:48) at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) at java.lang.reflect.Method.invoke(Method.java:606) at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144) [Raw read]: length = 5 As per the vendor, there was no issue with their site. Other partners were able to call their API’s successfully.\nThis is one of the peculiar problem which happens with Java 7, due to the mismatch of ciphers between Java 7 and the destination webserver.\nIn order to debug this in Java, we need to add the parameter -Djavax.net.debug=all to the command line. Through this command line, we get full debug output such as follows:\nmain, READ: TLSv1.2 Handshake, length = 333 *** ECDH ServerKeyExchange Signature Algorithm SHA512withRSA Server key: Sun EC public key, 256 bits public x coord: 52151221190485581151214316798815876713912665823307283797594930350231973293152 public y coord: 5451449004300784798879937097030816531206591013653597175688384253361719134656 parameters: secp256r1 [NIST P-256, X9.62 prime256v1] (1.2.840.10045.3.1.7) [read] MD5 and SHA1 hashes: len = 333 ... [Raw read]: length = 5 0000: 16 03 03 00 04 ..... [Raw read]: length = 4 0000: 0E 00 00 00 .... main, READ: TLSv1.2 Handshake, length = 4 *** ServerHelloDone [read] MD5 and SHA1 hashes: len = 4 0000: 0E 00 00 00 .... *** ECDHClientKeyExchange ECDH Public value: { 4, 247, 183, 127, 41, 28, 143, 49, 205, 39, 146, 57, 240, 102, 0, 53, 90, 244, 137, 176, 75, 192, 158, 138, 198, 115, 11, 101, 50, 2, 228, 254, 236, 211, 211, 208, 159, 105, 156, 135, 78, 234, 56, 97, 34, 209, 81, 216, 147, 185, 181, 67, 73, 84, 198, 4, 105, 61, 170, 131, 230, 115, 58, 207, 46 } [write] MD5 and SHA1 hashes: len = 70 0000: 10 00 00 42 41 04 F7 B7 7F 29 1C 8F 31 CD 27 92 ...BA....)..1.'. 0010: 39 F0 66 00 35 5A F4 89 B0 4B C0 9E 8A C6 73 0B 9.f.5Z...K....s. 0020: 65 32 02 E4 FE EC D3 D3 D0 9F 69 9C 87 4E EA 38 e2........i..N.8 0030: 61 22 D1 51 D8 93 B9 B5 43 49 54 C6 04 69 3D AA a\".Q....CIT..i=. 0040: 83 E6 73 3A CF 2E ..s:.. main, WRITE: TLSv1.2 Handshake, length = 70 [Raw write]: length = 75 ... ... no IV derived for this protocol main, WRITE: TLSv1.2 Change Cipher Spec, length = 1 [Raw write]: length = 6 0000: 14 03 03 00 01 01 ...... *** Finished verify_data: { 162, 89, 141, 227, 142, 139, 54, 27, 241, 56, 38, 145 } *** [write] MD5 and SHA1 hashes: len = 16 0000: 14 00 00 0C A2 59 8D E3 8E 8B 36 1B F1 38 26 91 .....Y....6..8\u0026. Padded plaintext before ENCRYPTION: len = 64 0000: FD AD 67 A2 4D 09 37 F3 4F 7B 53 C5 D9 41 CA 17 ..g.M.7.O.S..A.. 0010: 14 00 00 0C A2 59 8D E3 8E 8B 36 1B F1 38 26 91 .....Y....6..8\u0026. 0020: BF 2D 9D 66 AA EB 4C E6 4F 35 51 A2 F7 00 40 77 .-.f..L.O5Q...@w 0030: 2A EA 37 3E 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B *.7\u003e............ main, WRITE: TLSv1.2 Handshake, length = 64 [Raw write]: length = 69 0000: 16 03 03 00 40 D3 7C 46 86 EE 71 97 63 10 93 8B ....@..F..q.c... 0010: 16 28 84 D4 72 CB 29 CA 65 FB 08 6E 5F C7 F2 83 .(..r.).e..n_... 0020: A7 45 5D 93 86 5B ED D7 AF A4 18 3A 6E AF 46 88 .E]..[.....:n.F. 0030: 83 0C 09 CC 01 5B BF 8D AB FD D9 6B 8C D1 E6 A6 .....[.....k.... 0040: AD 10 69 1D 81 ..i.. [Raw read]: length = 5 0000: 14 03 03 00 01 ..... [Raw read]: length = 1 0000: 01 . main, READ: TLSv1.2 Change Cipher Spec, length = 1 [Raw read]: length = 5 0000: 16 03 03 00 40 ....@ [Raw read]: length = 64 0000: 6C 21 89 CD 5E FF 76 BD 95 43 51 F1 E6 58 64 5C l!..^.v..CQ..Xd\\ 0010: 97 6D DB 98 3F 1C 25 3D 39 DF C6 D3 8C E1 E2 64 .m..?.%=9......d 0020: 18 BD 91 8A 7F B2 8E 78 82 F7 68 B2 3A 77 08 BE .......x..h.:w.. 0030: B8 2C 94 2D 06 EE 7B CB 40 86 FA 1A B1 9C 06 3F .,.-....@......? main, READ: TLSv1.2 Handshake, length = 64 Padded plaintext after DECRYPTION: len = 64 0000: 15 A8 6B 92 28 EB 61 3B 2A A0 BA 2F 0E D4 6D F5 ..k.(.a;*../..m. 0010: 14 00 00 0C 17 9E 44 19 42 D2 7F 29 74 7F 66 A8 ......D.B..)t.f. 0020: 36 A5 B7 2A 7B A7 D5 B6 DE F2 53 2B 15 E3 CA 5E 6..*......S+...^ 0030: 1A 3F 1D D5 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B 0B .?.............. *** Finished verify_data: { 23, 158, 68, 25, 66, 210, 127, 41, 116, 127, 102, 168 } *** %% Cached client session: [Session-1, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA] [read] MD5 and SHA1 hashes: len = 16 0000: 14 00 00 0C 17 9E 44 19 42 D2 7F 29 74 7F 66 A8 ......D.B..)t.f. Unless you really know SSL protocol in detail, you won’t understand all of it. But atleast I am able to figure out the following:\nThe protocol in use is TLSv1.2 Cipher used was TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA The handshake was successfully completed Some of the secure webservers, will only support TLS v1.2 protocol and deny any request on SSLv3 or TSL v1 protocol.\nIf that is the case, this is easy to fix in Java by adding following command line parameters\nJAVACMD=\"$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\\ deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true\"\nor even this\n-Dhttps.protocols=TLSv1.1,TLSv1.2\nHowever, some of the webservers can force the clients to use very strong ciphers which are not available in Java 7. They are only available in Java 8.\nThe list of ciphers supported by SSL site can be found through https://www.ssllabs.com/index.html\nIn that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html and replace the two JARs (local_policy.jar, US_export_policy.jar) under your JRE’s lib/security directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.\nFor reference, here are the ciphersuites available in Java 7 (1.7.0_79):\nSSL_DH_anon_WITH_3DES_EDE_CBC_SHA SSL_DH_anon_WITH_DES_CBC_SHA SSL_DH_anon_WITH_RC4_128_MD5 SSL_RSA_EXPORT_WITH_DES40_CBC_SHA SSL_RSA_EXPORT_WITH_RC4_40_MD5 * SSL_RSA_WITH_3DES_EDE_CBC_SHA SSL_RSA_WITH_DES_CBC_SHA SSL_RSA_WITH_NULL_MD5 SSL_RSA_WITH_NULL_SHA * SSL_RSA_WITH_RC4_128_MD5 * SSL_RSA_WITH_RC4_128_SHA * TLS_DHE_DSS_WITH_AES_128_CBC_SHA * TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 * TLS_DHE_RSA_WITH_AES_128_CBC_SHA * TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 TLS_DH_anon_WITH_AES_128_CBC_SHA TLS_DH_anon_WITH_AES_128_CBC_SHA256 * TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 TLS_ECDHE_ECDSA_WITH_NULL_SHA * TLS_ECDHE_ECDSA_WITH_RC4_128_SHA * TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 TLS_ECDHE_RSA_WITH_NULL_SHA * TLS_ECDHE_RSA_WITH_RC4_128_SHA * TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA * TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256 TLS_ECDH_ECDSA_WITH_NULL_SHA * TLS_ECDH_ECDSA_WITH_RC4_128_SHA * TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDH_RSA_WITH_AES_128_CBC_SHA * TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256 TLS_ECDH_RSA_WITH_NULL_SHA * TLS_ECDH_RSA_WITH_RC4_128_SHA TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA TLS_ECDH_anon_WITH_AES_128_CBC_SHA TLS_ECDH_anon_WITH_NULL_SHA TLS_ECDH_anon_WITH_RC4_128_SHA * TLS_EMPTY_RENEGOTIATION_INFO_SCSV TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5 TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA TLS_KRB5_EXPORT_WITH_RC4_40_MD5 TLS_KRB5_EXPORT_WITH_RC4_40_SHA TLS_KRB5_WITH_3DES_EDE_CBC_MD5 TLS_KRB5_WITH_3DES_EDE_CBC_SHA TLS_KRB5_WITH_DES_CBC_MD5 TLS_KRB5_WITH_DES_CBC_SHA TLS_KRB5_WITH_RC4_128_MD5 TLS_KRB5_WITH_RC4_128_SHA * TLS_RSA_WITH_AES_128_CBC_SHA * TLS_RSA_WITH_AES_128_CBC_SHA256 TLS_RSA_WITH_NULL_SHA256 and here are the ones after using the Unlimited Stringth Jurisdiction policy files:\nSSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA * SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA SSL_DHE_DSS_WITH_DES_CBC_SHA SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA * SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA SSL_DHE_RSA_WITH_DES_CBC_SHA SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA SSL_DH_anon_EXPORT_WITH_RC4_40_MD5 SSL_DH_anon_WITH_3DES_EDE_CBC_SHA SSL_DH_anon_WITH_DES_CBC_SHA SSL_DH_anon_WITH_RC4_128_MD5 SSL_RSA_EXPORT_WITH_DES40_CBC_SHA SSL_RSA_EXPORT_WITH_RC4_40_MD5 * SSL_RSA_WITH_3DES_EDE_CBC_SHA SSL_RSA_WITH_DES_CBC_SHA SSL_RSA_WITH_NULL_MD5 SSL_RSA_WITH_NULL_SHA * SSL_RSA_WITH_RC4_128_MD5 * SSL_RSA_WITH_RC4_128_SHA * TLS_DHE_DSS_WITH_AES_128_CBC_SHA * TLS_DHE_DSS_WITH_AES_128_CBC_SHA256 * TLS_DHE_DSS_WITH_AES_256_CBC_SHA * TLS_DHE_DSS_WITH_AES_256_CBC_SHA256 * TLS_DHE_RSA_WITH_AES_128_CBC_SHA * TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 * TLS_DHE_RSA_WITH_AES_256_CBC_SHA * TLS_DHE_RSA_WITH_AES_256_CBC_SHA256 TLS_DH_anon_WITH_AES_128_CBC_SHA TLS_DH_anon_WITH_AES_128_CBC_SHA256 TLS_DH_anon_WITH_AES_256_CBC_SHA TLS_DH_anon_WITH_AES_256_CBC_SHA256 * TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA * TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA * TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_ECDSA_WITH_NULL_SHA * TLS_ECDHE_ECDSA_WITH_RC4_128_SHA * TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA * TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 * TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA * TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 TLS_ECDHE_RSA_WITH_NULL_SHA * TLS_ECDHE_RSA_WITH_RC4_128_SHA * TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA * TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256 * TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA * TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384 TLS_ECDH_ECDSA_WITH_NULL_SHA * TLS_ECDH_ECDSA_WITH_RC4_128_SHA * TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA * TLS_ECDH_RSA_WITH_AES_128_CBC_SHA * TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256 * TLS_ECDH_RSA_WITH_AES_256_CBC_SHA * TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384 TLS_ECDH_RSA_WITH_NULL_SHA * TLS_ECDH_RSA_WITH_RC4_128_SHA TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA TLS_ECDH_anon_WITH_AES_128_CBC_SHA TLS_ECDH_anon_WITH_AES_256_CBC_SHA TLS_ECDH_anon_WITH_NULL_SHA TLS_ECDH_anon_WITH_RC4_128_SHA * TLS_EMPTY_RENEGOTIATION_INFO_SCSV TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5 TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA TLS_KRB5_EXPORT_WITH_RC4_40_MD5 TLS_KRB5_EXPORT_WITH_RC4_40_SHA TLS_KRB5_WITH_3DES_EDE_CBC_MD5 TLS_KRB5_WITH_3DES_EDE_CBC_SHA TLS_KRB5_WITH_DES_CBC_MD5 TLS_KRB5_WITH_DES_CBC_SHA TLS_KRB5_WITH_RC4_128_MD5 TLS_KRB5_WITH_RC4_128_SHA * TLS_RSA_WITH_AES_128_CBC_SHA * TLS_RSA_WITH_AES_128_CBC_SHA256 * TLS_RSA_WITH_AES_256_CBC_SHA * TLS_RSA_WITH_AES_256_CBC_SHA256 TLS_RSA_WITH_NULL_SHA256 Hope that helps anyone running into SSL issues with Java.\n","wordCount":"1350","inLanguage":"en","datePublished":"2016-10-30T00:00:00Z","dateModified":"2016-10-30T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2016/10/30/debugging-ssl-issues-java.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Debugging SSL Issues in Java</h1><div class=post-description>Debugging SSL Issues in Java</div><div class=post-meta><span title='2016-10-30 00:00:00 +0000 UTC'>October 30, 2016</span>&nbsp;·&nbsp;<span>7 min</span></div></header><div class="post-content md-content"><p>Recently we faced an issue, where all are calls to a third party vendor were failing with following stack trace in Java</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>javax.net.ssl.SSLHandshakeException: Received fatal alert: handshake_failure 
+</span></span><span class=line><span class=cl>at sun.security.ssl.Alerts.getSSLException(Alerts.java:192) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.Alerts.getSSLException(Alerts.java:154) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.SSLSocketImpl.recvAlert(SSLSocketImpl.java:1979) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:1086) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.SSLSocketImpl.performInitialHandshake(SSLSocketImpl.java:1332) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1359) 
+</span></span><span class=line><span class=cl>at sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:1343) 
+</span></span><span class=line><span class=cl>at org.apache.http.conn.ssl.SSLConnectionSocketFactory.createLayeredSocket(SSLConnectionSocketFactory.java:394) 
+</span></span><span class=line><span class=cl>at org.apache.http.conn.ssl.SSLConnectionSocketFactory.connectSocket(SSLConnectionSocketFactory.java:353) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:141) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:353) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:380) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:184) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:88) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:184) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:82) 
+</span></span><span class=line><span class=cl>at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:107) 
+</span></span><span class=line><span class=cl>at HttpURLConnectionExample.sendGet1(HttpURLConnectionExample.java:83) 
+</span></span><span class=line><span class=cl>at HttpURLConnectionExample.main(HttpURLConnectionExample.java:48) 
+</span></span><span class=line><span class=cl>at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) 
+</span></span><span class=line><span class=cl>at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57) 
+</span></span><span class=line><span class=cl>at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) 
+</span></span><span class=line><span class=cl>at java.lang.reflect.Method.invoke(Method.java:606) 
+</span></span><span class=line><span class=cl>at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144) [Raw read]: length = 5 
+</span></span></code></pre></div><p>As per the vendor, there was no issue with their site. Other partners were able to call their API&rsquo;s successfully.</p><p>This is one of the peculiar problem which happens with Java 7, due to the mismatch of ciphers between Java 7 and the destination webserver.</p><p>In order to debug this in Java, we need to add the parameter <code>-Djavax.net.debug=all</code> to the command line. Through this command line, we get full debug output such as follows:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>main, READ: TLSv1.2 Handshake, length = 333
+</span></span><span class=line><span class=cl>*** ECDH ServerKeyExchange
+</span></span><span class=line><span class=cl>Signature Algorithm SHA512withRSA
+</span></span><span class=line><span class=cl>Server key: Sun EC public key, 256 bits
+</span></span><span class=line><span class=cl>  public x coord: 52151221190485581151214316798815876713912665823307283797594930350231973293152
+</span></span><span class=line><span class=cl>  public y coord: 5451449004300784798879937097030816531206591013653597175688384253361719134656
+</span></span><span class=line><span class=cl>  parameters: secp256r1 [NIST P-256, X9.62 prime256v1] (1.2.840.10045.3.1.7)
+</span></span><span class=line><span class=cl>[read] MD5 and SHA1 hashes:  len = 333
+</span></span><span class=line><span class=cl>...
+</span></span><span class=line><span class=cl>[Raw read]: length = 5
+</span></span><span class=line><span class=cl>0000: 16 03 03 00 04                                     .....
+</span></span><span class=line><span class=cl>[Raw read]: length = 4
+</span></span><span class=line><span class=cl>0000: 0E 00 00 00                                        ....
+</span></span><span class=line><span class=cl>main, READ: TLSv1.2 Handshake, length = 4
+</span></span><span class=line><span class=cl>*** ServerHelloDone
+</span></span><span class=line><span class=cl>[read] MD5 and SHA1 hashes:  len = 4
+</span></span><span class=line><span class=cl>0000: 0E 00 00 00                                        ....
+</span></span><span class=line><span class=cl>*** ECDHClientKeyExchange
+</span></span><span class=line><span class=cl>ECDH Public value:  { 4, 247, 183, 127, 41, 28, 143, 49, 205, 39, 146, 57, 240, 102, 0, 53, 90, 244, 137, 176, 75, 192, 158, 138, 198, 115, 11, 101, 50, 2, 228, 254, 236, 211, 211, 208, 159, 105, 156, 135, 78, 234, 56, 97, 34, 209, 81, 216, 147, 185, 181, 67, 73, 84, 198, 4, 105, 61, 170, 131, 230, 115, 58, 207, 46 }
+</span></span><span class=line><span class=cl>[write] MD5 and SHA1 hashes:  len = 70
+</span></span><span class=line><span class=cl>0000: 10 00 00 42 41 04 F7 B7   7F 29 1C 8F 31 CD 27 92  ...BA....)..1.&#39;.
+</span></span><span class=line><span class=cl>0010: 39 F0 66 00 35 5A F4 89   B0 4B C0 9E 8A C6 73 0B  9.f.5Z...K....s.
+</span></span><span class=line><span class=cl>0020: 65 32 02 E4 FE EC D3 D3   D0 9F 69 9C 87 4E EA 38  e2........i..N.8
+</span></span><span class=line><span class=cl>0030: 61 22 D1 51 D8 93 B9 B5   43 49 54 C6 04 69 3D AA  a&#34;.Q....CIT..i=.
+</span></span><span class=line><span class=cl>0040: 83 E6 73 3A CF 2E                                  ..s:..
+</span></span><span class=line><span class=cl>main, WRITE: TLSv1.2 Handshake, length = 70
+</span></span><span class=line><span class=cl>[Raw write]: length = 75
+</span></span><span class=line><span class=cl>...
+</span></span><span class=line><span class=cl>... no IV derived for this protocol
+</span></span><span class=line><span class=cl>main, WRITE: TLSv1.2 Change Cipher Spec, length = 1
+</span></span><span class=line><span class=cl>[Raw write]: length = 6
+</span></span><span class=line><span class=cl>0000: 14 03 03 00 01 01                                  ......
+</span></span><span class=line><span class=cl>*** Finished
+</span></span><span class=line><span class=cl>verify_data:  { 162, 89, 141, 227, 142, 139, 54, 27, 241, 56, 38, 145 }
+</span></span><span class=line><span class=cl>***
+</span></span><span class=line><span class=cl>[write] MD5 and SHA1 hashes:  len = 16
+</span></span><span class=line><span class=cl>0000: 14 00 00 0C A2 59 8D E3   8E 8B 36 1B F1 38 26 91  .....Y....6..8&amp;.
+</span></span><span class=line><span class=cl>Padded plaintext before ENCRYPTION:  len = 64
+</span></span><span class=line><span class=cl>0000: FD AD 67 A2 4D 09 37 F3   4F 7B 53 C5 D9 41 CA 17  ..g.M.7.O.S..A..
+</span></span><span class=line><span class=cl>0010: 14 00 00 0C A2 59 8D E3   8E 8B 36 1B F1 38 26 91  .....Y....6..8&amp;.
+</span></span><span class=line><span class=cl>0020: BF 2D 9D 66 AA EB 4C E6   4F 35 51 A2 F7 00 40 77  .-.f..L.O5Q...@w
+</span></span><span class=line><span class=cl>0030: 2A EA 37 3E 0B 0B 0B 0B   0B 0B 0B 0B 0B 0B 0B 0B  *.7&gt;............
+</span></span><span class=line><span class=cl>main, WRITE: TLSv1.2 Handshake, length = 64
+</span></span><span class=line><span class=cl>[Raw write]: length = 69
+</span></span><span class=line><span class=cl>0000: 16 03 03 00 40 D3 7C 46   86 EE 71 97 63 10 93 8B  ....@..F..q.c...
+</span></span><span class=line><span class=cl>0010: 16 28 84 D4 72 CB 29 CA   65 FB 08 6E 5F C7 F2 83  .(..r.).e..n_...
+</span></span><span class=line><span class=cl>0020: A7 45 5D 93 86 5B ED D7   AF A4 18 3A 6E AF 46 88  .E]..[.....:n.F.
+</span></span><span class=line><span class=cl>0030: 83 0C 09 CC 01 5B BF 8D   AB FD D9 6B 8C D1 E6 A6  .....[.....k....
+</span></span><span class=line><span class=cl>0040: AD 10 69 1D 81                                     ..i..
+</span></span><span class=line><span class=cl>[Raw read]: length = 5
+</span></span><span class=line><span class=cl>0000: 14 03 03 00 01                                     .....
+</span></span><span class=line><span class=cl>[Raw read]: length = 1
+</span></span><span class=line><span class=cl>0000: 01                                                 .
+</span></span><span class=line><span class=cl>main, READ: TLSv1.2 Change Cipher Spec, length = 1
+</span></span><span class=line><span class=cl>[Raw read]: length = 5
+</span></span><span class=line><span class=cl>0000: 16 03 03 00 40                                     ....@
+</span></span><span class=line><span class=cl>[Raw read]: length = 64
+</span></span><span class=line><span class=cl>0000: 6C 21 89 CD 5E FF 76 BD   95 43 51 F1 E6 58 64 5C  l!..^.v..CQ..Xd\
+</span></span><span class=line><span class=cl>0010: 97 6D DB 98 3F 1C 25 3D   39 DF C6 D3 8C E1 E2 64  .m..?.%=9......d
+</span></span><span class=line><span class=cl>0020: 18 BD 91 8A 7F B2 8E 78   82 F7 68 B2 3A 77 08 BE  .......x..h.:w..
+</span></span><span class=line><span class=cl>0030: B8 2C 94 2D 06 EE 7B CB   40 86 FA 1A B1 9C 06 3F  .,.-....@......?
+</span></span><span class=line><span class=cl>main, READ: TLSv1.2 Handshake, length = 64
+</span></span><span class=line><span class=cl>Padded plaintext after DECRYPTION:  len = 64
+</span></span><span class=line><span class=cl>0000: 15 A8 6B 92 28 EB 61 3B   2A A0 BA 2F 0E D4 6D F5  ..k.(.a;*../..m.
+</span></span><span class=line><span class=cl>0010: 14 00 00 0C 17 9E 44 19   42 D2 7F 29 74 7F 66 A8  ......D.B..)t.f.
+</span></span><span class=line><span class=cl>0020: 36 A5 B7 2A 7B A7 D5 B6   DE F2 53 2B 15 E3 CA 5E  6..*......S+...^
+</span></span><span class=line><span class=cl>0030: 1A 3F 1D D5 0B 0B 0B 0B   0B 0B 0B 0B 0B 0B 0B 0B  .?..............
+</span></span><span class=line><span class=cl>*** Finished
+</span></span><span class=line><span class=cl>verify_data:  { 23, 158, 68, 25, 66, 210, 127, 41, 116, 127, 102, 168 }
+</span></span><span class=line><span class=cl>***
+</span></span><span class=line><span class=cl>%% Cached client session: [Session-1, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA]
+</span></span><span class=line><span class=cl>[read] MD5 and SHA1 hashes:  len = 16
+</span></span><span class=line><span class=cl>0000: 14 00 00 0C 17 9E 44 19   42 D2 7F 29 74 7F 66 A8  ......D.B..)t.f.
+</span></span></code></pre></div><p>Unless you really know SSL protocol in detail, you won&rsquo;t understand all of it. But atleast I am able to figure out the following:</p><ul><li>The protocol in use is TLSv1.2</li><li>Cipher used was TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</li><li>The handshake was successfully completed</li></ul><p>Some of the secure webservers, will only support TLS v1.2 protocol and deny any request on SSLv3 or TSL v1 protocol.</p><p>If that is the case, this is easy to fix in Java by adding following command line parameters</p><p><code>JAVACMD="$JAVACMD -Ddeployment.security.SSLv2Hello=false -Ddeployment.security.SSLv3=false -Ddeployment.security.TLSv1=false -D\ deployment.security.TLSv1.1=true -Ddeployment.security.TLSv1.2=true"</code></p><p>or even this</p><p><code>-Dhttps.protocols=TLSv1.1,TLSv1.2</code></p><p>However, some of the webservers can force the clients to use very strong ciphers which are not available in Java 7. They are only available in Java 8.</p><p>The list of ciphers supported by SSL site can be found through
+<a href=https://www.ssllabs.com/index.html>https://www.ssllabs.com/index.html</a></p><p>In that case, You can download the JCE Unlimited Strength Jurisdiction Policy files for Java 7 from <a href=http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html>http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html</a> and replace the two JARs (<code>local_policy.jar, US_export_policy.jar</code>) under your JRE&rsquo;s <code>lib/security</code> directory with the ones from the downloaded package. This will add additional (stronger) ciphersuites and you should be able to connect without having to make any changes to your code or enable TLSv1.2.</p><p>For reference, here are the ciphersuites available in Java 7 (1.7.0_79):</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>  SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>        SSL_RSA_EXPORT_WITH_DES40_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_EXPORT_WITH_RC4_40_MD5
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_NULL_MD5
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_ECDHE_ECDSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_ECDHE_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_ECDH_ECDSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_ECDH_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_RC4_40_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_RC4_40_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_3DES_EDE_CBC_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_DES_CBC_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_RSA_WITH_NULL_SHA256
+</span></span></code></pre></div><p>and here are the ones after using the Unlimited Stringth Jurisdiction policy files:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>        SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA
+</span></span><span class=line><span class=cl>*       SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DHE_DSS_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA
+</span></span><span class=line><span class=cl>*       SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DHE_RSA_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_EXPORT_WITH_RC4_40_MD5
+</span></span><span class=line><span class=cl>        SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_DH_anon_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>        SSL_RSA_EXPORT_WITH_DES40_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_EXPORT_WITH_RC4_40_MD5
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_NULL_MD5
+</span></span><span class=line><span class=cl>        SSL_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>*       SSL_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_DSS_WITH_AES_256_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_DH_anon_WITH_AES_256_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+</span></span><span class=line><span class=cl>        TLS_ECDHE_ECDSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_ECDSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+</span></span><span class=line><span class=cl>        TLS_ECDHE_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDHE_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384
+</span></span><span class=line><span class=cl>        TLS_ECDH_ECDSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_ECDSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384
+</span></span><span class=line><span class=cl>        TLS_ECDH_RSA_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>*       TLS_ECDH_RSA_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_NULL_SHA
+</span></span><span class=line><span class=cl>        TLS_ECDH_anon_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_DES_CBC_40_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_DES_CBC_40_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_RC4_40_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_EXPORT_WITH_RC4_40_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_3DES_EDE_CBC_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_3DES_EDE_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_DES_CBC_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_DES_CBC_SHA
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_RC4_128_MD5
+</span></span><span class=line><span class=cl>        TLS_KRB5_WITH_RC4_128_SHA
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_128_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_128_CBC_SHA256
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_256_CBC_SHA
+</span></span><span class=line><span class=cl>*       TLS_RSA_WITH_AES_256_CBC_SHA256
+</span></span><span class=line><span class=cl>        TLS_RSA_WITH_NULL_SHA256
+</span></span></code></pre></div><p>Hope that helps anyone running into SSL issues with Java.</p></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/java/>Java</a></li><li><a href=https://madhur.co.in/tags/ssl/>SSL</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2016/12/04/integrating-sentry-node.html><span class=title>« Prev</span>
+<span>Integrate node.js logging with Sentry</span>
+</a><a class=next href=https://madhur.co.in/blog/2016/10/16/learning-moving-mbr-gpt-uefi.html><span class=title>Next »</span>
+<span>Learnings from moving from MBR to GPT, multi-booting and random stuff</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on x" href="https://x.com/intent/tweet/?text=Debugging%20SSL%20Issues%20in%20Java&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html&amp;hashtags=Java%2cSSL"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html&amp;title=Debugging%20SSL%20Issues%20in%20Java&amp;summary=Debugging%20SSL%20Issues%20in%20Java&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html&title=Debugging%20SSL%20Issues%20in%20Java"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on whatsapp" href="https://api.whatsapp.com/send?text=Debugging%20SSL%20Issues%20in%20Java%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on telegram" href="https://telegram.me/share/url?text=Debugging%20SSL%20Issues%20in%20Java&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Debugging SSL Issues in Java on ycombinator" href="https://news.ycombinator.com/submitlink?t=Debugging%20SSL%20Issues%20in%20Java&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2016%2f10%2f30%2fdebugging-ssl-issues-java.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

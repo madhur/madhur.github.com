@@ -1,467 +1,209 @@
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" /> 
-    <title>Process huge log files &#8211; Madhur Ahuja</title>
-    
-
-    <meta name="author" content="Madhur Ahuja" />
-    <meta name="description" content=" Process huge log files" />
-
-    <link rel="start" href="/" />
-
-    <link rel="alternate" type="application/atom+xml" href="http://feeds.feedburner.com/madhur" title="RSS feed" />
-    <link rel="shortcut icon" href="http://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16" />
-
-    <link rel="stylesheet" href="/files/css/bootstrap.min.css" type="text/css" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="/files/font-awesome/css/font-awesome.min.css" type="text/css" />
-    <script src="/files/js/vendor/fancybox.umd.js" tpye="text/javascript"></script>
-    <link rel="stylesheet" href="/files/css/fancybox.css" type="text/css" />
-
-    <link rel="stylesheet" type="text/css" href="/files/css/styles.css" /> 
-    <link rel="stylesheet" type="text/css" href="/files/css/syntax.css" /> 
-
-     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-N14VDHYFHQ');
-</script> 
-    <link rel="stylesheet" type="text/css" media="print" href="/files/css/print.css"> 
-
-    <script src="/files/js/vendor/pace.min.js" type="text/javascript"></script>
-</head>
-
-
-<body>
-
-    <div class="container">
-
-        <header id="header" class="row">
-
-            <nav id="navigation" class="navbar navbar-inverse navbar-fixed-top top-nav-collapse" role="navigation">
-    <div class="container">
-
-        <div class="navbar-header">
-
-            <div class="hidden-md hidden-sm hidden-lg searchli">
-
-                <form method="get" role="search" id="searchform" action="/results" onsubmit="return checkfrm_search();">
-
-                    <div class="form-group">
-                        <input type="search" required id="q2" name="q" value="" class="form-control mobile"
-                            placeholder="Search" />
-                    </div>
-                </form>
-            </div>
-
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <!--  <a class="navbar-brand " href="/">Home</a> -->
-        </div>
-
-        <div class="collapse navbar-collapse" id="mainmenu">
-            <ul id="nav" class="nav navbar-nav">
-
-                <li><a class="home" href="/">Home</a>
-                </li>
-                <li><a class="blog" href="/blog">Blog</a>
-                </li>
-                <!--<li><a class="work" href="/work">Resume</a></li>-->
-                <li><a class="code" href="/projects">Work</a>
-                </li>
-                <!--<li><a class="papers" href="/papers">Papers</a></li>-->
-                <li><a class="info" href="/info">About</a>
-                </li>
-                <li><a class="contact" href="/contact">Contact</a>
-                </li>
-
-            </ul>
-
-            <ul class="nav navbar-nav visible-md visible-lg visible-sm searchbox">
-                <li>
-                    <form method="get" role="search" id="searchform" action="/results"
-                        onsubmit="return checkfrm_search();">
-
-                        <div class="form-group">
-                            <input type="search" required id="q1" name="q" value="" class="form-control desktop"
-                                placeholder="Search" />
-                        </div>
-                    </form>
-                </li>
-            </ul>
-
-
-            <ul class="nav-icons navbar-right nav navbar-nav visible-md visible-lg">
-                <li><a href="http://www.linkedin.com/in/madhurahuja"><i class="fa fa-linkedin-square fa-3x"></i></a>
-                </li>
-                <li><a href="https://github.com/madhur"><i class="fa fa-github fa-3x"></i></a>
-                </li>
-                <li><a href="http://feeds.feedburner.com/madhur"><i class="fa fa-rss-square fa-3x"></i></a>
-                </li>
-            </ul>
-
-
-        </div>
-
-    </div>
-</nav>
-
-        </header>
-
-        <div id="content" class="row">
-
-            <section>
-
-	<div id="blogcontent">
-
-
-		<article id="blog-article" class="post col-md-12 clearfix">
-
-			<header>
-				<h1>Process huge log files</h1>
-			</header>
-
-			
-
-
-
-<div class="post-meta">
-    <time datetime="2023-06-10T00:00:00+05:30">June 10, 2023</time>
-    <span class="reading-time">8 min read</span>
-</div>
-
-
-			<hr style="margin-top:0px" />
-
-
-			<p>Recently, I was faced with a situation where I had to process huge (in order of several gigabytes) log files.</p>
-
-<p>The log files consisted of either <a href="https://en.wikipedia.org/wiki/Comma-separated_values">CSV format</a> or <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html">AWS ALB logs format</a></p>
-
-<p>Here the process means, I had to process each row to either filter it or store the valuable information from it for later analysis.</p>
-
-<p>First, I attempted with python to parse it with the simple logic</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">file_name</span> <span class="o">=</span> <span class="n">home</span> <span class="o">+</span> <span class="s">'/Downloads/huge_file.csv'</span>
-<span class="n">filtered_rows</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'./filtered.csv'</span><span class="p">,</span> <span class="s">'w'</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s">''</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
-     <span class="n">dict_writer</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="p">[</span><span class="s">"client_ip"</span><span class="p">,</span> <span class="s">"target_processing_time"</span><span class="p">,</span> <span class="s">"target_status_code"</span><span class="p">,</span> <span class="s">"received_bytes"</span><span class="p">,</span> <span class="s">"request_url"</span><span class="p">,</span> <span class="s">"request_creation_time"</span><span class="p">,</span> <span class="s">"ssl_protocol"</span><span class="p">,</span> <span class="s">"trace_id"</span> <span class="p">])</span>
-     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">csv_file</span><span class="p">:</span>
-        <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
-        <span class="n">line_count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">csv_reader</span><span class="p">:</span>
-            <span class="c1"># Do some processing
-</span>            <span class="n">filtered_rows</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="n">dict_writer</span><span class="p">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</code></pre></div></div>
-
-<p>The above program reads the CSV line by line and optionally writes few columns of it to another file.</p>
-
-<p>This was done on a 12 GB CSV file and it took 4-5 hours.</p>
-
-<p>I was not satisfied with it as I had to do multiple iterations on multiple such files. There had to be a better way.</p>
-
-<p>Turned to <a href="https://go.dev/">Go</a> due to its concurrency features</p>
-
-<p>There is a <a href="https://pkg.go.dev/encoding/csv">encoding/csv</a> package in go which can help read the CSV files. However, it is single threaded and does not make use of multiple goroutines.</p>
-
-<p>Came across another package <a href="https://github.com/actforgood/bigcsvreader">github.com/actforgood/bigcsvreader</a> which can help read the big CSV files with the use of multiple routines.</p>
-
-<p>Quickly wrote a program which reads the bunch of huge CSV files in a folder and applies processing logic to it. Below is the sample snippet:</p>
-
-<p>The below program reads the folder of log files and processes each one after another. However, since the reading is done using multiple goroutines, the below program can process 12 GB of ALB log file in matter of few seconds. The log files in my case was the list of ALB log files from AWS. Note that ALB log files are space character separated.</p>
-
-<p>Also, if the files are huge, we need to increase the buffer space in library so that its heap memory does not runs out.</p>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsDelimiter</span> <span class="o">=</span> <span class="sc">' '</span>
-<span class="n">bigCSV</span><span class="o">.</span><span class="n">BufferSize</span> <span class="o">=</span> <span class="m">81920</span>
-
-</code></pre></div></div>
-
-<p>The <code class="language-plaintext highlighter-rouge">processRow()</code> function receives each row and based on the process / filtering criteria publishes the data of type <code class="language-plaintext highlighter-rouge">ALBLog</code> on the <code class="language-plaintext highlighter-rouge">resultChan</code> channel.</p>
-
-<p>There is another inline goroutine which reads all the data from <code class="language-plaintext highlighter-rouge">resultChan</code> channel and writes it to <code class="language-plaintext highlighter-rouge">filtered.csv</code></p>
-
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
-
-<span class="k">import</span> <span class="p">(</span>
-	<span class="s">"context"</span>
-	<span class="s">"encoding/csv"</span>
-	<span class="s">"fmt"</span>
-	<span class="s">"log"</span>
-	<span class="s">"os"</span>
-	<span class="s">"strings"</span>
-	<span class="s">"sync"</span>
-	<span class="s">"sync/atomic"</span>
-	<span class="s">"github.com/actforgood/bigcsvreader"</span>
-	<span class="s">"net/url"</span>
-<span class="p">)</span>
-
-<span class="k">const</span> <span class="n">noOfColumns</span> <span class="o">=</span> <span class="m">29</span>
-<span class="k">var</span> <span class="n">rowCount</span> <span class="o">=</span> <span class="m">0</span>
-
-<span class="k">type</span> <span class="n">ALBLog</span> <span class="k">struct</span> <span class="p">{</span>
-	<span class="n">ClientIP</span>             <span class="kt">string</span>
-	<span class="n">TargetProcessingTime</span> <span class="kt">string</span>
-	<span class="n">TargetStatusCode</span>     <span class="kt">string</span>
-	<span class="n">ReceivedBytes</span>        <span class="kt">string</span>
-	<span class="n">RequestUrl</span>           <span class="kt">string</span>
-	<span class="n">RequestCreationTime</span>  <span class="kt">string</span>
-	<span class="n">SSLProtocol</span>          <span class="kt">string</span>
-	<span class="n">TraceID</span>              <span class="kt">string</span>
-	<span class="n">RawRow</span>               <span class="p">[]</span><span class="kt">string</span>
-<span class="p">}</span>
-
-<span class="k">type</span> <span class="n">count32</span> <span class="kt">int32</span>
-
-<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">inc</span><span class="p">()</span> <span class="kt">int32</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="n">atomic</span><span class="o">.</span><span class="n">AddInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">),</span> <span class="m">1</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">get</span><span class="p">()</span> <span class="kt">int32</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="n">atomic</span><span class="o">.</span><span class="n">LoadInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">))</span>
-<span class="p">}</span>
-<span class="k">func</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">count32</span><span class="p">)</span> <span class="n">reset</span><span class="p">()</span>  <span class="p">{</span>
-	<span class="n">atomic</span><span class="o">.</span><span class="n">StoreInt32</span><span class="p">((</span><span class="o">*</span><span class="kt">int32</span><span class="p">)(</span><span class="n">c</span><span class="p">),</span> <span class="m">0</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="k">var</span> <span class="n">counter</span> <span class="n">count32</span>
-
-<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-
-	<span class="n">homedir</span><span class="p">,</span> <span class="n">_</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">UserHomeDir</span><span class="p">()</span>
-	<span class="n">csvLocation</span> <span class="o">:=</span> <span class="n">homedir</span> <span class="o">+</span> <span class="s">"/logs/"</span>
-	<span class="n">entries</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">ReadDir</span><span class="p">(</span><span class="n">csvLocation</span><span class="p">)</span>
-	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-		<span class="n">log</span><span class="o">.</span><span class="n">Fatal</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="k">var</span> <span class="n">TotalProcessRows</span> <span class="kt">int32</span>
-	<span class="k">var</span> <span class="n">FilteredProcessedRows</span> <span class="kt">int</span>
-	
-	<span class="n">f</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"filtered.csv"</span><span class="p">)</span>
-	<span class="n">w</span> <span class="o">:=</span> <span class="n">csv</span><span class="o">.</span><span class="n">NewWriter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-	<span class="n">w</span><span class="o">.</span><span class="n">Write</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span><span class="s">"request_url"</span><span class="p">,</span> <span class="s">"target_processing_time"</span><span class="p">})</span>
-	<span class="n">w</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
-	<span class="n">f</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
-
-	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">e</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">entries</span> <span class="p">{</span>
-		<span class="k">if</span> <span class="n">strings</span><span class="o">.</span><span class="n">HasSuffix</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">Name</span><span class="p">(),</span> <span class="s">".log"</span><span class="p">)</span> <span class="p">{</span>
-			<span class="n">totalRows</span><span class="p">,</span> <span class="n">filteredRows</span> <span class="o">:=</span> <span class="n">processFile</span><span class="p">(</span><span class="n">csvLocation</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">Name</span><span class="p">())</span>
-			<span class="n">TotalProcessRows</span> <span class="o">=</span> <span class="n">TotalProcessRows</span> <span class="o">+</span> <span class="n">totalRows</span>
-			<span class="n">FilteredProcessedRows</span> <span class="o">=</span> <span class="n">FilteredProcessedRows</span> <span class="o">+</span> <span class="n">filteredRows</span>
-		<span class="p">}</span>
-	<span class="p">}</span>
-
-	<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">"Total Rows: %d Filtered Rows: %d"</span><span class="p">,</span> <span class="n">TotalProcessRows</span><span class="p">,</span> <span class="n">FilteredProcessedRows</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="k">func</span> <span class="n">processFile</span><span class="p">(</span><span class="n">csvLocation</span> <span class="kt">string</span><span class="p">,</span> <span class="n">fileName</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="kt">int32</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-
-	<span class="n">counter</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-	<span class="c">// initialize the big csv reader</span>
-	<span class="n">bigCSV</span> <span class="o">:=</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">New</span><span class="p">()</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">SetFilePath</span><span class="p">(</span><span class="n">csvLocation</span> <span class="o">+</span> <span class="n">fileName</span><span class="p">)</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsCount</span> <span class="o">=</span> <span class="n">noOfColumns</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">MaxGoroutinesNo</span> <span class="o">=</span> <span class="m">16</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">BufferSize</span> <span class="o">=</span> <span class="m">81920</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">FileHasHeader</span> <span class="o">=</span> <span class="no">true</span>
-	<span class="n">bigCSV</span><span class="o">.</span><span class="n">ColumnsDelimiter</span> <span class="o">=</span> <span class="sc">' '</span>
-
-	<span class="n">ctx</span><span class="p">,</span> <span class="n">cancelCtx</span> <span class="o">:=</span> <span class="n">context</span><span class="o">.</span><span class="n">WithCancel</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">Background</span><span class="p">())</span>
-	<span class="k">defer</span> <span class="n">cancelCtx</span><span class="p">()</span>
-	<span class="k">var</span> <span class="n">wg</span> <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
-	<span class="k">var</span> <span class="n">filteredRows</span> <span class="kt">int</span>
-	<span class="c">// start multi-thread reading</span>
-	<span class="n">rowsChans</span><span class="p">,</span> <span class="n">errsChan</span> <span class="o">:=</span> <span class="n">bigCSV</span><span class="o">.</span><span class="n">Read</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
-	<span class="n">resultChan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="n">ALBLog</span><span class="p">)</span>
-
-	<span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">rowsChans</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
-		<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
-		<span class="k">go</span> <span class="n">rowWorker</span><span class="p">(</span><span class="n">rowsChans</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">wg</span><span class="p">,</span> <span class="n">resultChan</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
-	<span class="k">go</span> <span class="n">errWorker</span><span class="p">(</span><span class="n">errsChan</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wg</span><span class="p">)</span>
-
-	<span class="k">var</span> <span class="n">writeCSVWaitGroup</span> <span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span>
-	<span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
-		<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
-		<span class="k">var</span> <span class="n">result</span> <span class="p">[]</span><span class="n">ALBLog</span>
-		<span class="k">for</span> <span class="n">filteredLog</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">resultChan</span> <span class="p">{</span>
-			<span class="n">result</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">filteredLog</span><span class="p">)</span>
-		<span class="p">}</span>
-		<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">"%s Filtered rows %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
-		<span class="n">filteredRows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-		<span class="n">f</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">OpenFile</span><span class="p">(</span><span class="s">"filtered.csv"</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">O_APPEND</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">O_WRONLY</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">O_CREATE</span><span class="p">,</span> <span class="m">0600</span><span class="p">)</span>
-		<span class="k">defer</span> <span class="n">f</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
-
-		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">Fatalln</span><span class="p">(</span><span class="s">"failed to open file"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
-		<span class="p">}</span>
-
-		<span class="n">w</span> <span class="o">:=</span> <span class="n">csv</span><span class="o">.</span><span class="n">NewWriter</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-		<span class="k">defer</span> <span class="n">w</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
-
-		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">Fatal</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-		<span class="p">}</span>
-
-		<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">result</span> <span class="p">{</span>
-			<span class="n">w</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">RawRow</span><span class="p">)</span>
-		<span class="p">}</span>
-
-		<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
-
-	<span class="p">}()</span>
-
-	<span class="n">wg</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
-	<span class="nb">close</span><span class="p">(</span><span class="n">resultChan</span><span class="p">)</span>
-
-	<span class="n">writeCSVWaitGroup</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
-	<span class="n">fmt</span><span class="o">.</span><span class="n">Fprintf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">Stdout</span><span class="p">,</span> <span class="s">" %s Total rows: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">counter</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
-
-	<span class="k">return</span> <span class="n">counter</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">filteredRows</span>
-<span class="p">}</span>
-
-<span class="k">func</span> <span class="n">rowWorker</span><span class="p">(</span><span class="n">rowsChan</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">RowsChan</span><span class="p">,</span> <span class="n">waitGr</span> <span class="o">*</span><span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span><span class="p">,</span> <span class="n">resultChan</span> <span class="k">chan</span><span class="o">&lt;-</span> <span class="n">ALBLog</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">for</span> <span class="n">row</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">rowsChan</span> <span class="p">{</span>
-		<span class="n">processRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">resultChan</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="n">waitGr</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="k">func</span> <span class="n">errWorker</span><span class="p">(</span><span class="n">errsChan</span> <span class="n">bigcsvreader</span><span class="o">.</span><span class="n">ErrsChan</span><span class="p">,</span> <span class="n">waitGr</span> <span class="o">*</span><span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">for</span> <span class="n">err</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">errsChan</span> <span class="p">{</span>
-		<span class="n">handleError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-	<span class="p">}</span>
-	<span class="n">waitGr</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="c">// processRow can be used to implement business logic</span>
-<span class="c">// like validation / converting to a struct / persisting row into a storage.</span>
-<span class="k">func</span> <span class="n">processRow</span><span class="p">(</span><span class="n">row</span> <span class="p">[]</span><span class="kt">string</span><span class="p">,</span> <span class="n">resultChan</span> <span class="k">chan</span><span class="o">&lt;-</span> <span class="n">ALBLog</span><span class="p">)</span> <span class="p">{</span>
-	<span class="n">clientIP</span> <span class="o">:=</span> <span class="n">strings</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="m">3</span><span class="p">],</span> <span class="s">":"</span><span class="p">)[</span><span class="m">0</span><span class="p">]</span>
-	<span class="n">requestUrl</span> <span class="o">:=</span> <span class="n">strings</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="m">12</span><span class="p">],</span> <span class="s">" "</span><span class="p">)[</span><span class="m">1</span><span class="p">]</span>
-	<span class="n">urlObject</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">url</span><span class="o">.</span><span class="n">Parse</span><span class="p">(</span><span class="n">requestUrl</span><span class="p">)</span>
-
-	<span class="n">counter</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
-
-	<span class="n">RawRow</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span><span class="n">urlObject</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="m">6</span><span class="p">]}</span>
-	<span class="n">alblog</span> <span class="o">:=</span> <span class="n">ALBLog</span><span class="p">{</span>
-		<span class="n">ClientIP</span><span class="o">:</span>             <span class="n">clientIP</span><span class="p">,</span>
-		<span class="n">TargetProcessingTime</span><span class="o">:</span> <span class="n">row</span><span class="p">[</span><span class="m">6</span><span class="p">],</span>
-		<span class="n">TargetStatusCode</span><span class="o">:</span>     <span class="n">row</span><span class="p">[</span><span class="m">9</span><span class="p">],</span>
-		<span class="n">ReceivedBytes</span><span class="o">:</span>        <span class="n">row</span><span class="p">[</span><span class="m">10</span><span class="p">],</span>
-		<span class="n">RequestUrl</span><span class="o">:</span>           <span class="n">row</span><span class="p">[</span><span class="m">12</span><span class="p">],</span>
-		<span class="n">RequestCreationTime</span><span class="o">:</span>  <span class="n">row</span><span class="p">[</span><span class="m">21</span><span class="p">],</span>
-		<span class="n">RawRow</span><span class="o">:</span>               <span class="n">RawRow</span><span class="p">,</span>
-	<span class="p">}</span>
-	
-	<span class="k">if</span> <span class="n">doSomeFiltering</span><span class="p">()</span> <span class="p">{</span>
-		<span class="n">resultChan</span> <span class="o">&lt;-</span> <span class="n">alblog</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c">// handleError handles the error.</span>
-<span class="c">// errors can be fatal like file does not exist, or row related like a given row could not be parsed, etc...</span>
-<span class="k">func</span> <span class="n">handleError</span><span class="p">(</span><span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"error"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-			<footer>
-				<div class="blocked tags">
-					<p>
-						
-						<a href="/blog/tags/go">Go</a> |
-						
-					</p>
-				</div>
-			</footer>
-
-			<br />
-
-
-
-			<div class="hr"></div>
-
-		</article>
-
-		<div class="c">&nbsp;</div>
-
-	</div>
-
-
-</section>
-
-<div class="c">&nbsp;</div>
-
-        </div>
-
-
-        <footer id="footer" class="row">
-
-            <p id="copyright">
-                &copy; 2011-2026 Madhur Ahuja
-            </p>
-            <p id="poweredby" class="visible-lg visible-md">
-                Powered by <a href="http://jekyllrb.com">Jekyll</a> and <a href="http://github.com/">Github</a>.
-            </p>
-
-            <div class="c">&nbsp;</div>
-
-
-        </footer>
-
-
-    </div>
-
-    <script src="/files/js/main.js"></script> 
-    
-
-    <!-- serviceWorker.html -->
-    <script>
-        if ('serviceWorker' in navigator) {
-
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
-        }
-
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('/serviceWorker.js').then(function(reg) {
-//         if (!reg.installing) return;
-//         console.log("[*] ServiceWorker is installing...");
-
-//         var worker = reg.installing;
-//         worker.addEventListener('statechange', function() {
-//             if (worker.state == 'redundant') {
-//                 console.log('[*] Install failed');
-//             }
-//             if (worker.state == 'installed') {
-//                 console.log('[*] Install successful!');
-//             }
-//         });
-//     });
-// }
-
-    </script>
-
-</body>
-
-</html>
+<!doctype html><html lang=en dir=auto data-theme=dark><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Process huge log files | Madhur Ahuja</title><meta name=keywords content="Go"><meta name=description content="Process huge log files"><meta name=author content><link rel=canonical href=https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html><link crossorigin=anonymous href=/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as=style><link rel=icon href=https://madhur.co.in/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://madhur.co.in/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://madhur.co.in/favicon-32x32.png><link rel=apple-touch-icon href=https://madhur.co.in/apple-touch-icon.png><link rel=mask-icon href=https://madhur.co.in/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html><noscript><style>#theme-toggle,.top-link{display:none}</style></noscript><link rel="shortcut icon" href="https://www.gravatar.com/avatar/5352cde0b084abcd6d4d783c08a51c76?s=16"><link rel=stylesheet type=text/css href=/css/tagcloud.css><link rel=stylesheet type=text/css href=/css/site.css><link rel=stylesheet type=text/css media=print href=/css/print.css><script async src="https://www.googletagmanager.com/gtag/js?id=G-N14VDHYFHQ"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-N14VDHYFHQ")</script><meta property="og:url" content="https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html"><meta property="og:site_name" content="Madhur Ahuja"><meta property="og:title" content="Process huge log files"><meta property="og:description" content="Process huge log files"><meta property="og:locale" content="en_us"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2023-06-10T00:00:00+00:00"><meta property="article:modified_time" content="2023-06-10T00:00:00+00:00"><meta property="article:tag" content="Go"><meta name=twitter:card content="summary"><meta name=twitter:title content="Process huge log files"><meta name=twitter:description content="Process huge log files"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Posts","item":"https://madhur.co.in/posts/index.html"},{"@type":"ListItem","position":2,"name":"Process huge log files","item":"https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Process huge log files","name":"Process huge log files","description":"Process huge log files","keywords":["Go"],"articleBody":"Recently, I was faced with a situation where I had to process huge (in order of several gigabytes) log files.\nThe log files consisted of either CSV format or AWS ALB logs format\nHere the process means, I had to process each row to either filter it or store the valuable information from it for later analysis.\nFirst, I attempted with python to parse it with the simple logic\nfile_name = home + '/Downloads/huge_file.csv' filtered_rows = [] with open('./filtered.csv', 'w', newline='') as csvfile: dict_writer = csv.DictWriter(csvfile, [\"client_ip\", \"target_processing_time\", \"target_status_code\", \"received_bytes\", \"request_url\", \"request_creation_time\", \"ssl_protocol\", \"trace_id\" ]) with open(file_name, mode='r') as csv_file: csv_reader = csv.DictReader(csv_file) line_count = 0 for row in csv_reader: # Do some processing filtered_rows.append(obj) dict_writer.writerow(obj) The above program reads the CSV line by line and optionally writes few columns of it to another file.\nThis was done on a 12 GB CSV file and it took 4-5 hours.\nI was not satisfied with it as I had to do multiple iterations on multiple such files. There had to be a better way.\nTurned to Go due to its concurrency features\nThere is a encoding/csv package in go which can help read the CSV files. However, it is single threaded and does not make use of multiple goroutines.\nCame across another package github.com/actforgood/bigcsvreader which can help read the big CSV files with the use of multiple routines.\nQuickly wrote a program which reads the bunch of huge CSV files in a folder and applies processing logic to it. Below is the sample snippet:\nThe below program reads the folder of log files and processes each one after another. However, since the reading is done using multiple goroutines, the below program can process 12 GB of ALB log file in matter of few seconds. The log files in my case was the list of ALB log files from AWS. Note that ALB log files are space character separated.\nAlso, if the files are huge, we need to increase the buffer space in library so that its heap memory does not runs out.\nbigCSV.ColumnsDelimiter = ' ' bigCSV.BufferSize = 81920 The processRow() function receives each row and based on the process / filtering criteria publishes the data of type ALBLog on the resultChan channel.\nThere is another inline goroutine which reads all the data from resultChan channel and writes it to filtered.csv\npackage main import ( \"context\" \"encoding/csv\" \"fmt\" \"log\" \"os\" \"strings\" \"sync\" \"sync/atomic\" \"github.com/actforgood/bigcsvreader\" \"net/url\" ) const noOfColumns = 29 var rowCount = 0 type ALBLog struct { ClientIP string TargetProcessingTime string TargetStatusCode string ReceivedBytes string RequestUrl string RequestCreationTime string SSLProtocol string TraceID string RawRow []string } type count32 int32 func (c *count32) inc() int32 { return atomic.AddInt32((*int32)(c), 1) } func (c *count32) get() int32 { return atomic.LoadInt32((*int32)(c)) } func (c *count32) reset() { atomic.StoreInt32((*int32)(c), 0) } var counter count32 func main() { homedir, _ := os.UserHomeDir() csvLocation := homedir + \"/logs/\" entries, err := os.ReadDir(csvLocation) if err != nil { log.Fatal(err) } var TotalProcessRows int32 var FilteredProcessedRows int f, err := os.Create(\"filtered.csv\") w := csv.NewWriter(f) w.Write([]string{\"request_url\", \"target_processing_time\"}) w.Flush() f.Close() for _, e := range entries { if strings.HasSuffix(e.Name(), \".log\") { totalRows, filteredRows := processFile(csvLocation, e.Name()) TotalProcessRows = TotalProcessRows + totalRows FilteredProcessedRows = FilteredProcessedRows + filteredRows } } fmt.Fprintf(os.Stdout, \"Total Rows: %d Filtered Rows: %d\", TotalProcessRows, FilteredProcessedRows) } func processFile(csvLocation string, fileName string) (int32, int) { counter.reset() // initialize the big csv reader bigCSV := bigcsvreader.New() bigCSV.SetFilePath(csvLocation + fileName) bigCSV.ColumnsCount = noOfColumns bigCSV.MaxGoroutinesNo = 16 bigCSV.BufferSize = 81920 bigCSV.FileHasHeader = true bigCSV.ColumnsDelimiter = ' ' ctx, cancelCtx := context.WithCancel(context.Background()) defer cancelCtx() var wg sync.WaitGroup var filteredRows int // start multi-thread reading rowsChans, errsChan := bigCSV.Read(ctx) resultChan := make(chan ALBLog) for i := 0; i \u003c len(rowsChans); i++ { wg.Add(1) go rowWorker(rowsChans[i], \u0026wg, resultChan) } wg.Add(1) go errWorker(errsChan, \u0026wg) var writeCSVWaitGroup sync.WaitGroup go func() { writeCSVWaitGroup.Add(1) var result []ALBLog for filteredLog := range resultChan { result = append(result, filteredLog) } fmt.Fprintf(os.Stdout, \"%s Filtered rows %d\\n\", fileName, len(result)) filteredRows = len(result) f, err := os.OpenFile(\"filtered.csv\", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600) defer f.Close() if err != nil { log.Fatalln(\"failed to open file\", err) } w := csv.NewWriter(f) defer w.Flush() if err != nil { log.Fatal(err) } for _, row := range result { w.Write(row.RawRow) } writeCSVWaitGroup.Done() }() wg.Wait() close(resultChan) writeCSVWaitGroup.Wait() fmt.Fprintf(os.Stdout, \" %s Total rows: %d\\n\", fileName, counter.get()) return counter.get(), filteredRows } func rowWorker(rowsChan bigcsvreader.RowsChan, waitGr *sync.WaitGroup, resultChan chan\u003c- ALBLog) { for row := range rowsChan { processRow(row, resultChan) } waitGr.Done() } func errWorker(errsChan bigcsvreader.ErrsChan, waitGr *sync.WaitGroup) { for err := range errsChan { handleError(err) } waitGr.Done() } // processRow can be used to implement business logic // like validation / converting to a struct / persisting row into a storage. func processRow(row []string, resultChan chan\u003c- ALBLog) { clientIP := strings.Split(row[3], \":\")[0] requestUrl := strings.Split(row[12], \" \")[1] urlObject, err := url.Parse(requestUrl) counter.inc() RawRow := []string {urlObject.Path, row[6]} alblog := ALBLog{ ClientIP: clientIP, TargetProcessingTime: row[6], TargetStatusCode: row[9], ReceivedBytes: row[10], RequestUrl: row[12], RequestCreationTime: row[21], RawRow: RawRow, } if doSomeFiltering() { resultChan \u003c- alblog } } // handleError handles the error. // errors can be fatal like file does not exist, or row related like a given row could not be parsed, etc... func handleError(err error) { fmt.Println(\"error\", err) } ","wordCount":"860","inLanguage":"en","datePublished":"2023-06-10T00:00:00Z","dateModified":"2023-06-10T00:00:00Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://madhur.co.in/blog/2023/06/10/processing-huge-log-files.html"},"publisher":{"@type":"Organization","name":"Madhur Ahuja","logo":{"@type":"ImageObject","url":"https://madhur.co.in/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://madhur.co.in/ accesskey=h title="Madhur Ahuja (Alt + H)">Madhur Ahuja</a></div><ul id=menu class=menu><li><a href=https://madhur.co.in/posts/ title=Blog><span>Blog</span></a></li><li><a href=https://madhur.co.in/archives/ title=Archive><span>Archive</span></a></li><li><a href=https://madhur.co.in/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://madhur.co.in/projects/ title=Work><span>Work</span></a></li><li><a href=https://madhur.co.in/info/ title=About><span>About</span></a></li><li><a href=https://madhur.co.in/contact/ title=Contact><span>Contact</span></a></li><li><a href=https://madhur.co.in/search/ title="Search (Alt + /)" accesskey=/><span>Search</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/index.html>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Process huge log files</h1><div class=post-description>Process huge log files</div><div class=post-meta><span title='2023-06-10 00:00:00 +0000 UTC'>June 10, 2023</span>&nbsp;·&nbsp;<span>5 min</span></div></header><div class="post-content md-content"><p>Recently, I was faced with a situation where I had to process huge (in order of several gigabytes) log files.</p><p>The log files consisted of either <a href=https://en.wikipedia.org/wiki/Comma-separated_values>CSV format</a> or <a href=https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html>AWS ALB logs format</a></p><p>Here the process means, I had to process each row to either filter it or store the valuable information from it for later analysis.</p><p>First, I attempted with python to parse it with the simple logic</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>file_name</span> <span class=o>=</span> <span class=n>home</span> <span class=o>+</span> <span class=s1>&#39;/Downloads/huge_file.csv&#39;</span>
+</span></span><span class=line><span class=cl><span class=n>filtered_rows</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=s1>&#39;./filtered.csv&#39;</span><span class=p>,</span> <span class=s1>&#39;w&#39;</span><span class=p>,</span> <span class=n>newline</span><span class=o>=</span><span class=s1>&#39;&#39;</span><span class=p>)</span> <span class=k>as</span> <span class=n>csvfile</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>     <span class=n>dict_writer</span> <span class=o>=</span> <span class=n>csv</span><span class=o>.</span><span class=n>DictWriter</span><span class=p>(</span><span class=n>csvfile</span><span class=p>,</span> <span class=p>[</span><span class=s2>&#34;client_ip&#34;</span><span class=p>,</span> <span class=s2>&#34;target_processing_time&#34;</span><span class=p>,</span> <span class=s2>&#34;target_status_code&#34;</span><span class=p>,</span> <span class=s2>&#34;received_bytes&#34;</span><span class=p>,</span> <span class=s2>&#34;request_url&#34;</span><span class=p>,</span> <span class=s2>&#34;request_creation_time&#34;</span><span class=p>,</span> <span class=s2>&#34;ssl_protocol&#34;</span><span class=p>,</span> <span class=s2>&#34;trace_id&#34;</span> <span class=p>])</span>
+</span></span><span class=line><span class=cl>     <span class=k>with</span> <span class=nb>open</span><span class=p>(</span><span class=n>file_name</span><span class=p>,</span> <span class=n>mode</span><span class=o>=</span><span class=s1>&#39;r&#39;</span><span class=p>)</span> <span class=k>as</span> <span class=n>csv_file</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>csv_reader</span> <span class=o>=</span> <span class=n>csv</span><span class=o>.</span><span class=n>DictReader</span><span class=p>(</span><span class=n>csv_file</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>line_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>row</span> <span class=ow>in</span> <span class=n>csv_reader</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1># Do some processing</span>
+</span></span><span class=line><span class=cl>            <span class=n>filtered_rows</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>obj</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>dict_writer</span><span class=o>.</span><span class=n>writerow</span><span class=p>(</span><span class=n>obj</span><span class=p>)</span>
+</span></span></code></pre></div><p>The above program reads the CSV line by line and optionally writes few columns of it to another file.</p><p>This was done on a 12 GB CSV file and it took 4-5 hours.</p><p>I was not satisfied with it as I had to do multiple iterations on multiple such files. There had to be a better way.</p><p>Turned to <a href=https://go.dev/>Go</a> due to its concurrency features</p><p>There is a <a href=https://pkg.go.dev/encoding/csv>encoding/csv</a> package in go which can help read the CSV files. However, it is single threaded and does not make use of multiple goroutines.</p><p>Came across another package <a href=https://github.com/actforgood/bigcsvreader>github.com/actforgood/bigcsvreader</a> which can help read the big CSV files with the use of multiple routines.</p><p>Quickly wrote a program which reads the bunch of huge CSV files in a folder and applies processing logic to it. Below is the sample snippet:</p><p>The below program reads the folder of log files and processes each one after another. However, since the reading is done using multiple goroutines, the below program can process 12 GB of ALB log file in matter of few seconds. The log files in my case was the list of ALB log files from AWS. Note that ALB log files are space character separated.</p><p>Also, if the files are huge, we need to increase the buffer space in library so that its heap memory does not runs out.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>ColumnsDelimiter</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=sc>&#39; &#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>BufferSize</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=mi>81920</span><span class=w>
+</span></span></span></code></pre></div><p>The <code>processRow()</code> function receives each row and based on the process / filtering criteria publishes the data of type <code>ALBLog</code> on the <code>resultChan</code> channel.</p><p>There is another inline goroutine which reads all the data from <code>resultChan</code> channel and writes it to <code>filtered.csv</code></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kn>package</span><span class=w> </span><span class=nx>main</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kn>import</span><span class=w> </span><span class=p>(</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;context&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;encoding/csv&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;fmt&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;log&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;os&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;strings&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;sync&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;sync/atomic&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;github.com/actforgood/bigcsvreader&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=s>&#34;net/url&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>const</span><span class=w> </span><span class=nx>noOfColumns</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=mi>29</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>var</span><span class=w> </span><span class=nx>rowCount</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=mi>0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>type</span><span class=w> </span><span class=nx>ALBLog</span><span class=w> </span><span class=kd>struct</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>ClientIP</span><span class=w>             </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>TargetProcessingTime</span><span class=w> </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>TargetStatusCode</span><span class=w>     </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>ReceivedBytes</span><span class=w>        </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>RequestUrl</span><span class=w>           </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>RequestCreationTime</span><span class=w>  </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>SSLProtocol</span><span class=w>          </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>TraceID</span><span class=w>              </span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>RawRow</span><span class=w>               </span><span class=p>[]</span><span class=kt>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>type</span><span class=w> </span><span class=nx>count32</span><span class=w> </span><span class=kt>int32</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=p>(</span><span class=nx>c</span><span class=w> </span><span class=o>*</span><span class=nx>count32</span><span class=p>)</span><span class=w> </span><span class=nf>inc</span><span class=p>()</span><span class=w> </span><span class=kt>int32</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>return</span><span class=w> </span><span class=nx>atomic</span><span class=p>.</span><span class=nf>AddInt32</span><span class=p>((</span><span class=o>*</span><span class=kt>int32</span><span class=p>)(</span><span class=nx>c</span><span class=p>),</span><span class=w> </span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=p>(</span><span class=nx>c</span><span class=w> </span><span class=o>*</span><span class=nx>count32</span><span class=p>)</span><span class=w> </span><span class=nf>get</span><span class=p>()</span><span class=w> </span><span class=kt>int32</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>return</span><span class=w> </span><span class=nx>atomic</span><span class=p>.</span><span class=nf>LoadInt32</span><span class=p>((</span><span class=o>*</span><span class=kt>int32</span><span class=p>)(</span><span class=nx>c</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=p>(</span><span class=nx>c</span><span class=w> </span><span class=o>*</span><span class=nx>count32</span><span class=p>)</span><span class=w> </span><span class=nf>reset</span><span class=p>()</span><span class=w>  </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>atomic</span><span class=p>.</span><span class=nf>StoreInt32</span><span class=p>((</span><span class=o>*</span><span class=kt>int32</span><span class=p>)(</span><span class=nx>c</span><span class=p>),</span><span class=w> </span><span class=mi>0</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>var</span><span class=w> </span><span class=nx>counter</span><span class=w> </span><span class=nx>count32</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>main</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>homedir</span><span class=p>,</span><span class=w> </span><span class=nx>_</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>os</span><span class=p>.</span><span class=nf>UserHomeDir</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>csvLocation</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>homedir</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;/logs/&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>entries</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>os</span><span class=p>.</span><span class=nf>ReadDir</span><span class=p>(</span><span class=nx>csvLocation</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>if</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>nil</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=kd>var</span><span class=w> </span><span class=nx>TotalProcessRows</span><span class=w> </span><span class=kt>int32</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=kd>var</span><span class=w> </span><span class=nx>FilteredProcessedRows</span><span class=w> </span><span class=kt>int</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>f</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>os</span><span class=p>.</span><span class=nf>Create</span><span class=p>(</span><span class=s>&#34;filtered.csv&#34;</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>w</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>csv</span><span class=p>.</span><span class=nf>NewWriter</span><span class=p>(</span><span class=nx>f</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>w</span><span class=p>.</span><span class=nf>Write</span><span class=p>([]</span><span class=kt>string</span><span class=p>{</span><span class=s>&#34;request_url&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;target_processing_time&#34;</span><span class=p>})</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>w</span><span class=p>.</span><span class=nf>Flush</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>f</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>for</span><span class=w> </span><span class=nx>_</span><span class=p>,</span><span class=w> </span><span class=nx>e</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=k>range</span><span class=w> </span><span class=nx>entries</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>if</span><span class=w> </span><span class=nx>strings</span><span class=p>.</span><span class=nf>HasSuffix</span><span class=p>(</span><span class=nx>e</span><span class=p>.</span><span class=nf>Name</span><span class=p>(),</span><span class=w> </span><span class=s>&#34;.log&#34;</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>totalRows</span><span class=p>,</span><span class=w> </span><span class=nx>filteredRows</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nf>processFile</span><span class=p>(</span><span class=nx>csvLocation</span><span class=p>,</span><span class=w> </span><span class=nx>e</span><span class=p>.</span><span class=nf>Name</span><span class=p>())</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>TotalProcessRows</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=nx>TotalProcessRows</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=nx>totalRows</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>FilteredProcessedRows</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=nx>FilteredProcessedRows</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=nx>filteredRows</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Fprintf</span><span class=p>(</span><span class=nx>os</span><span class=p>.</span><span class=nx>Stdout</span><span class=p>,</span><span class=w> </span><span class=s>&#34;Total Rows: %d Filtered Rows: %d&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>TotalProcessRows</span><span class=p>,</span><span class=w> </span><span class=nx>FilteredProcessedRows</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>processFile</span><span class=p>(</span><span class=nx>csvLocation</span><span class=w> </span><span class=kt>string</span><span class=p>,</span><span class=w> </span><span class=nx>fileName</span><span class=w> </span><span class=kt>string</span><span class=p>)</span><span class=w> </span><span class=p>(</span><span class=kt>int32</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>counter</span><span class=p>.</span><span class=nf>reset</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=c1>// initialize the big csv reader</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>bigcsvreader</span><span class=p>.</span><span class=nf>New</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nf>SetFilePath</span><span class=p>(</span><span class=nx>csvLocation</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=nx>fileName</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>ColumnsCount</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=nx>noOfColumns</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>MaxGoroutinesNo</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=mi>16</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>BufferSize</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=mi>81920</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>FileHasHeader</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>bigCSV</span><span class=p>.</span><span class=nx>ColumnsDelimiter</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=sc>&#39; &#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>ctx</span><span class=p>,</span><span class=w> </span><span class=nx>cancelCtx</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>context</span><span class=p>.</span><span class=nf>WithCancel</span><span class=p>(</span><span class=nx>context</span><span class=p>.</span><span class=nf>Background</span><span class=p>())</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>defer</span><span class=w> </span><span class=nf>cancelCtx</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=kd>var</span><span class=w> </span><span class=nx>wg</span><span class=w> </span><span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=kd>var</span><span class=w> </span><span class=nx>filteredRows</span><span class=w> </span><span class=kt>int</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=c1>// start multi-thread reading</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>rowsChans</span><span class=p>,</span><span class=w> </span><span class=nx>errsChan</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>bigCSV</span><span class=p>.</span><span class=nf>Read</span><span class=p>(</span><span class=nx>ctx</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>resultChan</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nb>make</span><span class=p>(</span><span class=kd>chan</span><span class=w> </span><span class=nx>ALBLog</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>for</span><span class=w> </span><span class=nx>i</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w> </span><span class=nx>i</span><span class=w> </span><span class=p>&lt;</span><span class=w> </span><span class=nb>len</span><span class=p>(</span><span class=nx>rowsChans</span><span class=p>);</span><span class=w> </span><span class=nx>i</span><span class=o>++</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>wg</span><span class=p>.</span><span class=nf>Add</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>go</span><span class=w> </span><span class=nf>rowWorker</span><span class=p>(</span><span class=nx>rowsChans</span><span class=p>[</span><span class=nx>i</span><span class=p>],</span><span class=w> </span><span class=o>&amp;</span><span class=nx>wg</span><span class=p>,</span><span class=w> </span><span class=nx>resultChan</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>wg</span><span class=p>.</span><span class=nf>Add</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>go</span><span class=w> </span><span class=nf>errWorker</span><span class=p>(</span><span class=nx>errsChan</span><span class=p>,</span><span class=w> </span><span class=o>&amp;</span><span class=nx>wg</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=kd>var</span><span class=w> </span><span class=nx>writeCSVWaitGroup</span><span class=w> </span><span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>go</span><span class=w> </span><span class=kd>func</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>writeCSVWaitGroup</span><span class=p>.</span><span class=nf>Add</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=kd>var</span><span class=w> </span><span class=nx>result</span><span class=w> </span><span class=p>[]</span><span class=nx>ALBLog</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>for</span><span class=w> </span><span class=nx>filteredLog</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=k>range</span><span class=w> </span><span class=nx>resultChan</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>result</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=nb>append</span><span class=p>(</span><span class=nx>result</span><span class=p>,</span><span class=w> </span><span class=nx>filteredLog</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Fprintf</span><span class=p>(</span><span class=nx>os</span><span class=p>.</span><span class=nx>Stdout</span><span class=p>,</span><span class=w> </span><span class=s>&#34;%s Filtered rows %d\n&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>fileName</span><span class=p>,</span><span class=w> </span><span class=nb>len</span><span class=p>(</span><span class=nx>result</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>filteredRows</span><span class=w> </span><span class=p>=</span><span class=w> </span><span class=nb>len</span><span class=p>(</span><span class=nx>result</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>f</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>os</span><span class=p>.</span><span class=nf>OpenFile</span><span class=p>(</span><span class=s>&#34;filtered.csv&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>os</span><span class=p>.</span><span class=nx>O_APPEND</span><span class=p>|</span><span class=nx>os</span><span class=p>.</span><span class=nx>O_WRONLY</span><span class=p>|</span><span class=nx>os</span><span class=p>.</span><span class=nx>O_CREATE</span><span class=p>,</span><span class=w> </span><span class=mo>0600</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>defer</span><span class=w> </span><span class=nx>f</span><span class=p>.</span><span class=nf>Close</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>if</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>nil</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>log</span><span class=p>.</span><span class=nf>Fatalln</span><span class=p>(</span><span class=s>&#34;failed to open file&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>w</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>csv</span><span class=p>.</span><span class=nf>NewWriter</span><span class=p>(</span><span class=nx>f</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>defer</span><span class=w> </span><span class=nx>w</span><span class=p>.</span><span class=nf>Flush</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>if</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>nil</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>log</span><span class=p>.</span><span class=nf>Fatal</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=k>for</span><span class=w> </span><span class=nx>_</span><span class=p>,</span><span class=w> </span><span class=nx>row</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=k>range</span><span class=w> </span><span class=nx>result</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>			</span><span class=nx>w</span><span class=p>.</span><span class=nf>Write</span><span class=p>(</span><span class=nx>row</span><span class=p>.</span><span class=nx>RawRow</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>writeCSVWaitGroup</span><span class=p>.</span><span class=nf>Done</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>wg</span><span class=p>.</span><span class=nf>Wait</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nb>close</span><span class=p>(</span><span class=nx>resultChan</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>writeCSVWaitGroup</span><span class=p>.</span><span class=nf>Wait</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Fprintf</span><span class=p>(</span><span class=nx>os</span><span class=p>.</span><span class=nx>Stdout</span><span class=p>,</span><span class=w> </span><span class=s>&#34; %s Total rows: %d\n&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>fileName</span><span class=p>,</span><span class=w> </span><span class=nx>counter</span><span class=p>.</span><span class=nf>get</span><span class=p>())</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>return</span><span class=w> </span><span class=nx>counter</span><span class=p>.</span><span class=nf>get</span><span class=p>(),</span><span class=w> </span><span class=nx>filteredRows</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>rowWorker</span><span class=p>(</span><span class=nx>rowsChan</span><span class=w> </span><span class=nx>bigcsvreader</span><span class=p>.</span><span class=nx>RowsChan</span><span class=p>,</span><span class=w> </span><span class=nx>waitGr</span><span class=w> </span><span class=o>*</span><span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span><span class=p>,</span><span class=w> </span><span class=nx>resultChan</span><span class=w> </span><span class=kd>chan</span><span class=o>&lt;-</span><span class=w> </span><span class=nx>ALBLog</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>for</span><span class=w> </span><span class=nx>row</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=k>range</span><span class=w> </span><span class=nx>rowsChan</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nf>processRow</span><span class=p>(</span><span class=nx>row</span><span class=p>,</span><span class=w> </span><span class=nx>resultChan</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>waitGr</span><span class=p>.</span><span class=nf>Done</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>errWorker</span><span class=p>(</span><span class=nx>errsChan</span><span class=w> </span><span class=nx>bigcsvreader</span><span class=p>.</span><span class=nx>ErrsChan</span><span class=p>,</span><span class=w> </span><span class=nx>waitGr</span><span class=w> </span><span class=o>*</span><span class=nx>sync</span><span class=p>.</span><span class=nx>WaitGroup</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>for</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=k>range</span><span class=w> </span><span class=nx>errsChan</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nf>handleError</span><span class=p>(</span><span class=nx>err</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>waitGr</span><span class=p>.</span><span class=nf>Done</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c1>// processRow can be used to implement business logic</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c1>// like validation / converting to a struct / persisting row into a storage.</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>processRow</span><span class=p>(</span><span class=nx>row</span><span class=w> </span><span class=p>[]</span><span class=kt>string</span><span class=p>,</span><span class=w> </span><span class=nx>resultChan</span><span class=w> </span><span class=kd>chan</span><span class=o>&lt;-</span><span class=w> </span><span class=nx>ALBLog</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>clientIP</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nx>row</span><span class=p>[</span><span class=mi>3</span><span class=p>],</span><span class=w> </span><span class=s>&#34;:&#34;</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>requestUrl</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>strings</span><span class=p>.</span><span class=nf>Split</span><span class=p>(</span><span class=nx>row</span><span class=p>[</span><span class=mi>12</span><span class=p>],</span><span class=w> </span><span class=s>&#34; &#34;</span><span class=p>)[</span><span class=mi>1</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>urlObject</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>url</span><span class=p>.</span><span class=nf>Parse</span><span class=p>(</span><span class=nx>requestUrl</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>counter</span><span class=p>.</span><span class=nf>inc</span><span class=p>()</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>RawRow</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=p>[]</span><span class=kt>string</span><span class=w> </span><span class=p>{</span><span class=nx>urlObject</span><span class=p>.</span><span class=nx>Path</span><span class=p>,</span><span class=w> </span><span class=nx>row</span><span class=p>[</span><span class=mi>6</span><span class=p>]}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>alblog</span><span class=w> </span><span class=o>:=</span><span class=w> </span><span class=nx>ALBLog</span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>ClientIP</span><span class=p>:</span><span class=w>             </span><span class=nx>clientIP</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>TargetProcessingTime</span><span class=p>:</span><span class=w> </span><span class=nx>row</span><span class=p>[</span><span class=mi>6</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>TargetStatusCode</span><span class=p>:</span><span class=w>     </span><span class=nx>row</span><span class=p>[</span><span class=mi>9</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>ReceivedBytes</span><span class=p>:</span><span class=w>        </span><span class=nx>row</span><span class=p>[</span><span class=mi>10</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>RequestUrl</span><span class=p>:</span><span class=w>           </span><span class=nx>row</span><span class=p>[</span><span class=mi>12</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>RequestCreationTime</span><span class=p>:</span><span class=w>  </span><span class=nx>row</span><span class=p>[</span><span class=mi>21</span><span class=p>],</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>RawRow</span><span class=p>:</span><span class=w>               </span><span class=nx>RawRow</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=k>if</span><span class=w> </span><span class=nf>doSomeFiltering</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>		</span><span class=nx>resultChan</span><span class=w> </span><span class=o>&lt;-</span><span class=w> </span><span class=nx>alblog</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c1>// handleError handles the error.</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c1>// errors can be fatal like file does not exist, or row related like a given row could not be parsed, etc...</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=kd>func</span><span class=w> </span><span class=nf>handleError</span><span class=p>(</span><span class=nx>err</span><span class=w> </span><span class=kt>error</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>	</span><span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;error&#34;</span><span class=p>,</span><span class=w> </span><span class=nx>err</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=p>}</span><span class=w>
+</span></span></span></code></pre></div></div><footer class=post-footer><ul class=post-tags><li><a href=https://madhur.co.in/tags/go/>Go</a></li></ul><nav class=paginav><a class=prev href=https://madhur.co.in/blog/2023/07/30/creating-vagrant-base-box.html><span class=title>« Prev</span>
+<span>Creating vagrant basebox</span>
+</a><a class=next href=https://madhur.co.in/blog/2023/05/21/chrome-extension-leetcode-format.html><span class=title>Next »</span>
+<span>LeetCode Format v1.4</span></a></nav><ul class=share-buttons><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on x" href="https://x.com/intent/tweet/?text=Process%20huge%20log%20files&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html&amp;hashtags=Go"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446C483.971.0 512 28.03 512 62.554zM269.951 190.75 182.567 75.216H56L207.216 272.95 63.9 436.783h61.366L235.9 310.383l96.667 126.4H456L298.367 228.367l134-153.151H371.033zM127.633 110h36.468l219.38 290.065H349.5z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html&amp;title=Process%20huge%20log%20files&amp;summary=Process%20huge%20log%20files&amp;source=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html&title=Process%20huge%20log%20files"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on whatsapp" href="https://api.whatsapp.com/send?text=Process%20huge%20log%20files%20-%20https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html"><svg viewBox="0 0 512 512" height="30" width="30" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on telegram" href="https://telegram.me/share/url?text=Process%20huge%20log%20files&amp;url=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html"><svg viewBox="2 2 28 28" height="30" width="30" fill="currentColor"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></li><li><a target=_blank rel="noopener noreferrer" aria-label="share Process huge log files on ycombinator" href="https://news.ycombinator.com/submitlink?t=Process%20huge%20log%20files&u=https%3a%2f%2fmadhur.co.in%2fblog%2f2023%2f06%2f10%2fprocessing-huge-log-files.html"><svg width="30" height="30" viewBox="0 0 512 512" fill="currentColor"><path d="M449.446.0C483.971.0 512 28.03 512 62.554V449.446C512 483.97 483.97 512 449.446 512H62.554C28.03 512 0 483.97.0 449.446V62.554C0 28.03 28.029.0 62.554.0H449.446zM183.8767 87.9921h-62.034L230.6673 292.4508V424.0079h50.6655V292.4508L390.1575 87.9921H328.1233L256 238.2489z"/></svg></a></li></ul></footer><script src=https://giscus.app/client.js data-repo=madhur/madhur.github.com data-repo-id=MDEwOlJlcG9zaXRvcnkxMTk4NzY4 data-category=General data-category-id=DIC_kwDOABJKsM4DDaIW data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=bottom data-theme=dark data-lang=en crossorigin=anonymous async></script></article></main><footer class=footer><span>&copy; 2026 <a href=https://madhur.co.in/>Madhur Ahuja</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

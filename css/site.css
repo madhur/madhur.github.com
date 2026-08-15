@@ -1,0 +1,125 @@
+/* Site-wide overrides restoring the look of the original Jekyll site.
+   Colors, fonts, and background are ported directly from files/css/styles.less
+   (the pre-migration stylesheet, preserved in git history at commit cf7971f5e):
+     @textcolor:      #ddd   -> body text / headings
+     @backgroundcolor: #222  -> page background (+ the original repeating linen texture)
+     @linkstartcolor / @linkhovercolor: #72a4b4 -> link color
+     @normalfont: "Helvetica Neue", Helvetica, Arial, sans-serif
+   Base font-size: the old site's raw CSS value was Bootstrap 3's unmodified default,
+   14px/1.42857143 line-height — confirmed by checking the vendored bootstrap.min.css,
+   since styles.less never overrode it. But 14px reads noticeably smaller today than it
+   did on 2013-era displays, and PaperMod's own default (18px) is bigger again. Split the
+   difference at 16px — a standard, comfortable body-text minimum — rather than either
+   extreme. */
+
+:root[data-theme="dark"] {
+    --theme: #222222;
+    --primary: #dddddd;
+}
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.42857143;
+}
+
+/* PaperMod sets `background: var(--theme)` on `body` (core/reset.css) AND, with
+   higher specificity, on `[data-theme="dark"] .list` (core/theme-vars.css, the
+   class list/section pages like the homepage get on <body>). Both use the
+   shorthand `background` property, which resets background-image to `none` —
+   so a plain `body { background-image: ... }` rule gets silently wiped out on
+   any page where <body> has class="list", even though it works fine on single
+   pages. !important + matching both selectors makes this hold everywhere. */
+body,
+[data-theme="dark"] .list {
+    background-color: #222222 !important;
+    background-image: url("/images/black_linen_v2.png") !important;
+    background-repeat: repeat !important;
+}
+
+/* Content column width matches the original Jekyll site's desktop layout:
+   Bootstrap 3's largest .container breakpoint (>=1200px viewports) was
+   1170px, and the old blog-post layout used col-md-12 — full container
+   width, no sidebar — so 1170px is the actual old reading width, not an
+   arbitrary "wider than PaperMod's 720px default" choice. */
+:root {
+    --main-width: 1170px;
+}
+
+/* Hyperlinks: distinct color instead of blending into body text, matching the
+   original site's a:link/a:visited/a:hover treatment (color-only, dotted
+   underline on hover rather than a permanent underline). */
+.md-content a:not(.anchor) {
+    color: #72a4b4;
+    text-decoration: none;
+}
+
+.md-content a:not(.anchor):hover,
+.md-content a:not(.anchor):focus-visible {
+    border-bottom: 1px dotted #72a4b4;
+}
+
+/* Compact post list (layouts/list.html): one row per post — title, tags,
+   date — instead of PaperMod's default stacked "card" (background tile,
+   title on its own line, footer on the line below). Drops the per-entry
+   background/border/padding and lays entry-header + entry-footer out as a
+   single flex row so far more posts fit on screen without scrolling. */
+.post-entry {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 1em;
+    row-gap: 0.2em;
+    background: none;
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 1.1em 0;
+    margin-bottom: 0;
+    transition: background 0.15s ease;
+}
+
+.post-entry:hover,
+.post-entry:focus-within {
+    transform: none;
+    background: var(--code-bg);
+    border-color: var(--border);
+}
+
+.post-entry .entry-header {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.post-entry .entry-header h2 {
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-entry .entry-footer {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    column-gap: 0.75em;
+    margin-left: auto;
+}
+
+.post-entry .post-tags {
+    gap: 6px;
+}
+
+.post-entry .post-tags a {
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 22px;
+}
+
+.post-entry .entry-date {
+    font-size: 13px;
+    color: var(--secondary);
+    white-space: nowrap;
+}
