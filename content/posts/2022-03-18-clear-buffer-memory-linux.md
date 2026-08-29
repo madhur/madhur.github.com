@@ -2,6 +2,8 @@
 slug: "clear-buffer-memory-linux"
 title: Clear buffer memory on Linux
 date: '2022-03-18'
+year: '2022'
+month: '2022-03'
 description: Clear buffer memory on Linux
 tags:
   - Linux

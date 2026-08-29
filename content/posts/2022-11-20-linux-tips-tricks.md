@@ -2,6 +2,8 @@
 slug: "linux-tips-tricks"
 title: Linux Tips and Tricks
 date: '2022-11-20'
+year: '2022'
+month: '2022-11'
 description: Linux Tips and Tricks
 tags:
   - Linux

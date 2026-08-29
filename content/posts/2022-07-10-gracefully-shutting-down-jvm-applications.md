@@ -2,6 +2,8 @@
 slug: "gracefully-shutting-down-jvm-applications"
 title: Gracefully shutting down JVM applications
 date: '2022-07-10'
+year: '2022'
+month: '2022-07'
 description: Gracefully shutting down JVM applications
 tags:
   - JVM

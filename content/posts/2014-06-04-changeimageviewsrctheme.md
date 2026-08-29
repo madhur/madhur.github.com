@@ -2,6 +2,8 @@
 slug: "changeimageviewsrctheme"
 title: Change ImageView src based on Android Application theme
 date: '2014-06-04'
+year: '2014'
+month: '2014-06'
 description: Change ImageView src based on Android Application theme
 tags:
   - Android

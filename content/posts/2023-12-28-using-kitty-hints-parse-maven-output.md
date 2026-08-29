@@ -2,6 +2,8 @@
 slug: "using-kitty-hints-parse-maven-output"
 title: Using Kitty hints to parse maven output
 date: '2023-12-28'
+year: '2023'
+month: '2023-12'
 description: Using Kitty hints to parse maven output
 tags:
   - Kitty

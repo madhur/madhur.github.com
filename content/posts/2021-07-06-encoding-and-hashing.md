@@ -2,6 +2,8 @@
 slug: "encoding-and-hashing"
 title: Encoding and Hashing
 date: '2021-07-06'
+year: '2021'
+month: '2021-07'
 description: Encoding and Hashing
 tags:
   - Design

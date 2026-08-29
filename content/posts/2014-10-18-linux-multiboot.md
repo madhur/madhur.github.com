@@ -2,6 +2,8 @@
 slug: "linux-multiboot"
 title: 'Multiboot: Booting linux from ISO placed in HDD via GRUB'
 date: '2014-10-18'
+year: '2014'
+month: '2014-10'
 description: 'Multiboot: Booting linux from ISO placed in HDD via GRUB'
 tags:
   - Linux

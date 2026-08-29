@@ -2,6 +2,8 @@
 slug: "centos-is-dead"
 title: CentOS is dead
 date: '2022-02-05'
+year: '2022'
+month: '2022-02'
 description: CentOS is dead
 tags:
   - CentOS

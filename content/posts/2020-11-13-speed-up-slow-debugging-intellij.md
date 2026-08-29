@@ -2,6 +2,8 @@
 slug: "speed-up-slow-debugging-intellij"
 title: Speed up debugging in IntelliJ
 date: '2020-11-13'
+year: '2020'
+month: '2020-11'
 description: Speed up debugging in IntelliJ
 tags:
   - IntelliJ

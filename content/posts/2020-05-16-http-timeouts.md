@@ -2,6 +2,8 @@
 slug: "http-timeouts"
 title: Different HTTP Timeouts in HTTP Client
 date: 2020-05-16T00:00:00.000Z
+year: '2020'
+month: '2020-05'
 description: Different HTTP Timeouts in HTTP Client
 tags:
   - Java

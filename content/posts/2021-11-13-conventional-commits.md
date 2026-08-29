@@ -2,6 +2,8 @@
 slug: "conventional-commits"
 title: Conventional Commits
 date: '2021-11-13'
+year: '2021'
+month: '2021-11'
 description: Conventional Commits
 tags:
   - Git

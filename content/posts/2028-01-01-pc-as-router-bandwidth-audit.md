@@ -4,6 +4,8 @@ title: >-
   Turning My Homelab PC Into the House Router for a Day, Just to Find One
   Bandwidth Hog
 date: '2028-01-01'
+year: '2028'
+month: '2028-01'
 description: >-
   My ISP router has no per-device stats, and I don't want to root or replace it.
   So for one day I made my Arch homelab box the LAN's DHCP server and NAT

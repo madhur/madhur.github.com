@@ -2,6 +2,8 @@
 slug: "protbufferoverflow"
 title: Protections against buffer overflow exploits in Linux
 date: '2011-08-06'
+year: '2011'
+month: '2011-08'
 description: Protections against buffer overflow exploits in Linux
 tags:
   - Security

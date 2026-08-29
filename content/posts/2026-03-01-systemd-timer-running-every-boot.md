@@ -2,6 +2,8 @@
 slug: "systemd-timer-running-every-boot"
 title: Systemd timer running on every boot
 date: '2026-03-01'
+year: '2026'
+month: '2026-03'
 description: Systemd timer running on every boot
 tags:
   - Systemd

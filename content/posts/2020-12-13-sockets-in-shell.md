@@ -2,6 +2,8 @@
 slug: "sockets-in-shell"
 title: Sockets in shell
 date: '2020-12-13'
+year: '2020'
+month: '2020-12'
 description: Sockets in shell
 tags:
   - Shell

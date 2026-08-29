@@ -2,6 +2,8 @@
 slug: "debugging-ssl-issues-java"
 title: Debugging SSL Issues in Java
 date: '2016-10-30'
+year: '2016'
+month: '2016-10'
 description: Debugging SSL Issues in Java
 tags:
   - Java

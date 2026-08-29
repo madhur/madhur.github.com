@@ -2,6 +2,8 @@
 slug: "findnthlargest"
 title: Find Nth largest element in an array
 date: '2014-07-28'
+year: '2014'
+month: '2014-07'
 description: Find Nth largest element in an array
 tags:
   - Algorithms

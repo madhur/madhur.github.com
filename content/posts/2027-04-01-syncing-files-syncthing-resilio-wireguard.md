@@ -2,6 +2,8 @@
 slug: "syncing-files-syncthing-resilio-wireguard"
 title: Syncing Files Over the Internet with Syncthing and Resilio Using WireGuard VPN
 date: '2027-04-01'
+year: '2027'
+month: '2027-04'
 description: >-
   How to set up Syncthing and Resilio Sync to work reliably over the internet
   using WireGuard VPN with wg-easy in Docker

@@ -2,6 +2,8 @@
 slug: "apache-benchmark-alternative-hey"
 title: A nifty Apache Benchmark alternative - hey
 date: '2023-02-23'
+year: '2023'
+month: '2023-02'
 description: A nifty Apache Benchmark alternative - hey
 tags:
   - ab

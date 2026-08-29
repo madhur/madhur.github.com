@@ -2,6 +2,8 @@
 slug: "poem-doraha"
 title: Doraha
 date: '2018-02-16'
+year: '2018'
+month: '2018-02'
 description: Doraha
 tags:
   - Poetry

@@ -2,6 +2,8 @@
 slug: "configuring-aws-alb-timeout"
 title: Configuring AWS ALB Timeouts
 date: '2025-10-01'
+year: '2025'
+month: '2025-10'
 description: Configuring AWS ALB Timeouts
 tags:
   - Timeout

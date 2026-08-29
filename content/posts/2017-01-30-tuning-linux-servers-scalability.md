@@ -2,6 +2,8 @@
 slug: "tuning-linux-servers-scalability"
 title: Tuning Linux servers for scalability
 date: '2017-01-30'
+year: '2017'
+month: '2017-01'
 description: Tuning Linux servers for scalability
 tags:
   - Linux

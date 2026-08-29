@@ -2,6 +2,8 @@
 slug: "monitoring-guava-cache-statistics"
 title: Monitoring Guava Cache Statistics
 date: '2023-01-23'
+year: '2023'
+month: '2023-01'
 description: Monitoring Guava Cache Statistics
 tags:
   - guava

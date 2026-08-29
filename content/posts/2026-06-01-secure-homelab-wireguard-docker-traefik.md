@@ -4,6 +4,8 @@ title: >-
   Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and
   Traefik
 date: '2026-06-01'
+year: '2026'
+month: '2026-06'
 description: >-
   Secure Your Homelab: Exposing Services Selectively with WireGuard VPN and
   Traefik

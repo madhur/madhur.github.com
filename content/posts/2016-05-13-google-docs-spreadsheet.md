@@ -2,6 +2,8 @@
 slug: "google-docs-spreadsheet"
 title: Read Google docs spreadsheet using Python
 date: '2016-05-13'
+year: '2016'
+month: '2016-05'
 description: Read Google docs spreadsheet using Python
 tags:
   - Python

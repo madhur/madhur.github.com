@@ -2,6 +2,8 @@
 slug: "workaround-lambda-6mb-limit"
 title: Workaround AWS Lambda 6 MB Response size limit
 date: '2023-03-23'
+year: '2023'
+month: '2023-03'
 description: Workaround AWS Lambda 6 MB Response size limit
 tags:
   - AWS

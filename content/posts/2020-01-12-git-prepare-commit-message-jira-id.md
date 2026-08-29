@@ -1,6 +1,8 @@
 ---
 title: Ensuring git commit messages contain JIRA ID
 date: '2020-01-12'
+year: '2020'
+month: '2020-01'
 description: Ensuring git commit messages contain JIRA ID
 tags:
   - Git

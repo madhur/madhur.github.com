@@ -2,6 +2,8 @@
 slug: "tagcloudjekyll"
 title: Creating Tag cloud of Categories in Jekyll
 date: '2011-06-11'
+year: '2011'
+month: '2011-06'
 description: Creating Tag cloud of Categories in Jekyll
 tags:
   - Jekyll

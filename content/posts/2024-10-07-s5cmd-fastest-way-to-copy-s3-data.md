@@ -2,6 +2,8 @@
 slug: "s5cmd-fastest-way-to-copy-s3-data"
 title: s3cmd Fast way to copy s3 data
 date: '2024-10-07'
+year: '2024'
+month: '2024-10'
 description: s3cmd Fast way to copy s3 data
 tags:
   - s5cmd

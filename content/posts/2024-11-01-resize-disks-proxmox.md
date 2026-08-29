@@ -2,6 +2,8 @@
 slug: "resize-disks-proxmox"
 title: Resize disk in Proxmox VM
 date: '2024-11-01'
+year: '2024'
+month: '2024-11'
 description: Resize disk in Proxmox VM
 tags:
   - Proxmox

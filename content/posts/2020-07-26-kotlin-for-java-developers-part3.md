@@ -2,6 +2,8 @@
 slug: "kotlin-for-java-developers-part3"
 title: Kotlin for Java Developers - Part 3
 date: '2020-07-26'
+year: '2020'
+month: '2020-07'
 description: Kotlin for Java Developers
 tags:
   - Java

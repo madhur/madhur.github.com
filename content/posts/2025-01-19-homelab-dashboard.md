@@ -2,6 +2,8 @@
 slug: "homelab-dashboard"
 title: Homelab Dashboard
 date: '2025-01-19'
+year: '2025'
+month: '2025-01'
 description: Homelab Dashboard
 tags:
   - Homelab

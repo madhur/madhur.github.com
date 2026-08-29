@@ -2,6 +2,8 @@
 slug: "fastest-way-spin-kubernetes-cluster"
 title: Fastest way to spin up Kubernetes cluster on AWS
 date: '2020-04-11'
+year: '2020'
+month: '2020-04'
 description: Fastest way to spin up Kubernetes cluster on AWS
 tags:
   - Kubernetes

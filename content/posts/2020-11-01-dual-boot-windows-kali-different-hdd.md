@@ -2,6 +2,8 @@
 slug: "dual-boot-windows-kali-different-hdd"
 title: Dual Booting Windows and Linux on different HDD / SDD
 date: '2020-11-01'
+year: '2020'
+month: '2020-11'
 description: Dual Booting Windows and Linux on different HDD / SDD
 tags:
   - Windows

@@ -2,6 +2,8 @@
 slug: "handling-special-characters-python"
 title: Handling special characters in Python 2
 date: '2016-04-25'
+year: '2016'
+month: '2016-04'
 description: Handling special characters in Python 2
 tags:
   - Python

@@ -2,6 +2,8 @@
 slug: "find-non-expiring-keys-redis"
 title: Find non-expiring keys in Redis
 date: '2022-06-04'
+year: '2022'
+month: '2022-06'
 description: Find non-expiring keys in Redis
 tags:
   - Redis

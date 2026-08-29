@@ -2,6 +2,8 @@
 slug: "angular-chat-popup"
 title: Angular Chat popup
 date: '2015-09-14'
+year: '2015'
+month: '2015-09'
 description: Angular Chat popup
 tags:
   - AngularJs

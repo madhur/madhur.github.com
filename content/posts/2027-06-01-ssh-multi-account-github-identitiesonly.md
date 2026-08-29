@@ -2,6 +2,8 @@
 slug: "ssh-multi-account-github-identitiesonly"
 title: Why My SSH Key Wasn't Being Used for Git Despite Multi-Key Setup
 date: '2027-06-01'
+year: '2027'
+month: '2027-06'
 description: >-
   How the SSH agent silently overrides an explicitly specified key, and why
   adding IdentitiesOnly=yes to git sshCommand fixed it.

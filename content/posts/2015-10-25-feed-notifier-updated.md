@@ -2,6 +2,8 @@
 slug: "feed-notifier-updated"
 title: Feed notifier updated
 date: '2015-10-25'
+year: '2015'
+month: '2015-10'
 description: Feed notifier updated
 tags:
   - Programming

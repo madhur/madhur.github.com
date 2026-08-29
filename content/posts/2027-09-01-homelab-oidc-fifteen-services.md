@@ -2,6 +2,8 @@
 slug: "homelab-oidc-fifteen-services"
 title: Five Decisions for an OIDC-First Homelab
 date: '2027-09-01'
+year: '2027'
+month: '2027-09'
 description: >-
   After moving auth to Authelia, the easy questions were done and the
   interesting ones were left: native OIDC or forward-auth, local fallback or

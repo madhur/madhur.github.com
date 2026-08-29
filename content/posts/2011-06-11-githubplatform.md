@@ -2,6 +2,8 @@
 slug: "githubplatform"
 title: Github as a development platform
 date: '2011-06-11'
+year: '2011'
+month: '2011-06'
 description: Github as a development platform
 tags:
   - Github

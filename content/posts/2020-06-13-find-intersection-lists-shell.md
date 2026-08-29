@@ -2,6 +2,8 @@
 slug: "find-intersection-lists-shell"
 title: Finding intersection of two lists in shell
 date: '2020-06-13'
+year: '2020'
+month: '2020-06'
 description: Finding intersection of two lists in shell
 tags:
   - Shell

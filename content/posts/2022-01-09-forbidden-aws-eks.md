@@ -2,6 +2,8 @@
 slug: "forbidden-aws-eks"
 title: Forbidden error while accessing AWS services on Kubernetes
 date: '2022-01-09'
+year: '2022'
+month: '2022-01'
 description: Forbidden error while accessing AWS services on Kubernetes
 tags:
   - AWS

@@ -2,6 +2,8 @@
 slug: "case-of-sudden-kafka-lag-drop"
 title: Case of sudden Kafka lag drop
 date: '2025-03-01'
+year: '2025'
+month: '2025-03'
 description: Case of sudden Kafka lag drop
 tags:
   - Kafka

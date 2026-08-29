@@ -2,6 +2,8 @@
 slug: "hashmap-with-ttl"
 title: HashMap with TTL
 date: '2021-02-27'
+year: '2021'
+month: '2021-02'
 description: HashMap with TTL
 tags:
   - Java

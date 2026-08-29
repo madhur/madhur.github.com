@@ -2,6 +2,8 @@
 slug: "bestfontscode"
 title: Best fonts for programming
 date: '2011-09-09'
+year: '2011'
+month: '2011-09'
 description: Best fonts for programming
 tags:
   - Code

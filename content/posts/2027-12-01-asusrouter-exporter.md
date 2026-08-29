@@ -4,6 +4,8 @@ title: >-
   asusrouter-exporter: Prometheus Metrics for an Asuswrt-Merlin Router, No Cloud
   API Required
 date: '2027-12-01'
+year: '2027'
+month: '2027-12'
 description: >-
   There's no official Prometheus exporter for Asuswrt-Merlin, so I SSH in and
   read /proc myself. TDD against real router fixtures, counter-reset handling

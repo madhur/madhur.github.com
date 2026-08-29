@@ -2,6 +2,8 @@
 slug: "awesome-conky"
 title: An awesome conky configuration
 date: '2014-10-10'
+year: '2014'
+month: '2014-10'
 description: An awesome conky configuration
 tags:
   - Linux

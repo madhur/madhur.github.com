@@ -2,6 +2,8 @@
 slug: "kotlin-for-java-developers"
 title: Kotlin for Java Developers
 date: '2020-07-10'
+year: '2020'
+month: '2020-07'
 description: Kotlin for Java Developers
 tags:
   - Java

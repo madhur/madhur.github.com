@@ -2,6 +2,8 @@
 slug: "things-learn-modern-web-development"
 title: Things to learn for Modern Web Development
 date: '2016-05-14'
+year: '2016'
+month: '2016-05'
 description: Things to learn for Modern Web Development
 tags:
   - Programming

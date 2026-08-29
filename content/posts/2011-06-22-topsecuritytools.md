@@ -2,6 +2,8 @@
 slug: "topsecuritytools"
 title: My Top Network Security Tools
 date: '2011-06-22'
+year: '2011'
+month: '2011-06'
 description: My Top Network Security Tools
 tags:
   - Security

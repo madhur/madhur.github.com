@@ -2,6 +2,8 @@
 slug: "automating-gmail-pdf-extraction-paperless"
 title: Automating Gmail PDF Extraction and Paperless NGX Integration
 date: '2025-12-29'
+year: '2025'
+month: '2025-12'
 description: >-
   A Python script that automatically extracts PDFs from Gmail, removes password
   protection, and uploads them to Paperless NGX for document management.

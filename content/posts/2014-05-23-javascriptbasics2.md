@@ -2,6 +2,8 @@
 slug: "javascriptbasics2"
 title: Javascript Basics Part II
 date: '2014-05-23'
+year: '2014'
+month: '2014-05'
 description: Javascript Basics Part II
 tags:
   - Javascript

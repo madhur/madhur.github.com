@@ -2,6 +2,8 @@
 slug: "create-local-k8s-cluster-kind"
 title: Create local kubernetes cluster using Kind
 date: '2024-09-01'
+year: '2024'
+month: '2024-09'
 description: Create local kubernetes cluster using Kind
 tags:
   - k8s

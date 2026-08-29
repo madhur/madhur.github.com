@@ -2,6 +2,8 @@
 slug: "fun-with-splunk"
 title: Fun with Splunk
 date: '2021-05-30'
+year: '2021'
+month: '2021-05'
 description: Fun with Splunk
 tags:
   - Splunk

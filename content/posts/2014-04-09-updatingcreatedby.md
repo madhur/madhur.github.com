@@ -2,6 +2,8 @@
 slug: "updatingcreatedby"
 title: Updating Created By field in SharePoint through Client Object Model
 date: '2014-04-09'
+year: '2014'
+month: '2014-04'
 description: Updating Created By field in SharePoint through Client Object Model
 tags:
   - SharePoint 2010

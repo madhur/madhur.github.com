@@ -2,6 +2,8 @@
 slug: "rednotebook-web"
 title: 'RedNotebook Web: A Self-Hostable Web Interface for RedNotebook'
 date: '2027-05-01'
+year: '2027'
+month: '2027-05'
 description: >-
   How I built a full-stack web interface for the RedNotebook journal app using
   FastAPI and React, with Docker packaging and PWA support.

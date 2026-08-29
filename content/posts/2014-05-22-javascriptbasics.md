@@ -2,6 +2,8 @@
 slug: "javascriptbasics"
 title: Javascript Basics Part I
 date: '2014-05-22'
+year: '2014'
+month: '2014-05'
 description: Javascript Basics Part I
 tags:
   - Javascript

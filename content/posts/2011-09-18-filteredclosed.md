@@ -2,6 +2,8 @@
 slug: "filteredclosed"
 title: Difference between Filtered vs Closed Ports
 date: '2011-09-18'
+year: '2011'
+month: '2011-09'
 description: Difference between Filtered vs Closed Ports
 tags:
   - Hacking

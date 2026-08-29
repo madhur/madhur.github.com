@@ -2,6 +2,8 @@
 slug: "conky-google-calendar"
 title: Displaying Google Calendar Events in Conky
 date: '2026-02-01'
+year: '2026'
+month: '2026-02'
 description: Displaying Google Calendar Events in Conky
 tags:
   - Conky

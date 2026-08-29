@@ -2,6 +2,8 @@
 slug: "transfer-files-from-shell-k8s"
 title: Transfer files from k8s or docker shell to other host
 date: '2023-11-14'
+year: '2023'
+month: '2023-11'
 description: Transfer files from k8s or docker shell to other host
 tags:
   - Kubernetes

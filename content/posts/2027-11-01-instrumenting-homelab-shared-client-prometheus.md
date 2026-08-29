@@ -4,6 +4,8 @@ title: >-
   Instrumenting My Homelab: One Shared Client Library, Source-Attributed
   Prometheus Metrics
 date: '2027-11-01'
+year: '2027'
+month: '2027-11'
 description: >-
   Scattered API calls — Firefly, ntfy, Bedrock, Gmail, Google Drive — collapsed
   into one instrumented Python library that fires fire-and-forget statsd packets

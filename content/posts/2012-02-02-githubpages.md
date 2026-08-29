@@ -2,6 +2,8 @@
 slug: "githubpages"
 title: GitHub Pages are served from the Default Branch
 date: '2012-02-02'
+year: '2012'
+month: '2012-02'
 description: GitHub Pages are served from the Default Branch
 tags:
   - Github

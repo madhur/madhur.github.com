@@ -2,6 +2,8 @@
 slug: "angular-confirmation-dialog"
 title: Angular2 Confirmation Dialog component
 date: '2017-03-26'
+year: '2017'
+month: '2017-03'
 description: Angular2 Confirmation Dialog component
 tags:
   - Angular

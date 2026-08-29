@@ -2,6 +2,8 @@
 slug: "design-change-data-capture"
 title: Designing Change Data Capture
 date: '2021-08-20'
+year: '2021'
+month: '2021-08'
 description: Designing Change Data Capture
 tags:
   - Design

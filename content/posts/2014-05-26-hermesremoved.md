@@ -2,6 +2,8 @@
 slug: "hermesremoved"
 title: Hermes removed from Play Store by Google
 date: '2014-05-26'
+year: '2014'
+month: '2014-05'
 description: Hermes removed from Play Store by Google
 tags:
   - Android

@@ -2,6 +2,8 @@
 slug: "taking-memory-dump-jvm"
 title: Taking memory dump of JVM Applications
 date: '2023-04-23'
+year: '2023'
+month: '2023-04'
 description: Taking memory dump of JVM Applications
 tags:
   - Java

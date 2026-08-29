@@ -2,6 +2,8 @@
 slug: "notification-feed-notifier"
 title: Ringtone Preference in Feed Notifier
 date: '2015-12-06'
+year: '2015'
+month: '2015-12'
 description: Ringtone Preference in Feed Notifier
 tags:
   - Android

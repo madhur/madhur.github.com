@@ -2,6 +2,8 @@
 slug: "building-redisearch-module"
 title: Building RediSearch module in Amazon Linux 2
 date: '2024-03-08'
+year: '2024'
+month: '2024-03'
 description: Building RediSearch module in Amazon Linux 2
 tags:
   - Redisearch

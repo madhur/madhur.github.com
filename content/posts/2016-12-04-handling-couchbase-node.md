@@ -2,6 +2,8 @@
 slug: "handling-couchbase-node"
 title: Couchbase exception handling in Node.js
 date: '2016-12-04'
+year: '2016'
+month: '2016-12'
 description: Couchbase exception handling in Node.js
 tags:
   - Node.js

@@ -2,6 +2,8 @@
 slug: "class-attribute-spring-data-mongodb"
 title: _class attribute in Spring data MongoDB_
 date: '2024-10-05'
+year: '2024'
+month: '2024-10'
 description: _class attribute in Spring data MongoDB
 tags:
   - Spring

@@ -2,6 +2,8 @@
 slug: "concurrency-python"
 title: Concurrency in Python
 date: '2019-07-14'
+year: '2019'
+month: '2019-07'
 description: Concurrency in Python
 tags:
   - Concurrency

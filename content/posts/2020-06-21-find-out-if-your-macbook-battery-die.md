@@ -2,6 +2,8 @@
 slug: "find-out-if-your-macbook-battery-die"
 title: Determine if your Macbook battery is about to die
 date: '2020-06-21'
+year: '2020'
+month: '2020-06'
 description: Determine if your Macbook battery is about to die
 tags:
   - Macbook

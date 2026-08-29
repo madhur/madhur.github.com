@@ -2,6 +2,8 @@
 slug: "cmdshellfirst"
 title: Windows command shell(cmd.exe) runs only first command
 date: '2011-12-29'
+year: '2011'
+month: '2011-12'
 description: Windows command shell(cmd.exe) runs only first command
 tags:
   - Windows

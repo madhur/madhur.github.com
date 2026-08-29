@@ -2,6 +2,8 @@
 slug: "binary-search-jdk-bug"
 title: Binary Search bug in JDK
 date: '2020-12-05'
+year: '2020'
+month: '2020-12'
 description: Binary Search bug in JDK
 tags:
   - Binary Search

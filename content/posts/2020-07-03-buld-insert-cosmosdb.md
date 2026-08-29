@@ -2,6 +2,8 @@
 slug: "buld-insert-cosmosdb"
 title: Bulk insertion of Rows in CosmosDB
 date: '2020-07-03'
+year: '2020'
+month: '2020-07'
 description: Bulk insertion of Rows in CosmosDB
 tags:
   - Java

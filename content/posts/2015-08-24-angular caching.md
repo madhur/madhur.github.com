@@ -2,6 +2,8 @@
 slug: "angular-caching"
 title: Caching http requests with Angular
 date: '2015-08-24'
+year: '2015'
+month: '2015-08'
 description: Caching http requests with Angular
 tags:
   - AngularJs

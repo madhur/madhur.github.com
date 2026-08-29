@@ -2,6 +2,8 @@
 slug: "websocket-close-status-codes"
 title: Websocket - Close Status codes
 date: '2024-02-11'
+year: '2024'
+month: '2024-02'
 description: Websocket - Close Status codes
 tags:
   - Websocket

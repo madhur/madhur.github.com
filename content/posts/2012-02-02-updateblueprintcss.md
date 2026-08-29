@@ -2,6 +2,8 @@
 slug: "updateblueprintcss"
 title: Updated with Blueprint CSS Framework
 date: '2012-02-02'
+year: '2012'
+month: '2012-02'
 description: Updated with Blueprint CSS Framework
 tags:
   - Jekyll

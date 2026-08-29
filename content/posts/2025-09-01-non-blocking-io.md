@@ -2,6 +2,8 @@
 slug: "non-blocking-io"
 title: Non Blocking I/O
 date: '2025-09-01'
+year: '2025'
+month: '2025-09'
 description: Non Blocking I/O
 tags:
   - Linux

@@ -2,6 +2,8 @@
 slug: "proxmox-user-friendly-urls"
 title: Proxmox - Setting up user friendly urls
 date: '2024-01-07'
+year: '2024'
+month: '2024-01'
 description: Proxmox - Setting up user friendly urls
 tags:
   - Proxmox

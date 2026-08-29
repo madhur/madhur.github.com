@@ -2,6 +2,8 @@
 slug: "send-gmail-email-python"
 title: How to Send Emails from Python Using msmtp and Gmail
 date: '2026-05-01'
+year: '2026'
+month: '2026-05'
 description: How to Send Emails from Python Using msmtp and Gmail
 tags:
   - Linux

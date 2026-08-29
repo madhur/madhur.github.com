@@ -2,6 +2,8 @@
 slug: "import-certificate-java"
 title: Importing certificate into Java Keystore
 date: '2020-03-07'
+year: '2020'
+month: '2020-03'
 description: Importing certificate into Java Keystore
 tags:
   - Java

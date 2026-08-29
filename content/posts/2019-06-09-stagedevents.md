@@ -2,6 +2,8 @@
 slug: "stagedevents"
 title: Using SEDA
 date: '2019-06-09'
+year: '2019'
+month: '2019-06'
 description: Using SEDA
 tags:
   - SEDA

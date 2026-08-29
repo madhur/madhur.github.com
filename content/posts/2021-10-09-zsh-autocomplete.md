@@ -2,6 +2,8 @@
 slug: "zsh-autocomplete"
 title: zsh Autocomplete
 date: '2021-10-09'
+year: '2021'
+month: '2021-10'
 description: zsh Autocomplete
 tags:
   - Shell

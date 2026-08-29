@@ -2,6 +2,8 @@
 slug: "lambda-functions-final-variable"
 title: Why do Lambda functions require final variables
 date: '2020-08-16'
+year: '2020'
+month: '2020-08'
 description: Why do Lambda functions require final variables
 tags:
   - Java

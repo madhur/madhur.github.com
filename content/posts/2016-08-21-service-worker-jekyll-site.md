@@ -2,6 +2,8 @@
 slug: "service-worker-jekyll-site"
 title: Adding Service worker to Jekyll Site
 date: '2016-08-21'
+year: '2016'
+month: '2016-08'
 description: Adding Service worker for to Jekyll Site
 tags:
   - Jekyll

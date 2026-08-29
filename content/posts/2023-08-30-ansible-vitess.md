@@ -2,6 +2,8 @@
 slug: "ansible-vitess"
 title: Ansible roles for installing and configuring Vitess
 date: '2023-08-30'
+year: '2023'
+month: '2023-08'
 description: Ansible roles for installing and configuring Vitess
 tags:
   - Vitess

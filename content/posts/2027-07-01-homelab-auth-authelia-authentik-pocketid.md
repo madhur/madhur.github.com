@@ -4,6 +4,8 @@ title: >-
   Choosing an Auth Stack for My Homelab: Authentik, Authelia, PocketID, and
   TinyAuth
 date: '2027-07-01'
+year: '2027'
+month: '2027-07'
 description: >-
   How I decided between forward-auth and OIDC, why I moved my ~50-service
   homelab from Authentik to Authelia, and where PocketID and TinyAuth fit in.

@@ -2,6 +2,8 @@
 slug: "mocking-jvm-time"
 title: Faking time in JVM Process
 date: '2024-07-01'
+year: '2024'
+month: '2024-07'
 description: Faking time in JVM Process
 tags:
   - Java

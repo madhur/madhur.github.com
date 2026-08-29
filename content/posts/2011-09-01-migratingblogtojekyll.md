@@ -2,6 +2,8 @@
 slug: "migratingblogtojekyll"
 title: Migrating 3rd party blogs to Jekyll
 date: '2011-09-01'
+year: '2011'
+month: '2011-09'
 description: Migrating 3rd party blogs to Jekyll
 tags:
   - Jekyll

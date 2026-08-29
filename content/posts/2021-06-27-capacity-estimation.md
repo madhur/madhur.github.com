@@ -2,6 +2,8 @@
 slug: "capacity-estimation"
 title: Capacity Estimation Examples
 date: '2021-06-27'
+year: '2021'
+month: '2021-06'
 description: Capacity Estimation Examples
 tags:
   - Design

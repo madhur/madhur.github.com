@@ -2,6 +2,8 @@
 slug: "tailing-multiple-log-files"
 title: Tailing log files on multiple remote machines
 date: '2020-03-14'
+year: '2020'
+month: '2020-03'
 description: Tailing log files on multiple remote machines
 tags:
   - SSH

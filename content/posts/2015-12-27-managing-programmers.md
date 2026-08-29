@@ -2,6 +2,8 @@
 slug: "managing-programmers"
 title: Managing Programmers By Douglas Crockford
 date: '2015-12-27'
+year: '2015'
+month: '2015-12'
 description: Managing Programmers By Douglas Crockford
 tags:
   - Programming

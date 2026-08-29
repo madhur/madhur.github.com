@@ -2,6 +2,8 @@
 slug: "using-ns-image"
 title: NSImage Caching
 date: '2016-01-25'
+year: '2016'
+month: '2016-01'
 description: NSImage Caching
 tags:
   - OSX

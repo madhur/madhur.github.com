@@ -2,6 +2,8 @@
 slug: "learning-moving-mbr-gpt-uefi"
 title: 'Learnings from moving from MBR to GPT, multi-booting and random stuff'
 date: '2016-10-16'
+year: '2016'
+month: '2016-10'
 description: 'Learnings from moving from MBR to GPT, multi-booting and random stuff'
 tags:
   - Linux

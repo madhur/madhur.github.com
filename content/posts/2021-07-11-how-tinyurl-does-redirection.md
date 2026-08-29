@@ -2,6 +2,8 @@
 slug: "how-tinyurl-does-redirection"
 title: How tinyUrl Does redirection
 date: '2021-07-11'
+year: '2021'
+month: '2021-07'
 description: How tinyUrl Does redirection
 tags:
   - Design

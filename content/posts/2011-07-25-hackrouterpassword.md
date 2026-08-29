@@ -2,6 +2,8 @@
 slug: "hackrouterpassword"
 title: Hacking Router password using Hydra
 date: '2011-07-25'
+year: '2011'
+month: '2011-07'
 description: Hacking Router password using Hydra
 tags:
   - Security

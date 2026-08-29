@@ -2,6 +2,8 @@
 slug: "router-hairpin-nat-homelab-traffic"
 title: 'Hairpin NAT, Split-Horizon DNS, and Where I Landed Between Them'
 date: '2027-08-01'
+year: '2027'
+month: '2027-08'
 description: >-
   Tracing 8 MB of unexplained traffic between my PC and my router led me through
   hairpin NAT, split-horizon DNS, and a hybrid homelab setup that avoids both.

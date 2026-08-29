@@ -2,6 +2,8 @@
 slug: "generic-traffic-splitting-algorithm"
 title: Generic traffic splitting algorithm
 date: '2020-11-29'
+year: '2020'
+month: '2020-11'
 description: Generic traffic splitting algorithm
 tags:
   - Algorithm

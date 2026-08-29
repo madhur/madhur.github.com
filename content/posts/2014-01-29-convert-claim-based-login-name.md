@@ -2,6 +2,8 @@
 slug: "convert-claim-based-login-name"
 title: Convert claims based login name in SharePoint Client object model
 date: '2014-01-29'
+year: '2014'
+month: '2014-01'
 description: Convert claims based login name in SharePoint Client object model
 tags:
   - Silverlight

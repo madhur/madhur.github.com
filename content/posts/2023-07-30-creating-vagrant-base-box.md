@@ -2,6 +2,8 @@
 slug: "creating-vagrant-base-box"
 title: Creating vagrant basebox
 date: '2023-07-30'
+year: '2023'
+month: '2023-07'
 description: Creating vagrant basebox
 tags:
   - Vagrant

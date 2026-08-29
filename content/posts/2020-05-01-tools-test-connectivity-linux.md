@@ -2,6 +2,8 @@
 slug: "tools-test-connectivity-linux"
 title: Tools to test remote connectivity in Linux
 date: '2020-05-01'
+year: '2020'
+month: '2020-05'
 description: Tools to test remote connectivity in Linux
 tags:
   - Linux

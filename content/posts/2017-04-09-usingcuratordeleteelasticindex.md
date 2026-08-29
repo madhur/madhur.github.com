@@ -2,6 +2,8 @@
 slug: "usingcuratordeleteelasticindex"
 title: Using curator to delete older elasticsearch indices
 date: '2017-04-09'
+year: '2017'
+month: '2017-04'
 description: Using curator to delete older elasticsearch indices
 tags:
   - Curator

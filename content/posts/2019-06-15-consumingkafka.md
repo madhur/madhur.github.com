@@ -2,6 +2,8 @@
 slug: "consumingkafka"
 title: Consuming from Kafka
 date: '2019-06-15'
+year: '2019'
+month: '2019-06'
 description: Consuming from Kafka
 tags:
   - Kafka

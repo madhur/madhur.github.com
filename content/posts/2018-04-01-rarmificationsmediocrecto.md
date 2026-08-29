@@ -2,6 +2,8 @@
 slug: "rarmificationsmediocrecto"
 title: Ramifications of a mediocre founders
 date: '2018-04-01'
+year: '2018'
+month: '2018-04'
 description: Ramifications of a mediocre founders
 tags:
   - Technology

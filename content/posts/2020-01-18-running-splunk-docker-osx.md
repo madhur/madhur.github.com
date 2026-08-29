@@ -2,6 +2,8 @@
 slug: "running-splunk-docker-osx"
 title: Running splunk on docker on OSX
 date: '2020-01-18'
+year: '2020'
+month: '2020-01'
 description: Running splunk on docker on OSX
 tags:
   - Splunk

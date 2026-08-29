@@ -2,6 +2,8 @@
 slug: "same-origin-policy-and-cors"
 title: Same origin policy and CORS
 date: '2021-02-20'
+year: '2021'
+month: '2021-02'
 description: Same origin policy and CORS
 tags:
   - Web Security

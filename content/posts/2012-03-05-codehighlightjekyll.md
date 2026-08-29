@@ -2,6 +2,8 @@
 slug: "codehighlightjekyll"
 title: Enable code highlighting with Pygments/Jekyll
 date: '2012-03-05'
+year: '2012'
+month: '2012-03'
 description: Enable code highlighting with Pygments/Jekyll
 tags:
   - Jekyll

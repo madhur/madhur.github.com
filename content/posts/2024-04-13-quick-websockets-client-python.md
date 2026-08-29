@@ -2,6 +2,8 @@
 slug: "quick-websockets-client-python"
 title: Quick Websockets client in Python
 date: '2024-04-13'
+year: '2024'
+month: '2024-04'
 description: Quick Websockets client in Python
 tags:
   - Websockets

@@ -2,6 +2,8 @@
 slug: "running-spark-on-windows"
 title: Running Spark on Windows
 date: '2021-10-16'
+year: '2021'
+month: '2021-10'
 description: Running Spark on Windows
 tags:
   - Spark

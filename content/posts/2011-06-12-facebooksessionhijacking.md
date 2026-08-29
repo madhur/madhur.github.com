@@ -2,6 +2,8 @@
 slug: "facebooksessionhijacking"
 title: Facebook Vulnerability - Session sidejacking
 date: '2011-06-12'
+year: '2011'
+month: '2011-06'
 description: Facebook Vulnerability - Session sidejacking
 tags:
   - Facebook

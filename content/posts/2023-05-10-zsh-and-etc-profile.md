@@ -2,6 +2,8 @@
 slug: "zsh-and-etc-profile"
 title: zsh and /etc/profile
 date: '2023-05-10'
+year: '2023'
+month: '2023-05'
 description: zsh and /etc/profile
 tags:
   - Zsh

@@ -2,6 +2,8 @@
 slug: "quality-quantity"
 title: Quality or Quantity
 date: '2018-02-24'
+year: '2018'
+month: '2018-02'
 description: Quality or Quantity
 tags:
   - Work

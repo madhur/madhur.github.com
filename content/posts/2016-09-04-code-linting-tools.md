@@ -2,6 +2,8 @@
 slug: "code-linting-tools"
 title: Code linting tools
 date: '2016-09-04'
+year: '2016'
+month: '2016-09'
 description: Code linting tools
 tags:
   - Lint

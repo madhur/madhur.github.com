@@ -2,6 +2,8 @@
 slug: "explorwebappsecurity"
 title: Exploring Web Application vulnerabilities
 date: '2011-07-26'
+year: '2011'
+month: '2011-07'
 description: Exploring Web Application vulnerabilities
 tags:
   - Security

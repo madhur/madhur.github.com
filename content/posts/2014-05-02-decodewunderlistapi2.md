@@ -2,6 +2,8 @@
 slug: "decodewunderlistapi2"
 title: Decoding the hidden Wunderlist API (Part II)
 date: '2014-05-02'
+year: '2014'
+month: '2014-05'
 description: Decoding the hidden Wunderlist API (Part II)
 tags:
   - Wunderlist

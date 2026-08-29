@@ -2,6 +2,8 @@
 slug: "ntfy-desktop-notifications-linux"
 title: Getting Native Desktop Notifications from ntfy on Linux
 date: '2027-03-01'
+year: '2027'
+month: '2027-03'
 description: >-
   How to receive ntfy push notifications as native Linux desktop notifications
   using notify-send, even when the browser is closed.

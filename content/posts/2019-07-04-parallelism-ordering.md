@@ -2,6 +2,8 @@
 slug: "parallelism-ordering"
 title: Parallelism and ordering
 date: '2019-07-04'
+year: '2019'
+month: '2019-07'
 description: Parallelism and ordering
 tags:
   - Parallel

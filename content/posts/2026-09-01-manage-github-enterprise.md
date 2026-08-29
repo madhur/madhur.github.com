@@ -2,6 +2,8 @@
 slug: "manage-github-enterprise"
 title: Manage both github and github enterprise
 date: '2026-09-01'
+year: '2026'
+month: '2026-09'
 description: Manage both github and github enterprise
 tags:
   - Github

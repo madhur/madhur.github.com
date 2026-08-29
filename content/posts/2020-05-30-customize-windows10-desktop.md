@@ -2,6 +2,8 @@
 slug: "customize-windows10-desktop"
 title: Customize Windows 10 Desktop
 date: '2020-05-30'
+year: '2020'
+month: '2020-05'
 description: Customize Windows 10 Desktop
 tags:
   - Windows

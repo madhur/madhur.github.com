@@ -2,6 +2,8 @@
 slug: "few-useful-kubectl-commands"
 title: Few Useful Kubectl commands
 date: '2021-05-22'
+year: '2021'
+month: '2021-05'
 description: Few Useful Kubectl commands
 tags:
   - Kubernetes

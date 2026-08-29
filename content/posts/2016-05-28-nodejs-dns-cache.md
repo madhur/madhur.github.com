@@ -2,6 +2,8 @@
 slug: "nodejs-dns-cache"
 title: Speeding up Node.js HTTP requests with DNS caching
 date: '2016-05-28'
+year: '2016'
+month: '2016-05'
 description: Speeding up Node.js HTTP requests with DNS caching
 tags:
   - NodeJs

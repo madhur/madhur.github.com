@@ -2,6 +2,8 @@
 slug: "active-active-kafka-cluster"
 title: Overview of Active-Active Kafka Cluster using MirrorMaker 2.0
 date: '2020-08-01'
+year: '2020'
+month: '2020-08'
 description: Overview of Active-Active Kafka Cluster using MirrorMaker 2.0
 tags:
   - Kafka

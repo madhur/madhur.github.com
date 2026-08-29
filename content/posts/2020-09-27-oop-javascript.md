@@ -2,6 +2,8 @@
 slug: "oop-javascript"
 title: Object Oriented Programming in JavaScript
 date: '2020-09-27'
+year: '2020'
+month: '2020-09'
 description: Object Oriented Programming in JavaScript
 tags:
   - Javascript

@@ -2,6 +2,8 @@
 slug: "adventurecoreldraw"
 title: Adventures with Corel Draw
 date: '2013-07-20'
+year: '2013'
+month: '2013-07'
 description: Adventures with Corel Draw
 tags:
   - Corel Draw

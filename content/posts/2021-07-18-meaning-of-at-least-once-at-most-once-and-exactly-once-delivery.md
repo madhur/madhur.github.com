@@ -2,6 +2,8 @@
 slug: "meaning-of-at-least-once-at-most-once-and-exactly-once-delivery"
 title: 'Meaning of at-least once, at-most once and exactly-once delivery'
 date: '2021-07-18'
+year: '2021'
+month: '2021-07'
 description: 'Meaning of at-least once, at-most once and exactly-once delivery'
 tags:
   - Design

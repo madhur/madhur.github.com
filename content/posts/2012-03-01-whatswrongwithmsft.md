@@ -2,6 +2,8 @@
 slug: "whatswrongwithmsft"
 title: What's wrong with Microsoft
 date: '2012-03-01'
+year: '2012'
+month: '2012-03'
 description: What's wrong with Microsoft
 tags:
   - Microsoft

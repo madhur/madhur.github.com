@@ -2,6 +2,8 @@
 slug: "conditionalcommentsie"
 title: Conditional comments in Internet Explorer
 date: '2012-02-20'
+year: '2012'
+month: '2012-02'
 description: Conditional comments in Internet Explorer
 tags:
   - IE

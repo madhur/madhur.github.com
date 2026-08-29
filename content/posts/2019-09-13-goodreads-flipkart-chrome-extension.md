@@ -2,6 +2,8 @@
 slug: "goodreads-flipkart-chrome-extension"
 title: Goodreads For Flipkart
 date: '2019-09-13'
+year: '2019'
+month: '2019-09'
 description: Goodreads For Flipkart
 tags:
   - Chrome

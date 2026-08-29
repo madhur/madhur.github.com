@@ -2,6 +2,8 @@
 slug: "parental-control-softwares"
 title: Parental Control Softwares for Windows and Linux
 date: '2022-03-06'
+year: '2022'
+month: '2022-03'
 description: Parental Control Softwares for Windows and Linux
 tags:
   - Linux

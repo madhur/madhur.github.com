@@ -2,6 +2,8 @@
 slug: "difference-betweeen-upper90-mean90"
 title: Difference between upper90 and mean90
 date: '2022-04-16'
+year: '2022'
+month: '2022-04'
 description: Difference between upper90 and mean90
 tags:
   - StatsD

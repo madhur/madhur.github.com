@@ -2,6 +2,8 @@
 slug: "setup-cassandra-cluster-using-ansible-vagrant"
 title: Setup Cassandra Cluster using Ansible and Vagrant
 date: '2022-03-13'
+year: '2022'
+month: '2022-03'
 description: Setup Cassandra Cluster using Ansible and Vagrant
 tags:
   - Cassandra

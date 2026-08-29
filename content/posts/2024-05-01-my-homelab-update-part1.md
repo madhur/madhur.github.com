@@ -2,6 +2,8 @@
 slug: "my-homelab-update-part1"
 title: My Homelab Update - Part I
 date: '2024-05-01'
+year: '2024'
+month: '2024-05'
 description: My Homelab Update - Part I
 tags:
   - Homelab

@@ -2,6 +2,8 @@
 slug: "combine-videos-ffmpeg"
 title: Combine videos using ffmpeg
 date: '2025-04-01'
+year: '2025'
+month: '2025-04'
 description: Combine videos using ffmpeg
 tags:
   - ffmpeg

@@ -2,6 +2,8 @@
 slug: "row-level-locking-database"
 title: Row level locking in database
 date: '2025-07-09'
+year: '2025'
+month: '2025-07'
 description: Row level locking in database
 tags:
   - Database

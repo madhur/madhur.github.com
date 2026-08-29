@@ -2,6 +2,8 @@
 slug: "introducinghermesandroidapp"
 title: Introducing Hermes Android App
 date: '2013-11-05'
+year: '2013'
+month: '2013-11'
 description: Introducing Hermes Android App
 tags:
   - Android

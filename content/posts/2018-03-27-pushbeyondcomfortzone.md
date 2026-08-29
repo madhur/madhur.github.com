@@ -2,6 +2,8 @@
 slug: "pushbeyondcomfortzone"
 title: Push beyond comfort zone
 date: '2018-03-27'
+year: '2018'
+month: '2018-03'
 description: Push beyond comfort zone
 tags:
   - Whiplash

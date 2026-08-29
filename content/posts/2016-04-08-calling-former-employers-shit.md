@@ -2,6 +2,8 @@
 slug: "calling-former-employers-shit"
 title: On calling your former employers shit
 date: '2016-04-08'
+year: '2016'
+month: '2016-04'
 description: On calling your former employers shit
 tags:
   - General

@@ -2,6 +2,8 @@
 slug: "linux-kernel-panic"
 title: Kernel Panic with AMD Ryzen 5600x on CentOS 7
 date: '2021-11-27'
+year: '2021'
+month: '2021-11'
 description: Kernel Panic with AMD Ryzen 5600x on CentOS 7
 tags:
   - Linux

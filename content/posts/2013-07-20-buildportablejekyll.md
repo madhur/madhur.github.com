@@ -2,6 +2,8 @@
 slug: "buildportablejekyll"
 title: Building portable Jekyll for Windows
 date: '2013-07-20'
+year: '2013'
+month: '2013-07'
 description: Building portable Jekyll for Windows
 tags:
   - Jekyll

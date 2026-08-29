@@ -2,6 +2,8 @@
 slug: "must-have-java-code-analysis-tools-part3"
 title: Must have Java code analysis Tools - Part 3
 date: '2020-02-15'
+year: '2020'
+month: '2020-02'
 description: Must have Java code analysis Tools - Part 3
 tags:
   - Java

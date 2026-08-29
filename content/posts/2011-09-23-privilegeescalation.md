@@ -2,6 +2,8 @@
 slug: "privilegeescalation"
 title: Privilege escalation on Windows using Binary Planting
 date: '2011-09-23'
+year: '2011'
+month: '2011-09'
 description: Privilege escalation on Windows using Binary Planting
 tags:
   - Privilege Escalation

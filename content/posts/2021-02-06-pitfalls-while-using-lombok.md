@@ -2,6 +2,8 @@
 slug: "pitfalls-while-using-lombok"
 title: Pitfalls while using Lombok with Java Development
 date: '2021-02-06'
+year: '2021'
+month: '2021-02'
 description: Pitfalls while using Lombok with Java Development
 tags:
   - Java

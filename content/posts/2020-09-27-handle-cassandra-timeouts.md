@@ -2,6 +2,8 @@
 slug: "handle-cassandra-timeouts"
 title: Handle timeouts while connecting to cassandra
 date: '2020-09-27'
+year: '2020'
+month: '2020-09'
 description: Handle timeouts while connecting to cassandra
 tags:
   - Cassandra

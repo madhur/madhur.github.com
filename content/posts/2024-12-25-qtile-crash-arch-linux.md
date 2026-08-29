@@ -2,6 +2,8 @@
 slug: "qtile-crash-arch-linux"
 title: Qtile crash on Arch Linux
 date: '2024-12-25'
+year: '2024'
+month: '2024-12'
 description: Qtile crash on Arch Linux
 tags:
   - Qtile

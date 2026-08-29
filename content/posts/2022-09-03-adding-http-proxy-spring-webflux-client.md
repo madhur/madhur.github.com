@@ -2,6 +2,8 @@
 slug: "adding-http-proxy-spring-webflux-client"
 title: Adding HTTP Proxy to Spring WebFlux Client
 date: '2022-09-03'
+year: '2022'
+month: '2022-09'
 description: Adding HTTP Proxy to Spring WebFlux Client
 tags:
   - Spring

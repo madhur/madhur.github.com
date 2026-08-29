@@ -2,6 +2,8 @@
 slug: "setup-email-smtp-relay-gmail"
 title: Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation
 date: '2026-07-01'
+year: '2026'
+month: '2026-07'
 description: Setting up SMTP Mail Relay with msmtpd and systemd Socket Activation
 tags:
   - Linux

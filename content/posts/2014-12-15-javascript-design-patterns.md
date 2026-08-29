@@ -2,6 +2,8 @@
 slug: "javascript-design-patterns"
 title: Useful Javascript Design patterns
 date: '2014-12-15'
+year: '2014'
+month: '2014-12'
 description: Useful Javascript Design patterns
 tags:
   - Javascript

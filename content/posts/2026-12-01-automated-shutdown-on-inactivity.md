@@ -2,6 +2,8 @@
 slug: "automated-shutdown-on-inactivity"
 title: Automated Shutdown on Computer Inactivity
 date: '2026-12-01'
+year: '2026'
+month: '2026-12'
 description: Automated Shutdown on Computer Inactivity
 tags:
   - Linux

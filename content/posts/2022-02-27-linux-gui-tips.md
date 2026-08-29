@@ -2,6 +2,8 @@
 slug: "linux-gui-tips"
 title: Linux GUI Tips
 date: '2022-02-27'
+year: '2022'
+month: '2022-02'
 description: Linux GUI Tips
 tags:
   - Linux

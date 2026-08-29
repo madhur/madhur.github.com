@@ -2,6 +2,8 @@
 slug: "android-ssl-pinning-bypass"
 title: Android SSL Pinning Bypass
 date: '2023-12-05'
+year: '2023'
+month: '2023-12'
 description: Android SSL Pinning Bypass
 tags:
   - Android

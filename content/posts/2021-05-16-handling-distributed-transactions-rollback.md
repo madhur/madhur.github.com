@@ -2,6 +2,8 @@
 slug: "handling-distributed-transactions-rollback"
 title: Handling Distributed transactions rollback
 date: '2021-05-16'
+year: '2021'
+month: '2021-05'
 description: Handling Distributed transactions rollback
 tags:
   - Transactions

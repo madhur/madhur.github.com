@@ -2,6 +2,8 @@
 slug: "emoji-encoding-decoding"
 title: Encoding and Decoding Emoji for Cross platform
 date: '2014-12-26'
+year: '2014'
+month: '2014-12'
 description: Encoding and decoding Emoji for Cross platform
 tags:
   - AngularJs

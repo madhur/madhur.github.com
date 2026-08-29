@@ -2,6 +2,8 @@
 slug: "updateportablejekyll"
 title: Portable Jekyll Updated to Jekyll v1.3.0
 date: '2013-11-05'
+year: '2013'
+month: '2013-11'
 description: Portable Jekyll Updated to Jekyll v1.3.0
 tags:
   - Jekyll

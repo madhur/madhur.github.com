@@ -2,6 +2,8 @@
 slug: "liveness-and-readiness-probes"
 title: Liveness and Readiness Probes
 date: '2021-08-14'
+year: '2021'
+month: '2021-08'
 description: Liveness and Readiness Probes
 tags:
   - Kubernetes

@@ -2,6 +2,8 @@
 slug: "atleast-once-atmost-once-exactly-once"
 title: 'Meaning of atleast once, atmost once and exactly once delivery'
 date: '2019-08-04'
+year: '2019'
+month: '2019-08'
 description: 'Meaning of atleast once, atmost once and exactly once delivery'
 tags:
   - Kafka

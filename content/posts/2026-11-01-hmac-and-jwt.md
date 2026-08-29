@@ -2,6 +2,8 @@
 slug: "hmac-and-jwt"
 title: HMAC and JWT
 date: '2026-11-01'
+year: '2026'
+month: '2026-11'
 description: HMAC and JWT
 tags:
   - HMAC

@@ -2,6 +2,8 @@
 slug: "removing-empty-space-around-image-using-blur-css"
 title: Removing the empty space around image using blur technique in CSS
 date: '2021-05-09'
+year: '2021'
+month: '2021-05'
 description: Removing the empty space around image using blur technique in CSS
 tags:
   - CSS

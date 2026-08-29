@@ -2,6 +2,8 @@
 slug: "envelope-encryption-with-vault"
 title: Envelope encryption with vault
 date: '2026-10-01'
+year: '2026'
+month: '2026-10'
 description: Envelope encryption with vault
 tags:
   - Vault

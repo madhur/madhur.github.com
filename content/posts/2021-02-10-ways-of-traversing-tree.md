@@ -2,6 +2,8 @@
 slug: "ways-of-traversing-tree"
 title: Ways of traversing tree
 date: '2021-02-10'
+year: '2021'
+month: '2021-02'
 description: Ways of traversing tree
 tags:
   - Tree

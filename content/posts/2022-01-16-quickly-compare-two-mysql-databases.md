@@ -2,6 +2,8 @@
 slug: "quickly-compare-two-mysql-databases"
 title: Quickly Compare two MySQL databases
 date: '2022-01-16'
+year: '2022'
+month: '2022-01'
 description: Quickly Compare two MySQL databases
 tags:
   - MySQL

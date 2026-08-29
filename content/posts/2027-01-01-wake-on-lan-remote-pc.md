@@ -2,6 +2,8 @@
 slug: "wake-on-lan-remote-pc"
 title: 'Wake on LAN: Remotely Power On Your PC'
 date: '2027-01-01'
+year: '2027'
+month: '2027-01'
 description: >-
   How to configure Wake on LAN on your PC and use an Android app to remotely
   turn it on from anywhere

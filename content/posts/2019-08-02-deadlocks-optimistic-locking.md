@@ -2,6 +2,8 @@
 slug: "deadlocks-optimistic-locking"
 title: Deadlocks in Optimistic locking
 date: '2019-08-02'
+year: '2019'
+month: '2019-08'
 description: Deadlocks in Optimistic locking
 tags:
   - Deadlocks

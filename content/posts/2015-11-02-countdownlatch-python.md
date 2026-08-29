@@ -2,6 +2,8 @@
 slug: "countdownlatch-python"
 title: CountDownLatch in Python using Condition Objects
 date: '2015-11-02'
+year: '2015'
+month: '2015-11'
 description: CountDownLatch in Python using Condition Objects
 tags:
   - Programming

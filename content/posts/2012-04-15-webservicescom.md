@@ -2,6 +2,8 @@
 slug: "webservicescom"
 title: WebServices or Client Object Model
 date: '2012-04-15'
+year: '2012'
+month: '2012-04'
 description: WebServices or Client Object Model
 tags:
   - SharePoint 2010

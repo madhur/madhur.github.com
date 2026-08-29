@@ -2,6 +2,8 @@
 slug: "celery-tips-and-tricks"
 title: Scaling Celery Task queue
 date: '2015-11-17'
+year: '2015'
+month: '2015-11'
 description: Experiences of Scaling Celery Task queue
 tags:
   - Programming

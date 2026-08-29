@@ -2,6 +2,8 @@
 slug: "proxy-cache-lock-nginx"
 title: Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx
 date: '2016-12-25'
+year: '2016'
+month: '2016-12'
 description: Close look at proxy_cache_lock and proxy_cache_use_stale in Nginx
 tags:
   - Nginx

@@ -2,6 +2,8 @@
 slug: "classloaders-containers-unit-tests"
 title: 'Classloaders, Containers & Unit Tests'
 date: '2020-04-25'
+year: '2020'
+month: '2020-04'
 description: 'Classloaders, Containers & Unit Tests'
 tags:
   - Java

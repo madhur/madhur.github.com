@@ -2,6 +2,8 @@
 slug: "rofi-process-killer"
 title: Rofi Process Killer
 date: '2025-11-01'
+year: '2025'
+month: '2025-11'
 description: Rofi Process Killer
 tags:
   - Rofi

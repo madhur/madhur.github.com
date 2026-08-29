@@ -2,6 +2,8 @@
 slug: "emoji-bubbles-android"
 title: Emoji Keyboard and Chat bubbles in Android
 date: '2015-03-06'
+year: '2015'
+month: '2015-03'
 description: Emoji Keyboard and Chat bubbles in Android
 tags:
   - Android

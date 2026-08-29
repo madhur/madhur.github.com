@@ -2,6 +2,8 @@
 slug: "google-groups-developers"
 title: Google groups for Developers
 date: '2016-01-03'
+year: '2016'
+month: '2016-01'
 description: Google groups for Developers
 tags:
   - Programming

@@ -2,6 +2,8 @@
 slug: "fedora-centos-tips-tricks"
 title: Fedora / CentOS Tips & Tricks - running it as Desktop OS
 date: '2022-01-23'
+year: '2022'
+month: '2022-01'
 description: Fedora / CentOS Tips & Tricks - running it as Desktop OS
 tags:
   - Fedora

@@ -2,6 +2,8 @@
 slug: "unionintersection"
 title: Union and Intersection of ArrayList in Java
 date: '2014-07-29'
+year: '2014'
+month: '2014-07'
 description: Union and Intersection of ArrayList in Java
 tags:
   - Java

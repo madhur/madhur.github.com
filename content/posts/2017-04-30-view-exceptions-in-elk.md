@@ -2,6 +2,8 @@
 slug: "view-exceptions-in-elk"
 title: Handling stack traces in Elasticsearch Logstash Kibana (ELK)
 date: '2017-04-30'
+year: '2017'
+month: '2017-04'
 description: Handling stack traces in Elasticsearch Logstash Kibana (ELK)
 tags:
   - ELK

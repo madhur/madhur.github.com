@@ -2,6 +2,8 @@
 slug: "journalctl-rtkit-daemon"
 title: Rtkit Daemon flooding journalctl logs
 date: '2024-06-22'
+year: '2024'
+month: '2024-06'
 description: Rtkit Daemon flooding journalctl logs
 tags:
   - Linux

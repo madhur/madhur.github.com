@@ -2,6 +2,8 @@
 slug: "redis-cluster-ansible"
 title: Provision Redis cluster through Vagrant and Ansible
 date: '2022-01-01'
+year: '2022'
+month: '2022-01'
 description: Provision Redis cluster through Vagrant and Ansible
 tags:
   - Redis

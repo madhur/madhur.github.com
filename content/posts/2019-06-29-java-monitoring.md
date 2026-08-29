@@ -2,6 +2,8 @@
 slug: "java-monitoring"
 title: Setting up Java project for monitoring
 date: '2019-06-29'
+year: '2019'
+month: '2019-06'
 description: Setting up Java project for monitoring
 tags:
   - Java

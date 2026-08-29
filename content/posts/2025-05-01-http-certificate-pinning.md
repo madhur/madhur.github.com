@@ -2,6 +2,8 @@
 slug: "http-certificate-pinning"
 title: HTTP Certificate Pinning
 date: '2025-05-01'
+year: '2025'
+month: '2025-05'
 description: HTTP Certificate Pinning
 tags:
   - Security

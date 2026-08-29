@@ -2,6 +2,8 @@
 slug: "estimate-partitions-single-thread-compute"
 title: Estimate no. of kafka partitions handled by a single thread on compute
 date: '2020-09-06'
+year: '2020'
+month: '2020-09'
 description: Estimate no. of kafka partitions handled by a single thread on compute
 tags:
   - Kafka

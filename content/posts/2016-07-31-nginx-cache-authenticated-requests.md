@@ -2,6 +2,8 @@
 slug: "nginx-cache-authenticated-requests"
 title: Caching authenticated requests using NGINX
 date: '2016-07-31'
+year: '2016'
+month: '2016-07'
 description: Caching authenticated requests using NGINX
 tags:
   - Caching

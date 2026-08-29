@@ -4,6 +4,8 @@ title: >-
   Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web
   Services and Jquery
 date: '2012-01-09'
+year: '2012'
+month: '2012-01'
 description: >-
   Invoke SharePoint 2010 Approval Workflow with Dynamic Approvers using Web
   Services and Jquery

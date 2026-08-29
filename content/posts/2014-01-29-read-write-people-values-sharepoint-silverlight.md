@@ -4,6 +4,8 @@ title: >-
   Reading and writing People Values in SharePoint List through Silverlight
   Client object model
 date: '2014-01-29'
+year: '2014'
+month: '2014-01'
 description: >-
   Reading and writing People Values in SharePoint List through Silverlight
   Client object model

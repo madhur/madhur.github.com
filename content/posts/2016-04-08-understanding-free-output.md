@@ -2,6 +2,8 @@
 slug: "understanding-free-output"
 title: Understanding free output in Linux
 date: '2016-04-08'
+year: '2016'
+month: '2016-04'
 description: Understanding free output in Linux
 tags:
   - Linux

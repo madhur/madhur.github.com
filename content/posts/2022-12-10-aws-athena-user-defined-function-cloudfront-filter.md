@@ -4,6 +4,8 @@ title: >-
   User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena
   Logs
 date: '2022-12-10'
+year: '2022'
+month: '2022-12'
 description: >-
   User Defined function(UDF) to filter cloudfront IP Addresses from AWS Athena
   Logs

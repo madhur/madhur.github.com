@@ -2,6 +2,8 @@
 slug: "chrome-extension-leetcode-format"
 title: LeetCode Format v1.4
 date: '2023-05-21'
+year: '2023'
+month: '2023-05'
 description: LeetCode Format v1.4
 tags:
   - Browser Extension

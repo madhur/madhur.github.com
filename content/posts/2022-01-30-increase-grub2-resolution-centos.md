@@ -2,6 +2,8 @@
 slug: "increase-grub2-resolution-centos"
 title: Increase Grub2 Resolution in CentOS / Fedora
 date: '2022-01-30'
+year: '2022'
+month: '2022-01'
 description: Increase Grub2 Resolution in CentOS / Fedora
 tags:
   - Fedora

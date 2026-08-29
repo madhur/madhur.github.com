@@ -2,6 +2,8 @@
 slug: "wireguard-docker-issue"
 title: WireGuard Docker Configuration Drift
 date: '2026-08-01'
+year: '2026'
+month: '2026-08'
 description: SWireGuard Docker Configuration Drift
 tags:
   - Wireguard

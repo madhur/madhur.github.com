@@ -2,6 +2,8 @@
 slug: "tools-madhur-co-in"
 title: tools.madhur.co.in - Developer Utilities for Data Transformation
 date: '2027-01-01'
+year: '2027'
+month: '2027-01'
 description: >-
   A collection of client-side tools for YAML/JSON conversion, JSON minification,
   and JOLT transformations

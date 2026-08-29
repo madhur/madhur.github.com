@@ -2,6 +2,8 @@
 slug: "useful-systemd-commands"
 title: Useful Systemd commands
 date: '2022-02-20'
+year: '2022'
+month: '2022-02'
 description: Useful Systemd commands
 tags:
   - Systemd

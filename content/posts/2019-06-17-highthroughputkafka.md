@@ -2,6 +2,8 @@
 slug: "highthroughputkafka"
 title: Considerations for high throughput kafka producer
 date: '2019-06-17'
+year: '2019'
+month: '2019-06'
 description: Considerations for high throughput kafka producer
 tags:
   - Java

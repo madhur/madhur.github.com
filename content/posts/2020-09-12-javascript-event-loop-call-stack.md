@@ -2,6 +2,8 @@
 slug: "javascript-event-loop-call-stack"
 title: Javascript Event loop and call stack
 date: '2020-09-12'
+year: '2020'
+month: '2020-09'
 description: Javascript Event loop and call stack
 tags:
   - Javascript

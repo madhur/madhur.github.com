@@ -2,6 +2,8 @@
 slug: "kafka-rebalancing"
 title: Kafka rebalancing
 date: '2019-08-31'
+year: '2019'
+month: '2019-08'
 description: Kafka rebalancing
 tags:
   - Kafka

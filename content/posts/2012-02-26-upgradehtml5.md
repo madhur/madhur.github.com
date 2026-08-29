@@ -2,6 +2,8 @@
 slug: "upgradehtml5"
 title: How to upgrade your Jekyll Blog/Site to HTML5
 date: '2012-02-26'
+year: '2012'
+month: '2012-02'
 description: How to upgrade your Jekyll Blog/Site to HTML5
 tags:
   - HTML5

@@ -2,6 +2,8 @@
 slug: "flexbox-not-supported"
 title: Flexbox is not supported Android 4.3 and below
 date: '2015-11-29'
+year: '2015'
+month: '2015-11'
 description: Flexbox is not supported Android 4.3 and below
 tags:
   - Android

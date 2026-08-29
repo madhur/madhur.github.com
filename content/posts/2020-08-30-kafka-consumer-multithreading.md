@@ -2,6 +2,8 @@
 slug: "kafka-consumer-multithreading"
 title: Kafka Consumer Multithreading
 date: '2020-08-30'
+year: '2020'
+month: '2020-08'
 description: Kafka Consumer Multithreading
 tags:
   - Kafka

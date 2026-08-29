@@ -2,6 +2,8 @@
 slug: "crackresetwindows"
 title: Crack or Reset Windows Passwords
 date: '2011-09-18'
+year: '2011'
+month: '2011-09'
 description: Crack or Reset Windows Passwords
 tags:
   - Hacking

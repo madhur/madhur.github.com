@@ -2,6 +2,8 @@
 slug: "migrating-from-jekyll-to-hugo"
 title: This Blog Just Moved From Jekyll to Hugo
 date: '2026-08-15'
+year: '2026'
+month: '2026-08'
 description: After 15 years on Jekyll, this site now runs on Hugo with the PaperMod theme — here's what changed, what I kept, and what I dropped.
 tags:
   - Hugo

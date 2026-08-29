@@ -2,6 +2,8 @@
 slug: "api-response-group-pattern"
 title: API Response Group Pattern - Improving latencies using GraphQL
 date: '2021-06-13'
+year: '2021'
+month: '2021-06'
 description: API Response Group Pattern - Improving latencies using GraphQL
 tags:
   - Design

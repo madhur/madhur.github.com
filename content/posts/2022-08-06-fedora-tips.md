@@ -2,6 +2,8 @@
 slug: "fedora-tips"
 title: Fedora Tips & Tricks
 date: '2022-08-06'
+year: '2022'
+month: '2022-08'
 description: Fedora Tips & Tricks
 tags:
   - Fedora

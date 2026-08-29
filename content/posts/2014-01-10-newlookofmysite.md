@@ -2,6 +2,8 @@
 slug: "newlookofmysite"
 title: New look for my site
 date: '2014-01-10'
+year: '2014'
+month: '2014-01'
 description: New look for my site
 tags:
   - CSS

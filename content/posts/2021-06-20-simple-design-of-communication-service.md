@@ -2,6 +2,8 @@
 slug: "simple-design-of-communication-service"
 title: Simple Design of Communication Service
 date: '2021-06-20'
+year: '2021'
+month: '2021-06'
 description: Simple Design of Communication Service
 tags:
   - Design

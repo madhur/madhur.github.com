@@ -2,6 +2,8 @@
 slug: "jekyllupgraded"
 title: Jekyll upgraded to 1.0.2
 date: '2013-06-02'
+year: '2013'
+month: '2013-06'
 description: Jekyll upgraded to 1.0.2
 tags:
   - Jekyll

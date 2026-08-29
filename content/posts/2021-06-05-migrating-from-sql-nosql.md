@@ -2,6 +2,8 @@
 slug: "migrating-from-sql-nosql"
 title: Migrating from SQL to No-SQL without downtime
 date: '2021-06-05'
+year: '2021'
+month: '2021-06'
 description: Migrating from SQL to No-SQL without downtime
 tags:
   - Design

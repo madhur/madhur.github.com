@@ -2,6 +2,8 @@
 slug: "validation-data-provided-must-contain-class"
 title: The validation data provided must contain class
 date: '2020-06-28'
+year: '2020'
+month: '2020-06'
 description: The validation data provided must contain class
 tags:
   - Swift

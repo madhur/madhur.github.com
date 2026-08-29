@@ -2,6 +2,8 @@
 slug: "offload-io-intensive-tasks-to-threads"
 title: Offload IO Intensive tasks to worker threads
 date: '2021-11-20'
+year: '2021'
+month: '2021-11'
 description: Offload IO Intensive tasks to worker thread
 tags:
   - Java

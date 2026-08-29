@@ -2,6 +2,8 @@
 slug: "useful-angular-libraries"
 title: Useful Angular libraries
 date: '2021-05-02'
+year: '2021'
+month: '2021-05'
 description: Useful Angular libraries
 tags:
   - Angular

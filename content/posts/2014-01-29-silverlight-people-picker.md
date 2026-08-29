@@ -4,6 +4,8 @@ title: >-
   Writing Silverlight people picker control using SharePoint 2010 Client object
   model
 date: '2014-01-29'
+year: '2014'
+month: '2014-01'
 description: >-
   Writing Silverlight people picker control using SharePoint 2010 Client object
   model

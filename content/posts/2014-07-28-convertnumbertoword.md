@@ -2,6 +2,8 @@
 slug: "convertnumbertoword"
 title: 'Algorithm: Convert number to word'
 date: '2014-07-28'
+year: '2014'
+month: '2014-07'
 description: 'Algorithm: Convert number to word'
 tags:
   - Algorithms

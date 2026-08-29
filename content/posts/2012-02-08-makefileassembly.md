@@ -2,6 +2,8 @@
 slug: "makefileassembly"
 title: Using MakeFile with Assembly Programming
 date: '2012-02-08'
+year: '2012'
+month: '2012-02'
 description: Using MakeFile with Assembly Programming
 tags:
   - Assembly

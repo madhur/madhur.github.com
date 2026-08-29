@@ -2,6 +2,8 @@
 slug: "makingmostdatadirectory"
 title: Making most out of _data directory in Jekyll
 date: '2013-11-05'
+year: '2013'
+month: '2013-11'
 description: Making most out of _data directory in Jekyll
 tags:
   - Jekyll

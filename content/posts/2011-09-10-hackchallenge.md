@@ -2,6 +2,8 @@
 slug: "hackchallenge"
 title: 'HackingLab Challenge: Disassemble .NET Clients'
 date: '2011-09-10'
+year: '2011'
+month: '2011-09'
 description: 'HackingLab Challenge: Disassemble .NET Clients'
 tags:
   - Hacking

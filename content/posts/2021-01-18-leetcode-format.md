@@ -2,6 +2,8 @@
 slug: "leetcode-format"
 title: LeetCode Format
 date: '2021-01-18'
+year: '2021'
+month: '2021-01'
 description: LeetCode Format
 tags:
   - Browser Extension

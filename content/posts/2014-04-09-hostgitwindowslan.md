@@ -2,6 +2,8 @@
 slug: "hostgitwindowslan"
 title: Hosting Git repository on a Windows LAN
 date: '2014-04-09'
+year: '2014'
+month: '2014-04'
 description: Hosting Git repository on a Windows LAN
 tags:
   - Git

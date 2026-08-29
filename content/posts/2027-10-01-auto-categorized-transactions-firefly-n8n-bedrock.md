@@ -2,6 +2,8 @@
 slug: "auto-categorized-transactions-firefly-n8n-bedrock"
 title: 'Auto-Categorized Transactions in Firefly III with n8n, Bedrock and ntfy'
 date: '2027-10-01'
+year: '2027'
+month: '2027-10'
 description: >-
   Three feeds — email alerts, SMS backups and a realtime MacroDroid → n8n
   webhook — converge on the same Firefly III dashboard. A two-tier categorizer
