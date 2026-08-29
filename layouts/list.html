@@ -58,6 +58,12 @@
 {{- partial "home_info.html" . }}
 {{- end }}
 
+{{/* Home shows the bio (home_info.html above) only — no post listing below it.
+     $pages/$paginator above are still computed even on Home so the homepage's
+     RSS/JSON outputs keep listing recent posts; this only skips the visible
+     <article> cards, archive link and pager. */}}
+{{- if not .IsHome }}
+
 {{- $term := .Data.Term }}
 {{- range $index, $page := $paginator.Pages }}
 
@@ -105,6 +111,14 @@
 </article>
 {{- end }}
 
+{{/* Archive is a view onto this same listing, not its own nav section, so
+     it's surfaced here instead of in menu.main (see hugo.toml). Only on the
+     posts section's own list page — not on Home's teaser list, not on term
+     (tag) list pages. */}}
+{{- if and .IsSection (eq .Section "posts") }}
+<p class="archive-link"><a href="{{ (site.GetPage "/archives/").Permalink }}">View the full archive by year →</a></p>
+{{- end }}
+
 {{- if gt $paginator.TotalPages 1 }}
 <footer class="page-footer">
   <nav class="pagination">
@@ -127,6 +141,8 @@
   </nav>
 </footer>
 {{- end }}
+
+{{- end }}{{/* end not .IsHome */}}
 
 {{- end }}{{/* end profileMode */}}
 

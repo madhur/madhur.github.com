@@ -1,0 +1,154 @@
+<header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            {{- $label_text := (site.Params.label.text | default site.Title) }}
+            {{- if site.Title }}
+            <a href="{{ "" | absLangURL }}" accesskey="h" title="{{ $label_text }} (Alt + H)">
+                {{- if site.Params.label.icon }}
+                {{- $img := resources.Get site.Params.label.icon }}
+                {{- if $img }}
+                    {{- $processableFormats := (slice "jpg" "jpeg" "png" "tif" "bmp" "gif") -}}
+                    {{- if hugo.IsExtended -}}
+                        {{- $processableFormats = $processableFormats | append "webp" -}}
+                    {{- end -}}
+                    {{- $prod := (hugo.IsProduction | or (eq site.Params.env "production")) }}
+                    {{- if and (in $processableFormats $img.MediaType.SubType) (eq $prod true)}}
+                        {{- if site.Params.label.iconHeight }}
+                            {{- $img = $img.Resize (printf "x%d" site.Params.label.iconHeight) }}
+                        {{ else }}
+                            {{- $img = $img.Resize "x30" }}
+                        {{- end }}
+                    {{- end }}
+                    <img src="{{ $img.Permalink }}" alt="" aria-label="logo"
+                        height="{{- site.Params.label.iconHeight | default "30" -}}">
+                {{- else }}
+                <img src="{{- site.Params.label.icon | absURL -}}" alt="" aria-label="logo"
+                    height="{{- site.Params.label.iconHeight | default "30" -}}">
+                {{- end -}}
+                {{- else if hasPrefix site.Params.label.iconSVG "<svg" }}
+                    {{ site.Params.label.iconSVG | safeHTML }}
+                {{- end -}}
+                {{- $label_text -}}
+            </a>
+            {{- end }}
+
+            {{- $lsenabled := (or (not site.Params.disableThemeToggle) (and (not site.Params.disableLangToggle) (hugo.IsMultilingual))) }}
+            {{- if $lsenabled }}
+            <div class="logo-switches">
+                {{- if (not site.Params.disableThemeToggle) }}
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                {{- end }}
+
+                {{- if (not site.Params.disableLangToggle) }}
+                    {{- $lang := .Lang}}
+                    {{- with site.Home.Translations }}
+                    {{- $separator := or $label_text (not site.Params.disableThemeToggle)}}
+                    {{- if $separator }}<span class="nav-sep">|</span>{{ end }}
+                    <ul class="lang-menu">
+                        {{- range . -}}
+                        {{- if ne $lang .Lang }}
+                        <li>
+                            <a href="{{- .Permalink -}}" title="{{ .Language.Params.languageAltTitle | default (.Language.LanguageName | emojify) | default (.Lang | title) }}"
+                                aria-label="{{ .Language.LanguageName | default (.Lang | title) }}">
+                                {{- if (and site.Params.displayFullLangName (.Language.LanguageName)) }}
+                                {{- .Language.LanguageName | emojify -}}
+                                {{- else }}
+                                {{- .Lang | title -}}
+                                {{- end -}}
+                            </a>
+                        </li>
+                        {{- end -}}
+                        {{- end}}
+                    </ul>
+                    {{- end }}
+                {{- end }}
+            </div>
+            {{- end }}
+        </div>
+        {{- $currentPage := . }}
+        {{/* .menu and .nav-search are wrapped together so .header-nav keeps exactly
+             two flex children (logo, this wrapper) and "justify-content: space-between"
+             still just means "logo left, everything else right" — see site.css. Wrapping
+             also matters for the search dropdown: .menu has overflow-x:auto (for
+             horizontal scroll on narrow screens), which per the CSS overflow-x/overflow-y
+             coupling rule also clips vertical overflow — an absolutely-positioned dropdown
+             *inside* .menu would get clipped instead of floating below it. Keeping
+             .nav-search as .menu's *sibling*, not its child, avoids that. */}}
+        <div class="nav-links">
+            <ul id="menu" class="menu">
+                {{- range site.Menus.main }}
+                {{/* Project override of PaperMod's header.html: upstream only matches
+                     class="active" on an exact URL match, so a menu item pointing at a
+                     section index (e.g. /posts/) never activates on pages *within* that
+                     section (individual posts), and there's no way to activate Home at
+                     all without a dedicated "/" menu item + IsHome check. This version
+                     activates on exact match, on being a descendant of the menu target
+                     (so /blog/2025/.../slug activates "Blog", /tags/java/ activates
+                     "Tags"), or on IsHome for a "/" item — without ever treating every
+                     page as a descendant of Home. */}}
+                {{- $menu_item_url := (cond (strings.HasSuffix .URL "/") .URL (printf "%s/" .URL) ) | absLangURL }}
+                {{- $page_url:= $currentPage.Permalink | absLangURL }}
+                {{- $target := site.GetPage .URL }}
+                {{- $is_active := eq $menu_item_url $page_url }}
+                {{- with $target }}
+                    {{- if .IsHome }}
+                        {{- $is_active = $currentPage.IsHome }}
+                    {{- else }}
+                        {{- $is_active = or $is_active ($currentPage.IsDescendant .) }}
+                    {{- end }}
+                {{- end }}
+                <li>
+                    <a href="{{ .URL | absLangURL }}" title="{{ .Title | default .Name }}">
+                        <span {{- if $is_active }} class="active" {{- end }}>
+                            {{- .Pre }}
+                            {{- .Name -}}
+                            {{ .Post -}}
+                        </span>
+                        {{- if (findRE "://" .URL) }}&nbsp;
+                        <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                            <path d="M15 3h6v6"></path>
+                            <path d="M10 14L21 3"></path>
+                        </svg>
+                        {{- end }}
+                    </a>
+                </li>
+                {{- end }}
+            </ul>
+            {{/* Live search box in the nav itself, replacing the old "Search" link out to
+                 /search/ (see hugo.toml). Fuse.js + the post index are loaded lazily, on
+                 first focus/keystroke, by static/js/nav-search.js — not on every page load. */}}
+            <div class="nav-search">
+                <form id="navSearchForm" role="search" aria-label="Search posts">
+                    {{- $fuse := resources.Get "js/fuse.basic.min.js" | fingerprint }}
+                    <input id="navSearchInput" type="search" name="q" placeholder="Search…"
+                        aria-label="Search posts" aria-expanded="false" aria-controls="navSearchResults"
+                        autocomplete="off" maxlength="64" accesskey="/" title="Search (Alt + /)"
+                        data-fuse-src="{{ $fuse.RelPermalink }}" data-index-src="{{ "index.json" | absURL }}">
+                    <ul id="navSearchResults" class="nav-search-results" role="listbox" aria-label="Search results" hidden></ul>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+<script defer src="{{ "js/nav-search.js" | absURL }}"></script>
