@@ -65,10 +65,12 @@ groups:
       labels:
         severity: warning
       annotations:
-        summary: High CPU usage detected on {{ $labels.instance }}description: |
+        summary: High CPU usage detected on {{ $labels.instance }}
+        description: |
           CPU usage has exceeded 50%
           Current value: {{ $value }}%
-          Instance: {{ $labels.instance }}- alert: HighCPUUsageCritical
+          Instance: {{ $labels.instance }}
+    - alert: HighCPUUsageCritical
       expr: |
         (1 - avg by(instance) (
           rate(node_cpu_seconds_total{mode="idle"}[1m])
@@ -77,10 +79,12 @@ groups:
       labels:
         severity: critical
       annotations:
-        summary: Critical CPU usage detected on {{ $labels.instance }}description: |
+        summary: Critical CPU usage detected on {{ $labels.instance }}
+        description: |
           CPU usage has exceeded 80%
           Current value: {{ $value }}%
-          Instance: {{ $labels.instance }}```
+          Instance: {{ $labels.instance }}
+```
 
 <a href="/images/email3.png" data-fancybox>
 <img src='/images/email3.png' height=500px />
