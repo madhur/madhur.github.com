@@ -12,10 +12,20 @@
 {{- else }} {{/* if not profileMode */}}
 
 {{- if not .IsHome | and .Title }}
+{{- /* /month/2020-05/ term pages get an untitled raw term ("2020-05") as
+       .Title; reformat just the on-page heading to "May 2020" for
+       readability. Breadcrumbs still show the raw term, which is fine as a
+       terser trail label. */}}
+{{- $displayTitle := .Title }}
+{{- if and (eq .Kind `term`) (eq .Data.Plural `month`) }}
+{{- with (time.AsTime (printf "%s-01" .Data.Term)) }}
+{{- $displayTitle = .Format "January 2006" }}
+{{- end }}
+{{- end }}
 <header class="page-header">
   {{- partial "breadcrumbs.html" . }}
   <h1>
-    {{ .Title }}
+    {{ $displayTitle }}
     {{- if and (or (eq .Kind `term`) (eq .Kind `section`)) (.Param "ShowRssButtonInSectionTermList") }}
     {{- with .OutputFormats.Get "rss" }}
     <a href="{{ .RelPermalink }}" title="RSS" aria-label="RSS">
@@ -64,6 +74,58 @@
      <article> cards, archive link and pager. */}}
 {{- if not .IsHome }}
 
+{{/* Year-jump row is a view onto this same listing, not its own nav section,
+     so it's surfaced here instead of in menu.main (see hugo.toml). Only on
+     the posts section's own list page — not on Home's teaser list, not on
+     term (tag) list pages. Each year links to that year's own real archive
+     page — /year/2019/ — a taxonomy term page (see [taxonomies] in
+     hugo.toml, and the `year`/`month` front matter every post carries)
+     listing only that year's posts, rather than one giant /archives/ page a
+     reader has to scroll/jump within. Placed above the listing (rather than
+     after it) so it's usable before scrolling past a full page of posts. */}}
+{{- if and .IsSection (eq .Section "posts") }}
+{{- $years := slice }}
+{{- range $pages }}
+{{- $y := .Date.Format "2006" }}
+{{- if and (not .Date.IsZero) (not (in $years $y)) }}
+{{- $years = $years | append $y }}
+{{- end }}
+{{- end }}
+{{- $years = sort $years "value" "desc" }}
+<p class="archive-years">
+  <span class="archive-years-label">All blog posts</span>
+  {{- range $i, $y := $years }}
+  {{- if $i }}<span class="archive-years-dot">•</span>{{ end }}
+  <a href="{{ (site.GetPage (printf "/year/%s/" $y)).Permalink }}">{{ $y }}</a>
+  {{- end }}
+</p>
+{{- end }}
+
+{{/* On a year archive page (/year/2019/), break it down further into the
+     months that actually have posts, each linking to its own /month/2019-05/
+     term page — the month-level equivalent of the row above. */}}
+{{- if and (eq .Kind `term`) (eq .Data.Plural `year`) }}
+{{- $months := slice }}
+{{- range $pages }}
+{{- $m := .Params.month }}
+{{- if and $m (not (in $months $m)) }}
+{{- $months = $months | append $m }}
+{{- end }}
+{{- end }}
+{{- $months = sort $months "value" "asc" }}
+{{- if gt (len $months) 1 }}
+<p class="archive-years">
+  <span class="archive-years-label">Months in {{ .Title }}</span>
+  {{- range $i, $m := $months }}
+  {{- if $i }}<span class="archive-years-dot">•</span>{{ end }}
+  {{- with site.GetPage (printf "/month/%s/" $m) }}
+  <a href="{{ .Permalink }}">{{ (time.AsTime (printf "%s-01" $m)).Format "January" }}</a>
+  {{- end }}
+  {{- end }}
+</p>
+{{- end }}
+{{- end }}
+
 {{- $term := .Data.Term }}
 {{- range $index, $page := $paginator.Pages }}
 
@@ -80,8 +142,15 @@
   {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
   {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
   <header class="entry-header">
+    {{- /* Only the title itself is a link now — previously an invisible
+           .entry-link covered the whole card (theme default), so clicking
+           anywhere, including on a tag or the date, went to the post and
+           silently swallowed those inner links. Tags already linked to
+           their tag listing; the date is now a link too, to that month's
+           archive page (see /month/ term pages, layouts/list.html + the
+           `month` front matter every post carries). */}}
     <h2 class="entry-hint-parent">
-      {{- .Title }}
+      <a class="entry-title-link" href="{{ .Permalink }}">{{ .Title }}</a>
       {{- if .Draft }}
       <span class="entry-hint" title="Draft">
         <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
@@ -103,11 +172,21 @@
     </ul>
     {{- end }}
     {{- if not .Date.IsZero }}
-    <span class="entry-date"><span title='{{ .Date }}'>{{ .Date | time.Format (default ":date_long" site.Params.DateFormat) }}</span></span>
+    {{- /* $ always resolves to the root "main" context — the section/term
+           page being listed, not the post being rendered — so it can't be
+           used here to re-read the post's own date once `with` rebinds `.`
+           to the found month page below. $page (the range var above) still
+           correctly points at this post regardless of nesting. */}}
+    <span class="entry-date">
+      {{- with site.GetPage (printf "/month/%s/" (.Date.Format "2006-01")) }}
+      <a href="{{ .Permalink }}" title='{{ $page.Date }}'>{{ $page.Date | time.Format (default ":date_long" site.Params.DateFormat) }}</a>
+      {{- else }}
+      <span title='{{ $page.Date }}'>{{ $page.Date | time.Format (default ":date_long" site.Params.DateFormat) }}</span>
+      {{- end }}
+    </span>
     {{- end }}
   </footer>
   {{- end }}
-  <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
 </article>
 {{- end }}
 

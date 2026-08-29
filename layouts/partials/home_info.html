@@ -1,0 +1,22 @@
+{{- /* Project override of themes/PaperMod/layouts/_partials/home_info.html.
+       Only change: the heading is optional. Upstream always renders
+       <h1>{{ .Title }}</h1> even when Title is empty, leaving a stray empty
+       heading in the DOM — homeInfoParams.Title is unset on purpose here (no
+       "Hi, I'm Madhur" line), so skip the <header> entirely when there's no
+       title to put in it. */ -}}
+{{- with site.Params.homeInfoParams }}
+<article class="first-entry home-info">
+    {{- with .Title }}
+    <header class="entry-header">
+        <h1>{{ . | markdownify }}</h1>
+    </header>
+    {{- end }}
+    <div class="entry-content md-content">
+        {{ $opts := dict "display" "block" }}
+        {{ .Content | $.Page.RenderString $opts }}
+    </div>
+    <footer class="entry-footer">
+        {{ partial "social_icons.html" (dict "align" site.Params.homeInfoParams.AlignSocialIconsTo) }}
+    </footer>
+</article>
+{{- end -}}
