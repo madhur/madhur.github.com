@@ -41,9 +41,18 @@ body,
    Bootstrap 3's largest .container breakpoint (>=1200px viewports) was
    1170px, and the old blog-post layout used col-md-12 — full container
    width, no sidebar — so 1170px is the actual old reading width, not an
-   arbitrary "wider than PaperMod's 720px default" choice. */
+   arbitrary "wider than PaperMod's 720px default" choice.
+
+   --nav-width is pinned to the same value: PaperMod's header.css and
+   main.css/footer.css each center their row independently (`margin: auto`)
+   at their own max-width, so leaving --nav-width at the theme's 1024px
+   default while --main-width is 1170px put the header ~73px to the right
+   of the content column below it on wide viewports — the site name looked
+   "not left aligned" against the post titles/body text under it. Matching
+   the two widths puts every row on the same left edge. */
 :root {
     --main-width: 1170px;
+    --nav-width: 1170px;
 }
 
 /* Hyperlinks: distinct color instead of blending into body text, matching the
@@ -115,9 +124,19 @@ body,
 
 .post-entry .entry-footer {
     display: flex;
+    /* flex-wrap + min-width: 0 let the tag pills themselves wrap onto a second line
+       instead of forcing one unbroken row that overflows past the viewport on
+       narrow screens — flex: 0 0 auto (no shrink, no wrap) let entry-footer grow
+       to fit all its tags on one line regardless of how little room was actually
+       left, which is what caused the horizontal scroll on /posts/ and the home
+       listing for any post with more than a couple of tags. */
+    flex-wrap: wrap;
     align-items: center;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
     column-gap: 0.75em;
+    row-gap: 4px;
     margin-left: auto;
 }
 
@@ -135,4 +154,365 @@ body,
     font-size: 13px;
     color: var(--secondary);
     white-space: nowrap;
+}
+
+/* Link to /archives/ below the blog listing (layouts/list.html) — a quiet
+   footer link, not a CTA, since it's a view onto the same posts rather than
+   a separate section. */
+.archive-link {
+    margin: 1.5em 0 0.5em;
+    text-align: center;
+    font-size: 14px;
+}
+
+.archive-link a {
+    color: var(--secondary);
+}
+
+.archive-link a:hover,
+.archive-link a:focus-visible {
+    color: var(--primary);
+}
+
+/* Live search box in the nav (layouts/partials/header.html + static/js/nav-search.js),
+   replacing the old "Search" link out to /search/. .nav-links wraps .menu and
+   .nav-search together so .header-nav's `justify-content: space-between` still reads
+   as just "logo left, everything else right". */
+.nav-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: var(--gap);
+    row-gap: 0.5rem;
+}
+
+.nav-search {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+#navSearchInput {
+    display: block;
+    width: 11rem;
+    max-width: 40vw;
+    font-size: 14px;
+    /* .header-nav sets line-height: var(--header-height) (60px) so its <a> children
+       get a tall, easy-to-hit line box — but an <input> takes that same line-height
+       as its own content height, ballooning the box to ~50px instead of a normal
+       input's ~34px. Reset it explicitly rather than let it inherit. */
+    line-height: 1.4;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+    color: var(--primary);
+}
+
+#navSearchInput::placeholder {
+    color: var(--secondary);
+}
+
+#navSearchInput:focus {
+    outline: none;
+    border-color: var(--secondary);
+}
+
+/* Dropdown anchors to .nav-search (position: relative above), not .menu — .menu's
+   overflow-x: auto (for horizontal scroll on narrow screens) would otherwise clip
+   the dropdown's vertical overflow too, per the CSS overflow-x/overflow-y coupling
+   rule. */
+.nav-search-results {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 20;
+    min-width: 100%;
+    width: max-content;
+    max-width: min(90vw, 22rem);
+    max-height: 60vh;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.3rem;
+    list-style: none;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.nav-search-result {
+    display: block;
+    padding: 0.45rem 0.6rem;
+    border-radius: calc(var(--radius) / 2);
+    color: var(--primary);
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.nav-search-result:hover,
+.nav-search-result:focus-visible {
+    background: var(--code-bg);
+    outline: none;
+}
+
+/* The home intro block (bio + social icons, layouts from PaperMod's home_info.html)
+   reuses .first-entry — a class the theme designed for a big hero-styled *first post*
+   on the home page, with min-height: 320px + justify-content: center to vertically
+   center a large title+excerpt. Applied to our short bio instead, that same
+   min-height just padded a large empty gap above/below the text before the post
+   listing below it. .home-info.first-entry (0,2,0) beats .first-entry alone (0,1,0),
+   so this wins regardless of stylesheet order. */
+.home-info.first-entry {
+    min-height: 0;
+    justify-content: flex-start;
+    margin-bottom: var(--gap);
+}
+
+/* /projects/ (layouts/projects/list.html) — flat showcase list styled after
+   https://nadh.in/work/: thumbnail + title/description/tags per row, divided by
+   a hairline, no card backgrounds. Stacks to a single column below 480px so the
+   fixed-width thumbnail never has to fight body text for room. */
+.work-list {
+    list-style: none;
+    margin: 2em 0 0;
+    padding: 0;
+}
+
+.work-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5em 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.work-item:first-child {
+    padding-top: 0;
+}
+
+.work-item:last-child {
+    border-bottom: none;
+}
+
+.work-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.work-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.work-title a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+}
+
+.work-title a:hover,
+.work-title a:focus-visible {
+    border-bottom-color: var(--secondary);
+}
+
+/* Category kicker standing in for nadh.in's year prefix — our data doesn't carry
+   a reliable per-project date, but the category (Android, Web Technologies, ...)
+   gives the same "what is this" context before the name. */
+.work-category {
+    color: var(--secondary);
+    font-weight: 400;
+    font-size: 14px;
+    margin-right: 0.6em;
+}
+
+.work-desc {
+    margin: 0.4em 0 0;
+    color: var(--content);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.work-tags {
+    margin: 0.5em 0 0;
+    color: var(--secondary);
+    font-size: 13px;
+}
+
+.work-thumb {
+    flex: 0 0 auto;
+    display: block;
+    width: 140px;
+    height: 105px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+}
+
+.work-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+@media screen and (max-width: 480px) {
+    .work-item {
+        flex-direction: column;
+    }
+
+    .work-thumb {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+    }
+}
+
+/* "Projects on GitHub" list on /projects/ (layouts/projects/list.html,
+   data/github_projects.yml) — compact date/name/description rows, styled after
+   nadh.in/work's .github list but with flex-wrap + min-width: 0 throughout so a
+   long description wraps onto its own line instead of forcing one unbroken row
+   wider than the viewport (see the .entry-footer fix above for why that
+   matters on narrow screens). */
+.work-github-heading {
+    margin: 2.5em 0 1em;
+    font-size: 20px;
+}
+
+.work-github-heading a {
+    color: var(--secondary);
+}
+
+.github-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+.github-list li {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1rem;
+    row-gap: 0.2rem;
+    padding: 0.6em 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.github-list li:last-child {
+    border-bottom: none;
+}
+
+.github-date {
+    flex: 0 0 5.5em;
+    color: var(--secondary);
+}
+
+.github-name {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.github-name a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.github-desc {
+    flex: 1 1 240px;
+    min-width: 0;
+    color: var(--content);
+}
+
+/* Screenshot gallery on /projects/ detail pages (layouts/partials/extend_post_content.html).
+   auto-fill + minmax means the grid never depends on a fixed item count to look
+   right, and object-fit: contain (not cover) avoids cropping screenshots whose
+   aspect ratios range from tall phone captures to wide desktop ones. */
+.work-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 2em 0;
+}
+
+.work-gallery a {
+    display: block;
+    height: 160px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.work-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Lightbox overlay (static/js/lightbox.js) — replaces the old Jekyll site's
+   Fancybox plugin for [data-fancybox] image links (used both in blog posts and
+   the /projects/ gallery above). */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 3rem 1rem;
+}
+
+.lightbox-overlay[hidden] {
+    display: none;
+}
+
+.lightbox-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: var(--radius);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.lightbox-close,
+.lightbox-nav {
+    position: fixed;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.25rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+
+.lightbox-close:hover,
+.lightbox-nav:hover {
+    color: var(--secondary);
+}
+
+.lightbox-close {
+    top: 0.5rem;
+    right: 0.75rem;
+}
+
+.lightbox-prev {
+    left: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.lightbox-next {
+    right: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+body.lightbox-open {
+    overflow: hidden;
 }
