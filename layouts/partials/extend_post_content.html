@@ -1,0 +1,24 @@
+{{- /* Screenshot gallery for /projects/ detail pages. `img:` front matter has
+       been on these pages since the Jekyll migration (the old site rendered it
+       as a Fancybox gallery) but nothing in the Hugo templates ever displayed
+       it — the /projects/ listing thumbnail (layouts/projects/list.html) reads
+       the same field, but the detail page itself showed none of it. Using this
+       theme-provided hook (appears after the post body, before the footer)
+       instead of forking single.html keeps everything else about a project
+       page — comments, share buttons, post nav — exactly as PaperMod renders
+       it by default. */ -}}
+{{- if and (eq .Section "projects") .Params.img }}
+{{- $group := printf "work-%s" .File.ContentBaseName }}
+<div class="work-gallery">
+  {{- range .Params.img }}
+  {{/* data-fancybox opens these in the site-wide lightbox (static/js/lightbox.js)
+       instead of navigating away — same mechanism already used, but previously
+       non-functional, on several blog posts. Grouping by this page's own
+       filename keeps each project's screenshots prev/next-able as one set,
+       without merging across projects. */}}
+  <a href="{{ . }}" data-fancybox="{{ $group }}">
+    <img src="{{ . }}" alt="" loading="lazy">
+  </a>
+  {{- end }}
+</div>
+{{- end }}

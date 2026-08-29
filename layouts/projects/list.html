@@ -1,46 +1,76 @@
 {{ define "main" }}
 <header class="page-header">
   <h1>{{ .Title }}</h1>
+  {{- with .Description }}
+  <div class="post-description">{{ . }}</div>
+  {{- end }}
 </header>
 
-{{/* .md-content wrapper: this template hand-builds its HTML rather than going
-     through Goldmark, but reusing the theme's content-prose class gives it the
-     same link color/typography as everything rendered from Markdown, instead
-     of needing a second, parallel set of link-color rules to maintain. */}}
-<div class="md-content">
+{{/* Flat showcase list styled after https://nadh.in/work/ — thumbnail, title,
+     description, tech tags, no card chrome, one row per project. The data is
+     still organized into categories (data/projects/*.yml: Android, Apple, Web
+     Technologies, ...) but this deliberately doesn't render category
+     sub-headings; the category shows as a small kicker next to the title
+     instead, since a bare project name ("RabbitMQ Monitor") doesn't always say
+     what platform it's for. Publish filtering (category-level `publish`, then
+     project-level `publish == true`) is unchanged from before this redesign —
+     see layouts/projects/legacy.html for everything this excludes. */}}
 
-{{/* Detail pages carry a `source_key` front-matter field holding the verbatim
-     `file:` value from data/projects/*.yml. Matching on that literal avoids
-     having to re-implement the old Jekyll slugize() in a Go template (which is
-     what silently broke the madhur.co.in link: urlize gives "madhur.co.in",
-     slugize gives "madhur-co-in"). */}}
 {{ $detailPages := where site.RegularPages "Section" "projects" }}
 
-{{ range hugo.Data.projects }}
-  {{ if .publish }}
-  <h2><i class="{{ .icon }}"></i> {{ .name }}</h2>
-  <ul>
-    {{ range .projects }}
-      {{ if eq .publish true }}
-        {{ $match := where $detailPages "Params.source_key" .file }}
-        <li>
-          {{ if $match }}
-            <a href="{{ (index $match 0).Permalink }}">{{ .project }}</a>
-          {{ else }}
-            <strong>{{ .project }}</strong>
-          {{ end }}
-          — {{ .description }}
-          {{ with .languages }}<em>({{ delimit . ", " }})</em>{{ end }}
-        </li>
-      {{ end }}
-    {{ end }}
-  </ul>
-  {{ end }}
+<ul class="work-list">
+  {{- range hugo.Data.projects }}
+    {{- $categoryName := .name }}
+    {{- if .publish }}
+      {{- range .projects }}
+        {{- if eq .publish true }}
+          {{- $project := . }}
+          {{- $match := where $detailPages "Params.source_key" .file }}
+          <li class="work-item">
+            {{- $page := "" }}
+            {{- with $match }}{{ $page = index . 0 }}{{ end }}
+            {{- with $page }}
+              {{- with .Params.img }}
+              <a class="work-thumb" href="{{ $page.Permalink }}" tabindex="-1" aria-hidden="true">
+                <img src="{{ index . 0 }}" alt="" loading="lazy">
+              </a>
+              {{- end }}
+            {{- end }}
+            <div class="work-body">
+              <h2 class="work-title">
+                {{- if $page }}<a href="{{ $page.Permalink }}">{{ end }}
+                <span class="work-category">{{ $categoryName }}</span>{{ $project.project }}
+                {{- if $page }}</a>{{ end }}
+              </h2>
+              <p class="work-desc">{{ $project.description }}</p>
+              {{- with $project.languages }}
+              <p class="work-tags">{{ delimit . ", " }}</p>
+              {{- end }}
+            </div>
+          </li>
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+</ul>
+
+{{/* Compact "Projects on GitHub" list styled after nadh.in/work's .github list:
+     date, name, one-line description. A curated (not live-fetched) subset of
+     github.com/madhur — see data/github_projects.yml for why it's static
+     rather than pulled from the GitHub API at build time. */}}
+{{ with hugo.Data.github_projects.projects }}
+<h2 class="work-github-heading">Projects on <a href="https://github.com/madhur">GitHub</a></h2>
+<ul class="github-list">
+  {{- range . }}
+  <li>
+    <span class="github-date">{{ .date | time.Format "Jan 2006" }}</span>
+    <span class="github-name"><a href="{{ .url }}">{{ .name }}</a></span>
+    <span class="github-desc">{{ .description }}</span>
+  </li>
+  {{- end }}
+</ul>
 {{ end }}
 
-<p style="margin-top: 2em;">
-  <a href="{{ "projects/old/" | relURL }}">View some of my legacy projects</a>
-</p>
+<p class="archive-link"><a href="{{ "projects/old/" | relURL }}">View some of my legacy projects →</a></p>
 
-</div>
 {{ end }}
